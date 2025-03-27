@@ -420,9 +420,10 @@ export const api = {
         instructions?: string;
       }>;
     }) {
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
+      // Get current user session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw new Error('Error al obtener la sesión del usuario');
+      if (!session) throw new Error('Debe iniciar sesión para crear recetas');
 
       // Start a transaction
       const { data: prescriptionData, error: prescriptionError } = await supabase
@@ -433,7 +434,7 @@ export const api = {
           special_instructions: prescription.special_instructions,
           diagnosis: prescription.diagnosis,
           status: 'active',
-          user_id: user?.id
+          user_id: session.user.id
         })
         .select()
         .single();
@@ -453,7 +454,7 @@ export const api = {
             presentation: med.presentation,
             concentration: med.concentration,
             active_compound: med.name, // Simplified for now
-            user_id: user?.id // Add user_id to comply with RLS
+            user_id: session.user.id
           })
           .select()
           .single();
@@ -475,7 +476,7 @@ export const api = {
             total_quantity: med.quantity,
             administration_route: 'Oral', // Default for now
             special_instructions: med.instructions,
-            user_id: user?.id // Add user_id to comply with RLS
+            user_id: session.user.id
           });
 
         if (prescMedError) {

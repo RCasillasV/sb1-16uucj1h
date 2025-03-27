@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Calendar, Clock } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
@@ -27,11 +27,6 @@ export function Prescriptions() {
   const [error, setError] = useState<string | null>(null);
   const [newEntry, setNewEntry] = useState('');
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
-  const [lastAppointment, setLastAppointment] = useState<{
-    date: Date;
-    status: string;
-  } | null>(null);
-  const [nextAppointment, setNextAppointment] = useState<Date | null>(null);
 
   useEffect(() => {
     if (!selectedPatient) {
@@ -39,7 +34,6 @@ export function Prescriptions() {
       return;
     }
     fetchPrescriptions();
-    fetchAppointments();
   }, [selectedPatient]);
 
   const fetchPrescriptions = async () => {
@@ -52,24 +46,7 @@ export function Prescriptions() {
         .map(prescription => ({
           id: prescription.id,
           created_at: prescription.created_at,
-          prescription_text: `
-            <h2>Diagnóstico</h2>
-            <p>${prescription.diagnosis || 'No especificado'}</p>
-            <h2>Medicamentos</h2>
-            <ul>
-              ${prescription.prescription_medications?.map(med => `
-                <li>
-                  <strong>${med.medications?.name} ${med.medications?.concentration}</strong><br>
-                  ${med.dosage} - ${med.frequency} - Durante ${med.duration}<br>
-                  ${med.special_instructions ? `<em>Nota: ${med.special_instructions}</em>` : ''}
-                </li>
-              `).join('') || 'No hay medicamentos registrados'}
-            </ul>
-            ${prescription.special_instructions ? `
-              <h2>Instrucciones Especiales</h2>
-              <p>${prescription.special_instructions}</p>
-            ` : ''}
-          `
+          prescription_text: prescription.diagnosis || prescription.special_instructions || ''
         }))
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       
@@ -82,38 +59,6 @@ export function Prescriptions() {
     }
   };
 
-  const fetchAppointments = async () => {
-    if (!selectedPatient) return;
-
-    try {
-      const appointments = await api.appointments.getAll();
-      const patientAppointments = appointments
-        .filter(app => app.patient_id === selectedPatient.id)
-        .sort((a, b) => new Date(b.appointment_date).getTime() - new Date(a.appointment_date).getTime());
-
-      // Get last appointment
-      const last = patientAppointments.find(app => 
-        new Date(app.appointment_date) <= new Date()
-      );
-      if (last) {
-        setLastAppointment({
-          date: new Date(last.appointment_date),
-          status: last.status === 'completed' ? 'COMPLETA' : 'PROGRAMADA'
-        });
-      }
-
-      // Get next appointment
-      const next = patientAppointments.find(app => 
-        new Date(app.appointment_date) > new Date() && app.status === 'scheduled'
-      );
-      if (next) {
-        setNextAppointment(new Date(next.appointment_date));
-      }
-    } catch (err) {
-      console.error('Error fetching appointments:', err);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedPatient || !newEntry.trim()) return;
@@ -122,13 +67,12 @@ export function Prescriptions() {
     setError(null);
 
     try {
-      // Create a new prescription with the rich text content
       await api.prescriptions.create({
         prescription_number: `RX-${Date.now()}`,
         patient_id: selectedPatient.id,
-        diagnosis: 'Nueva receta',
+        diagnosis: newEntry.trim(),
         medications: [],
-        special_instructions: newEntry.trim()
+        special_instructions: ''
       });
       
       await fetchPrescriptions();
@@ -179,84 +123,12 @@ export function Prescriptions() {
   }
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8">
-      {/* Patient Header */}
-      <div 
-        className="bg-white rounded-lg shadow-md p-6 mb-6"
-        style={{ 
-          background: currentTheme.colors.surface,
-          borderColor: currentTheme.colors.border,
-          fontFamily: 'Arial, Helvetica, sans-serif'
-        }}
-      >
-        <h2 
-          className="text-lg font-bold mb-4"
-          style={{ color: currentTheme.colors.text }}
-        >
-          DATOS DEL PACIENTE
-        </h2>
-        
-        <div className="space-y-3">
-          <div className="flex items-baseline">
-            <span 
-              className="font-bold min-w-[180px]"
-              style={{ color: currentTheme.colors.textSecondary }}
-            >
-              Nombre completo:
-            </span>
-            <span 
-              className="font-bold"
-              style={{ color: currentTheme.colors.text }}
-            >
-              {selectedPatient.paternal_surname} {selectedPatient.last_name}, {selectedPatient.first_name}
-            </span>
-          </div>
-
-          {lastAppointment && (
-            <div className="flex items-baseline">
-              <span 
-                className="font-bold min-w-[180px] flex items-center gap-2"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                <Clock className="h-4 w-4" />
-                Última consulta:
-              </span>
-              <span style={{ color: currentTheme.colors.text }}>
-                {format(lastAppointment.date, 'dd/MM/yyyy')} - 
-                <span 
-                  className={clsx(
-                    'ml-2 font-bold',
-                    lastAppointment.status === 'COMPLETA' ? 'text-green-600' : 'text-blue-600'
-                  )}
-                >
-                  {lastAppointment.status}
-                </span>
-              </span>
-            </div>
-          )}
-
-          {nextAppointment && (
-            <div className="flex items-baseline">
-              <span 
-                className="font-bold min-w-[180px] flex items-center gap-2"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                <Calendar className="h-4 w-4" />
-                Próxima cita:
-              </span>
-              <span style={{ color: currentTheme.colors.text }}>
-                {format(nextAppointment, "dd MMM yy", { locale: es })}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
+    <div className="max-w-4xl mx-auto">
       {/* Page Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <FileText className="h-6 w-6 shrink-0" style={{ color: currentTheme.colors.primary }} />
+      <div className="flex items-center gap-2 mb-2">
+        <FileText className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
         <h1 
-          className="text-xl sm:text-2xl font-bold"
+          className="text-2xl font-bold"
           style={{ 
             color: currentTheme.colors.text,
             fontFamily: currentTheme.typography.fontFamily,
@@ -264,19 +136,10 @@ export function Prescriptions() {
         >
           Recetas
         </h1>
-        <span 
-          className="ml-2 px-2.5 py-0.5 rounded-full text-sm font-medium"
-          style={{ 
-            background: `${currentTheme.colors.primary}20`,
-            color: currentTheme.colors.primary,
-          }}
-        >
-          {prescriptions.length} registros
-        </span>
       </div>
 
       <div 
-        className="rounded-lg shadow-lg p-4 sm:p-6"
+        className="rounded-lg shadow-lg p-2"
         style={{ 
           background: currentTheme.colors.surface,
           borderColor: currentTheme.colors.border,
@@ -288,26 +151,17 @@ export function Prescriptions() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mb-6">
-          <div className="mb-4">
-            <h3 
-              className="text-lg font-medium mb-2"
-              style={{ 
-                color: currentTheme.colors.text,
-                fontFamily: currentTheme.typography.fontFamily,
-              }}
-            >
-              Nueva Receta
-            </h3>
-            
+        {/* Active Prescription Area */}
+        <form onSubmit={handleSubmit} className="mb-4">
+          <div className="mb-2">
             <RichTextEditor
               value={newEntry}
               onChange={setNewEntry}
-              placeholder="Ingrese el contenido de la nueva receta..."
+              placeholder="Escriba el contenido de la receta médica..."
             />
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             <button
               type="submit"
               disabled={saving || loading || !newEntry.trim()}
@@ -319,17 +173,28 @@ export function Prescriptions() {
           </div>
         </form>
 
+        {/* Prescription History */}
         {prescriptions.length > 0 && (
           <div>
-            <h3 
-              className="text-lg font-medium mb-4"
+            <h2 
+              className="text-lg font-medium mb-4 flex items-center gap-2"
               style={{ 
                 color: currentTheme.colors.text,
                 fontFamily: currentTheme.typography.fontFamily,
               }}
             >
-              Recetas Anteriores
-            </h3>
+              Historial de Recetas
+              <span 
+                className="px-2 py-1 text-sm rounded-full"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                }}
+              >
+                {prescriptions.length}
+              </span>
+            </h2>
+
             <div className="space-y-4">
               {prescriptions.map((prescription, index) => (
                 <CollapsibleRecord

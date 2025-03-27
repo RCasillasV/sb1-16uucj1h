@@ -80,7 +80,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       if (last) {
         setLastAppointment({
           date: new Date(last.appointment_date),
-          status: last.status === 'completed' ? 'COMPLETA' : 'PROGRAMADA'
+          status: last.status === 'completed' ? 'COMPLETA' : ''
         });
       }
 
@@ -165,7 +165,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (!selectedPatient) return null;
 
     const age = calculateAge(selectedPatient.date_of_birth);
-    const birthDate = format(new Date(selectedPatient.date_of_birth), 'dd/MM/yyyy');
+    const birthDate = format(new Date(selectedPatient.date_of_birth), 'dd/mm/yyyy');
 
     const InfoItem = ({ icon: Icon, text, status }: { icon: typeof Mail; text: string; status?: string }) => (
       <div className="flex items-center gap-1">
@@ -235,7 +235,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Separator />
                   <InfoItem 
                     icon={Clock} 
-                    text={`Última: ${format(lastAppointment.date, 'dd/MM/yy')}`}
+                    text={`Última: ${format(lastAppointment.date, 'dd MMM yy')}`}
                     status={lastAppointment.status}
                   />
                 </>
@@ -245,7 +245,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Separator />
                   <InfoItem 
                     icon={Calendar} 
-                    text={`Próxima: ${format(nextAppointment, 'dd/MM/yy')}`}
+                    text={`Próxima: ${format(nextAppointment, 'dd MMM yy')}`}
                   />
                 </>
               )}
