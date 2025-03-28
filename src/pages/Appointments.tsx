@@ -173,7 +173,7 @@ export function Appointments() {
           className={buttonStyle.base}
           style={buttonStyle.primary}
         >
-          <CalendarPlus className="h-5 w-5 mr-2" />
+          <CalendarPlus className="h-5 w-5 mr-1" />
           Nueva Cita
         </button>
       </div>

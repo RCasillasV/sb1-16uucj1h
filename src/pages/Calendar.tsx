@@ -1,22 +1,23 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO, addMinutes, isWithinInterval } from 'date-fns';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO, addMinutes, isWithinInterval, addDays, addWeeks, isAfter } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarPlus,Plus, Clock, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 
-const BUSINESS_HOURS = {
-  start: 8, // 8 AM
-  end: 20, // 8 PM
-};
+const START_HOUR = 8; // 8 AM
+const END_HOUR = 23; // 10 PM
+const INTERVAL_MINUTES = 30;
+const DAYS_TO_SHOW = 6;
+const MAX_DAYS_AHEAD = 60;
 
 const TIME_SLOTS = Array.from(
-  { length: (BUSINESS_HOURS.end - BUSINESS_HOURS.start) * 2 },
+  { length: (END_HOUR - START_HOUR) * 2 },
   (_, i) => {
-    const hour = Math.floor(i / 2) + BUSINESS_HOURS.start;
+    const hour = Math.floor(i / 2) + START_HOUR;
     const minutes = (i % 2) * 30;
     return `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   }
@@ -60,21 +61,86 @@ export function Calendar() {
     reason: '',
   });
   const [formError, setFormError] = useState<string | null>(null);
+  const [suggestedSlots, setSuggestedSlots] = useState<Array<{ date: Date; time: string }>>([]);
+  const timeGridRef = useRef<HTMLDivElement>(null);
+  const timeMarkersRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchAppointments();
   }, [selectedDate]);
+
+  useEffect(() => {
+    const timeGrid = timeGridRef.current;
+    const timeMarkers = timeMarkersRef.current;
+
+    if (!timeGrid || !timeMarkers) return;
+
+    const handleScroll = () => {
+      requestAnimationFrame(() => {
+        if (timeMarkers) {
+          timeMarkers.style.transform = `translateY(-${timeGrid.scrollTop}px)`;
+        }
+      });
+    };
+
+    timeGrid.addEventListener('scroll', handleScroll);
+    return () => timeGrid.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const timeGrid = timeGridRef.current;
+    if (!timeGrid) return;
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const scrollPosition = (currentHour - START_HOUR) * 96;
+    timeGrid.scrollTop = scrollPosition;
+  }, []);
 
   const fetchAppointments = async () => {
     setLoading(true);
     try {
       const data = await api.appointments.getAll();
       setAppointments(data);
+      generateSuggestedSlots(data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const generateSuggestedSlots = (existingAppointments: Appointment[]) => {
+    const slots: Array<{ date: Date; time: string }> = [];
+    let currentDate = new Date();
+    let daysToCheck = 7;
+    const now = new Date();
+
+    while (slots.length < 5 && daysToCheck > 0) {
+      TIME_SLOTS.forEach(time => {
+        const [hours, minutes] = time.split(':').map(Number);
+        const slotDate = new Date(currentDate);
+        slotDate.setHours(hours, minutes, 0, 0);
+
+        if (isAfter(slotDate, now)) {
+          const isAvailable = !existingAppointments.some(app => 
+            isWithinInterval(parseISO(app.appointment_date), {
+              start: slotDate,
+              end: addMinutes(slotDate, 30)
+            })
+          );
+
+          if (isAvailable && slots.length < 5) {
+            slots.push({ date: slotDate, time });
+          }
+        }
+      });
+
+      currentDate = addDays(currentDate, 1);
+      daysToCheck--;
+    }
+
+    setSuggestedSlots(slots);
   };
 
   const monthDays = useMemo(() => {
@@ -169,6 +235,26 @@ export function Calendar() {
     }
   };
 
+  const handleReschedule = async (newDate: Date, newTime: string) => {
+    if (!selectedAppointment) return;
+
+    const [hours, minutes] = newTime.split(':').map(Number);
+    const appointmentDate = new Date(newDate);
+    appointmentDate.setHours(hours, minutes, 0, 0);
+
+    try {
+      await api.appointments.update(selectedAppointment.id, {
+        appointment_date: appointmentDate.toISOString(),
+      });
+      await fetchAppointments();
+      setShowAppointmentDetails(false);
+      setSelectedAppointment(null);
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
+      setFormError('Error al reprogramar la cita. Por favor intente nuevamente.');
+    }
+  };
+
   const buttonStyle = {
     base: clsx(
       'px-4 py-2 transition-colors',
@@ -183,53 +269,39 @@ export function Calendar() {
     },
   };
 
-  const selectedDayAppointments = getDayAppointments(selectedDate);
-
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
-          <h1 
-            className="text-2xl font-bold"
+        <div className="flex-1 flex justify-center items-center gap-4">
+          <button
+            onClick={() => setCurrentDate(subMonths(currentDate, 1))}
+            className="p-2 rounded-full hover:bg-gray-100"
+          >
+            <ChevronLeft className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
+          </button>
+          <span 
+            className="text-2xl font-medium"
             style={{ color: currentTheme.colors.text }}
           >
-            Calendario
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentDate(subMonths(currentDate, 1))}
-              className="p-2 rounded-full hover:bg-gray-100"
-            >
-              <ChevronLeft className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
-            </button>
-            <span 
-              className="text-lg font-medium"
-              style={{ color: currentTheme.colors.text }}
-            >
-              {format(currentDate, 'MMMM yyyy', { locale: es })}
-            </span>
-            <button
-              onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-              className="p-2 rounded-full hover:bg-gray-100"
-            >
-              <ChevronRight className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
-            </button>
-          </div>
-
+            {format(currentDate, 'MMMM yyyy', { locale: es })}
+          </span>
           <button
-            onClick={() => setShowAppointmentModal(true)}
-            className={clsx(buttonStyle.base, 'whitespace-nowrap')}
-            style={buttonStyle.primary}
+            onClick={() => setCurrentDate(addMonths(currentDate, 1))}
+            className="p-2 rounded-full hover:bg-gray-100"
           >
-            <Plus className="h-5 w-5 mr-2" />
-            Nueva Cita
+            <ChevronRight className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
           </button>
         </div>
+
+        <button
+          onClick={() => setShowAppointmentModal(true)}
+          className={clsx(buttonStyle.base, 'whitespace-nowrap')}
+          style={buttonStyle.primary}
+        >
+          <CalendarPlus className="h-5 w-5 mr-2" />
+          Nueva Cita
+        </button>
       </div>
 
       {/* Calendar Grid */}
@@ -237,122 +309,132 @@ export function Calendar() {
         {/* Monthly Calendar */}
         <div className="flex flex-col w-64">
           <div 
-            className="rounded-lg shadow-lg p-4 mb-4"
+            className="rounded-lg shadow-lg overflow-hidden"
             style={{ 
               background: currentTheme.colors.surface,
               borderColor: currentTheme.colors.border,
             }}
           >
-            <div className="grid grid-cols-7 gap-1 text-center mb-2">
-              {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(day => (
-                <div 
-                  key={day}
-                  className="text-xs font-medium"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {monthDays.map(day => {
-                const isToday = isSameDay(day, new Date());
-                const isSelected = isSameDay(day, selectedDate);
-                const dayAppointments = getDayAppointments(day);
-                
-                return (
-                  <button
-                    key={day.toISOString()}
-                    onClick={() => setSelectedDate(day)}
-                    className={clsx(
-                      'aspect-square flex flex-col items-center justify-center rounded-full relative',
-                      isSelected && 'font-bold',
-                      !isSameMonth(day, currentDate) && 'opacity-50'
-                    )}
-                    style={{
-                      background: isSelected 
-                        ? currentTheme.colors.primary 
-                        : isToday
-                          ? `${currentTheme.colors.primary}20`
-                          : 'transparent',
-                      color: isSelected
-                        ? currentTheme.colors.buttonText
-                        : currentTheme.colors.text,
-                    }}
-                  >
-                    <span>{format(day, 'd')}</span>
-                    {dayAppointments.length > 0 && (
-                      <div 
-                        className="absolute bottom-1 w-1 h-1 rounded-full"
-                        style={{ background: currentTheme.colors.primary }}
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Selected Day Appointments */}
-          {selectedDayAppointments.length > 0 && (
             <div 
-              className="rounded-lg shadow-lg p-4"
-              style={{ 
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-              }}
+              className="p-4 border-b text-center"
+              style={{ borderColor: currentTheme.colors.border }}
             >
-              <h3 
-                className="text-sm font-medium mb-3"
+              <span 
+                className="text-lg font-medium"
                 style={{ color: currentTheme.colors.text }}
               >
-                Citas del {format(selectedDate, "d 'de' MMMM", { locale: es })}
-              </h3>
-              <div className="space-y-3">
-                {selectedDayAppointments.map(appointment => (
+                {format(currentDate, 'MMMM yyyy', { locale: es })}
+              </span>
+            </div>
+
+            <div className="p-4">
+              <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(day => (
                   <div 
-                    key={appointment.id}
-                    className="text-sm space-y-1"
+                    key={day}
+                    className="text-xs font-medium"
+                    style={{ color: currentTheme.colors.textSecondary }}
                   >
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
-                      <span className="font-medium" style={{ color: currentTheme.colors.text }}>
-                        {format(parseISO(appointment.appointment_date), 'HH:mm')}
-                      </span>
-                    </div>
-                    <div style={{ color: currentTheme.colors.text }}>
-                      {appointment.patients?.first_name} {appointment.patients?.paternal_surname} {appointment.patients?.last_name}
-                    </div>
-                    <div style={{ color: currentTheme.colors.textSecondary }}>
-                      {appointment.reason}
-                    </div>
+                    {day}
                   </div>
                 ))}
               </div>
+
+              <div className="grid grid-cols-7 gap-1">
+                {monthDays.map(day => {
+                  const isToday = isSameDay(day, new Date());
+                  const isSelected = isSameDay(day, selectedDate);
+                  const dayAppointments = getDayAppointments(day);
+                  
+                  return (
+                    <button
+                      key={day.toISOString()}
+                      onClick={() => setSelectedDate(day)}
+                      className={clsx(
+                        'aspect-square flex flex-col items-center justify-center rounded-full relative',
+                        isSelected && 'font-bold',
+                        !isSameMonth(day, currentDate) && 'opacity-50'
+                      )}
+                      style={{
+                        background: isSelected 
+                          ? currentTheme.colors.primary 
+                          : isToday
+                            ? `${currentTheme.colors.primary}20`
+                            : 'transparent',
+                        color: isSelected
+                          ? currentTheme.colors.buttonText
+                          : currentTheme.colors.text,
+                      }}
+                    >
+                      <span>{format(day, 'd')}</span>
+                      {dayAppointments.length > 0 && (
+                        <div 
+                          className="absolute bottom-1 w-1 h-1 rounded-full"
+                          style={{ background: currentTheme.colors.primary }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Day's Appointments Summary */}
+          <div 
+            className="mt-4 rounded-lg shadow-lg p-4"
+            style={{ 
+              background: currentTheme.colors.surface,
+              borderColor: currentTheme.colors.border,
+            }}
+          >
+            <h3 
+              className="text-sm font-medium mb-3"
+              style={{ color: currentTheme.colors.text }}
+            >
+              Citas del {format(selectedDate, "d 'de' MMMM", { locale: es })}
+            </h3>
+            <div className="space-y-3">
+              {getDayAppointments(selectedDate).map(appointment => (
+                <div 
+                  key={appointment.id}
+                  className="text-sm space-y-1"
+                >
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
+                    <span className="font-medium" style={{ color: currentTheme.colors.text }}>
+                      {format(parseISO(appointment.appointment_date), 'HH:mm')}
+                    </span>
+                  </div>
+                  <div style={{ color: currentTheme.colors.text }}>
+                    {appointment.patients?.first_name} {appointment.patients?.paternal_surname}
+                  </div>
+                  <div style={{ color: currentTheme.colors.textSecondary }}>
+                    {appointment.reason}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Weekly View */}
-        <div 
-          className="flex-1 rounded-lg shadow-lg overflow-hidden"
-          style={{ 
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-          }}
-        >
+        <div className="flex-1 rounded-lg shadow-lg overflow-hidden relative">
           {/* Week Header */}
           <div 
-            className="grid grid-cols-7 border-b"
-            style={{ borderColor: currentTheme.colors.border }}
+            className="grid grid-cols-7 border-b sticky top-0 z-20"
+            style={{ 
+              borderColor: currentTheme.colors.border,
+              background: currentTheme.colors.surface,
+              marginLeft: '4rem', // Space for time markers
+            }}
           >
             {weekDays.map(day => {
               const isToday = isSameDay(day, new Date());
               return (
                 <div
                   key={day.toISOString()}
-                  className="p-2 text-center border-r last:border-r-0"
+                  className="p-3 text-center border-r last:border-r-0"
                   style={{ borderColor: currentTheme.colors.border }}
                 >
                   <div 
@@ -378,61 +460,88 @@ export function Calendar() {
             })}
           </div>
 
-          {/* Time Grid */}
-          <div className="overflow-auto" style={{ height: 'calc(100% - 72px)' }}>
-            {TIME_SLOTS.map(time => (
-              <div 
-                key={time}
-                className="grid grid-cols-7 border-b last:border-b-0"
-                style={{ borderColor: currentTheme.colors.border }}
-              >
-                {weekDays.map((day, dayIndex) => {
-                  const isAvailable = isTimeSlotAvailable(day, time);
-                  const appointment = getAppointmentForTimeSlot(day, time);
-                  
-                  return (
-                    <button
-                      key={`${day.toISOString()}-${time}`}
-                      onClick={() => handleTimeSlotClick(day, time)}
-                      className={clsx(
-                        'h-12 border-r last:border-r-0 relative group',
-                        isAvailable && 'hover:bg-opacity-5'
-                      )}
-                      style={{ 
-                        borderColor: currentTheme.colors.border,
-                        background: isAvailable 
-                          ? 'transparent'
-                          : `${currentTheme.colors.primary}10`,
-                      }}
-                    >
-                      {dayIndex === 0 && time.endsWith('00') && (
-                        <span 
-                          className="absolute -top-3 left-2 text-xs"
-                          style={{ color: currentTheme.colors.textSecondary }}
-                        >
-                          {time}
-                        </span>
-                      )}
-                      {appointment && (
-                        <div 
-                          className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center text-xs px-2"
-                          style={{ color: currentTheme.colors.text }}
-                        >
-                          <div className="truncate text-center">
-                            {appointment.patients?.first_name} {appointment.patients?.paternal_surname}
+          {/* Time Grid Container */}
+          <div 
+            ref={timeGridRef}
+            className="relative overflow-auto"
+            style={{ height: 'calc(100vh - 16rem)' }}
+          >
+            {/* Fixed Time Column */}
+            <div 
+              className="absolute left-0 top-0 w-16 z-10"
+              style={{ 
+                background: currentTheme.colors.surface,
+                borderRight: `1px solid ${currentTheme.colors.border}`,
+              }}
+            >
+              {TIME_SLOTS.map(time => (
+                <div 
+                  key={time}
+                  className="h-12 flex items-center justify-end pr-2"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                >
+                  <span className="text-xs font-medium">{time}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Appointments Grid */}
+            <div className="ml-16"> {/* Offset to account for time column */}
+              {TIME_SLOTS.map(time => (
+                <div 
+                  key={time}
+                  className="grid grid-cols-7 border-b last:border-b-0"
+                  style={{ 
+                    borderColor: currentTheme.colors.border,
+                    height: '48px', // Fixed height for consistency
+                  }}
+                >
+                  {weekDays.map(day => {
+                    const isAvailable = isTimeSlotAvailable(day, time);
+                    const appointment = getAppointmentForTimeSlot(day, time);
+                    
+                    return (
+                      <button
+                        key={`${day.toISOString()}-${time}`}
+                        onClick={() => handleTimeSlotClick(day, time)}
+                        className={clsx(
+                          'border-r last:border-r-0 relative group transition-colors h-full',
+                          isAvailable && 'hover:bg-opacity-5'
+                        )}
+                        style={{ 
+                          borderColor: currentTheme.colors.border,
+                          background: isAvailable 
+                            ? 'transparent'
+                            : `${currentTheme.colors.primary}10`,
+                        }}
+                      >
+                        {appointment && (
+                          <div 
+                            className="absolute inset-0 p-1 flex flex-col justify-center overflow-hidden"
+                            style={{ color: currentTheme.colors.text }}
+                          >
+                            <div className="text-[10px] leading-tight font-medium truncate">
+                              {appointment.patients?.first_name} {appointment.patients?.paternal_surname}
+                            </div>
+                            <div 
+                              className="text-[9px] leading-tight truncate"
+                              style={{ color: currentTheme.colors.textSecondary }}
+                            >
+                              {appointment.reason}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* New Appointment Modal */}
+      {/* Appointment Modal */}
       <Modal
         isOpen={showAppointmentModal}
         onClose={() => {
@@ -592,13 +701,13 @@ export function Calendar() {
                 Paciente
               </label>
               <div className="font-medium" style={{ color: currentTheme.colors.text }}>
-                {selectedAppointment.patients?.first_name} {selectedAppointment.patients?.paternal_surname} {selectedAppointment.patients?.last_name}
+                {selectedAppointment.patients?.first_name} {selectedAppointment.patients?.paternal_surname}
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.textSecondary }}>
-                Fecha y Hora
+                Fecha y Hora Actual
               </label>
               <div className="font-medium" style={{ color: currentTheme.colors.text }}>
                 {format(parseISO(selectedAppointment.appointment_date), "EEEE d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}
@@ -630,6 +739,35 @@ export function Calendar() {
                  selectedAppointment.status === 'completed' ? 'Completada' : 'Cancelada'}
               </div>
             </div>
+
+            {selectedAppointment.status === 'scheduled' && (
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: currentTheme.colors.textSecondary }}>
+                  Horarios Disponibles para Reprogramar
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {suggestedSlots.map(({ date, time }) => (
+                    <button
+                      key={`${date.toISOString()}-${time}`}
+                      onClick={() => handleReschedule(date, time)}
+                      className="p-2 text-sm rounded-md border transition-colors"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      <div className="font-medium">
+                        {format(date, "EEEE d 'de' MMMM", { locale: es })}
+                      </div>
+                      <div style={{ color: currentTheme.colors.textSecondary }}>
+                        {time}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal>
