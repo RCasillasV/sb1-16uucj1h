@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { UserPlus, LogIn } from 'lucide-react';
@@ -12,10 +12,42 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [emailAuthEnabled, setEmailAuthEnabled] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    checkEmailAuth();
+  }, []);
+
+  const checkEmailAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'test@test.com',
+        password: 'testpassword'
+      });
+
+      // If we get an error about email provider being disabled, update state
+      if (error?.message?.includes('email_provider_disabled')) {
+        setEmailAuthEnabled(false);
+      }
+    } catch (err) {
+      console.error('Error checking auth status:', err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!emailAuthEnabled) {
+      setError('El inicio de sesión por correo electrónico está deshabilitado. Por favor, contacte al administrador.');
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
@@ -24,8 +56,18 @@ export function Login() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`,
+          }
         });
-        if (error) throw error;
+
+        if (error) {
+          if (error.message.includes('email_provider_disabled')) {
+            throw new Error('El registro por correo electrónico está temporalmente deshabilitado. Por favor, contacte al administrador.');
+          }
+          throw error;
+        }
+
         setError('Cuenta creada exitosamente. Por favor inicia sesión.');
         setIsSignUp(false);
       } else {
@@ -33,7 +75,14 @@ export function Login() {
           email,
           password,
         });
-        if (error) throw error;
+
+        if (error) {
+          if (error.message.includes('email_provider_disabled')) {
+            throw new Error('El inicio de sesión por correo electrónico está temporalmente deshabilitado. Por favor, contacte al administrador.');
+          }
+          throw error;
+        }
+
         navigate('/');
       }
     } catch (err) {
@@ -97,6 +146,12 @@ export function Login() {
             </div>
           )}
 
+          {!emailAuthEnabled && (
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 text-yellow-600 rounded-md">
+              <p>El inicio de sesión por correo electrónico está deshabilitado. Por favor, contacte al administrador para habilitarlo.</p>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label 
@@ -121,6 +176,7 @@ export function Login() {
                     color: currentTheme.colors.text,
                     borderColor: currentTheme.colors.border,
                   }}
+                  disabled={!emailAuthEnabled}
                 />
               </div>
             </div>
@@ -148,6 +204,7 @@ export function Login() {
                     color: currentTheme.colors.text,
                     borderColor: currentTheme.colors.border,
                   }}
+                  disabled={!emailAuthEnabled}
                 />
               </div>
             </div>
@@ -155,7 +212,7 @@ export function Login() {
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !emailAuthEnabled}
                 className={clsx(buttonStyle.base, 'disabled:opacity-50')}
                 style={buttonStyle.primary}
               >
@@ -181,6 +238,7 @@ export function Login() {
               onClick={() => setIsSignUp(!isSignUp)}
               className="w-full text-center text-sm hover:opacity-80 transition-opacity"
               style={{ color: currentTheme.colors.primary }}
+              disabled={!emailAuthEnabled}
             >
               {isSignUp
                 ? '¿Ya tienes una cuenta? Inicia sesión'

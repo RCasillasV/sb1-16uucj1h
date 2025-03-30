@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO, addMinutes, isWithinInterval, addDays, addWeeks, isAfter } from 'date-fns';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO, addMinutes, isWithinInterval, addDays, addWeeks, isAfter, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CalendarPlus,Plus, Clock, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Clock, X, CalendarPlus } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
@@ -9,16 +9,18 @@ import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 
 const START_HOUR = 8; // 8 AM
-const END_HOUR = 23; // 10 PM
+const END_HOUR = 20; // 8 PM
 const INTERVAL_MINUTES = 30;
 const DAYS_TO_SHOW = 6;
 const MAX_DAYS_AHEAD = 60;
 
+// Generate time slots for the available hours
 const TIME_SLOTS = Array.from(
-  { length: (END_HOUR - START_HOUR) * 2 },
+  { length: ((END_HOUR - START_HOUR) * 60) / INTERVAL_MINUTES },
   (_, i) => {
-    const hour = Math.floor(i / 2) + START_HOUR;
-    const minutes = (i % 2) * 30;
+    const totalMinutes = i * INTERVAL_MINUTES;
+    const hour = Math.floor(totalMinutes / 60) + START_HOUR;
+    const minutes = totalMinutes % 60;
     return `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   }
 );
@@ -91,63 +93,36 @@ export function Calendar() {
     const timeGrid = timeGridRef.current;
     if (!timeGrid) return;
 
-    const now = new Date();
-    const currentHour = now.getHours();
-    const scrollPosition = (currentHour - START_HOUR) * 96;
+    // Scroll to the first hour (8 AM)
+    const scrollPosition = 0; // Start at the first available hour
     timeGrid.scrollTop = scrollPosition;
   }, []);
-
-  const fetchAppointments = async () => {
-    setLoading(true);
-    try {
-      const data = await api.appointments.getAll();
-      setAppointments(data);
-      generateSuggestedSlots(data);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateSuggestedSlots = (existingAppointments: Appointment[]) => {
-    const slots: Array<{ date: Date; time: string }> = [];
-    let currentDate = new Date();
-    let daysToCheck = 7;
-    const now = new Date();
-
-    while (slots.length < 5 && daysToCheck > 0) {
-      TIME_SLOTS.forEach(time => {
-        const [hours, minutes] = time.split(':').map(Number);
-        const slotDate = new Date(currentDate);
-        slotDate.setHours(hours, minutes, 0, 0);
-
-        if (isAfter(slotDate, now)) {
-          const isAvailable = !existingAppointments.some(app => 
-            isWithinInterval(parseISO(app.appointment_date), {
-              start: slotDate,
-              end: addMinutes(slotDate, 30)
-            })
-          );
-
-          if (isAvailable && slots.length < 5) {
-            slots.push({ date: slotDate, time });
-          }
-        }
-      });
-
-      currentDate = addDays(currentDate, 1);
-      daysToCheck--;
-    }
-
-    setSuggestedSlots(slots);
-  };
 
   const monthDays = useMemo(() => {
     const start = startOfMonth(currentDate);
     const end = endOfMonth(currentDate);
-    return eachDayOfInterval({ start, end });
+    
+    // Get the first day of the month
+    const firstDayOfMonth = getDay(start);
+    
+    // Calculate how many days we need to show from the previous month
+    // In Spanish calendar, Monday is 1 and Sunday is 0
+    const daysFromPrevMonth = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+    
+    // Get the actual start date by subtracting the required days
+    const calendarStart = addDays(start, -daysFromPrevMonth);
+    
+    // Calculate the end date to show a complete grid (6 weeks)
+    const calendarEnd = addWeeks(calendarStart, 6);
+    
+    return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentDate]);
+
+  const hasAppointments = (date: Date) => {
+    return appointments.some(appointment => 
+      isSameDay(parseISO(appointment.appointment_date), date)
+    );
+  };
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(selectedDate, { locale: es });
@@ -255,6 +230,52 @@ export function Calendar() {
     }
   };
 
+  const fetchAppointments = async () => {
+    setLoading(true);
+    try {
+      const data = await api.appointments.getAll();
+      setAppointments(data);
+      generateSuggestedSlots(data);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateSuggestedSlots = (existingAppointments: Appointment[]) => {
+    const slots: Array<{ date: Date; time: string }> = [];
+    let currentDate = new Date();
+    let daysToCheck = 7;
+    const now = new Date();
+
+    while (slots.length < 5 && daysToCheck > 0) {
+      TIME_SLOTS.forEach(time => {
+        const [hours, minutes] = time.split(':').map(Number);
+        const slotDate = new Date(currentDate);
+        slotDate.setHours(hours, minutes, 0, 0);
+
+        if (isAfter(slotDate, now)) {
+          const isAvailable = !existingAppointments.some(app => 
+            isWithinInterval(parseISO(app.appointment_date), {
+              start: slotDate,
+              end: addMinutes(slotDate, 30)
+            })
+          );
+
+          if (isAvailable && slots.length < 5) {
+            slots.push({ date: slotDate, time });
+          }
+        }
+      });
+
+      currentDate = addDays(currentDate, 1);
+      daysToCheck--;
+    }
+
+    setSuggestedSlots(slots);
+  };
+
   const buttonStyle = {
     base: clsx(
       'px-4 py-2 transition-colors',
@@ -271,42 +292,17 @@ export function Calendar() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex-1 flex justify-center items-center gap-4">
-          <button
-            onClick={() => setCurrentDate(subMonths(currentDate, 1))}
-            className="p-2 rounded-full hover:bg-gray-100"
-          >
-            <ChevronLeft className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
-          </button>
-          <span 
-            className="text-2xl font-medium"
-            style={{ color: currentTheme.colors.text }}
-          >
-            {format(currentDate, 'MMMM yyyy', { locale: es })}
-          </span>
-          <button
-            onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-            className="p-2 rounded-full hover:bg-gray-100"
-          >
-            <ChevronRight className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
-          </button>
-        </div>
-
-        <button
-          onClick={() => setShowAppointmentModal(true)}
-          className={clsx(buttonStyle.base, 'whitespace-nowrap')}
-          style={buttonStyle.primary}
+      <div className="flex items-center gap-3 mb-6">
+        <CalendarIcon className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+        <h1 
+          className="text-2xl font-bold"
+          style={{ color: currentTheme.colors.text }}
         >
-          <CalendarPlus className="h-5 w-5 mr-2" />
-          Nueva Cita
-        </button>
+          Calendario
+        </h1>
       </div>
 
-      {/* Calendar Grid */}
       <div className="flex gap-6 flex-1">
-        {/* Monthly Calendar */}
         <div className="flex flex-col w-64">
           <div 
             className="rounded-lg shadow-lg overflow-hidden"
@@ -316,15 +312,29 @@ export function Calendar() {
             }}
           >
             <div 
-              className="p-4 border-b text-center"
+              className="p-4 border-b"
               style={{ borderColor: currentTheme.colors.border }}
             >
-              <span 
-                className="text-lg font-medium"
-                style={{ color: currentTheme.colors.text }}
-              >
-                {format(currentDate, 'MMMM yyyy', { locale: es })}
-              </span>
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentDate(subMonths(currentDate, 1))}
+                  className="p-2 rounded-full hover:bg-gray-100"
+                >
+                  <ChevronLeft className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
+                </button>
+                <span 
+                  className="text-lg font-medium"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  {format(currentDate, 'MMMM yyyy', { locale: es })}
+                </span>
+                <button
+                  onClick={() => setCurrentDate(addMonths(currentDate, 1))}
+                  className="p-2 rounded-full hover:bg-gray-100"
+                >
+                  <ChevronRight className="h-5 w-5" style={{ color: currentTheme.colors.text }} />
+                </button>
+              </div>
             </div>
 
             <div className="p-4">
@@ -344,7 +354,8 @@ export function Calendar() {
                 {monthDays.map(day => {
                   const isToday = isSameDay(day, new Date());
                   const isSelected = isSameDay(day, selectedDate);
-                  const dayAppointments = getDayAppointments(day);
+                  const hasAppointmentsForDay = hasAppointments(day);
+                  const isCurrentMonth = isSameMonth(day, currentDate);
                   
                   return (
                     <button
@@ -353,7 +364,7 @@ export function Calendar() {
                       className={clsx(
                         'aspect-square flex flex-col items-center justify-center rounded-full relative',
                         isSelected && 'font-bold',
-                        !isSameMonth(day, currentDate) && 'opacity-50'
+                        !isCurrentMonth && 'opacity-50'
                       )}
                       style={{
                         background: isSelected 
@@ -367,10 +378,15 @@ export function Calendar() {
                       }}
                     >
                       <span>{format(day, 'd')}</span>
-                      {dayAppointments.length > 0 && (
+                      {hasAppointmentsForDay && (
                         <div 
-                          className="absolute bottom-1 w-1 h-1 rounded-full"
-                          style={{ background: currentTheme.colors.primary }}
+                          className="absolute bottom-1 w-1.5 h-1.5 rounded-full"
+                          style={{ 
+                            background: isSelected 
+                              ? currentTheme.colors.buttonText
+                              : currentTheme.colors.primary,
+                            opacity: isSelected ? 0.9 : 0.8
+                          }}
                         />
                       )}
                     </button>
@@ -380,7 +396,6 @@ export function Calendar() {
             </div>
           </div>
 
-          {/* Day's Appointments Summary */}
           <div 
             className="mt-4 rounded-lg shadow-lg p-4"
             style={{ 
@@ -418,9 +433,7 @@ export function Calendar() {
           </div>
         </div>
 
-        {/* Weekly View */}
         <div className="flex-1 rounded-lg shadow-lg overflow-hidden relative">
-          {/* Week Header */}
           <div 
             className="grid grid-cols-7 border-b sticky top-0 z-20"
             style={{ 
@@ -460,14 +473,13 @@ export function Calendar() {
             })}
           </div>
 
-          {/* Time Grid Container */}
           <div 
             ref={timeGridRef}
             className="relative overflow-auto"
             style={{ height: 'calc(100vh - 16rem)' }}
           >
-            {/* Fixed Time Column */}
             <div 
+              ref={timeMarkersRef}
               className="absolute left-0 top-0 w-16 z-10"
               style={{ 
                 background: currentTheme.colors.surface,
@@ -485,15 +497,14 @@ export function Calendar() {
               ))}
             </div>
 
-            {/* Appointments Grid */}
-            <div className="ml-16"> {/* Offset to account for time column */}
+            <div className="ml-16">
               {TIME_SLOTS.map(time => (
                 <div 
                   key={time}
                   className="grid grid-cols-7 border-b last:border-b-0"
                   style={{ 
                     borderColor: currentTheme.colors.border,
-                    height: '48px', // Fixed height for consistency
+                    height: '48px',
                   }}
                 >
                   {weekDays.map(day => {
@@ -541,7 +552,6 @@ export function Calendar() {
         </div>
       </div>
 
-      {/* Appointment Modal */}
       <Modal
         isOpen={showAppointmentModal}
         onClose={() => {
@@ -585,7 +595,6 @@ export function Calendar() {
             </div>
           )}
 
-          {/* Patient Info */}
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
               Paciente
@@ -609,7 +618,6 @@ export function Calendar() {
             </div>
           </div>
 
-          {/* Date and Time */}
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
               Fecha y Hora
@@ -631,7 +639,6 @@ export function Calendar() {
             </div>
           </div>
 
-          {/* Duration */}
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
               Duración
@@ -652,7 +659,6 @@ export function Calendar() {
             </select>
           </div>
 
-          {/* Reason */}
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
               Motivo de la Consulta
@@ -673,7 +679,6 @@ export function Calendar() {
         </div>
       </Modal>
 
-      {/* Appointment Details Modal */}
       <Modal
         isOpen={showAppointmentDetails}
         onClose={() => {

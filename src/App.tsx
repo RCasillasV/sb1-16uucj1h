@@ -1,7 +1,6 @@
 import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
 import { initializeSupabase } from './lib/supabase';
@@ -87,13 +86,11 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <SelectedPatientProvider>
-          <AppRoutes />
-        </SelectedPatientProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <SelectedPatientProvider>
+        <AppRoutes />
+      </SelectedPatientProvider>
+    </ThemeProvider>
   );
 }
 

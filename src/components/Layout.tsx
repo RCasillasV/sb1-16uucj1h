@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Users, Calendar, LayoutDashboard, LogOut, FileText, Activity, Syringe, Image, FileSpreadsheet, Ruler, Stethoscope, Settings as SettingsIcon, Mail, Phone, Cake, Baby, Drama as VenusMars, Clock, MoreVertical } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { Users, Calendar, LayoutDashboard, FileText, Activity, Syringe, Image, FileSpreadsheet, Ruler, Stethoscope, Settings as SettingsIcon, Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical } from 'lucide-react';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../lib/api';
@@ -13,7 +12,6 @@ import clsx from 'clsx';
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const { currentTheme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(true);
@@ -40,7 +38,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [selectedPatient]);
 
-  // Close context menu when clicking outside
   useEffect(() => {
     const handleClickOutside = () => setShowContextMenu(false);
     document.addEventListener('click', handleClickOutside);
@@ -73,7 +70,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         .filter(app => app.patient_id === selectedPatient.id)
         .sort((a, b) => new Date(b.appointment_date).getTime() - new Date(a.appointment_date).getTime());
 
-      // Get last appointment
       const last = patientAppointments.find(app => 
         new Date(app.appointment_date) <= new Date()
       );
@@ -84,7 +80,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         });
       }
 
-      // Get next appointment
       const next = patientAppointments.find(app => 
         new Date(app.appointment_date) > new Date() && app.status === 'scheduled'
       );
@@ -191,10 +186,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
       />
     );
 
+    const GenderIcon = selectedPatient.gender.toLowerCase() === 'femenino' ? Venus : Mars;
+
     return (
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-4">
-          {/* Patient Avatar */}
           <div 
             className="h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 text-lg font-bold transition-colors"
             style={{ 
@@ -217,7 +213,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Separator />
               <InfoItem icon={Cake} text={birthDate} />
               <Separator />
-              <InfoItem icon={VenusMars} text={selectedPatient.gender} />
+              <InfoItem icon={GenderIcon} text={selectedPatient.gender} />
               {selectedPatient.phone && (
                 <>
                   <Separator />
@@ -253,7 +249,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Context Menu Button */}
         <div className="relative">
           <button
             onClick={handleContextMenuClick}
@@ -265,7 +260,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             />
           </button>
 
-          {/* Context Menu Dropdown */}
           {showContextMenu && (
             <div 
               className="absolute right-0 mt-1 py-1 w-32 rounded-md shadow-lg z-10"
@@ -294,7 +288,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       color: currentTheme.colors.text,
       fontFamily: currentTheme.typography.fontFamily,
     }}>
-      {/* Sidebar */}
       <div
         className={clsx(
           'fixed inset-y-0 left-0 transition-all duration-300 ease-in-out z-30',
@@ -304,7 +297,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         onMouseEnter={() => setIsExpanded(true)}
         onMouseLeave={() => setIsExpanded(false)}
       >
-        {/* Logo and title */}
         <div className="h-16 flex items-center px-4">
           <Link to="/" className="flex items-center gap-3" style={{ color: currentTheme.colors.sidebarText }}>
             <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0" style={{ background: currentTheme.colors.primary }}>
@@ -376,39 +368,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-
-        <div className={clsx(
-          'absolute bottom-0 w-full p-4',
-          isExpanded ? 'px-6' : 'px-4'
-        )}>
-          <button
-            onClick={() => signOut()}
-            className={clsx(
-              'flex items-center text-sm transition-all duration-300',
-              isExpanded ? '' : 'justify-center'
-            )}
-            style={{ color: currentTheme.colors.sidebarText }}
-          >
-            <LogOut className={clsx(
-              'h-5 w-5 shrink-0',
-              isExpanded ? 'mr-3' : 'mr-0'
-            )} />
-            <span className={clsx(
-              'transition-all duration-300',
-              isExpanded ? 'opacity-100' : 'opacity-0 w-0'
-            )}>
-              Cerrar sesión
-            </span>
-          </button>
-        </div>
       </div>
 
-      {/* Main content */}
       <div className={clsx(
         'flex-1 flex flex-col transition-all duration-300',
         isExpanded ? 'ml-64' : 'ml-16'
       )}>
-        {/* Fixed Header */}
         <div 
           className="sticky top-0 z-20 border-b"
           style={{
@@ -422,7 +387,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Scrollable Content */}
         <main className="flex-1 overflow-auto">
           <div className="p-6">
             {children}

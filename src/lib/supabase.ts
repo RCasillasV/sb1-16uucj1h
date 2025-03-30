@@ -31,19 +31,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
 export async function initializeSupabase(retries = 3, delay = 1000) {
   for (let i = 0; i < retries; i++) {
     try {
-      // First check for existing session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        throw sessionError;
-      }
-
-      if (!session) {
-        console.warn('No active session found');
-        return false;
-      }
-
-      // Test database access with session
+      // Test database access
       const { data, error } = await supabase
         .from('patients')
         .select('id')

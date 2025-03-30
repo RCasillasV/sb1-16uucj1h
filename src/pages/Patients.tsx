@@ -12,7 +12,7 @@ type Patient = Database['public']['Tables']['patients']['Row'];
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = 'name' | 'age' | 'gender' | null;
 
-const PATIENTS_PER_PAGE = 10;
+const PATIENTS_PER_PAGE = 12;
 
 export function Patients() {
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
@@ -43,11 +43,9 @@ export function Patients() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      // Toggle direction if same field
       setSortDirection(prev => prev === 'asc' ? 'desc' : prev === 'desc' ? null : 'asc');
       setSortField(prev => prev === field && sortDirection === 'desc' ? null : field);
     } else {
-      // New field, start with ascending
       setSortField(field);
       setSortDirection('asc');
     }
@@ -264,7 +262,7 @@ export function Patients() {
                   {getSortIcon('name')}
                 </button>
               </th>
-              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider">
+              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
                 <button
                   onClick={() => handleSort('age')}
                   className={sortButtonStyle.base}
@@ -274,13 +272,13 @@ export function Patients() {
                   {getSortIcon('age')}
                 </button>
               </th>
-              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider" style={{ color: currentTheme.colors.textSecondary }}>
+              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell" style={{ color: currentTheme.colors.textSecondary }}>
                 Teléfono
               </th>
-              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider" style={{ color: currentTheme.colors.textSecondary }}>
+              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell" style={{ color: currentTheme.colors.textSecondary }}>
                 Email
               </th>
-              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider">
+              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
                 <button
                   onClick={() => handleSort('gender')}
                   className={sortButtonStyle.base}
@@ -321,12 +319,12 @@ export function Patients() {
                   <td className="px-6 py-2 whitespace-nowrap">
                     {`${patient.first_name} ${patient.paternal_surname} ${patient.last_name}`}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap">
+                  <td className="px-6 py-2 whitespace-nowrap hidden sm:table-cell">
                     {calculateAge(patient.date_of_birth).formatted}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap">{patient.phone || '-'}</td>
-                  <td className="px-6 py-2 whitespace-nowrap">{patient.email || '-'}</td>
-                  <td className="px-6 py-2 whitespace-nowrap">{patient.gender}</td>
+                  <td className="px-6 py-2 whitespace-nowrap hidden md:table-cell">{patient.phone || '-'}</td>
+                  <td className="px-6 py-2 whitespace-nowrap hidden lg:table-cell">{patient.email || '-'}</td>
+                  <td className="px-6 py-2 whitespace-nowrap hidden sm:table-cell">{patient.gender}</td>
                 </tr>
               ))
             )}

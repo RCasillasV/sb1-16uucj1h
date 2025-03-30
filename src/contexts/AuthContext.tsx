@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null);
         setLoading(false);
       }
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (signOutError) throw signOutError;
       
       setUser(null);
-      window.location.href = '/';
+      window.location.href = '/login';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error signing out');
       console.error('Sign out error:', err);
