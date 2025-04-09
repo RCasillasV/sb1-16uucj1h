@@ -23,7 +23,7 @@ interface AppointmentFormProps {
 }
 
 const START_HOUR = 8; // 8 AM
-const END_HOUR = 23; // 10 PM
+const END_HOUR = 23; // 11 PM
 const INTERVAL_MINUTES = 30;
 const DAYS_TO_SHOW =6;
 const MAX_DAYS_AHEAD = 60;
@@ -51,6 +51,7 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
   ));
   const [reason, setReason] = useState(appointment?.reason || '');
   const [notes, setNotes] = useState(appointment?.notes || '');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!selectedPatient && !appointment) {
@@ -87,7 +88,7 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
 
     const dateTimeString = `${format(selectedDate, 'yyyy-MM-dd')}T${selectedTime}:00`;
@@ -110,7 +111,7 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar la cita');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -366,11 +367,18 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
           </button>
           <button
             type="submit"
-            disabled={loading || !selectedTime}
+            disabled={loading || !selectedTime || isLoading}
             className={clsx(buttonStyle.base, 'disabled:opacity-50')}
             style={buttonStyle.primary}
           >
-            {loading ? 'Guardando...' : appointment ? 'Actualizar' : 'Guardar'}
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                {appointment ? 'Actualizando...' : 'Guardando...'}
+              </div>
+            ) : (
+              appointment ? 'Actualizar' : 'Guardar'
+            )}
           </button>
         </div>
       </form>

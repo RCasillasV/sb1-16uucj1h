@@ -3,43 +3,27 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { format, startOfDay, endOfDay, isSameMonth, isSameDay, addMonths, subMonths, parseISO, addMinutes, isWithinInterval, addDays, addWeeks, isAfter, getDay } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Clock, X, CalendarPlus } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { PickCalendar } from '../components/PickCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/core';
-
-const START_HOUR = 8; // 8 AM
-const END_HOUR = 20; // 8 PM
-const INTERVAL_MINUTES = 15; // Changed from 30 to 15 minutes
-const DAYS_TO_SHOW = 6;
-const MAX_DAYS_AHEAD = 60;
-
-// Generate time slots for the available hours
-const TIME_SLOTS = Array.from(
-  { length: ((END_HOUR - START_HOUR) * 60) / INTERVAL_MINUTES },
-  (_, i) => {
-    const totalMinutes = i * INTERVAL_MINUTES;
-    const hour = Math.floor(totalMinutes / 60) + START_HOUR;
-    const minutes = totalMinutes % 60;
-    return `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  }
-);
 
 interface AppointmentFormData {
   date: Date;
   time: string;
   duration: number;
   reason: string;
-  cubicle?: number; // Added cubicle selection
+  cubicle: number;
 }
 
-export function Calendar() {
+export function Agenda2() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const navigate = useNavigate();
@@ -48,15 +32,16 @@ export function Calendar() {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventInput | null>(null);
   const mainCalendarRef = useRef<FullCalendar>(null);
+  const miniCalendarRef = useRef<FullCalendar>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [formData, setFormData] = useState<AppointmentFormData>({
     date: new Date(),
     time: '09:00',
-    duration: 15, // Changed default duration to 15 minutes
+    duration: 15,
     reason: '',
     cubicle: 1,
   });
   const [formError, setFormError] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek'>('dayGridMonth');
 
   useEffect(() => {
     fetchAppointments();
@@ -69,7 +54,7 @@ export function Calendar() {
         id: appointment.id,
         title: `${appointment.patients?.first_name} ${appointment.patients?.paternal_surname} - ${appointment.reason}`,
         start: new Date(appointment.appointment_date),
-        end: addMinutes(new Date(appointment.appointment_date), 15), // Changed to 15 minutes
+        end: new Date(new Date(appointment.appointment_date).getTime() + 15 * 60000),
         backgroundColor: getEventColor(appointment.status),
         extendedProps: {
           status: appointment.status,
@@ -163,9 +148,16 @@ export function Calendar() {
     }
   };
 
+  const handleDateChange = (date: Date) => {
+    setSelectedDate(date);
+    if (mainCalendarRef.current) {
+      mainCalendarRef.current.getApi().gotoDate(date);
+    }
+  };
+
   const buttonStyle = {
     base: clsx(
-      'px-4 py-2 transition-colors',
+      'flex items-center px-4 py-2 transition-all duration-200',
       currentTheme.buttons.style === 'pill' && 'rounded-full',
       currentTheme.buttons.style === 'rounded' && 'rounded-lg',
       currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
@@ -186,70 +178,104 @@ export function Calendar() {
             className="text-2xl font-bold"
             style={{ color: currentTheme.colors.text }}
           >
-            Calendario
+            Agenda
           </h1>
         </div>
 
-        <div 
-          className="rounded-lg shadow-lg p-4"
-          style={{ 
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-            minHeight: '100vh',
-            height: 'auto',
-            overflowY: 'auto'
-          }}
-        >
-          <div className="h-full">
-            <FullCalendar
-              ref={mainCalendarRef}
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="timeGridWeek"
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-              }}
-              buttonText={{
-                today: 'Hoy',
-                month: 'Mes',
-                week: 'Semana',
-              }}
-              locale={es}
-              firstDay={1}
-              selectable={true}
-              selectMirror={true}
-              dayMaxEvents={true}
-              weekends={true}
+        <div className="flex gap-2">
+          {/* Mini Calendar */}
+          <div className="w-56 shrink-0 scale-90">
+            <PickCalendar
               events={events}
-              select={handleDateSelect}
-              eventClick={handleEventClick}
-              slotDuration="00:15:00" // Changed to 15 minutes
-              slotMinTime="08:00:00"
-              slotMaxTime="20:00:00"
-              allDaySlot={false}
-              eventTimeFormat={{
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-              }}
-              views={{
-                timeGridWeek: {
-                  dayHeaderFormat: { weekday: 'long', day: 'numeric' },
-                  slotLabelFormat: {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
+              selectedDate={selectedDate}
+              onDateSelect={handleDateChange}
+              calendarRef={miniCalendarRef}
+              cellHeight={20}     // Altura de las celdas
+              headerHeight={30}   // Altura del encabezado (mes/año)
+              />
+          </div>
+
+          {/* Main Calendar */}
+          <div 
+            className="flex-1 rounded-lg shadow-lg p-4"
+            style={{ 
+              background: currentTheme.colors.surface,
+              borderColor: currentTheme.colors.border,
+              minHeight: '100vh',
+              height: 'auto',
+              overflowY: 'auto',
+              fontSize: 'auto'
+            }}
+          >
+            <div className="h-full">
+              <FullCalendar
+                ref={mainCalendarRef}
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                initialView="timeGridWeek"
+                headerToolbar={{
+                  left: 'prev,next today',
+                  center: 'title',
+                  right: 'dayGridMonth,timeGridWeek'
+                }}
+                buttonText={{
+                  today: 'Hoy',
+                  month: 'Mes',
+                  week: 'Semana',
+                }}
+                locale={es}
+                firstDay={1}
+                selectable={true}
+                selectMirror={true}
+                dayMaxEvents={true}
+                weekends={true}
+                events={events}
+                select={handleDateSelect}
+                eventClick={handleEventClick}
+                slotDuration="00:15:00"
+                slotMinTime="08:00:00"
+                slotMaxTime="22:00:00"
+                allDaySlot={false}
+                eventTimeFormat={{
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false
+                }}
+                views={{
+                  timeGridWeek: {
+                    dayHeaderFormat: { weekday: 'short', day: 'numeric' },
+                    slotLabelFormat: {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    }
                   }
-                }
-              }}
-              height="100%"
-              contentHeight="auto"
-              aspectRatio={2}
-              handleWindowResize={true}
-              stickyHeaderDates={true}
-              expandRows={true}
-            />
+                }}
+                height="100%"
+                contentHeight="auto"
+                aspectRatio={2}
+                handleWindowResize={true}
+                stickyHeaderDates={true}
+                expandRows={true}
+              />
+
+              {/* Custom styles for time slots */}
+              <style>
+                {`
+                  .fc-timegrid-slot-label {
+                    font-size: 0.75rem !important;
+                  }
+                  .fc-timegrid-axis-cushion {
+                    font-size: 0.75rem !important;
+                  }
+                  .fc .fc-timegrid-slot {
+                    height: 2rem !important;
+                  }
+                  .fc .fc-timegrid-slot-label-cushion {
+                    font-size: 0.75rem !important;
+                  }
+                `}
+              </style>
+            </div>
           </div>
         </div>
       </div>

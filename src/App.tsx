@@ -10,6 +10,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ defau
 const Patients = lazy(() => import('./pages/Patients').then(module => ({ default: module.Patients })));
 const Appointments = lazy(() => import('./pages/Appointments').then(module => ({ default: module.Appointments })));
 const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default: module.Calendar })));
+const Agenda2 = lazy(() => import('./pages/Agenda2').then(module => ({ default: module.Agenda2 })));
 const ClinicalHistory = lazy(() => import('./pages/ClinicalHistory').then(module => ({ default: module.ClinicalHistory })));
 const ClinicalEvolution = lazy(() => import('./pages/ClinicalEvolution').then(module => ({ default: module.ClinicalEvolution })));
 const Prescriptions = lazy(() => import('./pages/Prescriptions').then(module => ({ default: module.Prescriptions })));
@@ -48,6 +49,12 @@ function AppRoutes() {
           <Route path="/calendar" element={
             <Layout>
               <Calendar />
+            </Layout>
+          } />
+
+          <Route path="/agenda2" element={
+            <Layout>
+              <Agenda2 />
             </Layout>
           } />
           

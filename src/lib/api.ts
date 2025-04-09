@@ -11,19 +11,88 @@ type Prescription = Tables['prescriptions']['Row'];
 type PrescriptionMedication = Tables['prescription_medications']['Row'];
 type Medication = Tables['medications']['Row'];
 
-// Cache for frequently accessed data
-const cache = new Map();
+// Cache configuration
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const cache = new Map<string, { data: any; timestamp: number }>();
+
+// Performance metrics
+const metrics = {
+  appointmentFetchTime: 0,
+  appointmentUpdateTime: 0,
+  cacheHits: 0,
+  cacheMisses: 0,
+  validationErrors: [] as string[],
+};
+
+// Batch processing configuration
+const BATCH_SIZE = 10;
+const updateQueue: Array<{ id: string; data: any }> = [];
+let batchUpdateTimeout: NodeJS.Timeout | null = null;
+
+// Validation helpers
+const validateAppointmentDate = (date: string): boolean => {
+  const appointmentDate = new Date(date);
+  const now = new Date();
+  return appointmentDate >= now;
+};
+
+const validateAppointmentOverlap = (appointments: Appointment[], newAppointment: { appointment_date: string }): boolean => {
+  const newDate = new Date(newAppointment.appointment_date);
+  const thirtyMinutes = 30 * 60 * 1000;
+  
+  return !appointments.some(existing => {
+    const existingDate = new Date(existing.appointment_date);
+    const timeDiff = Math.abs(newDate.getTime() - existingDate.getTime());
+    return timeDiff < thirtyMinutes;
+  });
+};
+
+const logValidationError = (error: string) => {
+  metrics.validationErrors.push(`${new Date().toISOString()}: ${error}`);
+  console.error('Validation Error:', error);
+};
+
+// Batch processing function
+const processBatchUpdates = async () => {
+  if (updateQueue.length === 0) return;
+
+  const batch = updateQueue.splice(0, BATCH_SIZE);
+  const startTime = performance.now();
+
+  try {
+    await Promise.all(batch.map(async ({ id, data }) => {
+      const { error } = await supabase
+        .from('appointments')
+        .update(data)
+        .eq('id', id);
+
+      if (error) throw error;
+    }));
+
+    metrics.appointmentUpdateTime = performance.now() - startTime;
+  } catch (error) {
+    console.error('Batch update error:', error);
+    // Re-queue failed updates
+    updateQueue.push(...batch);
+  }
+
+  if (updateQueue.length > 0) {
+    batchUpdateTimeout = setTimeout(processBatchUpdates, 1000);
+  }
+};
 
 export const api = {
   patients: {
     async getAll() {
       const cacheKey = 'patients:all';
       const cached = cache.get(cacheKey);
+      
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        metrics.cacheHits++;
         return cached.data;
       }
 
+      metrics.cacheMisses++;
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -223,10 +292,14 @@ export const api = {
     async getAll() {
       const cacheKey = 'appointments:all';
       const cached = cache.get(cacheKey);
+      const startTime = performance.now();
+      
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        metrics.cacheHits++;
         return cached.data;
       }
 
+      metrics.cacheMisses++;
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -237,7 +310,10 @@ export const api = {
             paternal_surname
           )
         `)
+        .gte('appointment_date', new Date().toISOString()) // Only fetch current and future appointments
         .order('appointment_date', { ascending: true });
+
+      metrics.appointmentFetchTime = performance.now() - startTime;
 
       if (error) {
         console.error('Error fetching appointments:', error);
@@ -271,11 +347,23 @@ export const api = {
     },
 
     async create(appointment: Tables['appointments']['Insert']) {
+      if (!validateAppointmentDate(appointment.appointment_date)) {
+        throw new Error('Cannot create appointments in the past');
+      }
+
+      const existingAppointments = await this.getAll();
+      if (!validateAppointmentOverlap(existingAppointments, appointment)) {
+        throw new Error('Appointment time slot is already taken');
+      }
+
+      const startTime = performance.now();
       const { data, error } = await supabase
         .from('appointments')
         .insert(appointment)
         .select()
         .single();
+
+      metrics.appointmentUpdateTime = performance.now() - startTime;
 
       if (error) {
         console.error('Error creating appointment:', error);
@@ -288,21 +376,40 @@ export const api = {
     },
 
     async update(id: string, appointment: Tables['appointments']['Update']) {
-      const { data, error } = await supabase
-        .from('appointments')
-        .update(appointment)
-        .eq('id', id)
-        .select()
-        .single();
+      if (appointment.appointment_date && !validateAppointmentDate(appointment.appointment_date)) {
+        throw new Error('Cannot update to a past date');
+      }
 
-      if (error) {
-        console.error('Error updating appointment:', error);
-        throw error;
+      // Add to batch update queue
+      updateQueue.push({ id, data: appointment });
+
+      // Start batch processing if not already started
+      if (!batchUpdateTimeout) {
+        batchUpdateTimeout = setTimeout(processBatchUpdates, 1000);
       }
 
       // Invalidate cache
       cache.delete('appointments:all');
-      return data;
+      
+      // Return immediately for better UI responsiveness
+      return { id, ...appointment };
+    },
+
+    getMetrics() {
+      return {
+        fetchTime: `${metrics.appointmentFetchTime.toFixed(2)}ms`,
+        updateTime: `${metrics.appointmentUpdateTime.toFixed(2)}ms`,
+        cacheEfficiency: {
+          hits: metrics.cacheHits,
+          misses: metrics.cacheMisses,
+          ratio: metrics.cacheHits / (metrics.cacheHits + metrics.cacheMisses),
+        },
+        validationErrors: metrics.validationErrors,
+        batchProcessing: {
+          queueSize: updateQueue.length,
+          batchSize: BATCH_SIZE,
+        },
+      };
     },
   },
 

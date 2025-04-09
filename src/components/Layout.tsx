@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Users, Calendar, LayoutDashboard, FileText, Activity, Syringe, Image, FileSpreadsheet, Ruler, Stethoscope, Settings as SettingsIcon, Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical } from 'lucide-react';
+import { Users, Calendar, LayoutDashboard, FileText, Activity, Syringe, Image, FileSpreadsheet, Ruler, Stethoscope, Settings as SettingsIcon, Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, LogOut } from 'lucide-react';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../lib/api';
@@ -24,6 +24,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
   } | null>(null);
   const [nextAppointment, setNextAppointment] = useState<Date | null>(null);
   const [showContextMenu, setShowContextMenu] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -108,11 +118,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
     setSelectedPatient(null);
   };
 
+  const handleLogout = () => {
+    navigate('/login');
+  };
+
   const baseNavigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Agenda2', href: '/agenda2', icon: Calendar },
     { name: 'Pacientes', href: '/patients', icon: Users },
-    { name: 'Agenda', href: '/calendar', icon: Calendar },
     { name: 'Citas', href: '/appointments', icon: Clock },
+    { name: 'Agenda', href: '/calendar', icon: Calendar },
   ];
 
   const medicalNavigation = selectedPatient ? [
@@ -141,6 +156,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const bottomNavigation = [
     { name: 'Configuración', href: '/settings', icon: SettingsIcon },
+    { name: 'Cerrar Sesión', href: '/login', icon: LogOut, onClick: handleLogout },
   ];
 
   const navigation = [
@@ -208,7 +224,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               {selectedPatient.first_name} {selectedPatient.paternal_surname} {selectedPatient.last_name}
             </h2>
-            <div className="flex items-center flex-wrap text-sm">
+            <div className="flex items-center flex-wrap text-sm gap-2">
               <InfoItem icon={Baby} text={age.formatted} />
               <Separator />
               <InfoItem icon={Cake} text={birthDate} />
@@ -288,15 +304,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
       color: currentTheme.colors.text,
       fontFamily: currentTheme.typography.fontFamily,
     }}>
+      {/* Sidebar */}
       <div
         className={clsx(
           'fixed inset-y-0 left-0 transition-all duration-300 ease-in-out z-30',
           isExpanded ? 'w-64' : 'w-16'
         )}
         style={{ background: currentTheme.colors.sidebar }}
-        onMouseEnter={() => setIsExpanded(true)}
-        onMouseLeave={() => setIsExpanded(false)}
+        onMouseEnter={() => !isMobile && setIsExpanded(true)}
+        onMouseLeave={() => !isMobile && setIsExpanded(false)}
       >
+        {/* Logo */}
         <div className="h-16 flex items-center px-4">
           <Link to="/" className="flex items-center gap-3" style={{ color: currentTheme.colors.sidebarText }}>
             <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0" style={{ background: currentTheme.colors.primary }}>
@@ -311,6 +329,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
+        {/* Navigation */}
         <nav className="mt-4">
           {navigation.map((item, index) => {
             if (item.type === 'divider') {
@@ -333,6 +352,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={(e) => {
+                  if (item.onClick) {
+                    e.preventDefault();
+                    item.onClick();
+                  }
+                }}
                 className={clsx(
                   'flex items-center py-3 text-sm transition-all duration-300 relative',
                   isExpanded ? 'px-6' : 'px-4 justify-center'
@@ -370,10 +395,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </nav>
       </div>
 
+      {/* Main content */}
       <div className={clsx(
         'flex-1 flex flex-col transition-all duration-300',
         isExpanded ? 'ml-64' : 'ml-16'
       )}>
+        {/* Header */}
         <div 
           className="sticky top-0 z-20 border-b"
           style={{
@@ -387,6 +414,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
+        {/* Page content */}
         <main className="flex-1 overflow-auto">
           <div className="p-6">
             {children}
