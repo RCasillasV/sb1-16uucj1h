@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
@@ -11,9 +11,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import { PickCalendar } from '../components/PickCalendar';
+import { MiniCalendar } from '../components/MiniCalendar';
 import clsx from 'clsx';
-import type { EventInput, DateSelectArg, EventClickArg } from '@fullcalendar/core';
+import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg } from '@fullcalendar/core';
 
 interface AppointmentFormData {
   date: Date;
@@ -31,9 +31,12 @@ export function Agenda2() {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventInput | null>(null);
-  const mainCalendarRef = useRef<FullCalendar>(null);
-  const miniCalendarRef = useRef<FullCalendar>(null);
+  const calendarRef = useRef<FullCalendar>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentViewDates, setCurrentViewDates] = useState({
+    start: startOfMonth(new Date()),
+    end: endOfMonth(new Date())
+  });
   const [formData, setFormData] = useState<AppointmentFormData>({
     date: new Date(),
     time: '09:00',
@@ -42,6 +45,16 @@ export function Agenda2() {
     cubicle: 1,
   });
   const [formError, setFormError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchAppointments();
@@ -88,6 +101,7 @@ export function Agenda2() {
     }
 
     const selectedDateTime = new Date(selectInfo.start);
+    setSelectedDate(selectedDateTime);
     setFormData({
       date: selectedDateTime,
       time: format(selectedDateTime, 'HH:mm'),
@@ -150,14 +164,40 @@ export function Agenda2() {
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
-    if (mainCalendarRef.current) {
-      mainCalendarRef.current.getApi().gotoDate(date);
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.gotoDate(date);
+      
+      // Update view if date is outside current view
+      const view = calendarApi.view;
+      const viewStart = view.currentStart;
+      const viewEnd = view.currentEnd;
+      
+      if (date < viewStart || date >= viewEnd) {
+        if (view.type === 'timeGridWeek') {
+          calendarApi.gotoDate(date);
+        } else if (view.type === 'dayGridMonth') {
+          calendarApi.gotoDate(date);
+        }
+      }
+    }
+  };
+
+  const handleDatesSet = (arg: DatesSetArg) => {
+    setCurrentViewDates({
+      start: arg.start,
+      end: arg.end
+    });
+    
+    // Update selected date if it's outside the new view
+    if (selectedDate < arg.start || selectedDate >= arg.end) {
+      setSelectedDate(arg.start);
     }
   };
 
   const buttonStyle = {
     base: clsx(
-      'flex items-center px-4 py-2 transition-all duration-200',
+      'px-4 py-2 transition-colors',
       currentTheme.buttons.style === 'pill' && 'rounded-full',
       currentTheme.buttons.style === 'rounded' && 'rounded-lg',
       currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
@@ -182,22 +222,29 @@ export function Agenda2() {
           </h1>
         </div>
 
-        <div className="flex gap-2">
+        <div className={clsx(
+          'flex gap-4 transition-all duration-300',
+          isMobile && 'flex-col'
+        )}>
           {/* Mini Calendar */}
-          <div className="w-56 shrink-0 scale-90">
-            <PickCalendar
-              events={events}
+          <div className={clsx(
+            'shrink-0 transition-all duration-300',
+            isMobile && 'w-full'
+          )}>
+            <MiniCalendar
               selectedDate={selectedDate}
               onDateSelect={handleDateChange}
-              calendarRef={miniCalendarRef}
-              cellHeight={20}     // Altura de las celdas
-              headerHeight={30}   // Altura del encabezado (mes/año)
-              />
+              events={events}
+              currentViewDates={currentViewDates}
+            />
           </div>
 
           {/* Main Calendar */}
           <div 
-            className="flex-1 rounded-lg shadow-lg p-4"
+            className={clsx(
+              'flex-1 rounded-lg shadow-lg p-4 transition-all duration-300',
+              isMobile && 'hidden'
+            )}
             style={{ 
               background: currentTheme.colors.surface,
               borderColor: currentTheme.colors.border,
@@ -209,7 +256,7 @@ export function Agenda2() {
           >
             <div className="h-full">
               <FullCalendar
-                ref={mainCalendarRef}
+                ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="timeGridWeek"
                 headerToolbar={{
@@ -231,6 +278,7 @@ export function Agenda2() {
                 events={events}
                 select={handleDateSelect}
                 eventClick={handleEventClick}
+                datesSet={handleDatesSet}
                 slotDuration="00:15:00"
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
@@ -272,6 +320,28 @@ export function Agenda2() {
                   }
                   .fc .fc-timegrid-slot-label-cushion {
                     font-size: 0.75rem !important;
+                  }
+                  .fc .fc-button {
+                    background-color: ${currentTheme.colors.primary} !important;
+                    border-color: ${currentTheme.colors.primary} !important;
+                  }
+                  .fc .fc-button:disabled {
+                    opacity: 0.5;
+                  }
+                  .fc .fc-button:hover {
+                    background-color: ${currentTheme.colors.primary}dd !important;
+                  }
+                  .fc .fc-toolbar-title {
+                    color: ${currentTheme.colors.text};
+                  }
+                  .fc .fc-col-header-cell {
+                    color: ${currentTheme.colors.textSecondary};
+                  }
+                  .fc .fc-daygrid-day {
+                    color: ${currentTheme.colors.text};
+                  }
+                  .fc .fc-timegrid-col.fc-day-today {
+                    background-color: ${currentTheme.colors.primary}10 !important;
                   }
                 `}
               </style>

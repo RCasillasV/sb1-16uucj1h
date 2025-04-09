@@ -8,6 +8,7 @@ import { calculateAge } from '../utils/dateUtils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
+import packageJson from '../../package.json';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -307,7 +308,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <div
         className={clsx(
-          'fixed inset-y-0 left-0 transition-all duration-300 ease-in-out z-30',
+          'fixed inset-y-0 left-0 transition-all duration-300 ease-in-out z-30 flex flex-col',
           isExpanded ? 'w-64' : 'w-16'
         )}
         style={{ background: currentTheme.colors.sidebar }}
@@ -330,7 +331,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-4">
+        <nav className="flex-1 mt-4">
           {navigation.map((item, index) => {
             if (item.type === 'divider') {
               return (
@@ -393,6 +394,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+
+        {/* Version number */}
+        <div 
+          className={clsx(
+            'px-4 py-2 text-xs border-t',
+            isExpanded ? 'text-left' : 'text-center'
+          )}
+          style={{ 
+            borderColor: currentTheme.colors.sidebarHover,
+            color: currentTheme.colors.sidebarText 
+          }}
+        >
+          {isExpanded ? (
+            <span>Versión {packageJson.version}</span>
+          ) : (
+            <span>v{packageJson.version}</span>
+          )}
+        </div>
       </div>
 
       {/* Main content */}
