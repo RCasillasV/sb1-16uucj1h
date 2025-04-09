@@ -80,16 +80,16 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
       }}
     >
       {/* Calendar Header */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-2">
           <button
             onClick={handlePrevMonth}
             className="p-1 rounded-full hover:bg-black/5 transition-colors"
           >
-            <ChevronLeft className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
+            <ChevronLeft className="h-3 w-3" style={{ color: currentTheme.colors.text }} />
           </button>
           <span 
-            className="text-sm font-medium capitalize"
+            className="text-[10px] font-medium capitalize leading-tight"
             style={{ color: currentTheme.colors.text }}
           >
             {format(currentMonth, 'MMMM yyyy', { locale: es })}
@@ -98,16 +98,16 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
             onClick={handleNextMonth}
             className="p-1 rounded-full hover:bg-black/5 transition-colors"
           >
-            <ChevronRight className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
+            <ChevronRight className="h-3 w-3" style={{ color: currentTheme.colors.text }} />
           </button>
         </div>
 
         {/* Week days header */}
-        <div className="grid grid-cols-7 mb-2">
+        <div className="grid grid-cols-7 mb-1">
           {weekDays.map((day) => (
             <div
               key={day}
-              className="text-center text-xs font-medium"
+              className="text-center text-[9px] font-medium leading-tight"
               style={{ color: currentTheme.colors.textSecondary }}
             >
               {day}
@@ -116,7 +116,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
         </div>
 
         {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-px">
           {calendarDays.map((day) => {
             const isSelected = isSameDay(day, selectedDate);
             const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -129,7 +129,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                 key={day.toString()}
                 onClick={() => onDateSelect(day)}
                 className={clsx(
-                  'w-8 h-8 text-sm rounded-full flex items-center justify-center relative transition-colors',
+                  'w-7 h-7 text-[10px] rounded-full flex items-center justify-center relative transition-colors',
                   !isCurrentMonth && 'opacity-30',
                   isSelected && 'text-white'
                 )}
@@ -142,10 +142,10 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                       : currentTheme.colors.textSecondary,
                 }}
               >
-                <span>{format(day, 'd')}</span>
+                <span className="leading-none">{format(day, 'd')}</span>
                 {hasEvents && !isSelected && (
                   <span 
-                    className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                    className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full"
                     style={{ 
                       background: isCurrentMonth 
                         ? currentTheme.colors.primary 
@@ -164,17 +164,17 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
         className="border-t"
         style={{ borderColor: currentTheme.colors.border }}
       >
-        <div className="p-4">
+        <div className="p-3">
           <h3 
-            className="text-sm font-medium mb-2"
+            className="text-[10px] font-medium mb-2 leading-tight"
             style={{ color: currentTheme.colors.text }}
           >
             Citas del {format(selectedDate, "d 'de' MMMM", { locale: es })}
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {selectedDateEvents.length === 0 ? (
               <p 
-                className="text-sm text-center py-2"
+                className="text-[9px] text-center py-1.5 leading-tight"
                 style={{ color: currentTheme.colors.textSecondary }}
               >
                 No hay citas programadas
@@ -183,29 +183,29 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
               selectedDateEvents.map((event) => (
                 <div 
                   key={event.id}
-                  className="flex items-start gap-2 p-2 rounded-md transition-colors"
+                  className="flex items-start gap-1.5 p-1.5 rounded"
                   style={{ 
                     background: `${currentTheme.colors.primary}10`,
                   }}
                 >
                   <Clock 
-                    className="h-4 w-4 mt-0.5 shrink-0" 
+                    className="h-3 w-3 mt-px shrink-0" 
                     style={{ color: currentTheme.colors.primary }} 
                   />
                   <div className="min-w-0">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-sm font-medium">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[10px] font-medium leading-tight">
                         {format(new Date(event.start as string), 'HH:mm')}
                       </span>
                       <span 
-                        className="text-sm font-medium truncate"
+                        className="text-[10px] font-medium truncate leading-tight"
                         style={{ color: currentTheme.colors.text }}
                       >
                         {event.extendedProps?.patient?.first_name} {event.extendedProps?.patient?.paternal_surname}
                       </span>
                     </div>
                     <p 
-                      className="text-xs truncate"
+                      className="text-[8px] truncate leading-tight"
                       style={{ color: currentTheme.colors.textSecondary }}
                     >
                       {event.extendedProps?.reason}
