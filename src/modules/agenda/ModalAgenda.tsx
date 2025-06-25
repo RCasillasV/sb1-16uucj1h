@@ -52,7 +52,7 @@ export function ModalAgenda({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={selectedEvent ? "Editar Cita" : "Nueva Cita"}
+      title={selectedEvent ? "Editar Cita" : "Cita M"}
       actions={
         <div className="flex justify-end gap-2">
           <button
