@@ -2,14 +2,15 @@ import { supabase } from './supabase';
 import type { Database } from '../types/database.types';
 
 type Tables = Database['public']['Tables'];
-type Patient = Tables['patients']['Row'];
+type Appointment = Tables['tcCitas']['Row']; // Changed from 'appointments' to 'tcCitas'
+type Patient = Tables['tcPacientes']['Row'];
 type MedicalRecord = Tables['medical_records']['Row'];
-type Appointment = Tables['appointments']['Row'];
 type ClinicalHistory = Tables['clinical_histories']['Row'];
 type ClinicalEvolution = Tables['clinical_evolution']['Row'];
 type Prescription = Tables['prescriptions']['Row'];
 type PrescriptionMedication = Tables['prescription_medications']['Row'];
 type Medication = Tables['medications']['Row'];
+
 
 // Cache configuration
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -30,27 +31,28 @@ const updateQueue: Array<{ id: string; data: any }> = [];
 let batchUpdateTimeout: NodeJS.Timeout | null = null;
 
 // Validation helpers
-const validateAppointmentDate = (date: string): boolean => {
-  const appointmentDate = new Date(date);
+const validateAppointmentDateTime = (dateString: string, timeString: string): boolean => {
+  // Combine date and time to create a complete DateTime
+  const appointmentDateTime = new Date(`${dateString}T${timeString}:00`);
   const now = new Date();
-  return appointmentDate >= now;
+  return appointmentDateTime >= now;
 };
 
-const validateAppointmentOverlap = (appointments: Appointment[], newAppointment: { appointment_date: string }): boolean => {
-  const newDate = new Date(newAppointment.appointment_date);
+const validateAppointmentOverlap = (appointments: Appointment[], newAppointment: { fecha_cita: string, hora_cita: string }): boolean => {
+  const newDateTime = new Date(`${newAppointment.fecha_cita}T${newAppointment.hora_cita}:00`);
   const thirtyMinutes = 30 * 60 * 1000;
   
   return !appointments.some(existing => {
-    const existingDate = new Date(existing.appointment_date);
-    const timeDiff = Math.abs(newDate.getTime() - existingDate.getTime());
+    const existingDateTime = new Date(`${existing.fecha_cita}T${existing.hora_cita}:00`);
+    const timeDiff = Math.abs(newDateTime.getTime() - existingDateTime.getTime());
     return timeDiff < thirtyMinutes;
   });
 };
 
-const logValidationError = (error: string) => {
+/*const logValidationError = (error: string) => {
   metrics.validationErrors.push(`${new Date().toISOString()}: ${error}`);
   console.error('Validation Error:', error);
-};
+};*/
 
 // Batch processing function
 const processBatchUpdates = async () => {
@@ -62,7 +64,7 @@ const processBatchUpdates = async () => {
   try {
     await Promise.all(batch.map(async ({ id, data }) => {
       const { error } = await supabase
-        .from('appointments')
+        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
         .update(data)
         .eq('id', id);
 
@@ -81,7 +83,78 @@ const processBatchUpdates = async () => {
   }
 };
 
+// Get user's business unit ID
+const getUserBusinessUnit = async (): Promise<string> => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) {
+    throw new Error('No authenticated user found');
+  }
+
+  const { data: userData, error } = await supabase.rpc('get_user_idbu', {
+    user_id: session.user.id
+  });
+
+  if (error) {
+    console.error('Error fetching user business unit:', error);
+    throw new Error('Could not determine user business unit');
+  }
+
+  if (!userData?.idbu) {
+    throw new Error('User has no assigned business unit');
+  }
+
+  return userData.idbu;
+};
+
 export const api = {
+  files: {
+    async getByPatientId(patientId: string) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          throw new Error('No authenticated user found');
+        }
+
+        const folderPath = `pacientes/${session.user.id}`;
+        
+        const { data, error } = await supabase.storage
+          .from('00000000-default-bucket')
+          .list(folderPath, {
+            limit: 100,
+            offset: 0,
+          });
+
+        if (error) {
+          console.error('Error fetching patient files:', error);
+          return [];
+        }
+
+        // Filter files that might be related to the patient
+        // Since we don't have a direct patient-file relationship in storage,
+        // we'll return all user files for now
+        const files = (data || []).map(file => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('00000000-default-bucket')
+            .getPublicUrl(`${folderPath}/${file.name}`);
+
+          return {
+            id: file.id || file.name,
+            name: file.name,
+            size: file.metadata?.size || 0,
+            type: file.metadata?.mimetype || 'application/octet-stream',
+            url: publicUrl,
+            path: `${folderPath}/${file.name}`
+          };
+        });
+
+        return files;
+      } catch (error) {
+        console.error('Error in getByPatientId:', error);
+        return [];
+      }
+    }
+  },
+
   patients: {
     async getAll() {
       const cacheKey = 'patients:all';
@@ -94,8 +167,48 @@ export const api = {
 
       metrics.cacheMisses++;
       const { data, error } = await supabase
-        .from('patients')
-        .select('*')
+        .from('tcPacientes')
+        .select(`
+          id,
+          created_at,
+          updated_at,
+          Nombre,
+          Paterno,
+          Materno,
+          FechaNacimiento,
+          CURP,
+          RFC,
+          Sexo,
+          EstadoCivil,
+          Email,
+          Telefono,
+          Calle,
+          Colonia,
+          Asentamiento,
+          CodigoPostal,
+          Poblacion,
+          Municipio,
+          EntidadFederativa,
+          Ocupacion,
+          TipoSangre,
+          Alergias,
+          ContactoEmergencia,
+          Aseguradora,
+          Responsable,
+          Refiere,
+          Observaciones,
+          TipoPaciente,
+          EstadoNacimiento,
+          Nacionalidad,
+          Folio,
+          Religion,
+          LenguaIndigena,
+          GrupoEtnico,
+          Discapacidad,
+          deleted_at,
+          user_id,
+          idbu
+        `)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -115,8 +228,48 @@ export const api = {
       }
 
       const { data, error } = await supabase
-        .from('patients')
-        .select('*')
+        .from('tcPacientes')
+        .select(`
+          id,
+          created_at,
+          updated_at,
+          Nombre,
+          Paterno,
+          Materno,
+          FechaNacimiento,
+          CURP,
+          RFC,
+          Sexo,
+          EstadoCivil,
+          Email,
+          Telefono,
+          Calle,
+          Colonia,
+          Asentamiento,
+          CodigoPostal,
+          Poblacion,
+          Municipio,
+          EntidadFederativa,
+          Ocupacion,
+          TipoSangre,
+          Alergias,
+          ContactoEmergencia,
+          Aseguradora,
+          Responsable,
+          Refiere,
+          Observaciones,
+          TipoPaciente,
+          EstadoNacimiento,
+          Nacionalidad,
+          Folio,
+          Religion,
+          LenguaIndigena,
+          GrupoEtnico,
+          Discapacidad,
+          deleted_at,
+          user_id,
+          idbu
+      `)
         .eq('id', id)
         .single();
 
@@ -129,10 +282,39 @@ export const api = {
       return data;
     },
 
-    async create(patient: Tables['patients']['Insert']) {
+    async create(patient: Tables['tcPacientes']['Insert']) {
+      // Get current user session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      // Get the user's business unit
+      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
+        user_id: session.user.id
+      });
+
+      if (userError) {
+        console.error('Error getting user business unit:', userError);
+        throw new Error('Could not determine user business unit');
+      }
+      
+      if (!userData?.idbu) {
+        throw new Error('User has no assigned business unit');
+      }
+
+      // Ensure user_id is set
+      const patientWithUser = {
+        ...patient,
+        user_id: session.user.id,
+        idbu: userData.idbu
+      };
+
+      console.log('Creating patient with data:', patientWithUser);
+
       const { data, error } = await supabase
-        .from('patients')
-        .insert(patient)
+        .from('tcPacientes')
+        .insert(patientWithUser)
         .select()
         .single();
 
@@ -146,10 +328,32 @@ export const api = {
       return data;
     },
 
-    async update(id: string, patient: Tables['patients']['Update']) {
+    async update(id: string, patient: Tables['tcPacientes']['Update']) {
+      // Get current user session to verify ownership
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      // Get the user's business unit
+      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
+        user_id: session.user.id
+      });
+
+      if (userError || !userData?.idbu) {
+        throw new Error('Could not determine user business unit');
+      }
+
+      // Ensure user_id and idbu are set
+      const patientWithUser = {
+        ...patient,
+        user_id: session.user.id,
+        idbu: userData.idbu
+      };
+
       const { data, error } = await supabase
-        .from('patients')
-        .update(patient)
+        .from('tcPacientes')
+        .update(patientWithUser)
         .eq('id', id)
         .select()
         .single();
@@ -162,128 +366,6 @@ export const api = {
       // Invalidate cache
       cache.delete('patients:all');
       cache.delete(`patient:${id}`);
-      return data;
-    },
-  },
-
-  clinicalHistories: {
-    async getByPatientId(patientId: string) {
-      const cacheKey = `histories:${patientId}`;
-      const cached = cache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        return cached.data;
-      }
-
-      const { data, error } = await supabase
-        .from('clinical_histories')
-        .select('*')
-        .eq('patient_id', patientId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching clinical history:', error);
-        throw error;
-      }
-
-      cache.set(cacheKey, { data, timestamp: Date.now() });
-      return data || [];
-    },
-
-    async create(history: Tables['clinical_histories']['Insert']) {
-      const { data, error } = await supabase
-        .from('clinical_histories')
-        .insert(history)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating clinical history:', error);
-        throw error;
-      }
-
-      // Invalidate cache
-      cache.delete(`histories:${history.patient_id}`);
-      return data;
-    },
-
-    async update(id: string, history: Tables['clinical_histories']['Update']) {
-      const { data, error } = await supabase
-        .from('clinical_histories')
-        .update(history)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating clinical history:', error);
-        throw error;
-      }
-
-      // Invalidate cache
-      if (history.patient_id) {
-        cache.delete(`histories:${history.patient_id}`);
-      }
-      return data;
-    },
-  },
-
-  clinicalEvolution: {
-    async getByPatientId(patientId: string) {
-      const cacheKey = `evolution:${patientId}`;
-      const cached = cache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        return cached.data;
-      }
-
-      const { data, error } = await supabase
-        .from('clinical_evolution')
-        .select('*')
-        .eq('patient_id', patientId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching clinical evolution:', error);
-        throw error;
-      }
-
-      cache.set(cacheKey, { data, timestamp: Date.now() });
-      return data || [];
-    },
-
-    async create(evolution: Tables['clinical_evolution']['Insert']) {
-      const { data, error } = await supabase
-        .from('clinical_evolution')
-        .insert(evolution)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating clinical evolution:', error);
-        throw error;
-      }
-
-      // Invalidate cache
-      cache.delete(`evolution:${evolution.patient_id}`);
-      return data;
-    },
-
-    async update(id: string, evolution: Tables['clinical_evolution']['Update']) {
-      const { data, error } = await supabase
-        .from('clinical_evolution')
-        .update(evolution)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating clinical evolution:', error);
-        throw error;
-      }
-
-      // Invalidate cache
-      if (evolution.patient_id) {
-        cache.delete(`evolution:${evolution.patient_id}`);
-      }
       return data;
     },
   },
@@ -301,17 +383,41 @@ export const api = {
 
       metrics.cacheMisses++;
       const { data, error } = await supabase
-        .from('appointments')
+        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
         .select(`
-          *,
-          patients (
-            first_name,
-            last_name,
-            paternal_surname
+          id,
+          created_at,
+          updated_at,
+          id_paciente,
+          fecha_cita,
+          hora_cita,
+          motivo,
+          estado,
+          notas,
+          urgente,
+          consultorio,
+          sintomas,
+          documentos,
+          tipo_consulta,
+          tiempo_evolucion,
+          unidad_tiempo,
+          sintomas_asociados,
+          campos_adicionales,
+          id_user,
+          patients:id_paciente (
+            id,
+            Nombre,
+            Paterno,
+            Materno,
+            FechaNacimiento,
+            Sexo,
+            Email,
+            Telefono
           )
         `)
-        .gte('appointment_date', new Date().toISOString()) // Only fetch current and future appointments
-        .order('appointment_date', { ascending: true });
+        .gte('fecha_cita', new Date().toISOString().split('T')[0]) // Filter by date only
+        .order('fecha_cita', { ascending: true })
+        .order('hora_cita', { ascending: true });
 
       metrics.appointmentFetchTime = performance.now() - startTime;
 
@@ -324,19 +430,89 @@ export const api = {
       return data || [];
     },
 
-    async getUpcoming() {
+    async getByPatientId(patientId: string) {
       const { data, error } = await supabase
-        .from('appointments')
+        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
         .select(`
-          *,
-          patients (
-            first_name,
-            last_name,
-            paternal_surname
+          id,
+          created_at,
+          updated_at,
+          id_paciente,
+          fecha_cita,
+          hora_cita,
+          motivo,
+          estado,
+          notas,
+          urgente,
+          consultorio,
+          sintomas,
+          documentos,
+          tipo_consulta,
+          tiempo_evolucion,
+          unidad_tiempo,
+          sintomas_asociados,
+          campos_adicionales,
+          id_user,
+          patients:id_paciente (     
+            id,
+            Nombre,
+            Paterno,
+            Materno,
+            FechaNacimiento,
+            Sexo,
+            Email,
+            Telefono
           )
         `)
-        .gte('appointment_date', new Date().toISOString())
-        .order('appointment_date', { ascending: true });
+        .eq('id_paciente', patientId) // Changed from 'patient_id' to 'id_paciente'
+        .order('fecha_cita', { ascending: false }) // Changed from 'appointment_date' to 'fecha_cita'
+        .order('hora_cita', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching patient appointments:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    async getUpcoming() {
+      const { data, error } = await supabase
+        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+        .select(`
+          id,
+          created_at,
+          updated_at,
+          id_paciente,
+          fecha_cita,
+          hora_cita,
+          motivo,
+          estado,
+          notas,
+          urgente,
+          consultorio,
+          sintomas,
+          documentos,
+          tipo_consulta,
+          tiempo_evolucion,
+          unidad_tiempo,
+          sintomas_asociados,
+          campos_adicionales,
+          id_user,
+          patients:id_paciente (
+            id,
+            Nombre,
+            Paterno,
+            Materno,
+            FechaNacimiento,
+            Sexo,
+            Email,
+            Telefono
+          )
+        `)
+        .gte('fecha_cita', new Date().toISOString().split('T')[0]) // Filter by date only
+        .eq('estado', 'programada') // Changed from 'status' to 'estado' and 'scheduled' to 'programada'
+        .order('fecha_cita', { ascending: true })
+        .order('hora_cita', { ascending: true });
 
       if (error) {
         console.error('Error fetching upcoming appointments:', error);
@@ -346,19 +522,19 @@ export const api = {
       return data || [];
     },
 
-    async create(appointment: Tables['appointments']['Insert']) {
-      if (!validateAppointmentDate(appointment.appointment_date)) {
+    async create(appointment: Tables['tcCitas']['Insert']) { // Changed from 'appointments' to 'tcCitas'
+      if (!validateAppointmentDateTime(appointment.fecha_cita as string, appointment.hora_cita as string)) {
         throw new Error('Cannot create appointments in the past');
       }
 
       const existingAppointments = await this.getAll();
-      if (!validateAppointmentOverlap(existingAppointments, appointment)) {
+      if (!validateAppointmentOverlap(existingAppointments, { fecha_cita: appointment.fecha_cita as string, hora_cita: appointment.hora_cita as string })) { // Changed to use fecha_cita and hora_cita
         throw new Error('Appointment time slot is already taken');
       }
 
       const startTime = performance.now();
       const { data, error } = await supabase
-        .from('appointments')
+        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
         .insert(appointment)
         .select()
         .single();
@@ -375,8 +551,8 @@ export const api = {
       return data;
     },
 
-    async update(id: string, appointment: Tables['appointments']['Update']) {
-      if (appointment.appointment_date && !validateAppointmentDate(appointment.appointment_date)) {
+    async update(id: string, appointment: Tables['tcCitas']['Update']) { // Changed from 'appointments' to 'tcCitas'
+      if (appointment.fecha_cita && appointment.hora_cita && !validateAppointmentDateTime(appointment.fecha_cita as string, appointment.hora_cita as string)) {
         throw new Error('Cannot update to a past date');
       }
 
@@ -413,6 +589,122 @@ export const api = {
     },
   },
 
+  clinicalHistories: {
+    async getByPatientId(patientId: string) {
+      const { data, error } = await supabase
+        .from('clinical_histories')
+        .select('*')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching clinical histories:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+
+    async create(clinicalHistory: Tables['clinical_histories']['Insert']) {
+      // Get current user session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      // Get the user's business unit
+      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
+        user_id: session.user.id
+      });
+
+      if (userError) {
+        console.error('Error getting user business unit:', userError);
+        throw new Error('Could not determine user business unit');
+      }
+      
+      if (!userData?.idbu) {
+        throw new Error('User has no assigned business unit');
+      }
+
+      // Ensure user_id and idbu are set
+      const historyWithUser = {
+        ...clinicalHistory,
+        user_id: session.user.id
+        };
+
+      const { data, error } = await supabase
+        .from('clinical_histories')
+        .insert(historyWithUser)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating clinical history:', error);
+        throw error;
+      }
+
+      return data;
+    }
+  },
+
+  clinicalEvolution: {
+    async getByPatientId(patientId: string) {
+      const { data, error } = await supabase
+        .from('clinical_evolution')
+        .select('*')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching clinical evolution:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+
+    async create(clinicalEvolution: Tables['clinical_evolution']['Insert']) {
+      // Get current user session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      // Get the user's business unit
+      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
+        user_id: session.user.id
+      });
+
+      if (userError) {
+        console.error('Error getting user business unit:', userError);
+        throw new Error('Could not determine user business unit');
+      }
+      
+      if (!userData?.idbu) {
+        throw new Error('User has no assigned business unit');
+      }
+
+      // Ensure user_id and idbu are set
+      const evolutionWithUser = {
+        ...clinicalEvolution,
+        user_id: session.user.id
+      };
+
+      const { data, error } = await supabase
+        .from('clinical_evolution')
+        .insert(evolutionWithUser)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating clinical evolution:', error);
+        throw error;
+      }
+
+      return data;
+    }
+  },
+
   stats: {
     async getDashboardStats() {
       const cacheKey = 'stats:dashboard';
@@ -431,18 +723,18 @@ export const api = {
           { data: upcomingAppointments }
         ] = await Promise.all([
           supabase
-            .from('patients')
-            .select('*', { count: 'exact', head: true }),
+            .from('tcPacientes')
+            .select('id', { count: 'exact', head: true }),
           supabase
-            .from('appointments')
+            .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
             .select('id')
-            .gte('appointment_date', today.toISOString())
-            .lt('appointment_date', new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString()),
+            .gte('fecha_cita', today.toISOString().split('T')[0]) // Changed from 'appointment_date' to 'fecha_cita'
+            .lt('fecha_cita', new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]), // Changed from 'appointment_date' to 'fecha_cita'
           supabase
-            .from('appointments')
+            .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
             .select('id')
-            .gt('appointment_date', new Date().toISOString())
-            .eq('status', 'scheduled')
+            .gt('fecha_cita', new Date().toISOString().split('T')[0]) // Changed from 'appointment_date' to 'fecha_cita'
+            .eq('estado', 'programada') // Changed from 'status' to 'estado' and 'scheduled' to 'programada'
         ]);
 
         const stats = {
@@ -470,10 +762,10 @@ export const api = {
         .from('prescriptions')
         .select(`
           *,
-          patients (
-            first_name,
-            last_name,
-            paternal_surname
+          patient:patient_id (
+            Nombre,
+            Paterno,
+            Materno
           ),
           prescription_medications (
             *,

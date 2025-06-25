@@ -173,7 +173,7 @@ export function ClinicalEvolution() {
                 fontFamily: currentTheme.typography.fontFamily,
               }}
             >
-              Historia Previa
+              Previa
             </h3>
             <div 
               className="space-y-4"

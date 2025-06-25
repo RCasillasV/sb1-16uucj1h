@@ -37,6 +37,8 @@ export function Agenda2() {
     start: startOfMonth(new Date()),
     end: endOfMonth(new Date())
   });
+  const [shouldSyncCalendars, setShouldSyncCalendars] = useState(false);
+  const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [formData, setFormData] = useState<AppointmentFormData>({
     date: new Date(),
     time: '09:00',
@@ -46,6 +48,7 @@ export function Agenda2() {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const calendarWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -57,15 +60,53 @@ export function Agenda2() {
   }, []);
 
   useEffect(() => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      const now = new Date();
+      const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+      
+      // Scroll to current time with offset
+      calendarApi.scrollToTime(scrollTime);
+      
+      // Fine-tune scroll position to center current time
+      if (calendarWrapperRef.current) {
+        const timeGridContainer = calendarWrapperRef.current.querySelector('.fc-timegrid-body');
+        if (timeGridContainer) {
+          const containerHeight = timeGridContainer.clientHeight;
+          const currentOffset = timeGridContainer.scrollTop;
+          timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
+        }
+      }
+    }
+  }, [calendarView]);
+
+  useEffect(() => {
     fetchAppointments();
   }, []);
+
+  const handleMonthChange = (date: Date) => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      setShouldSyncCalendars(false);
+      calendarApi.gotoDate(date);
+    }
+  };
+
+  const handleTodayClick = () => {
+    const today = new Date();
+    setSelectedDate(today);
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.today();
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
       const appointments = await api.appointments.getAll();
       const calendarEvents = appointments.map(appointment => ({
         id: appointment.id,
-        title: `${appointment.patients?.first_name} ${appointment.patients?.paternal_surname} - ${appointment.reason}`,
+        title: `${appointment.patients?.Nombre} ${appointment.patients?.paternal_surname} - ${appointment.reason}`,
         start: new Date(appointment.appointment_date),
         end: new Date(new Date(appointment.appointment_date).getTime() + 15 * 60000),
         backgroundColor: getEventColor(appointment.status),
@@ -102,6 +143,7 @@ export function Agenda2() {
 
     const selectedDateTime = new Date(selectInfo.start);
     setSelectedDate(selectedDateTime);
+    setShouldSyncCalendars(true);
     setFormData({
       date: selectedDateTime,
       time: format(selectedDateTime, 'HH:mm'),
@@ -123,26 +165,28 @@ export function Agenda2() {
       return;
     }
 
+    if (!formData.reason.trim()) {
+      setFormError('Por favor ingrese el motivo de la consulta');
+      return;
+    }
+
     try {
       const appointmentDate = new Date(formData.date);
       const [hours, minutes] = formData.time.split(':').map(Number);
       appointmentDate.setHours(hours, minutes);
 
+      const appointmentData = {
+        patient_id: selectedEvent?.extendedProps?.patient?.id || selectedPatient.id,
+        appointment_date: appointmentDate.toISOString(),
+        reason: formData.reason,
+        status: 'scheduled',
+        cubicle: formData.cubicle,
+      };
+
       if (selectedEvent) {
-        await api.appointments.update(selectedEvent.id as string, {
-          appointment_date: appointmentDate.toISOString(),
-          reason: formData.reason,
-          status: 'scheduled',
-          cubicle: formData.cubicle,
-        });
+        await api.appointments.update(selectedEvent.id as string, appointmentData);
       } else {
-        await api.appointments.create({
-          patient_id: selectedPatient.id,
-          appointment_date: appointmentDate.toISOString(),
-          reason: formData.reason,
-          status: 'scheduled',
-          cubicle: formData.cubicle,
-        });
+        await api.appointments.create(appointmentData);
       }
 
       await fetchAppointments();
@@ -164,9 +208,16 @@ export function Agenda2() {
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
+    setShouldSyncCalendars(true);
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi.gotoDate(date);
+      
+      // If in month view, switch to week view
+      if (calendarApi.view.type === 'dayGridMonth') {
+        calendarApi.changeView('timeGridWeek');
+        setCalendarView('timeGridWeek');
+      }
       
       // Update view if date is outside current view
       const view = calendarApi.view;
@@ -184,15 +235,18 @@ export function Agenda2() {
   };
 
   const handleDatesSet = (arg: DatesSetArg) => {
-    setCurrentViewDates({
-      start: arg.start,
-      end: arg.end
-    });
-    
-    // Update selected date if it's outside the new view
-    if (selectedDate < arg.start || selectedDate >= arg.end) {
-      setSelectedDate(arg.start);
+    if (!shouldSyncCalendars) {
+      setCurrentViewDates({
+        start: arg.start,
+        end: arg.end
+      });
+      
+      // Update selected date if it's outside the new view
+      if (selectedDate < arg.start || selectedDate >= arg.end) {
+        setSelectedDate(arg.start);
+      }
     }
+    setShouldSyncCalendars(false);
   };
 
   const buttonStyle = {
@@ -236,29 +290,27 @@ export function Agenda2() {
               onDateSelect={handleDateChange}
               events={events}
               currentViewDates={currentViewDates}
+              onMonthChange={handleMonthChange}
             />
           </div>
 
           {/* Main Calendar */}
           <div 
             className={clsx(
-              'flex-1 rounded-lg shadow-lg p-4 transition-all duration-300',
+              'flex-1 rounded-lg shadow-lg transition-all duration-300 flex flex-col',
               isMobile && 'hidden'
             )}
             style={{ 
               background: currentTheme.colors.surface,
               borderColor: currentTheme.colors.border,
-              minHeight: '100vh',
-              height: 'auto',
-              overflowY: 'auto',
-              fontSize: 'auto'
+              height: 'calc(100vh - 8rem)',
             }}
           >
-            <div className="h-full">
+            <div className="flex-1 overflow-hidden">
               <FullCalendar
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView="timeGridWeek"
+                initialView={calendarView}
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',
@@ -268,6 +320,9 @@ export function Agenda2() {
                   today: 'Hoy',
                   month: 'Mes',
                   week: 'Semana',
+                }}
+                viewDidMount={(info) => {
+                  setCalendarView(info.view.type as 'dayGridMonth' | 'timeGridWeek');
                 }}
                 locale={es}
                 firstDay={1}
@@ -298,8 +353,7 @@ export function Agenda2() {
                     }
                   }
                 }}
-                height="100%"
-                contentHeight="auto"
+                height="100vh"
                 aspectRatio={2}
                 handleWindowResize={true}
                 stickyHeaderDates={true}
@@ -343,6 +397,40 @@ export function Agenda2() {
                   .fc .fc-timegrid-col.fc-day-today {
                     background-color: ${currentTheme.colors.primary}10 !important;
                   }
+                  .fc-timegrid-body {
+                    overflow-y: auto !important;
+                    height: calc(100vh - 12rem) !important;
+                  }
+                  .fc-timegrid-body::-webkit-scrollbar {
+                    width: 8px;
+                  }
+                  .fc-timegrid-body::-webkit-scrollbar-track {
+                    background: ${currentTheme.colors.background};
+                    border-radius: 4px;
+                  }
+                  .fc-timegrid-body::-webkit-scrollbar-thumb {
+                    background: ${currentTheme.colors.border};
+                    border-radius: 4px;
+                  }
+                  .fc-timegrid-body::-webkit-scrollbar-thumb:hover {
+                    background: ${currentTheme.colors.textSecondary};
+                  }
+                  .fc .fc-timegrid-slot {
+                    height: 3rem !important;
+                  }
+                  .fc .fc-timegrid-axis,
+                  .fc .fc-timegrid-slot-label {
+                    position: sticky;
+                    left: 0;
+                    z-index: 2;
+                    background: ${currentTheme.colors.surface};
+                  }
+                  .fc .fc-col-header {
+                    position: sticky;
+                    top: 0;
+                    z-index: 3;
+                    background: ${currentTheme.colors.surface};
+                  }
                 `}
               </style>
             </div>
@@ -373,6 +461,7 @@ export function Agenda2() {
             </button>
             <button
               onClick={handleAppointmentSubmit}
+              disabled={!formData.reason.trim()}
               className={buttonStyle.base}
               style={buttonStyle.primary}
             >
@@ -407,7 +496,7 @@ export function Agenda2() {
             >
               {selectedPatient ? (
                 <span className="font-medium">
-                  {selectedPatient.first_name} {selectedPatient.paternal_surname}
+                  {selectedPatient.Nombre} {selectedPatient.paternal_surname}
                 </span>
               ) : (
                 <span className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>

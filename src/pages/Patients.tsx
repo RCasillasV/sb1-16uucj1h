@@ -8,7 +8,7 @@ import { calculateAge } from '../utils/dateUtils';
 import { useTheme } from '../contexts/ThemeContext';
 import clsx from 'clsx';
 
-type Patient = Database['public']['Tables']['patients']['Row'];
+type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = 'name' | 'age' | 'gender' | null;
 
@@ -64,14 +64,14 @@ export function Patients() {
     return [...patients].sort((a, b) => {
       let comparison = 0;
       if (sortField === 'name') {
-        const nameA = `${a.paternal_surname} ${a.last_name} ${a.first_name}`.toLowerCase();
-        const nameB = `${b.paternal_surname} ${b.last_name} ${b.first_name}`.toLowerCase();
+        const nameA = `${a.Paterno} ${a.Materno} ${a.Nombre}`.toLowerCase();
+        const nameB = `${b.Paterno} ${b.Materno} ${b.Nombre}`.toLowerCase();
         comparison = nameA.localeCompare(nameB);
       } else if (sortField === 'age') {
-        const ageA = calculateAge(a.date_of_birth).years;
-        const ageB = calculateAge(b.date_of_birth).years;
+        const ageA = calculateAge(a.FechaNacimiento).years;
+        const ageB = calculateAge(b.FechaNacimiento).years;
         comparison = ageA - ageB;
-      } else if (sortField === 'gender') {
+      } else if (sortField === 'Sexo') {
         comparison = a.gender.localeCompare(b.gender);
       }
       return sortDirection === 'asc' ? comparison : -comparison;
@@ -79,7 +79,7 @@ export function Patients() {
   };
 
   const filteredPatients = allPatients.filter(patient => 
-    `${patient.first_name} ${patient.paternal_surname} ${patient.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${patient.Nombre} ${patient.Paterno} ${patient.Materno}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.phone?.includes(searchTerm)
   );
@@ -168,7 +168,7 @@ export function Patients() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-1">
         <div className="flex items-center gap-2">
           <Users className="h-6 w-6" style={{ color: currentTheme.colors.text }} />
           <h1 className="text-2xl font-bold" style={{ color: currentTheme.colors.text }}>
@@ -183,7 +183,7 @@ export function Patients() {
               style={buttonStyle.secondary}
             >
               <Edit className="h-5 w-5 mr-2" />
-              Editar Paciente
+              Editar
             </button>
           )}
           <button
@@ -191,8 +191,8 @@ export function Patients() {
             className={buttonStyle.base}
             style={buttonStyle.primary}
           >
-            <UserPlus className="h-5 w-5 mr-2" />
-            Nuevo Paciente
+            <UserPlus className="h-5 w-5 mr-5" />
+            Nuevo
           </button>
         </div>
       </div>
@@ -270,23 +270,17 @@ export function Patients() {
                 >
                   Edad
                   {getSortIcon('age')}
+                  
                 </button>
               </th>
-              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell" style={{ color: currentTheme.colors.textSecondary }}>
+              <th className="px-6 py-2 text-left text-xs font-medium tracking-wider hidden md:table-cell" style={{ color: currentTheme.colors.textSecondary }}>
                 Teléfono
               </th>
-              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell" style={{ color: currentTheme.colors.textSecondary }}>
+              <th className="px-6 py-2 text-left text-xs font-medium  tracking-wider hidden lg:table-cell" style={{ color: currentTheme.colors.textSecondary }}>
                 Email
               </th>
-              <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
-                <button
-                  onClick={() => handleSort('gender')}
-                  className={sortButtonStyle.base}
-                  style={sortField === 'gender' ? sortButtonStyle.active : sortButtonStyle.inactive}
-                >
-                  Género
-                  {getSortIcon('gender')}
-                </button>
+              <th className="px-6 py-2 text-left text-xs font-medium  tracking-wider hidden sm:table-cell">
+                Género
               </th>
             </tr>
           </thead>
@@ -317,14 +311,14 @@ export function Patients() {
                   }}
                 >
                   <td className="px-6 py-2 whitespace-nowrap">
-                    {`${patient.first_name} ${patient.paternal_surname} ${patient.last_name}`}
+                    {`${patient.Nombre} ${patient.Paterno} ${patient.Materno}`}
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap hidden sm:table-cell">
-                    {calculateAge(patient.date_of_birth).formatted}
+                    {calculateAge(patient.FechaNacimiento).formatted}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap hidden md:table-cell">{patient.phone || '-'}</td>
-                  <td className="px-6 py-2 whitespace-nowrap hidden lg:table-cell">{patient.email || '-'}</td>
-                  <td className="px-6 py-2 whitespace-nowrap hidden sm:table-cell">{patient.gender}</td>
+                  <td className="px-6 py-2 whitespace-nowrap hidden md:table-cell">{patient.Telefono || '-'}</td>
+                  <td className="px-6 py-2 whitespace-nowrap hidden lg:table-cell">{patient.Email || '-'}</td>
+                  <td className="px-6 py-2 whitespace-nowrap hidden sm:table-cell">{patient.Sexo}</td>
                 </tr>
               ))
             )}

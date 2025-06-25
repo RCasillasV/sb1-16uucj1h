@@ -47,8 +47,8 @@ export function ClinicalHistory() {
       );
       setHistories(sortedHistories);
     } catch (err) {
-      console.error('Error fetching clinical history:', err);
-      setError('Error al cargar la historia clínica');
+      console.error('ClinicalHistory.tsx: Error fetching clinical history:', err);
+      setError('ClinicalHistory.tsx:Error al cargar la historia clínica');
     } finally {
       setLoading(false);
     }
@@ -147,78 +147,6 @@ export function ClinicalHistory() {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
-      {/* Patient Header */}
-      <div 
-        className="bg-white rounded-lg shadow-md p-6 mb-6"
-        style={{ 
-          background: currentTheme.colors.surface,
-          borderColor: currentTheme.colors.border,
-          fontFamily: 'Arial, Helvetica, sans-serif'
-        }}
-      >
-        <h2 
-          className="text-lg font-bold mb-4"
-          style={{ color: currentTheme.colors.text }}
-        >
-          DATOS DEL PACIENTE
-        </h2>
-        
-        <div className="space-y-3">
-          <div className="flex items-baseline">
-            <span 
-              className="font-bold min-w-[180px]"
-              style={{ color: currentTheme.colors.textSecondary }}
-            >
-              Nombre completo:
-            </span>
-            <span 
-              className="font-bold"
-              style={{ color: currentTheme.colors.text }}
-            >
-              {selectedPatient.paternal_surname} {selectedPatient.last_name}, {selectedPatient.first_name}
-            </span>
-          </div>
-
-          {lastAppointment && (
-            <div className="flex items-baseline">
-              <span 
-                className="font-bold min-w-[180px] flex items-center gap-2"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                <Clock className="h-4 w-4" />
-                Última consulta:
-              </span>
-              <span style={{ color: currentTheme.colors.text }}>
-                {format(lastAppointment.date, 'dd/MM/yyyy')} - 
-                <span 
-                  className={clsx(
-                    'ml-2 font-bold',
-                    lastAppointment.status === 'COMPLETA' ? 'text-green-600' : 'text-blue-600'
-                  )}
-                >
-                  {lastAppointment.status}
-                </span>
-              </span>
-            </div>
-          )}
-
-          {nextAppointment && (
-            <div className="flex items-baseline">
-              <span 
-                className="font-bold min-w-[180px] flex items-center gap-2"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                <Calendar className="h-4 w-4" />
-                Próxima cita:
-              </span>
-              <span style={{ color: currentTheme.colors.text }}>
-                {format(nextAppointment, "dd MMM yy", { locale: es })}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Page Header */}
       <div className="flex items-center gap-2 mb-6">
         <FileText className="h-6 w-6 shrink-0" style={{ color: currentTheme.colors.primary }} />
@@ -264,7 +192,7 @@ export function ClinicalHistory() {
                 fontFamily: currentTheme.typography.fontFamily,
               }}
             >
-              Historia Actual
+              Historia 
             </h3>
             
             <RichTextEditor

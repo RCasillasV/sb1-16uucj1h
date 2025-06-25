@@ -131,7 +131,7 @@ export function PickCalendar({ events, selectedDate, onDateSelect, calendarRef }
           className="p-4"
           style={{ color: currentTheme.colors.text }}
         >
-          <h3 className="font-short mb-2">
+          <h3 className="font-medium mb-2">
             Citas del {format(selectedDate, "d 'de' MMMM", { locale: es })}
           </h3>
           <div className="space-y-3">
@@ -161,7 +161,7 @@ export function PickCalendar({ events, selectedDate, onDateSelect, calendarRef }
                         {format(new Date(event.start as string), 'HH:mm')}
                       </span>
                       <span className="font-medium truncate">
-                        {event.extendedProps?.patient?.first_name} {event.extendedProps?.patient?.paternal_surname}
+                        {event.extendedProps?.patient?.Nombre} {event.extendedProps?.patient?.paternal_surname}
                       </span>
                     </div>
                     <p 

@@ -1,4 +1,4 @@
-export type ThemeType = 'light' | 'dark' | 'professional' | 'modern' | 'minimal' | 'ocean' | 'forest' | 'sunset' | 'forest-night' | 'ocean-breeze' | 'sunset-orange' | 'forest-green';
+export type ThemeType = 'light' | 'dark' | 'professional' | 'modern' | 'minimal' | 'ocean' | 'forest' | 'sunset' | 'forest-night' | 'ocean-breeze' | 'sunset-orange' | 'forest-green' | 'terra-cotta' | 'sage-clay' | 'desert-sand' | 'walnut-bark';
 
 export interface Theme {
   id: ThemeType;
@@ -21,14 +21,30 @@ export interface Theme {
     buttonText: string;
   };
   typography: {
-    fontFamily: string;
-    scale: number;
-    baseSize: string;
+    fonts: {
+      headings: 'Plus Jakarta Sans';
+      subheadings: 'Montserrat';
+      body: 'Inter';
+      ui: 'DM Sans';
+    };
+    baseSize: 16;
   };
   buttons: {
     style: 'rounded' | 'square' | 'pill';
     shadow: boolean;
     animation: boolean;
+    states: {
+      hover: {
+        opacity: number;
+        scale: number;
+      };
+      active: {
+        scale: number;
+      };
+      disabled: {
+        opacity: number;
+      };
+    };
   };
 }
 
@@ -54,14 +70,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: 'Inter, system-ui, sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'rounded',
       shadow: true,
-      animation: true,
+      animation: true, 
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   dark: {
@@ -85,14 +117,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: 'Inter, system-ui, sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'rounded',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   professional: {
@@ -116,14 +164,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: 'system-ui, sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'square',
       shadow: false,
       animation: false,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   modern: {
@@ -147,14 +211,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
-      scale: 1.1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'pill',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   minimal: {
@@ -178,14 +258,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Inter", system-ui, sans-serif',
-      scale: 0.95,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'square',
       shadow: false,
       animation: false,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   ocean: {
@@ -209,14 +305,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Nunito", system-ui, sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'rounded',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   forest: {
@@ -240,14 +352,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Quicksand", system-ui, sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'pill',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   sunset: {
@@ -271,45 +399,77 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Poppins", system-ui, sans-serif',
-      scale: 1.05,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'rounded',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   'forest-night': {
     id: 'forest-night',
     name: 'Forest Night',
     colors: {
-      primary: '#2D3B2D',
-      secondary: '#4A5D4A',
+      primary: '#4CAF50',
+      secondary: '#81C784',
       background: '#1A231A',
-      surface: '#2D3B2D',
-      text: '#E5E7E5',
-      textSecondary: '#B8C0B8',
-      border: '#4A5D4A',
+      surface: '#243024',
+      text: '#FFFFFF',
+      textSecondary: '#C8E6C9',
+      border: '#2E3B2E',
       sidebar: '#141914',
-      sidebarText: '#E5E7E5',
-      sidebarHover: '#2D3B2D',
-      header: '#2D3B2D',
-      headerText: '#E5E7E5',
-      buttonPrimary: '#4A5D4A',
-      buttonSecondary: '#2D3B2D',
-      buttonText: '#E5E7E5',
+      sidebarText: '#FFFFFF',
+      sidebarHover: '#2E3B2E',
+      header: '#243024',
+      headerText: '#FFFFFF',
+      buttonPrimary: '#4CAF50',
+      buttonSecondary: '#81C784',
+      buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Roboto Slab", serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'rounded',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   'ocean-breeze': {
@@ -333,14 +493,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Work Sans", sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'pill',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   'sunset-orange': {
@@ -364,14 +540,30 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"DM Sans", sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'pill',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
   'forest-green': {
@@ -395,14 +587,218 @@ export const themes: Record<ThemeType, Theme> = {
       buttonText: '#FFFFFF',
     },
     typography: {
-      fontFamily: '"Montserrat", sans-serif',
-      scale: 1,
-      baseSize: '16px',
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
     },
     buttons: {
       style: 'rounded',
       shadow: true,
       animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
+    },
+  },
+  'terra-cotta': {
+    id: 'terra-cotta',
+    name: 'Terra Cotta',
+    colors: {
+      primary: '#C65D4B',      // Rich terra cotta
+      secondary: '#E6A792',    // Soft clay pink
+      background: '#FDF6F4',   // Warm white
+      surface: '#FFFFFF',
+      text: '#4A3B38',        // Deep warm brown
+      textSecondary: '#8C7B76', // Muted terra cotta
+      border: '#F4D9D0',      // Light terra cotta
+      sidebar: '#8C5E54',     // Dark terra cotta
+      sidebarText: '#FDF6F4',
+      sidebarHover: '#A66B60',
+      header: '#FFFFFF',
+      headerText: '#4A3B38',
+      buttonPrimary: '#C65D4B',
+      buttonSecondary: '#E6A792',
+      buttonText: '#FFFFFF',
+    },
+    typography: {
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
+    },
+    buttons: {
+      style: 'rounded',
+      shadow: true,
+      animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
+    },
+  },
+  'sage-clay': {
+    id: 'sage-clay',
+    name: 'Sage & Clay',
+    colors: {
+      primary: '#8A9A7B',      // Sage green
+      secondary: '#BFA89E',    // Clay brown
+      background: '#F8F9F6',   // Light sage
+      surface: '#FFFFFF',
+      text: '#3C4A3E',        // Deep sage
+      textSecondary: '#7C8475', // Muted sage
+      border: '#E2E5DF',      // Light sage
+      sidebar: '#6B7F5C',     // Dark sage
+      sidebarText: '#F8F9F6',
+      sidebarHover: '#7E9470',
+      header: '#FFFFFF',
+      headerText: '#3C4A3E',
+      buttonPrimary: '#8A9A7B',
+      buttonSecondary: '#BFA89E',
+      buttonText: '#FFFFFF',
+    },
+    typography: {
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
+    },
+    buttons: {
+      style: 'pill',
+      shadow: true,
+      animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
+    },
+  },
+  'desert-sand': {
+    id: 'desert-sand',
+    name: 'Desert Sand',
+    colors: {
+      primary: '#D4A373',      // Warm sand
+      secondary: '#E9D5C3',    // Light sand
+      background: '#FDFAF6',   // Cream white
+      surface: '#FFFFFF',
+      text: '#4B3D2A',        // Deep sand
+      textSecondary: '#8C7B64', // Muted sand
+      border: '#F4E9DD',      // Light sand
+      sidebar: '#B08A5C',     // Dark sand
+      sidebarText: '#FDFAF6',
+      sidebarHover: '#C49B6B',
+      header: '#FFFFFF',
+      headerText: '#4B3D2A',
+      buttonPrimary: '#D4A373',
+      buttonSecondary: '#E9D5C3',
+      buttonText: '#FFFFFF',
+    },
+    typography: {
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
+    },
+    buttons: {
+      style: 'rounded',
+      shadow: true,
+      animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
+    },
+  },
+  'walnut-bark': {
+    id: 'walnut-bark',
+    name: 'Walnut Bark',
+    colors: {
+      primary: '#8B6E4F',      // Walnut brown
+      secondary: '#B39B82',    // Light walnut
+      background: '#FAF7F4',   // Cream white
+      surface: '#FFFFFF',
+      text: '#3D2E1C',        // Deep walnut
+      textSecondary: '#7D6B56', // Muted walnut
+      border: '#E9DFD4',      // Light walnut
+      sidebar: '#6B4E2F',     // Dark walnut
+      sidebarText: '#FAF7F4',
+      sidebarHover: '#8B6E4F',
+      header: '#FFFFFF',
+      headerText: '#3D2E1C',
+      buttonPrimary: '#8B6E4F',
+      buttonSecondary: '#B39B82',
+      buttonText: '#FFFFFF',
+    },
+    typography: {
+      fonts: {
+        headings: 'Plus Jakarta Sans',
+        subheadings: 'Montserrat',
+        body: 'Inter',
+        ui: 'DM Sans',
+      },
+      baseSize: 16,
+    },
+    buttons: {
+      style: 'square',
+      shadow: true,
+      animation: true,
+      states: {
+        hover: {
+          opacity: 0.9,
+          scale: 1.02
+        },
+        active: {
+          scale: 0.98
+        },
+        disabled: {
+          opacity: 0.5
+        }
+      }
     },
   },
 };

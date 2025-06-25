@@ -7,6 +7,7 @@ import { format, startOfDay, endOfDay, isSameMonth, isSameDay, addMonths, subMon
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Clock, X, CalendarPlus } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { Modal } from '../components/Modal';
@@ -42,6 +43,7 @@ interface AppointmentFormData {
 export function Calendar() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventInput[]>([]);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
@@ -67,15 +69,15 @@ export function Calendar() {
       const appointments = await api.appointments.getAll();
       const calendarEvents = appointments.map(appointment => ({
         id: appointment.id,
-        title: `${appointment.patients?.first_name} ${appointment.patients?.paternal_surname} - ${appointment.reason}`,
-        start: new Date(appointment.appointment_date),
-        end: addMinutes(new Date(appointment.appointment_date), 15), // Changed to 15 minutes
-        backgroundColor: getEventColor(appointment.status),
+        title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
+        start: new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`),
+        end: addMinutes(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`), 15), // Changed to 15 minutes
+        backgroundColor: getEventColor(appointment.estado),
         extendedProps: {
-          status: appointment.status,
+          status: appointment.estado,
           patient: appointment.patients,
-          reason: appointment.reason,
-          cubicle: appointment.cubicle || 1,
+          reason: appointment.motivo,
+          cubicle: appointment.consultorio || 1,
         }
       }));
       setEvents(calendarEvents);
@@ -86,11 +88,11 @@ export function Calendar() {
 
   const getEventColor = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'completada':
         return '#10B981';
-      case 'cancelled':
+      case 'cancelada':
         return '#EF4444';
-      case 'scheduled':
+      case 'programada':
       default:
         return currentTheme.colors.primary;
     }
@@ -124,25 +126,31 @@ export function Calendar() {
       return;
     }
 
+    if (!user) {
+      setFormError('Usuario no autenticado');
+      return;
+    }
+
     try {
-      const appointmentDate = new Date(formData.date);
-      const [hours, minutes] = formData.time.split(':').map(Number);
-      appointmentDate.setHours(hours, minutes);
+      const appointmentDate = format(formData.date, 'yyyy-MM-dd');
 
       if (selectedEvent) {
         await api.appointments.update(selectedEvent.id as string, {
-          appointment_date: appointmentDate.toISOString(),
-          reason: formData.reason,
-          status: 'scheduled',
-          cubicle: formData.cubicle,
+          fecha_cita: appointmentDate,
+          hora_cita: formData.time,
+          motivo: formData.reason,
+          estado: 'programada',
+          consultorio: formData.cubicle,
         });
       } else {
         await api.appointments.create({
-          patient_id: selectedPatient.id,
-          appointment_date: appointmentDate.toISOString(),
-          reason: formData.reason,
-          status: 'scheduled',
-          cubicle: formData.cubicle,
+          id_paciente: selectedPatient.id,
+          fecha_cita: appointmentDate,
+          hora_cita: formData.time,
+          motivo: formData.reason,
+          estado: 'programada',
+          consultorio: formData.cubicle,
+          id_user: user.id,
         });
       }
 
@@ -159,7 +167,7 @@ export function Calendar() {
       setFormError(null);
     } catch (error) {
       console.error('Error al guardar la cita:', error);
-      setFormError('Error al guardar la cita. Por favor, inténtelo de nuevo.');
+      setFormError('Calendar -> Error al guardar la cita. Por favor, inténtelo de nuevo.');
     }
   };
 
@@ -226,7 +234,7 @@ export function Calendar() {
               eventClick={handleEventClick}
               slotDuration="00:15:00" // Changed to 15 minutes
               slotMinTime="08:00:00"
-              slotMaxTime="20:00:00"
+              slotMaxTime="22:00:00"
               allDaySlot={false}
               eventTimeFormat={{
                 hour: '2-digit',
@@ -244,7 +252,7 @@ export function Calendar() {
                 }
               }}
               height="100%"
-              contentHeight="auto"
+              //contentHeight="auto"
               aspectRatio={2}
               handleWindowResize={true}
               stickyHeaderDates={true}
@@ -311,7 +319,7 @@ export function Calendar() {
             >
               {selectedPatient ? (
                 <span className="font-medium">
-                  {selectedPatient.first_name} {selectedPatient.paternal_surname}
+                  {selectedPatient.Nombre} {selectedPatient.Paterno}
                 </span>
               ) : (
                 <span className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>

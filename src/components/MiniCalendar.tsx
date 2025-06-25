@@ -1,3 +1,98 @@
+/**
+ * @component MiniCalendar
+ * @version 1.0.0 - 2025-03-20
+ * @author DoctorSoft Team
+ * 
+ * # MiniCalendar
+ * 
+ * ## Propósito
+ * Componente que renderiza un calendario mensual compacto con vista de eventos diarios.
+ * Diseñado para mostrar una vista general de citas médicas y permitir navegación rápida
+ * entre fechas. Se integra con el calendario principal para mantener sincronización.
+ * 
+ * ## Props
+ * 
+ * | Nombre           | Tipo                            | Requerido | Descripción                                    |
+ * |------------------|--------------------------------|-----------|------------------------------------------------|
+ * | selectedDate     | Date                           | Sí        | Fecha actualmente seleccionada                 |
+ * | onDateSelect     | (date: Date) => void           | Sí        | Callback ejecutado al seleccionar una fecha    |
+ * | events           | EventInput[]                   | Sí        | Array de eventos/citas a mostrar               |
+ * | currentViewDates | { start: Date, end: Date }     | Sí        | Rango de fechas visible en calendario principal|
+ * 
+ * ## Retorno
+ * Retorna un elemento div conteniendo:
+ * - Encabezado con navegación mensual
+ * - Grid de días del mes
+ * - Panel de citas del día seleccionado
+ * 
+ * ## Ejemplo de implementación
+ * ```tsx
+ * import { MiniCalendar } from './components/MiniCalendar';
+ * 
+ * // Uso básico
+ * <MiniCalendar
+ *   selectedDate={new Date()}
+ *   onDateSelect={(date) => console.log(date)}
+ *   events={[]}
+ *   currentViewDates={{
+ *     start: new Date(),
+ *     end: new Date()
+ *   }}
+ * />
+ * 
+ * // Uso completo con eventos
+ * <MiniCalendar
+ *   selectedDate={selectedDate}
+ *   onDateSelect={handleDateSelect}
+ *   events={[
+ *     {
+ *       id: '1',
+ *       start: '2025-03-20T10:00:00',
+ *       extendedProps: {
+ *         patient: {
+ *           Nombre: 'Juan',
+ *           paternal_surname: 'Pérez'
+ *         },
+ *         reason: 'Consulta general'
+ *       }
+ *     }
+ *   ]}
+ *   currentViewDates={{
+ *     start: new Date('2025-03-01'),
+ *     end: new Date('2025-03-31')
+ *   }}
+ * />
+ * ```
+ * 
+ * ## Notas técnicas
+ * 
+ * ### Dependencias
+ * - date-fns: Manipulación de fechas
+ * - lucide-react: Iconos
+ * - clsx: Utilidad para clases condicionales
+ * 
+ * ### Hooks utilizados
+ * - useState: Gestión del mes actual
+ * - useEffect: Sincronización con calendario principal
+ * - useMemo: Optimización de cálculos de días
+ * - useTheme: Acceso al tema actual
+ * 
+ * ### Consideraciones de rendimiento
+ * - Días del calendario memorizados con useMemo
+ * - Eventos filtrados y ordenados por fecha
+ * - Renderizado condicional para optimizar actualizaciones
+ * 
+ * ### Limitaciones
+ * - Ancho fijo de 16rem (w-64)
+ * - Tamaño mínimo de fuente 8px para mantener legibilidad
+ * - Máximo de eventos mostrados por día limitado por espacio
+ * 
+ * ### Casos edge
+ * - Manejo de meses con 5/6 semanas
+ * - Eventos en límites de mes
+ * - Múltiples eventos en mismo horario
+ */
+
 import React from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -5,6 +100,7 @@ import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import clsx from 'clsx';
 import type { EventInput } from '@fullcalendar/core';
+import type { DatesSetArg } from '@fullcalendar/core';
 
 interface MiniCalendarProps {
   selectedDate: Date;
@@ -14,23 +110,31 @@ interface MiniCalendarProps {
     start: Date;
     end: Date;
   };
+  onMonthChange?: (date: Date) => void;
 }
 
-export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDates }: MiniCalendarProps) {
+export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDates, onMonthChange }: MiniCalendarProps) {
   const { currentTheme } = useTheme();
   const [currentMonth, setCurrentMonth] = React.useState(startOfMonth(selectedDate));
 
-  // Update current month when main calendar view changes
   React.useEffect(() => {
     if (!isSameMonth(currentMonth, currentViewDates.start)) {
       setCurrentMonth(startOfMonth(currentViewDates.start));
     }
   }, [currentViewDates]);
 
+  // Handle today button click
+  const handleTodayClick = () => {
+    const today = new Date();
+    setCurrentMonth(startOfMonth(today));
+    onDateSelect(today);
+    onMonthChange?.(today);
+  };
+
   // Get calendar days including days from adjacent months
   const calendarDays = React.useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
+    const monthEnd = endOfMonth(currentMonth); //endOfMonth(monthStart);
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start on Monday
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 }); // End on Sunday
 
@@ -52,23 +156,24 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
   }).sort((a, b) => {
     const dateA = new Date(a.start as string);
     const dateB = new Date(b.start as string);
-    return dateA.getTime() - dateB.getTime();
+    //return dateA.getTime() - dateB.getTime();
+    return dateA.getTime() - dateB.getTime(); // Sort by time
   });
 
   // Week day headers
-  const weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const weekDays = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 
   // Navigation handlers with synchronization
   const handlePrevMonth = () => {
     const newMonth = subMonths(currentMonth, 1);
     setCurrentMonth(newMonth);
-    onDateSelect(newMonth); // Sync with main calendar
+    onMonthChange?.(newMonth);
   };
 
   const handleNextMonth = () => {
     const newMonth = addMonths(currentMonth, 1);
     setCurrentMonth(newMonth);
-    onDateSelect(newMonth); // Sync with main calendar
+    onMonthChange?.(newMonth);
   };
 
   return (
@@ -83,18 +188,30 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
       <div className="p-3">
         <div className="flex items-center justify-between mb-2">
           <button
+            type="button"
             onClick={handlePrevMonth}
             className="p-1 rounded-full hover:bg-black/5 transition-colors"
           >
             <ChevronLeft className="h-3 w-3" style={{ color: currentTheme.colors.text }} />
           </button>
-          <span 
-            className="text-[10px] font-medium capitalize leading-tight"
-            style={{ color: currentTheme.colors.text }}
-          >
-            {format(currentMonth, 'MMMM yyyy', { locale: es })}
-          </span>
+          <div className="flex items-center gap-2">
+            <span 
+              className="text-[10px] font-medium capitalize leading-tight"
+              style={{ color: currentTheme.colors.text }}
+            >
+              {format(currentMonth, 'MMMM yyyy', { locale: es })}
+            </span>
+            <button
+              type="button"
+              onClick={handleTodayClick}
+              className="text-[10px] px-2 py-0.5 rounded hover:bg-black/5 transition-colors"
+              style={{ color: currentTheme.colors.primary }}
+            >
+              Hoy
+            </button>
+          </div>
           <button
+            type="button"
             onClick={handleNextMonth}
             className="p-1 rounded-full hover:bg-black/5 transition-colors"
           >
@@ -201,7 +318,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                         className="text-[10px] font-medium truncate leading-tight"
                         style={{ color: currentTheme.colors.text }}
                       >
-                        {event.extendedProps?.patient?.first_name} {event.extendedProps?.patient?.paternal_surname}
+                        {event.extendedProps?.patient?.Nombre} {event.extendedProps?.patient?.Paterno}
                       </span>
                     </div>
                     <p 

@@ -102,7 +102,7 @@ export function Dashboard() {
 
   const cardStyle = {
     container: clsx(
-      'p-6 rounded-lg transition-all duration-200 cursor-pointer',
+      'p-2 rounded-lg transition-all duration-200 cursor-pointer',
       currentTheme.buttons.shadow && 'shadow-md hover:shadow-lg',
       currentTheme.buttons.animation && 'hover:scale-102'
     ),
@@ -111,11 +111,11 @@ export function Dashboard() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-8">
+    <div className="w-full max-w-7xl mx-auto space-y-2">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <LayoutDashboard 
-          className="h-7 w-7" 
+          className="h-6 w-6" 
           style={{ color: currentTheme.colors.primary }} 
         />
         <h1 
@@ -130,7 +130,7 @@ export function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {statsCards.map((card, index) => (
           <div
             key={index}
@@ -144,7 +144,7 @@ export function Dashboard() {
             <div className="flex items-start justify-between">
               <div>
                 <h2 
-                  className="text-sm font-medium mb-1"
+                  className="text-sm font-medium mb-4"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   {card.title}
@@ -184,7 +184,7 @@ export function Dashboard() {
 
       {/* Recent Activity */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-2">
           <Activity 
             className="h-5 w-5" 
             style={{ color: currentTheme.colors.primary }} 

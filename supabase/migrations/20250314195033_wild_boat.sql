@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),
-  first_name text NOT NULL,
+  Nombre text NOT NULL,
   paternal_surname text NOT NULL,
   maternal_surname text NOT NULL,
   date_of_birth date NOT NULL,

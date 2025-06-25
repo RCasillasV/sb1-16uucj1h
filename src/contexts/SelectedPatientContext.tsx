@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { Database } from '../types/database.types';
 
-type Patient = Database['public']['Tables']['patients']['Row'];
+type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
 interface SelectedPatientContextType {
   selectedPatient: Patient | null;

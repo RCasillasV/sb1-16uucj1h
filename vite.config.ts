@@ -1,8 +1,22 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import vue from '@vitejs/plugin-vue';
+
+// Validate environment variables at build time
+const requiredEnvVars = [
+  'VITE_SUPABASE_URL', 
+  'VITE_SUPABASE_ANON_KEY',
+  'VITE_MAX_FILE_SIZE_MB',
+  'VITE_BUCKET_NAME'
+];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.warn(`Warning: ${envVar} is not set in environment variables`);
+  }
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), vue()],
   build: {
     target: 'esnext',
     minify: 'esbuild',
@@ -11,7 +25,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-core': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['lucide-react', 'clsx'],
+          'vendor-ui': ['lucide-react', 'clsx', 'vue'],
           'vendor-date': ['date-fns'],
           'vendor-editor': ['react-quill'],
           'vendor-calendar': [

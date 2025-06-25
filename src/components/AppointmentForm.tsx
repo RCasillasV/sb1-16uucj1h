@@ -6,13 +6,16 @@ import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import type { Database } from '../types/database.types';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import clsx from 'clsx';
 
-type AppointmentInsert = Database['public']['Tables']['appointments']['Insert'];
-type AppointmentWithPatient = Database['public']['Tables']['appointments']['Row'] & {
+type AppointmentInsert = Database['public']['Tables']['tcCitas']['Insert'];
+type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
   patients: {
-    first_name: string;
-    last_name: string;
+    id: string;
+    Nombre: string;
+    Paterno: string;
+    Materno: string;
   } | null;
 };
 
@@ -31,26 +34,27 @@ const MAX_DAYS_AHEAD = 60;
 export function AppointmentForm({ onSuccess, onCancel, appointment }: AppointmentFormProps) {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(
     appointment 
-      ? new Date(appointment.appointment_date)
+      ? new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`)
       : startOfDay(new Date())
   );
-  const [existingAppointments, setExistingAppointments] = useState<Database['public']['Tables']['appointments']['Row'][]>([]);
+  const [existingAppointments, setExistingAppointments] = useState<Database['public']['Tables']['tcCitas']['Row'][]>([]);
   const [selectedTime, setSelectedTime] = useState<string | null>(
     appointment 
-      ? format(new Date(appointment.appointment_date), 'HH:mm')
+      ? appointment.hora_cita
       : null
   );
   const [startDate, setStartDate] = useState<Date>(startOfDay(
     appointment 
-      ? new Date(appointment.appointment_date)
+      ? new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`)
       : new Date()
   ));
-  const [reason, setReason] = useState(appointment?.reason || '');
-  const [notes, setNotes] = useState(appointment?.notes || '');
+  const [reason, setReason] = useState(appointment?.motivo || '');
+  const [notes, setNotes] = useState(appointment?.notas || '');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -74,10 +78,10 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
 
   const isTimeSlotTaken = (hour: number, minute: number) => {
     const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-    const dateTimeString = `${format(selectedDate, 'yyyy-MM-dd')}T${timeString}:00`;
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
     
     return existingAppointments.some(appointment => 
-      format(new Date(appointment.appointment_date), "yyyy-MM-dd'T'HH:mm:ss") === dateTimeString
+      appointment.fecha_cita === dateString && appointment.hora_cita === timeString
     );
   };
 
@@ -88,23 +92,32 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
       return;
     }
 
+    if (!user) {
+      setError('Usuario no autenticado');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
-    const dateTimeString = `${format(selectedDate, 'yyyy-MM-dd')}T${selectedTime}:00`;
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
 
     const appointmentData = {
-      patient_id: appointment?.patient_id || selectedPatient?.id,
-      appointment_date: dateTimeString,
-      reason,
-      notes: notes || null,
-      status: 'scheduled',
+      id_paciente: appointment?.id_paciente || selectedPatient?.id,
+      fecha_cita: dateString,
+      hora_cita: selectedTime,
+      id_user: user.id,
+      motivo: reason,
+      notas: notes || null,
+      estado: 'programada',
     };
 
     try {
       if (appointment) {
+        console.log("Actualizar ", appointmentData);
         await api.appointments.update(appointment.id, appointmentData);
       } else {
+        console.log("Crear:", appointmentData);
         await api.appointments.create(appointmentData);
       }
       onSuccess();
@@ -310,7 +323,7 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
           </label>
           <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-md">
             <span className="font-medium">
-              {patient?.first_name} {patient?.last_name}
+              {patient?.Nombre} {patient?.Paterno}
             </span>
           </div>
         </div>

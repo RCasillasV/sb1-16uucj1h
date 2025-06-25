@@ -1,0 +1,54 @@
+/* Estilos básicos del calendario */
+.fc {
+  height: 100%;
+  background: white;
+}
+
+.fc-toolbar-title {
+  font-size: 1.25em !important;
+}
+
+.fc-event {
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.fc-daygrid-day {
+  cursor: pointer;
+}
+
+.fc-timegrid-slot {
+  cursor: pointer;
+}
+
+/* Tema claro */
+:root[data-theme="light"] .fc-event {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+}
+
+/* Tema oscuro */
+:root[data-theme="dark"] .fc {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+:root[data-theme="dark"] .fc-button {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #e5e7eb !important;
+}
+
+:root[data-theme="dark"] .fc-event {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+  color: white;
+}
+
+:root[data-theme="dark"] .fc-day {
+  background-color: #1f2937 !important;
+}
+
+:root[data-theme="dark"] .fc-timegrid-slot {
+  background-color: #1f2937 !important;
+}

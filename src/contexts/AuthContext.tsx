@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import type { User } from '@supabase/supabase-js';
+import type { User, AuthError } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
-  signOut: () => Promise<void>;
   loading: boolean;
-  error: string | null;
+  signOut: () => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,58 +14,83 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for existing session
-    checkUser();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  async function checkUser() {
-    try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        throw sessionError;
-      }
-
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error checking auth session');
-      console.error('Auth error:', err);
-    } finally {
       setLoading(false);
-    }
-  }
+    });
+
+    // Listen for changes on auth state (sign in, sign out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signOut = async () => {
     try {
-      const { error: signOutError } = await supabase.auth.signOut();
-      if (signOutError) throw signOutError;
+      const { data: { session } } = await supabase.auth.getSession();
       
+      if (!session) {
+        // No active session, just redirect to login
+        navigate('/login', { 
+          state: { message: 'La sesión ha expirado' }
+        });
+        return { error: null }; 
+      }
+
+      // If we have a session, proceed with sign out
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        // If error is session related, just redirect
+        if (error.message.includes('session')) {
+          navigate('/login', {
+            state: { message: 'La sesión ha expirado' }
+          });
+          return { error: null };
+        }
+        throw error;
+      }
+      
+      // Clear any local storage data
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('rememberMe');
+      localStorage.removeItem('supabase.auth.refreshToken');
+      
+      // Reset context state
       setUser(null);
-      window.location.href = '/login';
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error signing out');
-      console.error('Sign out error:', err);
+      
+      // Redirect to login
+      navigate('/login', { 
+        state: { message: 'Sesión cerrada exitosamente' }
+      });
+      
+      return { error: null };
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Always redirect to login with appropriate message
+      navigate('/login', {
+        state: { message: 'La sesión ha sido cerrada' }
+      });
+      return { error: error as AuthError };
     }
   };
 
+  const value = {
+    user,
+    loading,
+    signOut,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, signOut, loading, error }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
