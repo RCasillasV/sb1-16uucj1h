@@ -259,7 +259,7 @@ export function Agenda() {
           >
             <div className="p-4 border-b flex justify-between items-center" style={{ borderColor: currentTheme.colors.border }}>
               <h2 className="text-lg font-semibold" style={{ color: currentTheme.colors.text }}>
-                Calendario de Citas
+                Citas Programadas
               </h2>
               <Link
                 to="/citas"
