@@ -215,6 +215,7 @@ export function Login() {
             style={{ color: currentTheme.colors.textSecondary }}
           >
             Inicie sesión para continuar
+            Versión Junio 25
           </p>
         </div>
 
