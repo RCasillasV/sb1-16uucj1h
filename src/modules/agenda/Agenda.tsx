@@ -267,7 +267,7 @@ export function Agenda() {
                 style={buttonStyle.primary}
               >
                 <CalendarPlus className="h-4 w-4 mr-2" />
-                Nueva Cita
+                Nuevas Cita
               </Link>
             </div>
             <div className="flex-1">
