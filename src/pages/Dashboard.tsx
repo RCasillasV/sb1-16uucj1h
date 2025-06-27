@@ -86,7 +86,7 @@ export function Dashboard() {
       title: 'Citas Hoy',
       value: stats.todayAppointments,
       icon: Clock,
-      onClick: () => navigate('/appointments', { state: { filter: 'today' } }),
+      onClick: () => navigate('/agenda/agenda', { state: { filter: 'today' } }),
     },
     {
       title: 'Próximas Citas',
@@ -96,7 +96,7 @@ export function Dashboard() {
         value: 5,
         isPositive: true,
       },
-      onClick: () => navigate('/appointments', { state: { filter: 'upcoming' } }),
+      onClick: () => navigate('/agenda/agenda', { state: { filter: 'upcoming' } }),
     },
   ];
 
