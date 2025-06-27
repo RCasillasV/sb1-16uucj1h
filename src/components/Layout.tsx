@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Users, Calendar, LayoutDashboard, FileText, Activity, Syringe, Image, FileSpreadsheet, FolderOpen, Stethoscope, Settings as SettingsIcon, Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, LogOut, UserSquare as RulerSquare, NotebookTabs } from 'lucide-react';
+import { RoleBasedNavigation, NavigationItem } from './RoleBasedNavigation';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -12,28 +13,36 @@ import { es } from 'date-fns/locale';
 import clsx from 'clsx';
 import packageJson from '../../package.json';
 
-const baseNavigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Pacientes', href: '/patients', icon: Users },
-  { name: 'Citas', href: '/citas', icon: Clock },
-  { name: 'Agenda', href: '/agenda/agenda', icon: Calendar },
+const baseNavigation: NavigationItem[] = [
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'medico', 'asistente'] },
+  { name: 'Pacientes', href: '/patients', icon: Users, roles: ['admin', 'medico', 'asistente'] },
+  { name: 'Citas', href: '/citas', icon: Clock, roles: ['admin', 'medico', 'asistente'] },
+  { name: 'Agenda', href: '/agenda/agenda', icon: Calendar, roles: ['admin', 'medico', 'asistente'] },
+  { name: 'Historia Clínica', href: '/clinical-history', icon: FileText, roles: ['admin', 'medico'] },
+  { name: 'Evolución Clínica', href: '/clinical-evolution', icon: Activity, roles: ['admin', 'medico'] },
+  { name: 'Recetas', href: '/prescriptions', icon: FileSpreadsheet, roles: ['admin', 'medico'] },
+  { name: 'Somatometría', href: '/somatometry', icon: RulerSquare, roles: ['admin', 'medico'] },
+  { name: 'Archivos', href: '/patient-files', icon: FolderOpen, roles: ['admin', 'medico'] },
+  { name: 'Catálogos', href: '/cie10', icon: NotebookTabs, roles: ['admin', 'medico'] },
 
   /*  Deshabilitadas por el momento 
-  { name: 'Catálogos ', href: '/insurance', icon: NotebookTabs },
    { name: 'Citas2', href: '/citas', icon: Clock },
   { name: 'Agenda', href: '/calendar', icon: Calendar },
   */
 ] as const;
 
-const bottomNavigation = [
-  { name: 'Configuración', href: '/settings', icon: SettingsIcon },
-  { name: 'Cerrar Sesión', href: '/login', icon: LogOut },
+const bottomNavigation: NavigationItem[] = [
+  { name: 'Unidades de Negocio', href: '/clinica', icon: Stethoscope, roles: ['admin'] },
+  { name: 'Usuarios', href: '/users', icon: Users, roles: ['admin'] },
+  { name: 'Configuración', href: '/settings', icon: SettingsIcon, roles: ['admin', 'medico', 'asistente'] },
+  { name: 'Cerrar Sesión', href: '/login', icon: LogOut, roles: ['admin', 'medico', 'asistente'] },
 ] as const;
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { user } = useAuth();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const { currentTheme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -221,15 +230,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [signOut]);
 
-  const navigation = useMemo(() => [
-    ...baseNavigation,
-    { type: 'divider' as const },
-    ...bottomNavigation.map(item => 
-      item.name === 'Cerrar Sesión' 
-        ? { ...item, onClick: handleLogout }
-        : item
-    )
-  ], [handleLogout]);
+  const navigation = useMemo(() => {
+    // Filter navigation items based on user role
+    const filteredBaseNavigation = RoleBasedNavigation({
+      navigationItems: baseNavigation,
+      userRole: user?.userRole
+    });
+    
+    // Filter bottom navigation items based on user role
+    const filteredBottomNavigation = RoleBasedNavigation({
+      navigationItems: bottomNavigation.map(item => 
+        item.name === 'Cerrar Sesión' 
+          ? { ...item, onClick: handleLogout }
+          : item
+      ),
+      userRole: user?.userRole
+    });
+    
+    return [
+      ...filteredBaseNavigation,
+      { type: 'divider' as const },
+      ...filteredBottomNavigation
+    ];
+  }, [handleLogout, user?.userRole]);
 
   const getInitials = (patient: typeof selectedPatient) => {
     if (!patient) return '';
@@ -413,7 +436,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="flex-1 mt-4 overflow-hidden">
-          {navigation.map((item, index) => {
+          {navigation.map((item: any, index) => {
             if ('type' in item && item.type === 'divider') {
               return (
                 <div
