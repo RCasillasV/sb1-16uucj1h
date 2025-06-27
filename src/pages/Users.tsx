@@ -20,7 +20,7 @@ interface User {
 interface FormData {
   Nombre: string;
   Email: string;
-  Rol: 'admin' | 'medico' | 'asistente';
+  Rol: 'Administrador' | 'Medico' | 'Recepcionista';
   idBu: string;
   Estado: 'activo' | 'inactivo';
 }
