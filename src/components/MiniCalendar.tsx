@@ -223,7 +223,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                         className="text-[10px] font-medium truncate leading-tight"
                         style={{ color: currentTheme.colors.text }}
                       >
-                        {event.extendedProps?.patient?.Nombre} {event.extendedProps?.patient?.Paterno}
+                        {event.extendedProps?.patient?.Nombre} {event.extendedProps?.patient?.Paterno} : {event.extendedProps?.tipo_consulta} 
                       </span>
                     </div>
                     <p 
