@@ -231,7 +231,8 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                       style={{ color: currentTheme.colors.textSecondary }}
                     >
                       {event.extendedProps?.reason}
-                      {event.extendedProps?.
+                      {event.extendedProps?.tiempo_evolucion}
+                      {event.extendedProps?.unidad_tiempo}
                     </p>
                   </div>
                 </div>
