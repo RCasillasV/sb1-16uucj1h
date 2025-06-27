@@ -10,7 +10,7 @@ interface User {
   Nombre: string;
   Email: string;
   Estado: 'activo' | 'inactivo';
-  Rol: 'admin' | 'medico' | 'asistente';
+  Rol: 'Administrador' | 'Medico' | 'Recepcionista';
   idBu: string;
   businessUnit?: {
     Nombre: string;
@@ -42,7 +42,7 @@ export function Users() {
   const [formData, setFormData] = useState<FormData>({
     Nombre: '',
     Email: '',
-    Rol: 'asistente',
+    Rol: 'Recepcionista',
     idBu: '',
     Estado: 'activo',
   });
@@ -113,7 +113,7 @@ export function Users() {
       setFormData({
         Nombre: '',
         Email: '',
-        Rol: 'asistente',
+        Rol: 'Recepcionista',
         idBu: '',
         Estado: 'activo',
       });
@@ -188,7 +188,7 @@ export function Users() {
             setFormData({
               Nombre: '',
               Email: '',
-              Rol: 'asistente',
+              Rol: 'Recepcionista',
               idBu: '',
               Estado: 'activo',
             });
@@ -431,7 +431,7 @@ export function Users() {
           setFormData({
             Nombre: '',
             Email: '',
-            Rol: 'asistente',
+            Rol: 'Recepcionista',
             idBu: '',
             Estado: 'activo',
           });
@@ -446,7 +446,7 @@ export function Users() {
                 setFormData({
                   Nombre: '',
                   Email: '',
-                  Rol: 'asistente',
+                  Rol: 'Recepcionista',
                   idBu: '',
                   Estado: 'activo',
                 });
@@ -528,7 +528,7 @@ export function Users() {
             <select
               id="rol"
               value={formData.Rol}
-              onChange={(e) => setFormData({ ...formData, Rol: e.target.value as 'admin' | 'medico' | 'asistente' })}
+              onChange={(e) => setFormData({ ...formData, Rol: e.target.value as 'Administrador' | 'Medico' | 'Recepcionista' })}
               required
               className="w-full rounded-md shadow-sm"
               style={{
