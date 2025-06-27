@@ -590,8 +590,8 @@ export function Users() {
                 color: currentTheme.colors.text,
               }}
             >
-              <option value="activo">Activo</option>
-              <option value="inactivo">Inactivo</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
             </select>
           </div>
         </form>
