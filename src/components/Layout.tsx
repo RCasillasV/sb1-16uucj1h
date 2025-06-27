@@ -14,16 +14,16 @@ import clsx from 'clsx';
 import packageJson from '../../package.json';
 
 const baseNavigation: NavigationItem[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'medico', 'asistente'] },
-  { name: 'Pacientes', href: '/patients', icon: Users, roles: ['admin', 'medico', 'asistente'] },
-  { name: 'Citas', href: '/citas', icon: Clock, roles: ['admin', 'medico', 'asistente'] },
-  { name: 'Agenda', href: '/agenda/agenda', icon: Calendar, roles: ['admin', 'medico', 'asistente'] },
-  { name: 'Historia Clínica', href: '/clinical-history', icon: FileText, roles: ['admin', 'medico'] },
-  { name: 'Evolución Clínica', href: '/clinical-evolution', icon: Activity, roles: ['admin', 'medico'] },
-  { name: 'Recetas', href: '/prescriptions', icon: FileSpreadsheet, roles: ['admin', 'medico'] },
-  { name: 'Somatometría', href: '/somatometry', icon: RulerSquare, roles: ['admin', 'medico'] },
-  { name: 'Archivos', href: '/patient-files', icon: FolderOpen, roles: ['admin', 'medico'] },
-  { name: 'Catálogos', href: '/cie10', icon: NotebookTabs, roles: ['admin', 'medico'] },
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Pacientes', href: '/patients', icon: Users, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Citas', href: '/citas', icon: Clock, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Agenda', href: '/agenda/agenda', icon: Calendar, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Historia Clínica', href: '/clinical-history', icon: FileText, roles: ['Administrador', 'Medico'] },
+  { name: 'Evolución Clínica', href: '/clinical-evolution', icon: Activity, roles: ['Administrador', 'Medico'] },
+  { name: 'Recetas', href: '/prescriptions', icon: FileSpreadsheet, roles: ['Administrador', 'Medico'] },
+  { name: 'Somatometría', href: '/somatometry', icon: RulerSquare, roles: ['Administrador', 'Medico'] },
+  { name: 'Archivos', href: '/patient-files', icon: FolderOpen, roles: ['Administrador', 'Medico'] },
+  { name: 'Catálogos', href: '/cie10', icon: NotebookTabs, roles: ['Administrador', 'Medico'] },
 
   /*  Deshabilitadas por el momento 
    { name: 'Citas2', href: '/citas', icon: Clock },
@@ -32,10 +32,10 @@ const baseNavigation: NavigationItem[] = [
 ] as const;
 
 const bottomNavigation: NavigationItem[] = [
-  { name: 'Unidades de Negocio', href: '/clinica', icon: Stethoscope, roles: ['admin'] },
-  { name: 'Usuarios', href: '/users', icon: Users, roles: ['admin'] },
-  { name: 'Configuración', href: '/settings', icon: SettingsIcon, roles: ['admin', 'medico', 'asistente'] },
-  { name: 'Cerrar Sesión', href: '/login', icon: LogOut, roles: ['admin', 'medico', 'asistente'] },
+  { name: 'Unidades de Negocio', href: '/clinica', icon: Stethoscope, roles: ['Administrador'] },
+  { name: 'Usuarios', href: '/users', icon: Users, roles: ['Administrador'] },
+  { name: 'Configuración', href: '/settings', icon: SettingsIcon, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Cerrar Sesión', href: '/login', icon: LogOut, roles: ['Administrador', 'Medico', 'Recepcionista'] },
 ] as const;
 
 export function Layout({ children }: { children: React.ReactNode }) {
