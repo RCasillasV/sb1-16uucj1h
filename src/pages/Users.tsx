@@ -537,9 +537,9 @@ export function Users() {
                 color: currentTheme.colors.text,
               }}
             >
-              <option value="admin">Administrador</option>
-              <option value="medico">Médico</option>
-              <option value="asistente">Asistente</option>
+              <option value="Administrador">Administrador</option>
+              <option value="Medico">Médico</option>
+              <option value="Recepcionista">Asistente</option>
             </select>
           </div>
 
