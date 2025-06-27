@@ -9,7 +9,7 @@ interface User {
   id: string;
   Nombre: string;
   Email: string;
-  Estado: 'activo' | 'inactivo';
+  Estado: 'Activo' | 'Inactivo';
   Rol: 'Administrador' | 'Medico' | 'Recepcionista';
   idBu: string;
   businessUnit?: {
