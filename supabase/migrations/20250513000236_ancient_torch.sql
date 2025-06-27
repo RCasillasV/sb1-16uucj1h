@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS "tcUsuarios" (
   idBu uuid NOT NULL,
   Nombre text NOT NULL,
   Email text NOT NULL UNIQUE,
-  Estado text NOT NULL DEFAULT 'activo' CHECK (Estado IN ('activo', 'inactivo')),
-  Rol text NOT NULL DEFAULT 'asistente' CHECK (Rol IN ('admin', 'medico', 'asistente')),
+  Estado text NOT NULL DEFAULT 'Activo' CHECK (Estado IN ('Activo', 'Inactivo')),
+  Rol text NOT NULL DEFAULT 'Asistente' CHECK (Rol IN ('Administrador', 'Medico', 'Recepcionista')),
   Telefono text,
   FechaUltimoAcceso timestamptz,
   Configuracion jsonb DEFAULT '{}'::jsonb
@@ -51,7 +51,7 @@ CREATE POLICY "Admins can manage users in their business unit"
       SELECT 1 FROM "tcUsuarios" admin
       WHERE admin.idUsuario = auth.uid()
       AND admin.idBu = "tcUsuarios".idBu
-      AND admin.Rol = 'admin'
+      AND admin.Rol = 'Administrador'
     )
   );
 
