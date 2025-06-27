@@ -298,10 +298,10 @@ export function Agenda() {
                 select={handleDateSelect}
                 eventClick={handleEventClick}
                 datesSet={handleDatesSet}
-                slotDuration="00:30:00"
+                slotDuration="00:15:00"
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
-                slotLabelInterval="00:30:00"
+                slotLabelInterval="00:15:00"
                 allDaySlot={false}
                 eventTimeFormat={{
                   hour: '2-digit',
@@ -385,6 +385,8 @@ export function Agenda() {
                   }
                   .fc .fc-timegrid-axis,
                   .fc .fc-timegrid-slot-label {
+                    width: 60px !important;
+                    height: 'calc(100vh - 8rem)';
                     position: sticky;
                     left: 0;
                     z-index: 2;
