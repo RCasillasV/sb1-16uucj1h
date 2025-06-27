@@ -8,6 +8,7 @@ function App() {
       <h1>¡Hola, DoctorSoft!</h1>
       {/* Aquí agregas el componente LogoutTestPage */}
       <LogoutTestPage />
+       <h1>¡Bye, DoctorSoft!</h1>
     </div>
   );
 }
