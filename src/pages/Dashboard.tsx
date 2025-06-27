@@ -95,7 +95,27 @@ export function Dashboard() {
       onClick: () => navigate('/agenda/agenda', { state: { filter: 'today' } }),
     },
     {
-      title: 'Próximas Citas',
+      title: 'Pacientes en espera',
+      value: stats.upcomingAppointments,
+      icon: Calendar,
+      trend: {
+        value: 5,
+        isPositive: true,
+      },
+      onClick: () => navigate('/agenda/agenda', { state: { filter: 'upcoming' } }),
+    },
+    {
+      title: 'Próxima Cita',
+      value: stats.upcomingAppointments,
+      icon: Calendar,
+      trend: {
+        value: 5,
+        isPositive: true,
+      },
+      onClick: () => navigate('/agenda/agenda', { state: { filter: 'upcoming' } }),
+    },
+    {
+      title: 'Tiempo espera Promedio',
       value: stats.upcomingAppointments,
       icon: Calendar,
       trend: {
