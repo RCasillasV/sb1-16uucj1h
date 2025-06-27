@@ -29,6 +29,7 @@ const Users = lazy(() => import('./pages/Users').then(module => ({ default: modu
 const BusinessUnits = lazy(() => import('./modules/clinica/BusinessUnits').then(module => ({ default: module.BusinessUnits })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').then(module => ({ default: module.InsuranceManagement })));
+const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage').then(module => ({ default: module.LogoutTestPage })));
 
 // Loading fallback
 const PageLoader = () => (
@@ -38,10 +39,160 @@ const PageLoader = () => (
 );
 
 function App() {
- return (
-    <div style={{ backgroundColor: 'lightblue', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <h1>¡Hola, DoctorSoft!</h1>
-    </div>
+  useEffect(() => {
+    initializeSupabase();
+  }, []);
+
+  return (
+    <Router>
+      <AuthProvider>
+        <ThemeProvider>
+          <SelectedPatientProvider>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/logout-test" element={<LogoutTestPage />} />
+                
+                <Route path="/" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Dashboard />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/patients" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Patients />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                {/* 
+                <Route path="/appointments" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Appointments />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                */}
+                
+                <Route path="/cie10" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <CIE10 />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/citas" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <CitasPage />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/calendar" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Calendar />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/agenda/agenda" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Agenda />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/clinical-history" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <ClinicalHistory />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/clinical-evolution" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <ClinicalEvolution />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/prescriptions" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Prescriptions />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/somatometry" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Somatometry />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/patient-files" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <PatientFilesPage />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/clinica" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <BusinessUnits />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/users" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Users />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/insurance" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <InsuranceManagement />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Settings />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+              </Routes>
+            </Suspense>
+          </SelectedPatientProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </Router>
   );
 }
+
 export default App;
