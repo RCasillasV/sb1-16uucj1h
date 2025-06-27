@@ -30,8 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error('Error fetching user role:', error);
         return null;
+      } else {
+        console.error('User role:', data.rol);
       }
-
       return data?.rol || null;
     } catch (error) {
       console.error('Unexpected error fetching user role:', error);
