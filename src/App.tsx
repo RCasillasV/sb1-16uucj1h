@@ -31,12 +31,6 @@ const Settings = lazy(() => import('./pages/Settings').then(module => ({ default
 const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').then(module => ({ default: module.InsuranceManagement })));
 const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage').then(module => ({ default: module.LogoutTestPage })));
 
-// Loading fallback
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-  </div>
-);
 
 function App() {
   return (
