@@ -581,7 +581,7 @@ export function Users() {
             <select
               id="estado"
               value={formData.Estado}
-              onChange={(e) => setFormData({ ...formData, Estado: e.target.value as 'activo' | 'inactivo' })}
+              onChange={(e) => setFormData({ ...formData, Estado: e.target.value as 'Activo' | 'Inactivo' })}
               required
               className="w-full rounded-md shadow-sm"
               style={{
