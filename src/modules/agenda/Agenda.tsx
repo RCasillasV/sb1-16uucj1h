@@ -330,7 +330,7 @@ export function Agenda() {
               <style>
                 {`
                   .fc-timegrid-slot-label {
-                    width: 70px !important;
+                    width: 60px !important;
                     font-size: 0.75rem !important;
                    color: ${currentTheme.colors.text} !important;
                   }
@@ -339,7 +339,7 @@ export function Agenda() {
                    color: ${currentTheme.colors.text} !important;
                   }
                   .fc .fc-timegrid-slot-label-cushion {
-                    width: 70px !important;
+                    width: 60px !important;
                     font-size: 0.75rem !important;
                    color: ${currentTheme.colors.text} !important;
                   }
