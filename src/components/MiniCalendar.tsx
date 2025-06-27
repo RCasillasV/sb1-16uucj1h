@@ -231,6 +231,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                       style={{ color: currentTheme.colors.textSecondary }}
                     >
                       {event.extendedProps?.reason}
+                      {event.extendedProps?.
                     </p>
                   </div>
                 </div>
