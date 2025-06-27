@@ -89,6 +89,12 @@ export function Dashboard() {
       onClick: () => navigate('/agenda/agenda', { state: { filter: 'today' } }),
     },
     {
+      title: 'Citas confirmadas',
+      value: stats.todayAppointmentsConfirm,
+      icon: Clock,
+      onClick: () => navigate('/agenda/agenda', { state: { filter: 'today' } }),
+    },
+    {
       title: 'Próximas Citas',
       value: stats.upcomingAppointments,
       icon: Calendar,
