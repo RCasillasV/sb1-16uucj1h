@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-export function LogoutTestPage() {
+function LogoutTestPage() {
   const { signOut } = useAuth();
 
   useEffect(() => {
@@ -15,14 +15,7 @@ export function LogoutTestPage() {
 
   return (
     <div 
-      style={{ 
-        backgroundColor: 'lightblue', 
-        height: '100vh', 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center', 
-        justifyContent: 'center' 
-      }}
+      className="flex flex-col items-center justify-center min-h-screen bg-blue-100 p-4"
     >
       <h1 className="text-3xl font-bold mb-4">¡Hola, DoctorSoft!</h1>
       <p className="text-lg mb-8">Cerrando sesión automáticamente en 3 segundos...</p>
@@ -36,4 +29,4 @@ export function LogoutTestPage() {
   );
 }
 
-export default { LogoutTestPage };
+export default LogoutTestPage;
