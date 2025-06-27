@@ -66,7 +66,7 @@ export function Agenda() {
       
       // Ajuste fino de la posición de desplazamiento para centrar la hora actual
       if (calendarWrapperRef.current) {
-        const timeGridContainer = calendarWrapperRef.current.querySelector('.fc-timegrid-body');
+        const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
         if (timeGridContainer) {
           const containerHeight = timeGridContainer.clientHeight;
           const currentOffset = timeGridContainer.scrollTop;
