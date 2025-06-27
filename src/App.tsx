@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
 import { initializeSupabase } from './lib/supabase';
+import LogoutTestPage from './pages/LogoutTestPage'; // Asegúrate de que la ruta sea correcta
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
