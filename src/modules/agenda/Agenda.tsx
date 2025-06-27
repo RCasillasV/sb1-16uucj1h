@@ -301,7 +301,7 @@ export function Agenda() {
                 slotDuration="00:30:00"
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
-                slotLabelInterval="00:30:00"
+                slotLabelInterval="00:15:00"
                 allDaySlot={false}
                 eventTimeFormat={{
                   hour: '2-digit',
