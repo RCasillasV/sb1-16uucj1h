@@ -43,7 +43,9 @@ export function Agenda() {
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true); // Nuevo ref para controlar la carga inicial
 
+  
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -54,7 +56,7 @@ export function Agenda() {
   }, []);
 
   useEffect(() => {
-    if (calendarRef.current) {
+    if (calendarRef.current && isInitialMount.current) { // Solo se ejecuta en la carga inicial
       const calendarApi = calendarRef.current.getApi();
       const now = new Date();
       const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
@@ -62,15 +64,18 @@ export function Agenda() {
       // Scroll to current time with offset
       calendarApi.scrollToTime(scrollTime);
       
-      // Fine-tune scroll position to center current time
+      // Ajuste fino de la posición de desplazamiento para centrar la hora actual
       if (calendarWrapperRef.current) {
         const timeGridContainer = calendarWrapperRef.current.querySelector('.fc-timegrid-body');
         if (timeGridContainer) {
           const containerHeight = timeGridContainer.clientHeight;
           const currentOffset = timeGridContainer.scrollTop;
+          // Desplaza hacia arriba un tercio de la altura del contenedor para centrar
+          // la hora actual, ya que scrollToTime la coloca al inicio de la vista.
           timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
         }
       }
+      isInitialMount.current = false; // Marca que la carga inicial ya ocurrió
     }
   }, [calendarView]);
 
