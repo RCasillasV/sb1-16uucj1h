@@ -385,8 +385,7 @@ export function Agenda() {
                   }
                   .fc .fc-timegrid-axis,
                   .fc .fc-timegrid-slot-label {
-                    width: 60px !important;
-                    height: 'calc(100vh - 8rem)';
+                    width: 70px !important;
                     position: sticky;
                     left: 0;
                     z-index: 2;
