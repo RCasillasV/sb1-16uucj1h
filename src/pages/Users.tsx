@@ -22,7 +22,7 @@ interface FormData {
   Email: string;
   Rol: 'Administrador' | 'Medico' | 'Recepcionista';
   idBu: string;
-  Estado: 'activo' | 'inactivo';
+  Estado: 'Activo' | 'Inactivo';
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -44,7 +44,7 @@ export function Users() {
     Email: '',
     Rol: 'Recepcionista',
     idBu: '',
-    Estado: 'activo',
+    Estado: 'Activo',
   });
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export function Users() {
         Email: '',
         Rol: 'Recepcionista',
         idBu: '',
-        Estado: 'activo',
+        Estado: 'Activo',
       });
     } catch (err) {
       console.error('Error saving user:', err);
@@ -190,7 +190,7 @@ export function Users() {
               Email: '',
               Rol: 'Recepcionista',
               idBu: '',
-              Estado: 'activo',
+              Estado: 'Activo',
             });
             setShowModal(true);
           }}
@@ -330,10 +330,10 @@ export function Users() {
                       <span
                         className={clsx(
                           'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                          user.Estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          user.Estado === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         )}
                       >
-                        {user.Estado === 'activo' ? 'Activo' : 'Inactivo'}
+                        {user.Estado === 'Activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -433,7 +433,7 @@ export function Users() {
             Email: '',
             Rol: 'Recepcionista',
             idBu: '',
-            Estado: 'activo',
+            Estado: 'Activo',
           });
         }}
         title={selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
@@ -448,7 +448,7 @@ export function Users() {
                   Email: '',
                   Rol: 'Recepcionista',
                   idBu: '',
-                  Estado: 'activo',
+                  Estado: 'Activo',
                 });
               }}
               className={clsx(buttonStyle.base, 'border')}
