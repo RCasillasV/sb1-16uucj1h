@@ -97,7 +97,7 @@ export function Dashboard() {
     {
       title: 'Pacientes en espera',
       value: stats.upcomingAppointments,
-      icon: Calendar,
+       icon: Users,
       trend: {
         value: 5,
         isPositive: true,
@@ -117,7 +117,7 @@ export function Dashboard() {
     {
       title: 'Tiempo espera Promedio',
       value: stats.upcomingAppointments,
-      icon: Calendar,
+      icon: Clock,
       trend: {
         value: 5,
         isPositive: true,
