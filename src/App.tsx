@@ -30,7 +30,6 @@ const Users = lazy(() => import('./pages/Users').then(module => ({ default: modu
 const BusinessUnits = lazy(() => import('./modules/clinica/BusinessUnits').then(module => ({ default: module.BusinessUnits })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').then(module => ({ default: module.InsuranceManagement })));
-const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage').then(module => ({ default: module.LogoutTestPage })));
 
 
 function App() {
