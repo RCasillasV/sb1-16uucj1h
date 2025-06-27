@@ -227,10 +227,10 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                       </span>
                     </div>
                     <p 
-                      className="text-[8px] truncate leading-tight"
+                      className="text-[9px] truncate leading-tight"
                       style={{ color: currentTheme.colors.textSecondary }}
                     >
-                      {event.extendedProps?.reason}:                      {event.extendedProps?.tiempo_evolucion} {event.extendedProps?.unidad_tiempo}
+                      {event.extendedProps?.reason}:                      {event.extendedProps?.tiempo_evolucion} {event.extendedProps?.unidad_tiempo}  {event.extendedProps?.tipo_cita}
                     </p>
                   </div>
                 </div>
