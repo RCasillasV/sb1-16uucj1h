@@ -83,7 +83,7 @@ export function Dashboard() {
       onClick: () => navigate('/patients'),
     },
     {
-      title: 'Citas Hoy',
+      title: 'Citas para hoy',
       value: stats.todayAppointments,
       icon: Clock,
       onClick: () => navigate('/agenda/agenda', { state: { filter: 'today' } }),
