@@ -116,6 +116,7 @@ export function Agenda() {
           consultorio: appointment.consultorio || 1,
           tiempo_evolucion: appointment.tiempo_evolucion,
           unidad_tiempo: appointment.unidad_tiempo,
+          tipo_consulta: appointment.tipo_consulta,
         }
       }));
       setEvents(calendarEvents);
