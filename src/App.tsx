@@ -50,12 +50,13 @@ function App() {
           <SelectedPatientProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
+                <Route path="/logout-test" element={<LogoutTestPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
-                <Route path="/logout-test" element={<LogoutTestPage />} />
+          
                 
                 <Route path="/" element={
                   <PrivateRoute>
