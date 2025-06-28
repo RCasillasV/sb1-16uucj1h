@@ -66,7 +66,7 @@ function App() {
                 // } />
 
                 <Route path="/" element={<Login />} /> // Temporalmente para depuración
-                
+             /*   
                 <Route path="/patients" element={
                   <PrivateRoute>
                     <Layout>
@@ -75,7 +75,7 @@ function App() {
                   </PrivateRoute>
                 } />
                 
-                {/* 
+                
                 <Route path="/appointments" element={
                   <PrivateRoute>
                     <Layout>
