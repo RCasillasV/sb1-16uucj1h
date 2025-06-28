@@ -40,28 +40,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Function to fetch user role from tcUsuarios
-  const fetchUserRole = async (userId: string): Promise<string | null> => {
-    try {
-      const { data, error } = await supabase
-        .from('tcUsuarios')
-        .select('rol')
-        .eq('idusuario', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user role:', error);
-        return null;
-      } else {
-        console.error('Rol del usuario:', data.rol);
-      }
-      return data?.rol || null;
-    } catch (error) {
-      console.error('Unexpected error fetching user role:', error);
-      return null;
-    }
-  };
-
   useEffect(() => {
     // Check active sessions and set the user with role
     const initializeAuth = async () => {
