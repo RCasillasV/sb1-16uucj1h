@@ -39,6 +39,7 @@ const bottomNavigation: NavigationItem[] = [
 ] as const;
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  console.log(`Usuario no autenticado`);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
