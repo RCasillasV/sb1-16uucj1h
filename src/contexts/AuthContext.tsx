@@ -5,6 +5,8 @@ import type { User, AuthError } from '@supabase/supabase-js';
 
 type UserWithRole = User & { userRole?: string | null };
 
+type UserWithRole = User & { userRole?: string | null };
+
 interface AuthContextType {
   user: UserWithRole | null;
   loading: boolean;
@@ -17,6 +19,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Function to fetch user role from tcUsuarios
+  const fetchUserRole = async (userId: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('tcUsuarios')
+        .select('rol')
+        .eq('idusuario', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return null;
+      }
+      
+      console.log('Rol del usuario:', data?.rol);
+      return data?.rol || null;
+    } catch (error) {
+      console.error('Unexpected error fetching user role:', error);
+      return null;
+    }
+  };
 
   // Function to fetch user role from tcUsuarios
   const fetchUserRole = async (userId: string): Promise<string | null> => {
