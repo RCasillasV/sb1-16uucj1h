@@ -57,13 +57,13 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />                
-                <Route path="/" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Dashboard/>
-                    </Layout>
-                  </PrivateRoute>
-                } />
+                //<Route path="/" element={
+                //  <PrivateRoute>
+                //    <Layout>
+                //      <Dashboard/>
+                //    </Layout>
+                //  </PrivateRoute>
+                // } />
 
                 <Route path="/" element={<Login />} /> // Temporalmente para depuración
                 
