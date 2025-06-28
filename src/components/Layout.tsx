@@ -434,7 +434,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
         </div>
-
+        console.log(`Usuario no autenticado`);
         <nav className="flex-1 mt-4 overflow-hidden">
           {navigation.map((item: any, index) => {
             if ('type' in item && item.type === 'divider') {
