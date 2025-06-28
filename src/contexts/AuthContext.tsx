@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check active sessions and set the user with role
-    const initializeAuth = async () => {
+    const checkSessionAndSetUser = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
@@ -65,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     checkSessionAndSetUser();
- //   initializeAuth();
 
     // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
