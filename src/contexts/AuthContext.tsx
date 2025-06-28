@@ -5,6 +5,8 @@ import type { User, AuthError } from '@supabase/supabase-js';
 
 type UserWithRole = User & { userRole?: string | null };
 
+type UserWithRole = User & { userRole?: string | null };
+
 interface AuthContextType {
   user: UserWithRole | null;
   loading: boolean;
