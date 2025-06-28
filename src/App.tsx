@@ -64,6 +64,8 @@ function App() {
                     </Layout>
                   </PrivateRoute>
                 } />
+
+                <Route path="/" element={<Login />} /> // Temporalmente para depuración
                 
                 <Route path="/patients" element={
                   <PrivateRoute>
