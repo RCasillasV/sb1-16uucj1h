@@ -29,6 +29,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function Login() {
+  console.log('Login component rendering'); // Añadir esta línea
   const { currentTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
