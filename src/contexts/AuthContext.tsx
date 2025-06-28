@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
         }
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error('Error during supabase.auth.getSession():', error); 
         setUser(null);
       } finally {
         // Ensure loading is set to false regardless of success or failure
