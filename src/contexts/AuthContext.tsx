@@ -5,6 +5,8 @@ import type { User, AuthError } from '@supabase/supabase-js';
 
 type UserWithRole = User & { userRole?: string | null };
 
+type UserWithRole = User & { userRole?: string | null };
+
 interface AuthContextType {
   user: UserWithRole | null;
   loading: boolean;
@@ -30,6 +32,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error('Error fetching user role:', error);
         return null;
+      }
+      
+      console.log('Rol del usuario:', data?.rol);
+      return data?.rol || null;
+    } catch (error) {
+      console.error('Unexpected error fetching user role:', error);
+      return null;
+    }
+  };
+
+  // Function to fetch user role from tcUsuarios
+  const fetchUserRole = async (userId: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('tcUsuarios')
+        .select('rol')
+        .eq('idusuario', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return null;
       } else {
         console.error('Rol del usuario:', data.rol);
       }
@@ -42,10 +66,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check active sessions and set the user with role
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const userRole = await fetchUserRole(session.user.id);
-        setUser({ ...session.user, userRole });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          try {
+            const userRole = await fetchUserRole(session.user.id);
+            setUser({ ...session.user, userRole });
+          } catch (roleError) {
+            console.error('Error fetching user role:', roleError);
+            setUser(session.user);
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+        setUser(null);
+      } finally {
+        // Ensure loading is set to false regardless of success or failure
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
       } else {
         setUser(null);
       }
@@ -54,8 +99,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const userRole = await fetchUserRole(session.user.id);
+      try {
+        if (session?.user) {
+          try {
+            const userRole = await fetchUserRole(session.user.id);
+            setUser({ ...session.user, userRole });
+          } catch (roleError) {
+            console.error('Error fetching user role on auth change:', roleError);
+            setUser(session.user);
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error in auth state change:', error);
+        setUser(null);
+      } finally {
+        // Ensure loading is set to false regardless of success or failure
+        setLoading(false);
+      }
         setUser({ ...session.user, userRole });
       } else {
         setUser(null);
