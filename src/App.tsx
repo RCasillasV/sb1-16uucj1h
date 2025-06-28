@@ -74,17 +74,7 @@ function App() {
                     </Layout>
                   </PrivateRoute>
                 } />
-                
-                
-                <Route path="/appointments" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Appointments />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                */}
-                
+                                           
                 <Route path="/cie10" element={
                   <PrivateRoute>
                     <Layout>
@@ -187,7 +177,8 @@ function App() {
                       <Settings />
                     </Layout>
                   </PrivateRoute>
-                } />
+                } />  
+*/
               </Routes>
             </Suspense>
           </SelectedPatientProvider>
