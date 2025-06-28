@@ -14,6 +14,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  console.log('AuthProvider component rendering'); // <-- Insertar aquí
   const [user, setUser] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -42,11 +43,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check active sessions and set the user with role
+     console.log('AuthContext useEffect triggered: Initializing auth'); // <-- Insertar aquí
     const initializeAuth = async () => {
       try {
+        console.log('Calling supabase.auth.getSession()'); // <-- Insertar aquí
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
+          console.log('supabase.auth.getSession() result:', session); // <-- Insertar aquí
           try {
             const userRole = await fetchUserRole(session.user.id);
             setUser({ ...session.user, userRole });
@@ -62,6 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       } finally {
         // Ensure loading is set to false regardless of success or failure
+        console.log('initializeAuth finished. Loading set to:', false); // <-- Insertar aquí
         setLoading(false);
       }
     };
@@ -152,6 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
+      {console.log('AuthProvider rendering children. Loading state:', loading)} {/* <-- Insertar aquí */}
       {!loading && children}
     </AuthContext.Provider>
   );
