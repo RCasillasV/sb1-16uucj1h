@@ -15,9 +15,7 @@ export function PrivateRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
-  return <>{children}</>;
+if (!user) {
+  console.log('PrivateRoute: User is null, redirecting to /login'); // Añadir esta línea
+  return <Navigate to="/login" replace state={{ from: location }} />;
 }
