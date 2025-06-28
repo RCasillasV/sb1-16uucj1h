@@ -89,7 +89,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     const fetchUserInfo = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('supabase.auth.getSession() result:', session); // Muestra el objeto session completo
         if (!session?.user) {
           setUserInfo({
             authId: '',
