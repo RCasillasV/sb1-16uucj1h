@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export function PrivateRoute({ children }: { children: React.ReactNode }) {
+  console.log('PrivateRoute is rendering');
   const { user, loading } = useAuth();
   const location = useLocation();
 
