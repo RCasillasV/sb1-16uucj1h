@@ -22,6 +22,7 @@ export function RoleBasedRoute({ children, allowedRoles }: RoleBasedRouteProps) 
 
   if (!user) {
     // User is not authenticated, redirect to login
+    console.log(`Usuario no autenticado`);
     return <Navigate to="/login" replace />;
   }
 
