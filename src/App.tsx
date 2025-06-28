@@ -40,6 +40,7 @@ const PageLoader = () => (
 
 function App() {
   console.log('App component started rendering'); // Añade esta línea
+  console.log(`Usuario `, userRole);
   useEffect(() => {
     initializeSupabase();
   }, []);
