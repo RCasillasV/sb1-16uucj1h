@@ -57,8 +57,9 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />      
-
-              
+ 
+               <Route path="/privacy" element={<Privacy />} />                
+                {/*             
                  <Route path="/" element={
                   <PrivateRoute>
                     <Layout>
@@ -74,7 +75,7 @@ function App() {
                     </Layout>
                   </PrivateRoute>
                 } />
-                                     
+        */}                   
                 <Route path="/cie10" element={
                   <PrivateRoute>
                     <Layout>
