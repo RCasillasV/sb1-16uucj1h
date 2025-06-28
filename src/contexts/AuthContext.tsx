@@ -47,7 +47,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('checkSessionAndSetUser called'); // Añadir esta línea
       try {
         console.log('Calling supabase.auth.getSession()'); // Añadir esta línea
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        
+        const { session } = data;
         console.log('Session data received:', session); // Añadir esta línea
         
         if (session?.user) {

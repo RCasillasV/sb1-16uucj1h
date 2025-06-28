@@ -41,7 +41,15 @@ const PageLoader = () => (
 function App() {
   console.log('App component started rendering'); // Añade esta línea
   useEffect(() => {
-    initializeSupabase();
+    const init = async () => {
+      try {
+        await initializeSupabase();
+      } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+      }
+    };
+    
+    init();
   }, []);
 
   return (

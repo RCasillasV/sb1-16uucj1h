@@ -5,7 +5,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Log environment variables for debugging
-console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase URL exists:', !!supabaseUrl);
 console.log('Supabase Key exists:', !!supabaseKey);
 
 if (!supabaseUrl || !supabaseKey) {
@@ -55,6 +55,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
 
 // Initialize the connection and verify access with retry mechanism
 export async function initializeSupabase(retries = 3, delay = 1000) {
+  console.log('Initializing Supabase connection...');
   for (let i = 0; i < retries; i++) {
     try {
       // Test database access using the correct table name 'tcPacientes'
@@ -68,10 +69,10 @@ export async function initializeSupabase(retries = 3, delay = 1000) {
         return true;
       }
 
-      console.warn(`Initialization attempt ${i + 1} failed:`, error.message);
+      console.warn(`Supabase initialization attempt ${i + 1} failed:`, error.message);
       await new Promise(resolve => setTimeout(resolve, delay));
     } catch (error) {
-      console.error(`Initialization attempt ${i + 1} failed:`, error);
+      console.error(`Supabase initialization attempt ${i + 1} failed:`, error);
       if (i === retries - 1) return false;
       await new Promise(resolve => setTimeout(resolve, delay));
     }

@@ -10,16 +10,17 @@ export function PrivateRoute({ children }: { children: React.ReactNode }) {
   console.log('PrivateRoute - user:', user, 'loading:', loading); // Añadir esta línea
 
   if (loading) {
-    console.log('PrivateRoute - Loading, showing spinner.'); // Añadir esta línea
+    console.log('PrivateRoute - Loading, showing spinner.');
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600">Cargando DoctorSoft...</p>
       </div>
     );
   }
 
   if (!user) {
-    console.log('PrivateRoute - User not authenticated, redirecting to login.'); // Añadir esta línea
+    console.log('PrivateRoute - User not authenticated, redirecting to login.');
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
   return <>{children}</>;
