@@ -68,7 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     business_unit: null
   });
 
-  console.log('supabase.auth.getSession() result:', session); // Muestra el objeto session completo
+
   const isMenuItemActive = (href: string) => {
     if (href === '/') {
       return location.pathname === '/';
@@ -89,6 +89,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     const fetchUserInfo = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('supabase.auth.getSession() result:', session); // Muestra el objeto session completo
         if (!session?.user) {
           setUserInfo({
             authId: '',
