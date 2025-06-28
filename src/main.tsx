@@ -19,5 +19,5 @@ if (import.meta.env.PROD) {
   console.info = () => {};
   console.warn = () => {};
   console.error = () => {};
-};
+}
 console.log('Entrando a la App en main.tsx');
