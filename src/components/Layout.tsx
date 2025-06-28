@@ -99,6 +99,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
           return;
         }
 
+// src/components/PrivateRoute.tsx
+// Añade la siguiente línea antes del return <Navigate ... />
+if (!user) {
+  console.log('PrivateRoute: User is null, redirecting to /login'); // Añadir esta línea
+  return <Navigate to="/login" replace state={{ from: location }} />;
+}
+        
         const { data: userData, error } = await supabase.rpc('get_user_idbu', {
           user_id: session.user.id
         });
