@@ -60,7 +60,7 @@ function App() {
                 <Route path="/" element={
                   <PrivateRoute>
                     <Layout>
-                      <Dashboard />
+                      <Dashboard/>
                     </Layout>
                   </PrivateRoute>
                 } />
