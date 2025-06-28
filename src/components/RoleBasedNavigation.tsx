@@ -28,7 +28,8 @@ export function RoleBasedNavigation({
     
     // If user has no role or the item requires a role, hide it
     if (!userRole) {
-      return false;
+     /* return false;  trampa, borrar despues*/
+     return true;
     }
     
     // Show the item if the user's role is included in the item's roles
