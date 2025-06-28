@@ -39,7 +39,6 @@ const bottomNavigation: NavigationItem[] = [
 ] as const;
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  console.log(`Usuario no autenticado`);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
@@ -69,6 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     business_unit: null
   });
 
+  console.log('supabase.auth.getSession() result:', session); // Muestra el objeto session completo
   const isMenuItemActive = (href: string) => {
     if (href === '/') {
       return location.pathname === '/';
