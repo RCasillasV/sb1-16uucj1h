@@ -97,9 +97,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           });
           return;
         }
+        
+        const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu', {
+          user_id: session.user.id
+        });
 
-        if (error) {
-          console.error('Error fetching user data:', error);
+        // Check for errors from the RPC call
+        if (rpcError) {
+          console.error('Error fetching user data:', rpcError);          
           setUserInfo({
             authId: session.user.id,
             idbu: null,
