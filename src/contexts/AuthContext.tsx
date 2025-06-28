@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-          console.log('supabase.auth.getSession() result:', session); // <-- Insertar aquí
+         console.log('supabase.auth.getSession() result:', session); // Muestra 
           try {
             const userRole = await fetchUserRole(session.user.id);
             setUser({ ...session.user, userRole });
