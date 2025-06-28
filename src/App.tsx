@@ -39,6 +39,7 @@ const PageLoader = () => (
 );
 
 function App() {
+  console.log('App component started rendering'); // Añade esta línea
   useEffect(() => {
     initializeSupabase();
   }, []);
