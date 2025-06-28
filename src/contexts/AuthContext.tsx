@@ -91,11 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
 
     // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -118,11 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Ensure loading is set to false regardless of success or failure
         setLoading(false);
       }
-        setUser({ ...session.user, userRole });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
