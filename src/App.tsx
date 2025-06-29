@@ -1,5 +1,5 @@
 import React, { useEffect, lazy, Suspense, useState } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { PrivateRoute } from './components/PrivateRoute';
 import { AuthProvider } from './contexts/AuthContext';
@@ -43,20 +43,27 @@ const PageLoader = () => {
 
 function App() {
   console.log('App component started rendering');
-  const [initError, setInitError] = useState<string | null>(null);
+  const [initError, setInitError] = useState<Error | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
     const init = async () => {
       try {
         await initializeSupabase();
+        setIsInitialized(true);
       } catch (error) {
         console.error('Failed to initialize Supabase:', error);
-        setInitError(error instanceof Error ? error.message : 'Error de conexión con el servidor');
+        setInitError(error instanceof Error ? error : new Error('Error de conexión con el servidor'));
       }
     };
     
     init();
   }, []);
+
+  // Show loading state while initializing
+  if (!isInitialized && !initError) {
+    return <PageLoader />;
+  }
 
   if (initError) {
     return (
@@ -64,7 +71,7 @@ function App() {
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Error de Conexión</h2>
           <div className="bg-red-50 p-4 rounded-md mb-4">
-            <p className="text-red-800 font-medium">{initError}</p>
+            <p className="text-red-800 font-medium">{initError.message}</p>
           </div>
           <p className="text-gray-600 mb-4">
             No se pudo conectar con el servicio de Supabase. Por favor, verifica tu conexión a internet y las credenciales en el archivo .env.
@@ -93,7 +100,8 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />              
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="*" element={<Navigate to="/" replace />} />              
                  <Route path="/" element={
                   <PrivateRoute>
                     <Layout>
