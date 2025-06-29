@@ -127,7 +127,7 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
         const searchTerms = searchTerm.toLowerCase().split(' ');
         
         const { data, error } = await supabase
-          .from('tcCIE10', { schema: 'sires' })
+          .from('tcCIE10')
           .select('Consecutivo, Catalog_Key, Nombre')
           .or(searchTerms.map(term => `Catalog_Key.ilike.%${term}%,Nombre.ilike.%${term}%`).join(','))
           .limit(10);
@@ -142,6 +142,10 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
         setResults(filteredData);
       } catch (error) {
         console.error('Error searching diagnoses:', error);
+        // If table doesn't exist, show helpful message
+        if (error.code === '42P01') {
+          console.warn('tcCIE10 table not found. Please ensure the CIE-10 diagnosis table is created in your database.');
+        }
         setResults([]);
       } finally {
         setIsLoading(false);
