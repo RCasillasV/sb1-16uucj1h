@@ -449,7 +449,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             const isActive = 'href' in item && location.pathname === item.href;
             
             return (
-              <div className="relative group">
+              <div key={item.name} className="relative group">
                 <Link
                 key={'name' in item ? item.name : `divider-${index}`}
                 to={item.href}
