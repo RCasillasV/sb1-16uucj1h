@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { format, startOfDay, endOfDay, isSameMonth, isSameDay, addMonths, subMonths, parseISO, addMinutes, isWithinInterval, addDays, addWeeks, isAfter, getDay } from 'date-fns';
-import { es } from 'date-fns/locale';
+import esLocale from '@fullcalendar/core/locales/es';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Clock, X, CalendarPlus } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -223,7 +223,7 @@ export function Calendar() {
                 month: 'Mes',
                 week: 'Semana',
               }}
-              locale={es}
+              locale={esLocale}
               firstDay={1}
               selectable={true}
               selectMirror={true}
