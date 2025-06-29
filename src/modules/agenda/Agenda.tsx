@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-import { es } from 'date-fns/locale';
+import esLocale from '@fullcalendar/core/locales/es';
 import { api } from '../../lib/api'; 
 import { useSelectedPatient } from '../../contexts/SelectedPatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -296,7 +296,7 @@ export function Agenda() {
                 viewDidMount={(info) => {
                   setCalendarView(info.view.type as 'dayGridMonth' | 'timeGridWeek');
                 }}
-                locale={es}
+                locale={esLocale}
                 firstDay={1}
                 selectable={true}
                 selectMirror={true}
