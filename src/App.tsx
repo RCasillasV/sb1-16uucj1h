@@ -1,5 +1,5 @@
 import React, { useEffect, lazy, Suspense } from 'react';
-import { HashRouter as Router, Routes, Route, createBrowserRouter, RouterProvider, v7_relativeSplatPath } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { PrivateRoute } from './components/PrivateRoute';
 import { AuthProvider } from './contexts/AuthContext';
@@ -32,28 +32,56 @@ const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').the
 const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
 
 // Loading fallback
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+const PageLoader = () => {
+  return (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+    <p className="text-gray-600">Cargando DoctorSoft...</p>
   </div>
-);
+  );
+};
 
 function App() {
-  console.log('App component started rendering'); // Añade esta línea
+  console.log('App component started rendering');
+  const [initError, setInitError] = useState<string | null>(null);
+  
   useEffect(() => {
     const init = async () => {
       try {
         await initializeSupabase();
       } catch (error) {
         console.error('Failed to initialize Supabase:', error);
+        setInitError(error instanceof Error ? error.message : 'Error de conexión con el servidor');
       }
     };
     
     init();
   }, []);
 
+  if (initError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Error de Conexión</h2>
+          <div className="bg-red-50 p-4 rounded-md mb-4">
+            <p className="text-red-800 font-medium">{initError}</p>
+          </div>
+          <p className="text-gray-600 mb-4">
+            No se pudo conectar con el servicio de Supabase. Por favor, verifica tu conexión a internet y las credenciales en el archivo .env.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Router future={{ v7_startTransition: true , v7_relativeSplatPath: true }}>
+    <Router>
 
       <AuthProvider>
         <ThemeProvider>

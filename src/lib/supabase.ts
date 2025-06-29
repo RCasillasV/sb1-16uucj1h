@@ -1,17 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database.types';
 
-// Use default values for development if environment variables are not set
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-id.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
+// Get environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Log environment variables for debugging
-console.log('Supabase URL exists:', !!supabaseUrl);
-console.log('Supabase Key exists:', !!supabaseKey);
+console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase Key exists:', !!supabaseKey); 
 
-// Show warning instead of throwing error to prevent app from crashing
-if (supabaseUrl === 'https://your-project-id.supabase.co' || !supabaseKey || supabaseKey === 'your-supabase-anon-key') {
-  console.warn('⚠️ Using placeholder Supabase credentials. Please update your .env file with actual values for production use.');
+// Validate environment variables
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase environment variables. Please check your .env file.');
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
@@ -58,27 +58,17 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
 // Initialize the connection and verify access with retry mechanism
 export async function initializeSupabase(retries = 3, delay = 1000) {
   console.log('Initializing Supabase connection...');
-  console.log('Initializing Supabase connection...');
   for (let i = 0; i < retries; i++) {
     try {
-      // Test database access using the correct table name 'tcPacientes'
-      // Use a try/catch block to handle potential errors more gracefully
-      try {
-        const { error } = await supabase
-          .from('tcPacientes')
-          .select('id')
-          .limit(1);
+      // Simple health check to verify connection
+      const { error } = await supabase.auth.getSession();
 
-        if (!error) {
-          console.log('✅ Supabase initialized successfully');
-          return true;
-        }
-        
-        console.warn(`⚠️ Initialization attempt ${i + 1} failed:`, error.message);
-      } catch (innerError) {
-        console.warn(`⚠️ Supabase query failed:`, innerError);
+      if (!error) {
+        console.log('✅ Supabase initialized successfully');
+        return true;
       }
-      
+
+      console.warn(`⚠️ Initialization attempt ${i + 1} failed:`, error.message);
       await new Promise(resolve => setTimeout(resolve, delay));
     } catch (error) {
       console.error(`❌ Initialization attempt ${i + 1} failed:`, error);
@@ -86,6 +76,7 @@ export async function initializeSupabase(retries = 3, delay = 1000) {
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
-  console.warn('⚠️ Supabase initialization failed after multiple attempts');
-  return false;
+  
+  // Throw an error after all retries fail to ensure proper error handling
+  throw new Error('Failed to initialize Supabase after multiple attempts');
 }

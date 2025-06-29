@@ -67,7 +67,7 @@ export function Login() {
   const onSubmit = async (data: LoginFormData) => {
     // Check if account is locked
     if (lockoutUntil && new Date() < lockoutUntil) {
-      const timeLeft = Math.ceil((lockoutUntil.getTime() - new Date().getTime()) / 1000);
+      const timeLeft = Math.ceil((lockoutUntil.getTime() - Date.now()) / 1000);
       setFormError('email', { 
         type: 'locked',
         message: `Cuenta bloqueada. Intente nuevamente en ${timeLeft} segundos`
@@ -79,16 +79,17 @@ export function Login() {
     setError(null);
 
     // Log authentication attempt
-    try {
-      await supabase.from('auth_logs').insert({
-        email: data.email,
-        ip_address: '127.0.0.1', // In production, get real IP
-        success: false, // Will update on success
-        user_agent: navigator.userAgent,
-      });
-    } catch (err) {
-      console.error('Error logging authentication attempt:', err);
-    }
+    // Commented out to avoid additional network requests during troubleshooting
+    // try {
+    //   await supabase.from('auth_logs').insert({
+    //     email: data.email,
+    //     ip_address: '127.0.0.1', // In production, get real IP
+    //     success: false, // Will update on success
+    //     user_agent: navigator.userAgent,
+    //   });
+    // } catch (err) {
+    //   console.error('Error logging authentication attempt:', err);
+    // }
 
     try {
       const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -115,14 +116,14 @@ export function Login() {
       }
 
       // Update auth log on success
-      try {
+      /* try {
         await supabase.from('auth_logs').update({
           success: true,
         }).eq('email', data.email);
       } catch (err) {
         console.error('Error updating auth log:', err);
       }
-
+      */
       // Reset attempts on successful login
       setLoginAttempts(0);
       setLockoutUntil(null);

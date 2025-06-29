@@ -44,9 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active sessions and set the user with role
     const checkSessionAndSetUser = async () => {
-      console.log('checkSessionAndSetUser called'); // Añadir esta línea
+      console.log('checkSessionAndSetUser called');
       try {
-        console.log('Calling supabase.auth.getSession()'); // Añadir esta línea
+        console.log('Calling supabase.auth.getSession()');
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting session:', error);
@@ -56,20 +56,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         const { session } = data;
-        console.log('Session data received:', session); // Añadir esta línea
+        console.log('Session data received:', session);
         
         if (session?.user) {
-          console.log('Session user exists:', session.user); // Añadir esta línea
+          console.log('Session user exists:', session.user);
           try {
             const userRole = await fetchUserRole(session.user.id);
-            console.log('User role fetched:', userRole); // Añadir esta línea
+            console.log('User role fetched:', userRole);
             setUser({ ...session.user, userRole });
           } catch (roleError) {
             console.error('Error fetching user role:', roleError);
             setUser(session.user);
           }
         } else {
-          console.log('No session user found.'); // Añadir esta línea
+          console.log('No session user found.');
           setUser(null);
         }
       } catch (error) {
@@ -77,14 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       } finally {
         setLoading(false);
-        console.log('setLoading(false) executed in checkSessionAndSetUser finally block.'); // Añadir esta línea
+        console.log('setLoading(false) executed in checkSessionAndSetUser finally block.');
       }
     };
     checkSessionAndSetUser();
 
     // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log('Auth state changed:', _event, 'Session:', session); // Añadir esta línea
+      console.log('Auth state changed:', _event, 'Session:', session);
       try {
         if (session?.user) {
           try {
