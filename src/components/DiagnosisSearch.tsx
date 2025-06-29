@@ -127,7 +127,7 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
         const searchTerms = searchTerm.toLowerCase().split(' ');
         
         const { data, error } = await supabase
-          .from('sires'.'tcCIE10')
+          .from('sires.tcCIE10')
           .select('Consecutivo, Catalog_Key, Nombre')
           .or(searchTerms.map(term => `Catalog_Key.ilike.%${term}%,Nombre.ilike.%${term}%`).join(','))
           .limit(10);
