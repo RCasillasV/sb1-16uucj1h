@@ -25,10 +25,6 @@ const baseNavigation: NavigationItem[] = [
   { name: 'Archivos', href: '/patient-files', icon: FolderOpen, roles: ['Administrador', 'Medico'] },
   { name: 'Catálogos', href: '/cie10', icon: NotebookTabs, roles: ['Administrador', 'Medico'] },
 
-  /*  Deshabilitadas por el momento 
-   { name: 'Citas2', href: '/citas', icon: Clock },
-  { name: 'Agenda', href: '/calendar', icon: Calendar },
-  */
 ] as const;
 
 const bottomNavigation: NavigationItem[] = [
