@@ -651,7 +651,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <main className="flex-1 overflow-auto">
-          <div className="pl-2 pr-1 pb-2">
+          <div className="pl-2 pr-2 pb-2">
             {children}
           </div>
         </main>
