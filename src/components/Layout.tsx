@@ -425,7 +425,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Stethoscope className="w-5 h-5" style={{ color: currentTheme.colors.sidebarText }} />
             </div>
             <span className={clsx(
-              "text-base font-bold transition-all duration-300",
+              "text-base font-bold transition-all duration-900",
               isExpanded ? "opacity-100" : "opacity-0"
             )}>
               DoctorSoft+
@@ -460,7 +460,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   }
                 }}
                 className={clsx(
-                  'flex items-center py-2.5 px-3 text-sm transition-all duration-300 relative',
+                  'flex items-center py-2.5 px-3 text-sm transition-all duration-900 relative',
                   isMenuItemActive(item.href) && 'bg-opacity-10'
                 )}
                 style={{
@@ -477,7 +477,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   }}
                 />
                 <span className={clsx(
-                  "ml-3 whitespace-nowrap transition-all duration-300", 
+                  "ml-3 whitespace-nowrap transition-all duration-900", 
                   isMenuItemActive(item.href) && "font-bold",
                   isExpanded ? "opacity-100" : "opacity-0"
                 )}>
@@ -486,7 +486,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {'count' in item && item.count > 0 && (
                   <span 
                     className={clsx(
-                      'absolute text-xs rounded-full w-5 h-5 flex items-center justify-center transition-all duration-300',
+                      'absolute text-xs rounded-full w-5 h-5 flex items-center justify-center transition-all duration-900',
                       isExpanded ? 'right-3' : 'right-1'
                     )}
                     style={{
@@ -528,7 +528,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           }}
         >
           <span className={clsx(
-            "transition-all duration-300",
+            "transition-all duration-900",
             isExpanded ? "opacity-100" : "opacity-0"
           )}>
             Versión {packageJson.version}
@@ -537,7 +537,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       <div 
-        className="flex-1 flex flex-col transition-all duration-300"
+        className="flex-1 flex flex-col transition-all duration-900"
         style={{ marginLeft: isExpanded ? '10rem' : '2rem' }}
       >
         <div 
