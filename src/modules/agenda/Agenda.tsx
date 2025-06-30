@@ -236,12 +236,12 @@ export function Agenda() {
         </div>
 
         <div className={clsx(
-          'flex gap-4 transition-all duration-300',
+          'flex gap-4 transition-all duration-100',
           isMobile && 'flex-col'
         )}>
           {/* Mini Calendar */}
           <div className={clsx(
-            'shrink-0 transition-all duration-300',
+            'shrink-0 transition-all duration-100',
             isMobile && 'w-full'
           )}>
             <MiniCalendar
