@@ -32,7 +32,7 @@ function SettingsCard({ icon: Icon, title, description, onClick }: SettingsCardP
   return (
     <button
       onClick={onClick}
-      className="group w-full h-full aspect-[3/2] p-5 rounded-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]"
+      className="group w-full h-full aspect-[3/2] p-5 rounded-lg transition-all duration-100 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]"
       style={{
         background: currentTheme.colors.surface,
         borderColor: currentTheme.colors.border,
@@ -40,7 +40,7 @@ function SettingsCard({ icon: Icon, title, description, onClick }: SettingsCardP
     >
       <div className="flex flex-col h-full">
         <Icon 
-          className="w-12 h-12 mb-4 transition-transform duration-300 group-hover:scale-110" 
+          className="w-12 h-12 mb-4 transition-transform duration-100 group-hover:scale-110" 
           style={{ color: currentTheme.colors.primary }}
         />
         <h3 
