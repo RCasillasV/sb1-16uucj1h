@@ -21,7 +21,7 @@ export function CollapsibleRecord({ date, content, index }: CollapsibleRecordPro
   return (
     <div
       className={clsx(
-        'border rounded-lg overflow-hidden transition-all duration-300 w-full',
+        'border rounded-lg overflow-hidden transition-all duration-100 w-full',
         isExpanded ? 'shadow-md' : 'hover:shadow-sm'
       )}
       style={{
@@ -52,7 +52,7 @@ export function CollapsibleRecord({ date, content, index }: CollapsibleRecordPro
         role="region"
         aria-labelledby={`record-header-${index}`}
         className={clsx(
-          'transition-all duration-300 origin-top w-full',
+          'transition-all duration-100 origin-top w-full',
           isExpanded ? 'opacity-100' : 'opacity-0 h-0'
         )}
       >
