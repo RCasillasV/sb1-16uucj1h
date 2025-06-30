@@ -256,7 +256,7 @@ export function Agenda() {
           {/* Main Calendar */}
           <div 
             className={clsx(
-              'flex-1 rounded-lg shadow-lg transition-all duration-300 flex flex-col',
+              'flex-1 rounded-lg shadow-lg transition-all duration-100 flex flex-col',
               isMobile && 'hidden'
             )}
             style={{ 
