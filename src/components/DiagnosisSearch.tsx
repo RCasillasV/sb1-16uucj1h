@@ -125,7 +125,7 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
       setIsLoading(true);
       try {
         const searchTerms = searchTerm.toLowerCase().split(' ');
-        
+
         const { data, error } = await supabase
           .schema('sires')
           .from('tcCIE10')
