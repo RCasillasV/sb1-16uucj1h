@@ -12,7 +12,7 @@ const TestCalendar = () => {
   console.log('TestCalendar rendering')
 
   return (
-    <div className="p-4 h-[calc(100vh-2rem)]">
+    <div className="p-4 h-[calc(100vh-1rem)]">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 h-full">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
