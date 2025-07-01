@@ -409,9 +409,8 @@ export function Agenda() {
                     background: ${currentTheme.colors.surface};
                   }
                   .fc-event-title {
-  font-size: 0.7rem !important; /* O el tamaño que desees, por ejemplo, 0.8rem */
-}
-
+                    font-size: 0.6rem !important;
+                  }
                 `}
               </style>
             </div>
