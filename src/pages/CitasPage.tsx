@@ -5,12 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Clock, Info, HelpCircle, FileUp, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Info, HelpCircle, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
-import { FileUpload } from '../components/FileUpload';
 import clsx from 'clsx';
 import { supabase } from '../lib/supabase'; // Importar supabase
 
@@ -68,7 +67,6 @@ export function CitasPage() {
   const [success, setSuccess] = useState(false);
   const [customSymptom, setCustomSymptom] = useState('');
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
 
   // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
@@ -160,9 +158,6 @@ export function CitasPage() {
     setCustomSymptom('');
   };
 
-  const handleFilesUploaded = (files: any[]) => {
-    setUploadedFiles(files);
-  };
   const buttonStyle = {
     base: clsx(
       'px-4 py-2 transition-colors',
@@ -487,26 +482,6 @@ export function CitasPage() {
                     </select>
                   </div>
                 </div>
-              </div>
-
-              {/* Adjuntar Documentos */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <FileUp className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-                  <h3 
-                    className="text-base font-medium"
-                    style={{ color: currentTheme.colors.text }}
-                  >
-                    Adjuntar Documentos
-                  </h3>
-                </div>
-                <FileUpload
-                  onFilesUploaded={handleFilesUploaded}
-                  maxFiles={5}
-                  maxFileSize={15}
-                  folder={`appointments/${selectedPatient?.id || 'temp'}`}
-                  className="w-full"
-                />
               </div>
 
               <div className="flex justify-end gap-3">
