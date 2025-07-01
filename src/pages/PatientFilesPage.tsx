@@ -17,6 +17,32 @@ interface UploadedFile {
   path: string;
 }
 
+function areFilesContentEqual(arr1: UploadedFile[], arr2: UploadedFile[]): boolean {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  for (let i = 0; i < arr1.length; i++) {
+    const file1 = arr1[i];
+    const file2 = arr2[i];
+    if (
+      file1.id !== file2.id ||
+      file1.name !== file2.name ||
+      file1.size !== file2.size ||
+      file1.type !== file2.type ||
+      file1.url !== file2.url ||
+      file1.path !== file2.path
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
+
+
+
+
 export function PatientFilesPage() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
