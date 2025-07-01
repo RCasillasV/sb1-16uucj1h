@@ -52,7 +52,9 @@ export function PatientFilesPage() {
   };
 
   const handleFilesUploaded = (files: UploadedFile[]) => {
-    setInitialFiles(files);
+    if (!areFilesContentEqual(initialFiles, files)) {
+      setInitialFiles(files);
+    }
   };
 
   const buttonStyle = {
