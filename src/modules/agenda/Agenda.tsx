@@ -409,7 +409,7 @@ export function Agenda() {
                     background: ${currentTheme.colors.surface};
                   }
                   .fc-event-title {
-                    font-size: 0.6rem !important;
+                    font-size: 0.7rem !important;
                   }
                 `}
               </style>
