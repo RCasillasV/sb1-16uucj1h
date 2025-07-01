@@ -28,7 +28,7 @@ interface AppointmentFormData {
 
 export function Agenda() {
   const { currentTheme } = useTheme();
-  const { selectedPatient } = useSelectedPatient();
+  const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventInput[]>([]);
   const [showWarningModal, setShowWarningModal] = useState(false);
