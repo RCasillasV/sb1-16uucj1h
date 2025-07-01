@@ -381,28 +381,7 @@ export function CitasPage() {
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                          ![
-                            "fiebre",
-                            "llanto",
-                            "rechazo_alimentacion",
-                            "vomitos",
-                            "diarrea",
-                            "congestion",
-                            "tos",
-                            "erupcion",
-                            "somnolencia",
-                            "irritabilidad",
-                            "estreñimiento",
-                            "regurgitaciones",
-                            "sibilancias",
-                            "secrecion_ocular",
-                            "dificultad_dormir",
-                            "estornudos",
-                            "hipo",
-                            "movimientos_anormales",
-                            "fontanela",
-                            "palidez",
-                          ].includes(id),
+                          !SINTOMAS_PREDEFINIDOS.includes(id),
                       )
                       .map((customTag) => (
                         <div
