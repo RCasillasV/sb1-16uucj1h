@@ -40,7 +40,9 @@ export function PatientFilesPage() {
     setLoading(true);
     try {
       const files = await api.files.getByPatientId(selectedPatient.id);
-      setInitialFiles(files);
+      if (!areFilesContentEqual(initialFiles, files)) {
+        setInitialFiles(files);
+      }
     } catch (err) {
       console.error('Error fetching patient files:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar los archivos del paciente');
