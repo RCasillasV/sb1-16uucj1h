@@ -6,14 +6,14 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import esLocale from '@fullcalendar/core/locales/es';
 import { api } from '../../lib/api'; 
-import { useSelectedPatient } from '../../contexts/SelectedPatientContext';
+import { useSelectedPatient } from '../../contexts/SelectedPatientContext'; 
 import { useTheme } from '../../contexts/ThemeContext';
 import { Modal } from '../../components/Modal';
-import { useNavigate, Link } from 'react-router-dom';
-import { Calendar as CalendarIcon, CalendarPlus } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom'; 
+import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
-import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg } from '@fullcalendar/core';
+import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
 
 interface AppointmentFormData {
   date: Date;
@@ -34,6 +34,8 @@ export function Agenda() {
   const [selectedEvent, setSelectedEvent] = useState<EventInput | null>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showAppointmentDetailsModal, setShowAppointmentDetailsModal] = useState(false);
+  const [currentAppointmentDetails, setCurrentAppointmentDetails] = useState<any>(null);
   const [currentViewDates, setCurrentViewDates] = useState({
     start: startOfMonth(new Date()),
     end: endOfMonth(new Date())
@@ -108,11 +110,12 @@ export function Agenda() {
         title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
         start: new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`),
         end: new Date(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`).getTime() + 15 * 60000),
-        backgroundColor: getEventColor(appointment.estado),
+        backgroundColor: getEventColor(appointment.estado), 
         extendedProps: {
           status: appointment.estado,
           patient: appointment.patients,
           reason: appointment.motivo,
+          notas: appointment.notas,
           consultorio: appointment.consultorio || 1,
           tiempo_evolucion: appointment.tiempo_evolucion,
           unidad_tiempo: appointment.unidad_tiempo,
@@ -137,6 +140,14 @@ export function Agenda() {
     }
   };
 
+  const handleEventDidMount = (info: EventMountArg) => {
+    // Añadir evento de doble clic para mostrar detalles
+    info.el.addEventListener('dblclick', () => {
+      setCurrentAppointmentDetails(info.event);
+      setShowAppointmentDetailsModal(true);
+    });
+  };
+
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     if (!selectedPatient) {
       setShowWarningModal(true);
@@ -153,7 +164,7 @@ export function Agenda() {
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
-    // Navegar a CitasPage para editar la cita
+    // Al hacer un solo clic, navegar a CitasPage para editar la cita
     navigate('/citas', {
       state: {
         editMode: true,
@@ -161,6 +172,10 @@ export function Agenda() {
         selectedPatient: selectedPatient
       }
     });
+  };
+
+  const handleCloseDetailsModal = () => {
+    setShowAppointmentDetailsModal(false);
   };
 
   const handleDateChange = (date: Date) => {
@@ -309,6 +324,7 @@ export function Agenda() {
                 slotDuration="00:15:00"
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
+                eventDidMount={handleEventDidMount}
                 slotLabelInterval="00:15:00"
                 allDaySlot={false}
                 eventTimeFormat={{
@@ -436,6 +452,105 @@ export function Agenda() {
         }
       >
         <p>Por favor, seleccione un paciente primero desde la sección de Pacientes.</p>
+      </Modal>
+
+      {/* Modal de detalles de cita */}
+      <Modal
+        isOpen={showAppointmentDetailsModal}
+        onClose={handleCloseDetailsModal}
+        title="Detalles de la Cita"
+        actions={
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => {
+                if (currentAppointmentDetails) {
+                  navigate('/citas', {
+                    state: {
+                      editMode: true,
+                      appointmentId: currentAppointmentDetails.id,
+                      selectedPatient: currentAppointmentDetails.extendedProps?.patient
+                    }
+                  });
+                }
+              }}
+              className={buttonStyle.base}
+              style={buttonStyle.primary}
+            >
+              Editar Cita
+            </button>
+          </div>
+        }
+      >
+        {currentAppointmentDetails && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${currentTheme.colors.primary}10` }}>
+              <Clock className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+              <div>
+                <p className="text-sm font-medium" style={{ color: currentTheme.colors.text }}>
+                  Fecha y Hora
+                </p>
+                <p className="text-lg font-bold" style={{ color: currentTheme.colors.text }}>
+                  {format(new Date(currentAppointmentDetails.start), 'dd/MM/yyyy HH:mm')} hrs
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${currentTheme.colors.primary}10` }}>
+              <User className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+              <div>
+                <p className="text-sm font-medium" style={{ color: currentTheme.colors.text }}>
+                  Paciente
+                </p>
+                <p className="text-lg font-bold" style={{ color: currentTheme.colors.text }}>
+                  {currentAppointmentDetails.extendedProps?.patient?.Nombre} {currentAppointmentDetails.extendedProps?.patient?.Paterno} {currentAppointmentDetails.extendedProps?.patient?.Materno}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${currentTheme.colors.primary}10` }}>
+              <FileText className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+              <div>
+                <p className="text-sm font-medium" style={{ color: currentTheme.colors.text }}>
+                  Motivo de Consulta
+                </p>
+                <p className="text-lg" style={{ color: currentTheme.colors.text }}>
+                  {currentAppointmentDetails.extendedProps?.reason}
+                </p>
+                {currentAppointmentDetails.extendedProps?.tiempo_evolucion && (
+                  <p className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                    Evolución: {currentAppointmentDetails.extendedProps?.tiempo_evolucion} {currentAppointmentDetails.extendedProps?.unidad_tiempo}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${currentTheme.colors.primary}10` }}>
+              <MapPin className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+              <div>
+                <p className="text-sm font-medium" style={{ color: currentTheme.colors.text }}>
+                  Consultorio
+                </p>
+                <p className="text-lg" style={{ color: currentTheme.colors.text }}>
+                  Consultorio {currentAppointmentDetails.extendedProps?.consultorio}
+                </p>
+              </div>
+            </div>
+
+            {currentAppointmentDetails.extendedProps?.notas && (
+              <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: `${currentTheme.colors.primary}10` }}>
+                <AlertCircle className="h-5 w-5 mt-1" style={{ color: currentTheme.colors.primary }} />
+                <div>
+                  <p className="text-sm font-medium" style={{ color: currentTheme.colors.text }}>
+                    Notas Adicionales
+                  </p>
+                  <p className="text-base" style={{ color: currentTheme.colors.text }}>
+                    {currentAppointmentDetails.extendedProps?.notas}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </Modal>
     </div>
   );
