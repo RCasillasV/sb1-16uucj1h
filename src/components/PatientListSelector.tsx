@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import type { Database } from '../types/database.types';
 import { calculateAge } from '../utils/dateUtils';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSelectedPatient } from '../contexts/SelectedPatientContext'; // Importa useSelectedPatient
 import clsx from 'clsx';
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
@@ -23,6 +24,7 @@ interface PatientListSelectorProps {
 
 export function PatientListSelector({ onSelectPatient, onClose, className = '', isModal = false }: PatientListSelectorProps) {
   const { currentTheme } = useTheme();
+  const { selectedPatient } = useSelectedPatient(); // Obtén el paciente seleccionado del contexto
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -234,7 +236,9 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
                   onClick={() => onSelectPatient(patient)}
                   className="transition-colors cursor-pointer hover:bg-opacity-5"
                   style={{
-                    backgroundColor: 'transparent',
+                    backgroundColor: selectedPatient?.id === patient.id // Aplica el color si el paciente está seleccionado
+                      ? `${currentTheme.colors.primary}20`
+                      : 'transparent',
                     color: currentTheme.colors.text,
                   }}
                 >
