@@ -10,14 +10,16 @@ type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = 'name' | 'age' | 'gender' | null;
 
+// Define constants for different view modes
+const MODAL_PATIENTS_PER_PAGE = 8;
+const FULL_PATIENTS_PER_PAGE = 12;
+
 interface PatientListSelectorProps {
   onSelectPatient: (patient: Patient) => void;
   onClose?: () => void;
   className?: string;
   isModal?: boolean;
 }
-
-const PATIENTS_PER_PAGE = 8; // Reduced for modal view
 
 export function PatientListSelector({ onSelectPatient, onClose, className = '', isModal = false }: PatientListSelectorProps) {
   const { currentTheme } = useTheme();
@@ -27,6 +29,9 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  
+  // Determine how many patients to show per page based on view mode
+  const patientsPerPage = isModal ? MODAL_PATIENTS_PER_PAGE : FULL_PATIENTS_PER_PAGE;
 
   useEffect(() => {
     fetchPatients();
@@ -87,9 +92,9 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
   );
 
   const sortedPatients = sortPatients(filteredPatients);
-  const totalPages = Math.ceil(sortedPatients.length / PATIENTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * PATIENTS_PER_PAGE;
-  const displayPatients = sortedPatients.slice(startIndex, startIndex + PATIENTS_PER_PAGE);
+  const totalPages = Math.ceil(sortedPatients.length / patientsPerPage);
+  const startIndex = (currentPage - 1) * patientsPerPage;
+  const displayPatients = sortedPatients.slice(startIndex, startIndex + patientsPerPage);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
