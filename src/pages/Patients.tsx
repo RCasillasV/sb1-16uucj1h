@@ -67,7 +67,7 @@ export function Patients() {
   }
 
   return (
-    <div className="w-full mx-auto space-y-2">
+    <div className="w-full md:w-11/12 mx-auto space-y-2">
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center gap-2">
           <Users className="h-6 w-6" style={{ color: currentTheme.colors.text }} />
