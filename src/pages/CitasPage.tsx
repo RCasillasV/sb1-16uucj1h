@@ -397,14 +397,6 @@ export function CitasPage() {
                         }
                       }}
                     />
-                    <button
-                      type="button"
-                      onClick={handleAddSymptom}
-                      className={buttonStyle.base}
-                      style={buttonStyle.primary}
-                    >
-                      Agregar
-                    </button>
                   </div>
                 </div>
               </div>
