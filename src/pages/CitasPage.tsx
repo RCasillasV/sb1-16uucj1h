@@ -396,8 +396,7 @@ export function CitasPage() {
                           handleAddSymptom();
                         }
                       }}
-                    />
-                    
+                    />                
                   </div>
                 </div>
               </div>
