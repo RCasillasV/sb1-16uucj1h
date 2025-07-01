@@ -489,7 +489,7 @@ export function CitasPage() {
                 </div>
               </div>
 
-              {/* Adjuntar Documentos }
+              {/* Adjuntar Documentos */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <FileUp className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
@@ -508,7 +508,7 @@ export function CitasPage() {
                   className="w-full"
                 />
               </div>
-*/
+
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
