@@ -8,7 +8,8 @@ import esLocale from '@fullcalendar/core/locales/es';
 import { api } from '../../lib/api'; 
 import { useSelectedPatient } from '../../contexts/SelectedPatientContext'; 
 import { useTheme } from '../../contexts/ThemeContext';
-import { Modal } from '../../components/Modal';
+import { Modal } from '../../components/Modal'; 
+import { PatientListSelector } from '../../components/PatientListSelector';
 import { useNavigate, Link } from 'react-router-dom'; 
 import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
@@ -31,6 +32,7 @@ export function Agenda() {
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventInput[]>([]);
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const [showPatientSelectionModal, setShowPatientSelectionModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventInput | null>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -150,7 +152,11 @@ export function Agenda() {
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     if (!selectedPatient) {
-      setShowWarningModal(true);
+      setShowPatientSelectionModal(true);
+      // Store the selected date for later use when a patient is selected
+      appointmentData = {
+        date: selectInfo.start
+      };
       return;
     }
 
@@ -435,6 +441,39 @@ export function Agenda() {
       </div>
 
       <Modal
+        isOpen={showPatientSelectionModal}
+        onClose={() => setShowPatientSelectionModal(false)}
+        title="Seleccionar Paciente"
+        actions={
+          <button
+            className={buttonStyle.base}
+            style={buttonStyle.primary}
+            onClick={() => setShowPatientSelectionModal(false)}
+          >
+            Cancelar
+          </button>
+        }
+      >
+        <PatientListSelector 
+          onSelectPatient={(patient) => {
+            setSelectedPatient(patient);
+            setShowPatientSelectionModal(false);
+            
+            // If we have stored appointment data, navigate to citas with it
+            if (appointmentData?.date) {
+              navigate('/citas', {
+                state: {
+                  selectedDate: appointmentData.date,
+                  selectedPatient: patient
+                }
+              });
+            }
+          }}
+          isModal={true}
+        />
+      </Modal>
+
+      <Modal
         isOpen={showWarningModal}
         onClose={() => setShowWarningModal(false)}
         title="Selección de Paciente Requerida"
@@ -444,14 +483,14 @@ export function Agenda() {
             style={buttonStyle.primary}
             onClick={() => {
               setShowWarningModal(false);
-              navigate('/patients');
+              setShowPatientSelectionModal(true);
             }}
           >
             Entendido
           </button>
         }
       >
-        <p>Por favor, seleccione un paciente primero desde la sección de Pacientes.</p>
+        <p>Para continuar, necesita seleccionar un paciente.</p>
       </Modal>
 
       {/* Modal de detalles de cita */}
