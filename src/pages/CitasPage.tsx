@@ -376,6 +376,51 @@ export function CitasPage() {
                         </button>
                       );
                     })}
+
+                    {/* Mostrar síntomas personalizados agregados */}
+                    {form.watch('sintomas_asociados')
+                      ?.filter(
+                        (id) =>
+                          ![
+                            "fiebre",
+                            "llanto",
+                            "rechazo_alimentacion",
+                            "vomitos",
+                            "diarrea",
+                            "congestion",
+                            "tos",
+                            "erupcion",
+                            "somnolencia",
+                            "irritabilidad",
+                            "estreñimiento",
+                            "regurgitaciones",
+                            "sibilancias",
+                            "secrecion_ocular",
+                            "dificultad_dormir",
+                            "estornudos",
+                            "hipo",
+                            "movimientos_anormales",
+                            "fontanela",
+                            "palidez",
+                          ].includes(id),
+                      )
+                      .map((customTag) => (
+                        <div
+                          key={customTag}
+                          className="flex items-center bg-slate-800 text-white px-2 py-0.5 rounded-md text-xs font-medium border border-slate-900"
+                        >
+                          {customTag}
+                          <button
+                            type="button"
+                            className="ml-1 text-white hover:text-slate-200"
+                            onClick={() => {
+                              form.setValue('sintomas_asociados', form.getValues('sintomas_asociados')?.filter((id) => id !== customTag));
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
                   </div>
 
                   <div className="flex gap-2">
@@ -393,7 +438,13 @@ export function CitasPage() {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          handleAddSymptom();
+                          if (e.currentTarget.value.trim()) {
+                            const newTag = e.currentTarget.value.trim()
+                            if (newTag && !form.getValues('sintomas_asociados')?.includes(newTag)) {
+                              form.setValue('sintomas_asociados', [...(form.getValues('sintomas_asociados') || []), newTag]);
+                              e.currentTarget.value = "";
+                            }
+                          }
                         }
                       }}
                     />                
