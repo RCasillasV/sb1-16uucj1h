@@ -408,6 +408,10 @@ export function Agenda() {
                     z-index: 3;
                     background: ${currentTheme.colors.surface};
                   }
+                  .fc-event-title {
+  font-size: 0.75rem !important; /* O el tamaño que desees, por ejemplo, 0.8rem */
+}
+
                 `}
               </style>
             </div>
