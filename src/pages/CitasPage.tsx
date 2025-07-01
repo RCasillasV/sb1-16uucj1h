@@ -442,7 +442,7 @@ export function CitasPage() {
                             const newTag = e.currentTarget.value.trim()
                             if (newTag && !form.getValues('sintomas_asociados')?.includes(newTag)) {
                               form.setValue('sintomas_asociados', [...(form.getValues('sintomas_asociados') || []), newTag]);
-                              e.currentTarget.value = "";
+                              setCustomSymptom('');;
                             }
                           }
                         }
