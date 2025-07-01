@@ -383,7 +383,7 @@ export function CitasPage() {
                       type="text"
                       value={customSymptom}
                       onChange={(e) => setCustomSymptom(e.target.value)}
-                      placeholder="Agregar nuevo síntoma"
+                      placeholder="Agregar otro síntoma"
                       className="flex-1 p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
