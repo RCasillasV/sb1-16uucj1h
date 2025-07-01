@@ -525,7 +525,7 @@ export function CitasPage() {
                   className={clsx(buttonStyle.base, 'disabled:opacity-50')}
                   style={buttonStyle.primary}
                 >
-                  {loading ? 'Guardando...' : navigationState?.editMode ? 'Actualizar Cita' : 'Agendar Consulta'}
+                  {loading ? 'Guardando...' : navigationState?.editMode ? 'Actualizar' : 'Agendar'}
                 </button>
               </div>
             </form>
