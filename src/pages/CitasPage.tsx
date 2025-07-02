@@ -362,7 +362,6 @@ export function CitasPage() {
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {/* Use dynamicSymptoms here */}
-                    console.log()
                     {dynamicSymptoms.map(sintoma => {
                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma_nombre);
                       return (
