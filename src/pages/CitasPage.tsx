@@ -195,3 +195,389 @@ export function CitasPage() {
           onClick={() => navigate('/patients')}
           className={buttonStyle.base}
           style={buttonStyle.
+                   >
+          Ir a Pacientes
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-2">
+      <div 
+        className="bg-white rounded-lg shadow-lg overflow-hidden"
+        style={{ 
+          background: currentTheme.colors.surface,
+          borderColor: currentTheme.colors.border,
+        }}
+      >
+        <div 
+          className="p-4 border-b"
+          style={{ 
+            background: `${currentTheme.colors.primary}10`,
+            borderColor: currentTheme.colors.border,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <Calendar className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+            <div>
+              <h1 
+                className="text-2xl font-bold"
+                style={{ color: currentTheme.colors.text }}
+              >
+                {navigationState?.editMode ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
+              </h1>
+              <p 
+                className="text-sm"
+                style={{ color: currentTheme.colors.textSecondary }}
+              >
+                {selectedPatient.Nombre} {selectedPatient.Paterno} {selectedPatient.Materno}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {success ? (
+            <div 
+              className="p-4 rounded-md"
+              style={{ 
+                background: '#DEF7EC',
+                color: '#03543F',
+              }}
+            >
+              Cita agendada exitosamente. Redirigiendo...
+            </div>
+          ) : (
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              
+              {/* Tipo de Consulta */}
+              <div>
+                <label 
+                  className="block text-base font-medium mb-1"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  Tipo de Consulta
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'primera', label: 'Primera vez' },
+                    { value: 'seguimiento', label: 'Seguimiento' },
+                    { value: 'urgencia', label: 'Urgencia' },
+                    { value: 'control', label: 'Control rutinario' },
+                  ].map(option => (
+                    <label 
+                      key={option.value}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        {...form.register('tipo_consulta')}
+                        value={option.value}
+                        className="rounded-full border-gray-300"
+                      />
+                      <span style={{ color: currentTheme.colors.text }}>
+                        {option.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Motivo Principal y Tiempo de Evolución */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label 
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Motivo Principal
+                  </label>
+                  <input
+                    type="text"
+                    {...form.register('motivo')}
+                    placeholder="Ej: Dolor de cabeza, Fiebre"
+                    className="w-full p-2 rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Tiempo de Evolución
+                    </label>
+                    <input
+                      type="number"
+                      {...form.register('tiempo_evolucion')}
+                      placeholder="Ej: 2"
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Unidad
+                    </label>
+                    <select
+                      {...form.register('unidad_tiempo')}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      <option value="horas">Horas</option>
+                      <option value="dias">Días</option>
+                      <option value="semanas">Semanas</option>
+                      <option value="meses">Meses</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Síntomas Asociados */}
+              <div>
+                <label 
+                  className="block text-base font-medium mb-2"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  Síntomas Asociados
+                </label>
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {SINTOMAS_PREDEFINIDOS.map(sintoma => {
+                      const isSelected = form.watch('sintomas_asociados').includes(sintoma);
+                      return (
+                        <button
+                          key={sintoma}
+                          type="button"
+                          onClick={() => {
+                            const current = form.getValues('sintomas_asociados');
+                            if (isSelected) {
+                              form.setValue('sintomas_asociados', 
+                                current.filter(s => s !== sintoma)
+                              );
+                            } else {
+                              form.setValue('sintomas_asociados', [...current, sintoma]);
+                            }
+                          }}
+                          className={clsx(
+                            'px-3 py-1 rounded-md text-sm transition-colors border',
+                            isSelected && 'bg-slate-800 text-white border-slate-900',
+                            !isSelected && 'bg-white hover:bg-slate-50 border-slate-200'
+                          )}
+                          style={{
+                            color: isSelected ? '#fff' : currentTheme.colors.text,
+                          }}
+                        >
+                          {sintoma}
+                        </button>
+                      );
+                    })}
+
+                    {/* Mostrar síntomas personalizados agregados */}
+                    {form.watch('sintomas_asociados')
+                      ?.filter(
+                        (id) =>
+                          !SINTOMAS_PREDEFINIDOS.includes(id),
+                      )
+                      .map((customTag) => (
+                        <div
+                          key={customTag}
+                          className="flex items-center bg-slate-800 text-white px-2 py-0.5 rounded-md text-xs font-medium border border-slate-900"
+                        >
+                          {customTag}
+                          <button
+                            type="button"
+                            className="ml-1 text-white hover:text-slate-200"
+                            onClick={() => {
+                              form.setValue('sintomas_asociados', form.getValues('sintomas_asociados')?.filter((id) => id !== customTag));
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customSymptom}
+                      onChange={(e) => setCustomSymptom(e.target.value)}
+                      placeholder="Agregar otro síntoma"
+                      className="flex-1 p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (e.currentTarget.value.trim()) {
+                            const newTag = e.currentTarget.value.trim()
+                            if (newTag && !form.getValues('sintomas_asociados')?.includes(newTag)) {
+                              form.setValue('sintomas_asociados', [...(form.getValues('sintomas_asociados') || []), newTag]);
+                              setCustomSymptom('');;
+                            }
+                          }
+                        }
+                      }}
+                    />                
+                  </div>
+                </div>
+              </div>
+
+              {/* Agenda de Citas */}
+              <div>
+                <h3 
+                  className="text-base font-medium mb-2"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  Agenda de Citas
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Fecha
+                    </label>
+                    <input
+                      type="date"
+                      {...form.register('fecha_cita')}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                      min={format(new Date(), 'yyyy-MM-dd')}
+                    />
+                  </div>
+
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Hora
+                    </label>
+                    <select
+                      {...form.register('hora_cita')}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      {HORARIOS_CONSULTA.map(hora => (
+                        <option key={hora} value={hora}>{hora}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Consultorio
+                    </label>
+                    <select
+                      {...form.register('consultorio', { valueAsNumber: true })}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      <option value={1}>Consultorio 1</option>
+                      <option value={2}>Consultorio 2</option>
+                      <option value={3}>Consultorio 3</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className={clsx(buttonStyle.base, 'border')}
+                  style={{
+                    background: 'transparent',
+                    borderColor: currentTheme.colors.border,
+                    color: currentTheme.colors.text,
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={clsx(buttonStyle.base, 'disabled:opacity-50')}
+                  style={buttonStyle.primary}
+                >
+                  {loading ? 'Guardando...' : navigationState?.editMode ? 'Actualizar' : 'Agendar'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Modal de error de fecha/hora */}
+          <Modal
+            isOpen={showDateTimeErrorModal}
+            onClose={() => setShowDateTimeErrorModal(false)}
+            title="Fecha y Hora No Válidas"
+            actions={
+              <button
+                onClick={() => setShowDateTimeErrorModal(false)}
+                className={buttonStyle.base}
+                style={buttonStyle.primary}
+              >
+                Aceptar
+              </button>
+            }
+          >
+            <div className="flex items-start gap-3">
+              <AlertTriangle 
+                className="h-6 w-6 mt-1 flex-shrink-0" 
+                style={{ color: '#F59E0B' }} 
+              />
+              <div>
+                <p className="mb-2" style={{ color: currentTheme.colors.text }}>
+                  No es posible agendar citas para fechas y horas anteriores al momento actual.
+                </p>
+                <p style={{ color: currentTheme.colors.textSecondary }}>
+                  Por favor, seleccione una fecha y hora futura.
+                </p>
+              </div>
+            </div>
+          </Modal>
+        </div>
+      </div>
+    </div>
+  );
+}
