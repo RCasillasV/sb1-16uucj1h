@@ -145,6 +145,9 @@ export function CitasPage() {
           p_fechanac: format(birthDate, 'yyyy/MM/dd'), 
           p_especialidad: 'Ortopedista' 
         });    
+        console.log('DEBUG: Enviando a sintomasconsulta:');
+        console.log('DEBUG: p_fechanac:', format(Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd'));
+
         if (error) throw error;
         // Update state with the fetched symptoms
         setDynamicSymptoms(data || []);
