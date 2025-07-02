@@ -395,7 +395,7 @@ export function CitasPage() {
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                          !dynamicSymptoms.includes(id), // Filter against dynamicSymptoms
+                         !dynamicSymptoms.some(sintoma => sintoma.sintoma_nombre === id),
                       )
                       .map((customTag) => (
                         <div
