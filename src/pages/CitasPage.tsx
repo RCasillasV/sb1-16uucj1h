@@ -145,7 +145,7 @@ export function CitasPage() {
           p_fechanac: format(birthDate, 'yyyy-MM-dd'), 
           p_especialidad: 'Ginecólogo' 
         });    
-        console.log("Fecha Nacimiento:",birthDate, "Especialidad médica:")
+        console.log("Fecha Nacimiento:",format(birthDate, 'yyyy-MM-dd'), "Especialidad médica:")
         if (error) throw error;
         // Update state with the fetched symptoms
         setDynamicSymptoms(data || []);
