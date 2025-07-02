@@ -139,11 +139,11 @@ export function CitasPage() {
       try {
         // Calculate age in months
         const birthDate = new Date(selectedPatient.FechaNacimiento);
-        const ageInMonths = differenceInMonths(new Date(), birthDate);
         
         // Call the RPC function
         const { data, error } = await supabase.rpc('sintomasconsulta', {
-          edad_meses: ageInMonths
+          edad_meses: birthDate,
+          especialidad: 'Urólogo'
         });
         
         if (error) throw error;
