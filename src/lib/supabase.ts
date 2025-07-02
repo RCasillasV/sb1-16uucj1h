@@ -6,8 +6,8 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Log environment variables for debugging
-console.log('Supabase URL exists:', !!supabaseUrl);
-console.log('Supabase Key exists:', !!supabaseKey);
+// console.log('Supabase URL exists:', !!supabaseUrl);
+// console.log('Supabase Key exists:', !!supabaseKey);
 
 // Validate environment variables
 if (!supabaseUrl || !supabaseKey) {
