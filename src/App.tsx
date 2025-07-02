@@ -42,7 +42,7 @@ const PageLoader = () => {
 };
 
 function App() {
-  console.log('App component started rendering');
+  //console.log('App component started rendering');
   const [initError, setInitError] = useState<Error | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   
