@@ -194,7 +194,8 @@ export function CitasPage() {
         <button
           onClick={() => navigate('/patients')}
           className={buttonStyle.base}
-          style={buttonStyle.primary}  >
+          style={buttonStyle.primary}
+        >
           Ir a Pacientes
         </button>
       </div>
@@ -361,7 +362,8 @@ export function CitasPage() {
                 </label>
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
-                    {SINTOMAS_PREDEFINIDOS.map(sintoma => {
+                    {/* Use dynamicSymptoms here */}
+                    {dynamicSymptoms.map(sintoma => {
                       const isSelected = form.watch('sintomas_asociados').includes(sintoma);
                       return (
                         <button
@@ -395,7 +397,7 @@ export function CitasPage() {
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                          !SINTOMAS_PREDEFINIDOS.includes(id),
+                          !dynamicSymptoms.includes(id), // Filter against dynamicSymptoms
                       )
                       .map((customTag) => (
                         <div
