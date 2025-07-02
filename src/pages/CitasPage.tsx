@@ -144,7 +144,8 @@ export function CitasPage() {
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: format(birthDate, 'yyyy-MM-dd'), 
           p_especialidad: 'Ginecólogo' 
-        });     
+        });    
+        console.log("Fecha Nacimiento:",p_fechanac, "Especialidad médica:",p_especialidad),
         if (error) throw error;
         // Update state with the fetched symptoms
         setDynamicSymptoms(data || []);
@@ -200,9 +201,7 @@ export function CitasPage() {
     );
   }
 
-  return (
-    console.log("Fecha Nacimiento:",p_fechanac, "Especialidad médica:",p_especialidad),
-    
+  return (  
     <div className="max-w-4xl mx-auto p-2">
       <div 
         className="bg-white rounded-lg shadow-lg overflow-hidden"
