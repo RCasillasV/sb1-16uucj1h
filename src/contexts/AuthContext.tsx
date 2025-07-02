@@ -56,10 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         const { session } = data;
-        console.log('Session data received:', session);
+        //console.log('Session data received:', session);
         
         if (session?.user) {
-          console.log('Session user exists:', session.user);
+          // console.log('Session user exists:', session.user);
           try {
             const userRole = await fetchUserRole(session.user.id);
             console.log('User role fetched:', userRole);
