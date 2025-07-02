@@ -3,11 +3,11 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export function PrivateRoute({ children }: { children: React.ReactNode }) {
-  console.log('PrivateRoute component rendering'); // Añadir esta línea
+  //console.log('PrivateRoute component rendering'); // Añadir esta línea
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  console.log('PrivateRoute - user:', user, 'loading:', loading); // Añadir esta línea
+  //console.log('PrivateRoute - user:', user, 'loading:', loading); // Añadir esta línea
 
   if (loading) {
     console.log('PrivateRoute - Loading, showing spinner.');
