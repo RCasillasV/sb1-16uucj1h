@@ -201,6 +201,8 @@ export function CitasPage() {
   }
 
   return (
+    console.log("Fecha Nacimiento:",p_fechanac, "Especialidad médica:",p_especialidad)
+    
     <div className="max-w-4xl mx-auto p-2">
       <div 
         className="bg-white rounded-lg shadow-lg overflow-hidden"
@@ -361,6 +363,7 @@ export function CitasPage() {
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {/* Use dynamicSymptoms here */}
+                    console.log()
                     {dynamicSymptoms.map(sintoma => {
                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma_nombre);
                       return (
