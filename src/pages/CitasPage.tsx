@@ -141,13 +141,11 @@ export function CitasPage() {
         const birthDate = new Date(selectedPatient.FechaNacimiento);
         
         // Call the RPC function
-        const { data, error } = await supabase.rpc('sintomasconsulta', {
-          edad_meses: birthDate,
-          especialidad: 'Urólogo'
-        });
-        
+        const { data, error } = await supabase.rpc('sintomasconsulta', { 
+          p_fechanac: format(birthDate, 'yyyy-MM-dd'), 
+          p_especialidad: 'Urólogo' 
+        });     
         if (error) throw error;
-        
         // Update state with the fetched symptoms
         setDynamicSymptoms(data || []);
       } catch (error) {
