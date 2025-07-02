@@ -194,8 +194,7 @@ export function CitasPage() {
         <button
           onClick={() => navigate('/patients')}
           className={buttonStyle.base}
-          style={buttonStyle.
-                   >
+          style={buttonStyle.primary}  >
           Ir a Pacientes
         </button>
       </div>
