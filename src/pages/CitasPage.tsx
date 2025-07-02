@@ -143,7 +143,7 @@ export function CitasPage() {
         // Call the RPC function
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: format(birthDate, 'yyyy-MM-dd'), 
-          p_especialidad: 'Oftalmólogo ' 
+          p_especialidad: 'Oftalmólogo' 
         });    
         if (error) throw error;
         // Update state with the fetched symptoms
