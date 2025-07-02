@@ -143,7 +143,7 @@ export function CitasPage() {
         // Call the RPC function
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: format(birthDate, 'yyyy-MM-dd'), 
-          p_especialidad: '' 
+          p_especialidad: 'Nutriologo' 
         });     
         if (error) throw error;
         // Update state with the fetched symptoms
