@@ -64,7 +64,7 @@ export async function initializeSupabase(retries = 3, delay = 1000) {
       const { data, error } = await supabase.auth.getSession();
  
       if (!error) {
-        console.log('✅ Supabase initialized successfully', data);
+        //console.log('✅ Supabase initialized successfully', data);
         return true;
       }
 
