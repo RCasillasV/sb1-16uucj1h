@@ -1,2 +1,3 @@
 ALTER TABLE "tcCitas"
 ADD COLUMN duracion_minutos INTEGER DEFAULT 30;
+ADD COLUMN hora_fin time without time zone null;
