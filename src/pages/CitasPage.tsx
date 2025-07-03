@@ -473,7 +473,7 @@ export function CitasPage() {
                         >
                           {sintoma.nombre}
                         </button>
-                      );
+                      ); 
                     })}
 
                     {/* Mostrar síntomas personalizados agregados */}
