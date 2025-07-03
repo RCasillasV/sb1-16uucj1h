@@ -537,7 +537,7 @@ export function CitasPage() {
                 >
                   Agenda de Citas
                 </h3 >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                   <div>
                     <label 
                       className="block text-sm font-medium mb-1"
