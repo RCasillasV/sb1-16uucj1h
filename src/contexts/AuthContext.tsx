@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active sessions and set the user with role
     const checkSessionAndSetUser = async () => {
-      console.log('checkSessionAndSetUser called');
+      //console.log('checkSessionAndSetUser called');
       try {
         console.log('Calling supabase.auth.getSession()');
         const { data, error } = await supabase.auth.getSession();
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       } finally {
         setLoading(false);
-        console.log('setLoading(false) executed in checkSessionAndSetUser finally block.');
+        //console.log('setLoading(false) executed in checkSessionAndSetUser finally block.');
       }
     };
     checkSessionAndSetUser();
