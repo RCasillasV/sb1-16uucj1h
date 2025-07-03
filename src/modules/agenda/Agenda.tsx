@@ -467,15 +467,15 @@ export function Agenda() {
             
             // If we have stored appointment data, navigate to citas with it
             //if (appointmentData?.date) {
-            if (tempSelectedDate) {
+            //if (tempSelectedDate) {
               navigate('/citas', {
                 state: {
                   //selectedDate: appointmentData.date,
-                  selectedDate: tempSelectedDate,
+                 // selectedDate: tempSelectedDate,
                   selectedPatient: patient
                 }
               });
-              setTempSelectedDate(null); 
+              //setTempSelectedDate(null); 
             }
           }}
           isModal={true}
