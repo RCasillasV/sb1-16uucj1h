@@ -1,8 +1,9 @@
+// src/lib/api.ts
 import { supabase } from './supabase';
 import type { Database } from '../types/database.types';
 
 type Tables = Database['public']['Tables'];
-type Appointment = Tables['tcCitas']['Row']; // Changed from 'appointments' to 'tcCitas'
+type Appointment = Tables['tcCitas']['Row'];
 type Patient = Tables['tcPacientes']['Row'];
 type MedicalRecord = Tables['medical_records']['Row'];
 type ClinicalHistory = Tables['clinical_histories']['Row'];
@@ -885,6 +886,26 @@ export const api = {
       }
 
       return prescriptionData;
+    }
+  },
+  businessUnits: {
+    async getById(idBu: string) {
+      try {
+        const { data, error } = await supabase
+          .from('tcBu')
+          .select('Especialidad')
+          .eq('idBu', idBu)
+          .single();
+
+        if (error) {
+          console.error('Error fetching business unit specialty:', error);
+          throw error;
+        }
+        return data?.Especialidad || null;
+      } catch (error) {
+        console.error('Error in getBusinessUnitSpecialty:', error);
+        throw error;
+      }
     }
   }
 };
