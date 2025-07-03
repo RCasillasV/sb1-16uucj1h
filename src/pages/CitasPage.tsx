@@ -1,3 +1,4 @@
+// src/pages/CitasPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -137,13 +138,36 @@ export function CitasPage() {
       setSymptomsError(null);
       
       try {
-        // Calculate age in months
-        const birthDate = new Date(selectedPatient.FechaNacimiento);
-        
+        // Get authenticated user's idbu
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          setSymptomsError('Usuario no autenticado');
+          setIsLoadingSymptoms(false);
+          return;
+        }
+
+        const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
+          user_id: session.user.id
+        });
+
+        if (userError || !userData?.idbu) {
+          setSymptomsError('No se pudo obtener la unidad de negocio del usuario');
+          setIsLoadingSymptoms(false);
+          return;
+        }
+
+        // Get specialty from business unit
+        const specialty = await api.businessUnits.getById(userData.idbu);
+        if (!specialty) {
+          setSymptomsError('No se pudo obtener la especialidad de la unidad de negocio');
+          setIsLoadingSymptoms(false);
+          return;
+        }
+
         // Call the RPC function
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: selectedPatient.FechaNacimiento.replace(/-/g, '/'), 
-          p_especialidad: 'Pediatría' 
+          p_especialidad: specialty // Use dynamically obtained specialty
         });    
         console.log('DEBUG: Enviando a sintomasconsulta:');
         console.log('DEBUG: p_fechanac:', selectedPatient.FechaNacimiento.replace(/-/g, '/'));
