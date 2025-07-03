@@ -1,4 +1,3 @@
-// src/pages/CitasPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -14,11 +13,7 @@ import { Modal } from '../components/Modal';
 import { supabase } from '../lib/supabase';
 import clsx from 'clsx';
 
-const HORARIOS_CONSULTA = Array.from({ length: 21 }, (_, i) => {
-  const hour = Math.floor(i / 2) + 8;
-  const minutes = (i % 2) * 30;
-  return `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-});
+// ... (otras definiciones)
 
 const formSchema = z.object({
   tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia', 'control']),
@@ -32,11 +27,10 @@ const formSchema = z.object({
   urgente: z.boolean().default(false),
   mismo_motivo: z.boolean().default(false), // This field is for UI logic, not directly for DB
   notas: z.string().optional(),
-  // Nuevos campos
-  duracion_minutos: z.number().refine(val => [15, 20, 30, 40, 60].includes(val), {
+  duracion_minutos: z.number().refine(val => [15, 20, 30, 40, 60].includes(val), { // Nuevo campo
     message: "La duración debe ser 15, 20, 30, 40 o 60 minutos."
   }),
-  hora_fin: z.string(),
+  hora_fin: z.string(), // Nuevo campo
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -53,8 +47,9 @@ export function CitasPage() {
   const [success, setSuccess] = useState(false);
   const [customSymptom, setCustomSymptom] = useState('');
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
-  const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false);
+  const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
 
+  // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
     selectedDate?: Date;
     editMode?: boolean;
@@ -62,10 +57,12 @@ export function CitasPage() {
     selectedPatient?: any;
   } | null;
 
+  // Configurar fecha inicial basada en la navegación
   const initialDate = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'yyyy-MM-dd')
     : format(new Date(), 'yyyy-MM-dd');
 
+  // Configurar hora inicial basada en la navegación
   const initialTime = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'HH:mm')
     : '09:00';
@@ -137,6 +134,7 @@ export function CitasPage() {
   const onSubmit = async (data: FormData) => {
     if (!selectedPatient) return;
     
+    // Validar que la fecha y hora sean futuras
     const selectedDateTime = new Date(`${data.fecha_cita}T${data.hora_cita}:00`);
     const now = new Date();
     
@@ -180,6 +178,7 @@ export function CitasPage() {
     }
   };
 
+  // Fetch symptoms based on patient age
   useEffect(() => {
     if (!selectedPatient || !selectedPatient.FechaNacimiento) return;
     
@@ -446,6 +445,7 @@ export function CitasPage() {
                 </label>
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
+                    {/* Use dynamicSymptoms here */}
                     {dynamicSymptoms.map(sintoma => {
                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.nombre);
                       return (
@@ -476,6 +476,7 @@ export function CitasPage() {
                       );
                     })}
 
+                    {/* Mostrar síntomas personalizados agregados */}
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
