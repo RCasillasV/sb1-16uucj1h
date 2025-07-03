@@ -59,7 +59,7 @@ export function BusinessUnits() {
     try {
       const { data, error } = await supabase
         .from('tcBu')
-        .select('idBu, Nombre, Descripcion, Calle, Colonia, Ciudad, Estado, CP, RFC, dtVigencia')
+        .select('idBu, Nombre, Descripcion, Calle, Colonia, Ciudad, Estado, CP, RFC, dtVigencia, Especialidad')
         .order('Nombre');
 
       if (error) throw error;
