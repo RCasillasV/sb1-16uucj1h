@@ -6,7 +6,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../lib/api';
 import { supabase } from '../lib/supabase';
-import { format, parseISO } from 'date-fns'; // Import parseISO
+import { Sidebar } from './Sidebar'; // Re-añadir esta línea
+import { MainHeader } from './MainHeader'; // Re-añadir esta línea
+import { format, parseISO } from 'date-fns';
 import packageJson from '../../package.json';
 import clsx from 'clsx';
 
