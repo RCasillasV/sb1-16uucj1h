@@ -20,7 +20,7 @@ export function PrivateRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    console.log('PrivateRoute - User not authenticated, redirecting to login.');
+    //console.log('PrivateRoute - User not authenticated, redirecting to login.');
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
   return <>{children}</>;
