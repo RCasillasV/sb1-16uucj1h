@@ -146,7 +146,7 @@ export function CitasPage() {
           p_especialidad: 'Ortopedista' 
         });    
         console.log('DEBUG: Enviando a sintomasconsulta:');
-        console.log('DEBUG: p_fechanac:', selectedPatient.FechaNacimiento);
+        console.log('DEBUG: p_fechanac:', selectedPatient.FechaNacimiento.replace(/-/g, '/'));
         console.log('DEBUG: fechaNacimiento:', selectedPatient.FechaNacimiento);
 
         if (error) throw error;
