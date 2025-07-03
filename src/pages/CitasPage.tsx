@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, differenceInMonths } from 'date-fns';
+import { format, differenceInMonths, isBefore, parseISO } from 'date-fns'; // Added parseISO and isBefore
 import { es } from 'date-fns/locale';
 import { ArrowLeft, Calendar, Clock, Info, HelpCircle, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -48,6 +48,7 @@ export function CitasPage() {
   const [success, setSuccess] = useState(false);
   const [customSymptom, setCustomSymptom] = useState('');
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
+  const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // New state
 
   // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
@@ -83,6 +84,35 @@ export function CitasPage() {
       notas: '',
     },
   });
+
+  // Effect to check for previous appointments
+  useEffect(() => {
+    const checkPreviousAppointments = async () => {
+      if (!selectedPatient) {
+        setHasPreviousAppointments(false);
+        return;
+      }
+      try {
+        const patientAppointments = await api.appointments.getByPatientId(selectedPatient.id);
+        const now = new Date();
+        const previous = patientAppointments.some(app => {
+          const appDateTime = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
+          return isBefore(appDateTime, now);
+        });
+        setHasPreviousAppointments(previous);
+        // If there are previous appointments, "Primera vez" should not be selected by default
+        if (previous && form.getValues('tipo_consulta') === 'primera') {
+          form.setValue('tipo_consulta', 'seguimiento'); // Default to 'seguimiento'
+        }
+      } catch (error) {
+        console.error('Error checking previous appointments:', error);
+        setHasPreviousAppointments(false);
+      }
+    };
+
+    checkPreviousAppointments();
+  }, [selectedPatient, form]);
+
 
   const onSubmit = async (data: FormData) => {
     if (!selectedPatient) return;
@@ -290,8 +320,24 @@ export function CitasPage() {
                   Tipo de Consulta
                 </label>
                 <div className="flex flex-wrap gap-2">
+                  {/* Conditionally render "Primera vez" */}
+                  {!hasPreviousAppointments && (
+                    <label 
+                      key="primera"
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        {...form.register('tipo_consulta')}
+                        value="primera"
+                        className="rounded-full border-gray-300"
+                      />
+                      <span style={{ color: currentTheme.colors.text }}>
+                        Primera vez
+                      </span>
+                    </label>
+                  )}
                   {[
-                    { value: 'primera', label: 'Primera vez' },
                     { value: 'seguimiento', label: 'Seguimiento' },
                     { value: 'urgencia', label: 'Urgencia' },
                     { value: 'control', label: 'Control rutinario' },
@@ -484,7 +530,7 @@ export function CitasPage() {
                   style={{ color: currentTheme.colors.text }}
                 >
                   Agenda de Citas
-                </h3>
+                </h3 >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label 
