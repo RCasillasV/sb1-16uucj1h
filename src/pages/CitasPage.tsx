@@ -142,7 +142,7 @@ export function CitasPage() {
         
         // Call the RPC function
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
-          p_fechanac: selectedPatient.FechaNacimiento, 
+          p_fechanac: selectedPatient.FechaNacimiento.replace(/-/g, '/'), 
           p_especialidad: 'Ortopedista' 
         });    
         console.log('DEBUG: Enviando a sintomasconsulta:');
