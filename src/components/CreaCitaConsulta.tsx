@@ -179,7 +179,7 @@ export default function AgendarConsulta() {
   }, [form])
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    //console.log(values)
     // Aquí iría la lógica para guardar la cita
 
     // Si se seleccionó una fecha y hora, agregar la cita a las existentes
