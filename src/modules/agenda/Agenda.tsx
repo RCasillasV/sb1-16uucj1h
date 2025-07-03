@@ -15,8 +15,6 @@ import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCir
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
-import { useStyles } from '../../hooks/useStyles'; // [!code ++]
-
 
 interface AppointmentFormData {
   date: Date;
@@ -51,8 +49,6 @@ export function Agenda() {
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true); // Nuevo ref para controlar la carga inicial
 
-  // Obtener las clases de botón del hook useStyles // [!code ++]
-  const { buttonClasses } = useStyles(); // [!code ++]
   
   useEffect(() => {
     const handleResize = () => {
@@ -296,8 +292,8 @@ export function Agenda() {
               </h2>
               <Link
                 to="/citas"
-                className={clsx(buttonClasses.base, buttonClasses.primary)}
-                //style={buttonStyle.primary}
+                className={buttonStyle.base}
+                style={buttonStyle.primary}
               >
                 <CalendarPlus className="h-4 w-4 mr-2" />
                 Agregar Cita
@@ -450,8 +446,8 @@ export function Agenda() {
         title="Seleccionar Paciente"
         actions={
           <button
-            className={clsx(buttonClasses.base, buttonClasses.primary)}
-            //style={buttonStyle.primary}
+            className={buttonStyle.base}
+            style={buttonStyle.primary}
             onClick={() => setShowPatientSelectionModal(false)}
           >
             Cancelar
@@ -483,7 +479,8 @@ export function Agenda() {
         title="Selección de Paciente Requerida"
         actions={
           <button
-            className={clsx(buttonClasses.base, buttonClasses.primary)} 
+            className={buttonStyle.base}
+            style={buttonStyle.primary}
             onClick={() => {
               setShowWarningModal(false);
               setShowPatientSelectionModal(true);
@@ -515,8 +512,9 @@ export function Agenda() {
                   });
                 }
               }}
-              className={clsx(buttonClasses.base, buttonClasses.primary)}
-              >
+              className={buttonStyle.base}
+              style={buttonStyle.primary}
+            >
               Editar Cita
             </button>
           </div>
