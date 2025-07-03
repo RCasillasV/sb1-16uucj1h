@@ -114,10 +114,10 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
 
     try {
       if (appointment) {
-        console.log("Actualizar ", appointmentData);
+        //console.log("Actualizar ", appointmentData);
         await api.appointments.update(appointment.id, appointmentData);
       } else {
-        console.log("Crear:", appointmentData);
+        //console.log("Crear:", appointmentData);
         await api.appointments.create(appointmentData);
       }
       onSuccess();
