@@ -33,7 +33,7 @@ const formSchema = z.object({
   mismo_motivo: z.boolean().default(false), // This field is for UI logic, not directly for DB
   notas: z.string().optional(),
   // Nuevos campos
-  duration_minutes: z.number().refine(val => [15, 20, 30, 40, 60].includes(val), {
+  duracion_minutos: z.number().refine(val => [15, 20, 30, 40, 60].includes(val), {
     message: "La duración debe ser 15, 20, 30, 40 o 60 minutos."
   }),
   hora_fin: z.string(),
@@ -84,7 +84,7 @@ export function CitasPage() {
       urgente: false,
       mismo_motivo: false,
       notas: '',
-      duration_minutes: 30, // Default duration
+      duracion_minutos: 30, // Default duration
       hora_fin: '', // Will be calculated
     },
   });
@@ -118,11 +118,11 @@ export function CitasPage() {
 
   // Effect to calculate hora_fin
   useEffect(() => {
-    const { fecha_cita, hora_cita, duration_minutes } = form.getValues();
-    if (fecha_cita && hora_cita && duration_minutes) {
+    const { fecha_cita, hora_cita, duracion_minutos } = form.getValues();
+    if (fecha_cita && hora_cita && duracion_minutos) {
       try {
         const startDateTime = parseISO(`${fecha_cita}T${hora_cita}`);
-        const endDateTime = addMinutes(startDateTime, duration_minutes);
+        const endDateTime = addMinutes(startDateTime, duracion_minutos);
         form.setValue('hora_fin', format(endDateTime, 'HH:mm'));
       } catch (e) {
         console.error('Error calculating end time:', e);
@@ -131,7 +131,7 @@ export function CitasPage() {
     } else {
       form.setValue('hora_fin', '');
     }
-  }, [form.watch('fecha_cita'), form.watch('hora_cita'), form.watch('duration_minutes')]);
+  }, [form.watch('fecha_cita'), form.watch('hora_cita'), form.watch('duracion_minutos')]);
 
 
   const onSubmit = async (data: FormData) => {
@@ -164,7 +164,7 @@ export function CitasPage() {
         sintomas_asociados: data.sintomas_asociados,
         urgente: data.urgente,
         id_user: userId,
-        duration_minutes: data.duration_minutes, // Nuevo campo
+        duracion_minutos: data.duracion_minutos, // Nuevo campo
         hora_fin: data.hora_fin, // Nuevo campo
       });
 
@@ -611,7 +611,7 @@ export function CitasPage() {
                       Duración minutos
                     </label>
                     <select
-                      {...form.register('duration_minutes', { valueAsNumber: true })}
+                      {...form.register('duracion_minutos', { valueAsNumber: true })}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
