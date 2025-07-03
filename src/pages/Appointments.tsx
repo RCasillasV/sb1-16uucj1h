@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
+import { useStyles } from '../../hooks/useStyles';
 
 type AppointmentWithPatient = Database['public']['Tables']['appointments']['Row'] & {
   patients: {
@@ -170,7 +171,7 @@ export function Appointments() {
         </div>
         <button
           onClick={handleNewAppointment}
-          className={buttonStyle.base}
+          className={clsx(buttonClasses.base, buttonClasses.outline)}
           style={buttonStyle.primary}
         >
           <CalendarPlus className="h-5 w-5 mr-1" />
@@ -375,8 +376,7 @@ export function Appointments() {
         title="Selección de Paciente Requerida"
         actions={
           <button
-            className={buttonStyle.base}
-            style={buttonStyle.primary}
+            className={clsx(buttonClasses.base, buttonClasses.outline)}
             onClick={() => {
               setShowWarningModal(false);
               navigate('/patients');
