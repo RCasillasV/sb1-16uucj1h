@@ -3,30 +3,19 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, parseISO, addMinutes, isBefore } from 'date-fns';
 import esLocale from '@fullcalendar/core/locales/es';
-import { api } from '../../lib/api'; 
-import { useSelectedPatient } from '../../contexts/SelectedPatientContext'; 
+import { api } from '../../lib/api';
+import { useSelectedPatient } from '../../contexts/SelectedPatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Modal } from '../../components/Modal'; 
+import { Modal } from '../../components/Modal';
 import { PatientListSelector } from '../../components/PatientListSelector';
-import { useNavigate, Link } from 'react-router-dom'; 
+import { useNavigate, Link } from 'react-router-dom';
 import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles'; // Importar useStyles
-
-
-interface AppointmentFormData {
-  date: Date;
-  patient_id: string;
-  time: string;
-  duration: number;
-  reason: string;
-  cubicle: number;
-  tipo_consulta: string;
-}
 
 export function Agenda() {
   const { currentTheme } = useTheme();
@@ -44,15 +33,15 @@ export function Agenda() {
     start: startOfMonth(new Date()),
     end: endOfMonth(new Date())
   });
-  //let appointmentData; // Declaración sin inicialización
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
   const [shouldSyncCalendars, setShouldSyncCalendars] = useState(false);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true); // Nuevo ref para controlar la carga inicial
-  const { buttonClasses } = useStyles(); 
-  
+  const { buttonClasses } = useStyles();
+
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -67,10 +56,10 @@ export function Agenda() {
       const calendarApi = calendarRef.current.getApi();
       const now = new Date();
       const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
-      
+
       // Scroll to current time with offset
       calendarApi.scrollToTime(scrollTime);
-      
+
       // Ajuste fino de la posición de desplazamiento para centrar la hora actual
       if (calendarWrapperRef.current) {
         const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
@@ -113,9 +102,9 @@ export function Agenda() {
       const calendarEvents = appointments.map(appointment => ({
         id: appointment.id,
         title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
-        start: new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`),
-        end: new Date(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`).getTime() + 15 * 60000),
-        backgroundColor: getEventColor(appointment.estado), 
+        start: parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`),
+        end: appointment.hora_fin ? parseISO(`${appointment.fecha_cita}T${appointment.hora_fin}`) : addMinutes(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`), appointment.duracion_minutos || 15),
+        backgroundColor: getEventColor(appointment.estado),
         extendedProps: {
           status: appointment.estado,
           patient: appointment.patients,
@@ -157,9 +146,6 @@ export function Agenda() {
     if (!selectedPatient) {
       setShowPatientSelectionModal(true);
       // Store the selected date for later use when a patient is selected
-     // appointmentData = {
-     //   date: selectInfo.start
-     // };
       setTempSelectedDate(selectInfo.start);
       return;
     }
@@ -194,18 +180,18 @@ export function Agenda() {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi.gotoDate(date);
-      
+
       // If in month view, switch to week view
       if (calendarApi.view.type === 'dayGridMonth') {
         calendarApi.changeView('timeGridWeek');
         setCalendarView('timeGridWeek');
       }
-      
+
       // Update view if date is outside current view
       const view = calendarApi.view;
       const viewStart = view.currentStart;
       const viewEnd = view.currentEnd;
-      
+
       if (date < viewStart || date >= viewEnd) {
         if (view.type === 'timeGridWeek') {
           calendarApi.gotoDate(date);
@@ -219,12 +205,12 @@ export function Agenda() {
   const handleDatesSet = (arg: DatesSetArg) => {
     if (!shouldSyncCalendars) {
       const effectiveStartDate = arg.view.type === 'dayGridMonth' ? startOfMonth(arg.view.currentStart) : arg.start;
-      
+
       setCurrentViewDates({
         start: effectiveStartDate,
         end: arg.end
       });
-      
+
       // Update selected date if it's outside the new view
       if (selectedDate < arg.start || selectedDate >= arg.end) {
         //setSelectedDate(arg.start);
@@ -238,7 +224,7 @@ export function Agenda() {
       <div className="w-[90vw] max-w-[1600px]">
         <div className="flex items-center gap-3 mb-2">
           <CalendarIcon className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
-          <h1 
+          <h1
             className="text-2xl font-bold"
             style={{ color: currentTheme.colors.text }}
           >
@@ -265,12 +251,12 @@ export function Agenda() {
           </div>
 
           {/* Main Calendar */}
-          <div 
+          <div
             className={clsx(
               'flex-1 rounded-lg shadow-lg transition-all duration-100 flex flex-col',
               isMobile && 'hidden'
             )}
-            style={{ 
+            style={{
               background: currentTheme.colors.surface,
               borderColor: currentTheme.colors.border,
               height: 'calc(100vh - 8rem)',
@@ -292,7 +278,7 @@ export function Agenda() {
               <FullCalendar
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView={calendarView}
+                initialView="timeGridWeek"
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',
@@ -337,7 +323,7 @@ export function Agenda() {
                     }
                   }
                 }}
-                 height="100%"
+                height="100%"
                 //contentHeight="100%"
                 aspectRatio={2}
                 handleWindowResize={true}
@@ -442,22 +428,20 @@ export function Agenda() {
           </button>
         }
       >
-        <PatientListSelector 
+        <PatientListSelector
           onSelectPatient={(patient) => {
             setSelectedPatient(patient);
             setShowPatientSelectionModal(false);
-            
+
             // If we have stored appointment data, navigate to citas with it
-            //if (appointmentData?.date) {
             if (tempSelectedDate) {
               navigate('/citas', {
                 state: {
-                  selectedDate: appointmentData.date,
                   selectedDate: tempSelectedDate,
                   selectedPatient: patient
                 }
               });
-              setTempSelectedDate(null); 
+              setTempSelectedDate(null);
             }
           }}
           isModal={true}
@@ -502,9 +486,7 @@ export function Agenda() {
                   });
                 }
               }}
-              //className={buttonStyle.base}
-              //style={buttonStyle.primary}
-              className={clsx(buttonClasses.base, buttonClasses.primary)}      
+              className={clsx(buttonClasses.base, buttonClasses.primary)}
             >
               Editar Cita
             </button>
