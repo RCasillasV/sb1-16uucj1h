@@ -6,8 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../lib/api';
 import { supabase } from '../lib/supabase';
-import { Sidebar } from './Sidebar';
-import { MainHeader } from './MainHeader';
+import { format, parseISO } from 'date-fns'; // Import parseISO
 import packageJson from '../../package.json';
 import clsx from 'clsx';
 
@@ -133,24 +132,44 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (!selectedPatient) return;
 
     try {
+      // Fetch appointments specifically for the selected patient
       const patientAppointments = await api.appointments.getByPatientId(selectedPatient.id);
 
-      const last = patientAppointments.find(app => 
-        new Date(app.appointment_date) <= new Date()
-      );
-      if (last) {
-        setLastAppointment({
-          date: new Date(last.appointment_date),
-          status: last.status === 'completed' ? 'COMPLETA' : ''
-        });
+      // Sort appointments by date and time in ascending order
+      const sortedAppointments = [...patientAppointments].sort((a, b) => {
+        const dateTimeA = parseISO(`${a.fecha_cita}T${a.hora_cita}`);
+        const dateTimeB = parseISO(`${b.fecha_cita}T${b.hora_cita}`);
+        return dateTimeA.getTime() - dateTimeB.getTime();
+      });
+
+      const now = new Date();
+      let last: { date: Date; status: string } | null = null;
+      let next: Date | null = null;
+
+      // Find the last appointment (past or current)
+      for (let i = sortedAppointments.length - 1; i >= 0; i--) {
+        const app = sortedAppointments[i];
+        const appDateTime = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
+        if (appDateTime <= now) {
+          last = {
+            date: appDateTime,
+            status: app.estado === 'completada' ? 'COMPLETA' : 'PROGRAMADA' // Use 'PROGRAMADA' for past but not completed
+          };
+          break;
+        }
       }
 
-      const next = patientAppointments.find(app => 
-        new Date(app.appointment_date) > new Date() && app.status === 'scheduled'
-      );
-      if (next) {
-        setNextAppointment(new Date(next.appointment_date));
+      // Find the next upcoming scheduled appointment
+      for (const app of sortedAppointments) {
+        const appDateTime = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
+        if (appDateTime > now && app.estado === 'programada') {
+          next = appDateTime;
+          break;
+        }
       }
+
+      setLastAppointment(last);
+      setNextAppointment(next);
     } catch (err) {
       console.error('Error fetching appointments:', err);
     }
