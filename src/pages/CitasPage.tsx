@@ -165,13 +165,17 @@ export function CitasPage() {
         }
 
         // Call the RPC function
+        console.log('DEBUG: Enviando a sintomasconsulta con los siguientes parámetros:');
+        console.log('DEBUG: p_fechanac:', selectedPatient.FechaNacimiento.replace(/-/g, '/'));
+        console.log('DEBUG: p_especialidad:', specialty);
+
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: selectedPatient.FechaNacimiento.replace(/-/g, '/'), 
           p_especialidad: specialty // Use dynamically obtained specialty
         });    
-        console.log('DEBUG: Enviando a sintomasconsulta:');
-        console.log('DEBUG: p_fechanac:', selectedPatient.FechaNacimiento.replace(/-/g, '/'));
-        console.log('DEBUG: fechaNacimiento:', specialty);
+        
+        console.log('DEBUG: Respuesta de sintomasconsulta - Data:', data);
+        console.log('DEBUG: Respuesta de sintomasconsulta - Error:', error);
 
         if (error) throw error;
         // Update state with the fetched symptoms
@@ -597,7 +601,7 @@ export function CitasPage() {
                 <p className="mb-2" style={{ color: currentTheme.colors.text }}>
                   No es posible agendar citas para fechas y horas anteriores al momento actual.
                 </p>
-                <p style={{ color: currentTheme.colors.textSecondary }}>
+                <p style={{ color: currentTheme.colors.textSecondary }>
                   Por favor, seleccione una fecha y hora futura.
                 </p>
               </div>
