@@ -601,7 +601,7 @@ export function CitasPage() {
                 <p className="mb-2" style={{ color: currentTheme.colors.text }}>
                   No es posible agendar citas para fechas y horas anteriores al momento actual.
                 </p>
-                <p style={{ color: currentTheme.colors.textSecondary }>
+                <p style={{ color: currentTheme.colors.textSecondary }}>
                   Por favor, seleccione una fecha y hora futura.
                 </p>
               </div>
