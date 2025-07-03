@@ -1,4 +1,3 @@
-// src/lib/api.ts
 import { supabase } from './supabase';
 import type { Database } from '../types/database.types';
 
@@ -405,6 +404,8 @@ export const api = {
           sintomas_asociados,
           campos_adicionales,
           id_user,
+          hora_fin,
+          duracion_minutos,
           patients:id_paciente (
             id,
             Nombre,
@@ -454,6 +455,8 @@ export const api = {
           sintomas_asociados,
           campos_adicionales,
           id_user,
+          hora_fin,
+          duracion_minutos,
           patients:id_paciente (     
             id,
             Nombre,
