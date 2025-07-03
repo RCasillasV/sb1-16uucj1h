@@ -37,10 +37,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (savedButtonStyle) {
       setButtonStyle(savedButtonStyle as Theme['buttons']['style']);
     }
-
-    // Apply theme to document
-    document.documentElement.style.setProperty('--app-font-size', `${fontSize}%`);
   }, []);
+
+  // Apply theme colors and font size as CSS variables
+  useEffect(() => {
+    const root = document.documentElement;
+
+    // Apply colors
+    for (const key in currentTheme.colors) {
+      if (Object.prototype.hasOwnProperty.call(currentTheme.colors, key)) {
+        root.style.setProperty(`--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`, (currentTheme.colors as any)[key]);
+      }
+    }
+
+    // Apply font size
+    root.style.setProperty('--app-font-size', `${fontSize}%`);
+  }, [currentTheme, fontSize]);
 
   const setTheme = (themeId: ThemeType) => {
     setCurrentTheme(themes[themeId]);
@@ -50,7 +62,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const handleSetFontSize = (size: number) => {
     setFontSize(size);
     localStorage.setItem(FONT_SIZE_KEY, String(size));
-    document.documentElement.style.setProperty('--app-font-size', `${size}%`);
+    // The actual CSS variable update is now handled by the useEffect above
   };
 
   const handleSetButtonStyle = (style: Theme['buttons']['style']) => {
