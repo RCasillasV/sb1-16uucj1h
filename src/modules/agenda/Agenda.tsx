@@ -233,20 +233,6 @@ export function Agenda() {
     setShouldSyncCalendars(false);
   };
 
-/*  const buttonStyle = {
-    base: clsx(
-      'px-4 py-2 transition-colors',
-      currentTheme.buttons.style === 'pill' && 'rounded-full',
-      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
-      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
-      currentTheme.buttons.animation && 'hover:scale-105'
-    ),
-    primary: {
-      background: currentTheme.colors.buttonPrimary,
-      color: currentTheme.colors.buttonText,
-    },
-  };
-*/
   return (
     <div className="flex flex-col items-center justify-start min-h-screen w-full p-2">
       <div className="w-[90vw] max-w-[1600px]">
