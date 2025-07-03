@@ -167,7 +167,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                 <span className="leading-none">{format(day, 'd')}</span>
                 {hasEvents && !isSelected && (
                   <span 
-                    className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 rounded-full"
+                    className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
                     style={{ 
                       background: isCurrentMonth 
                         ? currentTheme.colors.primary 
