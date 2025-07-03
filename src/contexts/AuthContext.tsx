@@ -14,7 +14,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  console.log('AuthProvider component rendering'); // Añadir esta línea
+  //console.log('AuthProvider component rendering'); // Añadir esta línea
   const [user, setUser] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
