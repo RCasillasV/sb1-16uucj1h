@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // console.log('Session user exists:', session.user);
           try {
             const userRole = await fetchUserRole(session.user.id);
-            console.log('User role fetched:', userRole);
+            //console.log('User role fetched:', userRole);
             setUser({ ...session.user, userRole });
           } catch (roleError) {
             console.error('Error fetching user role:', roleError);
