@@ -608,7 +608,7 @@ export function CitasPage() {
                       className="block text-sm font-medium mb-1"
                       style={{ color: currentTheme.colors.text }}
                     >
-                      Duración estimada (minutos)
+                      Duración minutos
                     </label>
                     <select
                       {...form.register('duration_minutes', { valueAsNumber: true })}
