@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkSessionAndSetUser = async () => {
       //console.log('checkSessionAndSetUser called');
       try {
-        console.log('Calling supabase.auth.getSession()');
+        //console.log('Calling supabase.auth.getSession()');
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting session:', error);
