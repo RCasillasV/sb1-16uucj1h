@@ -167,7 +167,7 @@ export function CitasPage() {
       });
 
       setSuccess(true);
-      setTimeout(() => {
+      setTimeout(() => { 
         navigate('/agenda/agenda');
       }, 2000);
     } catch (error) {
