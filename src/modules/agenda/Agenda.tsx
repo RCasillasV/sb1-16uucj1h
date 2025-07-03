@@ -476,7 +476,7 @@ export function Agenda() {
                 }
               });
               //setTempSelectedDate(null); 
-            }
+            //}
           }}
           isModal={true}
         />
