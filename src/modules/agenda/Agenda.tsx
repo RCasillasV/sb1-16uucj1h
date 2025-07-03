@@ -295,7 +295,7 @@ export function Agenda() {
                 className={buttonStyle.base}
                 style={buttonStyle.primary}
               >
-                <CalendarPlus className="h-4 w-4 mr-2" />
+                <CalendarPlus className="h-2 w-2 mr-2" />
                 Agregar Cita
               </Link>
             </div>
