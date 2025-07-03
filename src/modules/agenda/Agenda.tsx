@@ -15,6 +15,8 @@ import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCir
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
+import { useStyles } from '../../hooks/useStyles'; // Importar useStyles
+
 
 interface AppointmentFormData {
   date: Date;
@@ -42,13 +44,14 @@ export function Agenda() {
     start: startOfMonth(new Date()),
     end: endOfMonth(new Date())
   });
-  let appointmentData; // Declaración sin inicialización
+  //let appointmentData; // Declaración sin inicialización
+  const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
   const [shouldSyncCalendars, setShouldSyncCalendars] = useState(false);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true); // Nuevo ref para controlar la carga inicial
-
+  const { buttonClasses } = useStyles(); 
   
   useEffect(() => {
     const handleResize = () => {
@@ -154,9 +157,10 @@ export function Agenda() {
     if (!selectedPatient) {
       setShowPatientSelectionModal(true);
       // Store the selected date for later use when a patient is selected
-      appointmentData = {
-        date: selectInfo.start
-      };
+     // appointmentData = {
+     //   date: selectInfo.start
+     // };
+      setTempSelectedDate(selectInfo.start);
       return;
     }
 
@@ -229,7 +233,7 @@ export function Agenda() {
     setShouldSyncCalendars(false);
   };
 
-  const buttonStyle = {
+/*  const buttonStyle = {
     base: clsx(
       'px-4 py-2 transition-colors',
       currentTheme.buttons.style === 'pill' && 'rounded-full',
@@ -242,7 +246,7 @@ export function Agenda() {
       color: currentTheme.colors.buttonText,
     },
   };
-
+*/
   return (
     <div className="flex flex-col items-center justify-start min-h-screen w-full p-2">
       <div className="w-[90vw] max-w-[1600px]">
@@ -292,8 +296,9 @@ export function Agenda() {
               </h2>
               <Link
                 to="/citas"
-                className={buttonStyle.base}
-                style={buttonStyle.primary}
+                //className={buttonStyle.base}
+                //style={buttonStyle.primary}
+                className={clsx(buttonClasses.base, buttonClasses.primary)}
               >
                 <CalendarPlus className="h-4 w-4 mr-0" />
                 Agregar Cita
@@ -446,8 +451,9 @@ export function Agenda() {
         title="Seleccionar Paciente"
         actions={
           <button
-            className={buttonStyle.base}
-            style={buttonStyle.primary}
+            //className={buttonStyle.base}
+            //style={buttonStyle.primary}
+            className={clsx(buttonClasses.base, buttonClasses.primary)}
             onClick={() => setShowPatientSelectionModal(false)}
           >
             Cancelar
@@ -460,13 +466,16 @@ export function Agenda() {
             setShowPatientSelectionModal(false);
             
             // If we have stored appointment data, navigate to citas with it
-            if (appointmentData?.date) {
+            //if (appointmentData?.date) {
+            if (tempSelectedDate) {
               navigate('/citas', {
                 state: {
-                  selectedDate: appointmentData.date,
+                  //selectedDate: appointmentData.date,
+                  selectedDate: tempSelectedDate,
                   selectedPatient: patient
                 }
               });
+              setTempSelectedDate(null); 
             }
           }}
           isModal={true}
@@ -512,8 +521,9 @@ export function Agenda() {
                   });
                 }
               }}
-              className={buttonStyle.base}
-              style={buttonStyle.primary}
+              //className={buttonStyle.base}
+              //style={buttonStyle.primary}
+              className={clsx(buttonClasses.base, buttonClasses.primary)}      
             >
               Editar Cita
             </button>
