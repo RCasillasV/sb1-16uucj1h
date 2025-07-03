@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, differenceInMonths, isBefore, parseISO } from 'date-fns'; // Added parseISO and isBefore
+import { format, isBefore, parseISO, addMinutes } from 'date-fns'; // Added addMinutes
 import { es } from 'date-fns/locale';
 import { ArrowLeft, Calendar, Clock, Info, HelpCircle, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -32,6 +32,11 @@ const formSchema = z.object({
   urgente: z.boolean().default(false),
   mismo_motivo: z.boolean().default(false), // This field is for UI logic, not directly for DB
   notas: z.string().optional(),
+  // Nuevos campos
+  duration_minutes: z.number().refine(val => [15, 20, 30, 40, 60].includes(val), {
+    message: "La duración debe ser 15, 20, 30, 40 o 60 minutos."
+  }),
+  hora_fin: z.string(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -48,9 +53,8 @@ export function CitasPage() {
   const [success, setSuccess] = useState(false);
   const [customSymptom, setCustomSymptom] = useState('');
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
-  const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // New state
+  const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false);
 
-  // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
     selectedDate?: Date;
     editMode?: boolean;
@@ -58,12 +62,10 @@ export function CitasPage() {
     selectedPatient?: any;
   } | null;
 
-  // Configurar fecha inicial basada en la navegación
   const initialDate = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'yyyy-MM-dd')
     : format(new Date(), 'yyyy-MM-dd');
 
-  // Configurar hora inicial basada en la navegación
   const initialTime = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'HH:mm')
     : '09:00';
@@ -82,6 +84,8 @@ export function CitasPage() {
       urgente: false,
       mismo_motivo: false,
       notas: '',
+      duration_minutes: 30, // Default duration
+      hora_fin: '', // Will be calculated
     },
   });
 
@@ -100,9 +104,8 @@ export function CitasPage() {
           return isBefore(appDateTime, now);
         });
         setHasPreviousAppointments(previous);
-        // If there are previous appointments, "Primera vez" should not be selected by default
         if (previous && form.getValues('tipo_consulta') === 'primera') {
-          form.setValue('tipo_consulta', 'seguimiento'); // Default to 'seguimiento'
+          form.setValue('tipo_consulta', 'seguimiento');
         }
       } catch (error) {
         console.error('Error checking previous appointments:', error);
@@ -113,11 +116,27 @@ export function CitasPage() {
     checkPreviousAppointments();
   }, [selectedPatient, form]);
 
+  // Effect to calculate hora_fin
+  useEffect(() => {
+    const { fecha_cita, hora_cita, duration_minutes } = form.getValues();
+    if (fecha_cita && hora_cita && duration_minutes) {
+      try {
+        const startDateTime = parseISO(`${fecha_cita}T${hora_cita}`);
+        const endDateTime = addMinutes(startDateTime, duration_minutes);
+        form.setValue('hora_fin', format(endDateTime, 'HH:mm'));
+      } catch (e) {
+        console.error('Error calculating end time:', e);
+        form.setValue('hora_fin', '');
+      }
+    } else {
+      form.setValue('hora_fin', '');
+    }
+  }, [form.watch('fecha_cita'), form.watch('hora_cita'), form.watch('duration_minutes')]);
+
 
   const onSubmit = async (data: FormData) => {
     if (!selectedPatient) return;
     
-    // Validar que la fecha y hora sean futuras
     const selectedDateTime = new Date(`${data.fecha_cita}T${data.hora_cita}:00`);
     const now = new Date();
     
@@ -132,19 +151,21 @@ export function CitasPage() {
       const userId = session?.user?.id || null;
 
       await api.appointments.create({
-        id_paciente: selectedPatient.id, // Changed from patient_id to id_paciente
-        fecha_cita: data.fecha_cita, // Changed from appointment_date to fecha_cita
-        hora_cita: data.hora_cita, // New field
-        motivo: data.motivo, // Changed from reason to motivo
-        estado: 'programada', // Changed from status to estado, and 'scheduled' to 'programada'
-        consultorio: data.consultorio, // Changed from cubicle to consultorio
-        notas: data.notas || null, // Changed from notes to notas
+        id_paciente: selectedPatient.id,
+        fecha_cita: data.fecha_cita,
+        hora_cita: data.hora_cita,
+        motivo: data.motivo,
+        estado: 'programada',
+        consultorio: data.consultorio,
+        notas: data.notas || null,
         tipo_consulta: data.tipo_consulta,
         tiempo_evolucion: parseInt(data.tiempo_evolucion),
         unidad_tiempo: data.unidad_tiempo,
         sintomas_asociados: data.sintomas_asociados,
         urgente: data.urgente,
-        id_user: userId, // Added id_user
+        id_user: userId,
+        duration_minutes: data.duration_minutes, // Nuevo campo
+        hora_fin: data.hora_fin, // Nuevo campo
       });
 
       setSuccess(true);
@@ -159,7 +180,6 @@ export function CitasPage() {
     }
   };
 
-  // Fetch symptoms based on patient age
   useEffect(() => {
     if (!selectedPatient || !selectedPatient.FechaNacimiento) return;
     
@@ -168,7 +188,6 @@ export function CitasPage() {
       setSymptomsError(null);
       
       try {
-        // Get authenticated user's idbu
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) {
           setSymptomsError('Usuario no autenticado');
@@ -186,7 +205,6 @@ export function CitasPage() {
           return;
         }
 
-        // Get specialty from business unit
         const specialty = await api.businessUnits.getById(userData.idbu);
         if (!specialty) {
           setSymptomsError('No se pudo obtener la especialidad de la unidad de negocio');
@@ -194,26 +212,16 @@ export function CitasPage() {
           return;
         }
 
-        // Call the RPC function
-        console.log('DEBUG: Enviando a sintomasconsulta con los siguientes parámetros:');
-        console.log('DEBUG: p_fechanac:', selectedPatient.FechaNacimiento.replace(/-/g, '/'));
-        console.log('DEBUG: p_especialidad:', specialty);
-
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: selectedPatient.FechaNacimiento.replace(/-/g, '/'), 
-          p_especialidad: specialty // Use dynamically obtained specialty
+          p_especialidad: specialty
         });    
         
-        console.log('DEBUG: Respuesta de sintomasconsulta - Data:', data);
-        console.log('DEBUG: Respuesta de sintomasconsulta - Error:', error);
-
         if (error) throw error;
-        // Update state with the fetched symptoms
         setDynamicSymptoms(data || []);
       } catch (error) {
         console.error('Error fetching symptoms:', error);
         setSymptomsError('No se pudieron cargar los síntomas');
-        // Fallback to empty array
         setDynamicSymptoms([]);
       } finally {
         setIsLoadingSymptoms(false);
@@ -372,7 +380,7 @@ export function CitasPage() {
                   <input
                     type="text"
                     {...form.register('motivo')}
-                    placeholder="Ej: Dolor de cabeza, Fiebre"
+                    required placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"
                     className="w-full p-2 rounded-md border"
                     style={{
                       background: currentTheme.colors.surface,
@@ -438,7 +446,6 @@ export function CitasPage() {
                 </label>
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
-                    {/* Use dynamicSymptoms here */}
                     {dynamicSymptoms.map(sintoma => {
                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.nombre);
                       return (
@@ -469,7 +476,6 @@ export function CitasPage() {
                       );
                     })}
 
-                    {/* Mostrar síntomas personalizados agregados */}
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
@@ -594,6 +600,52 @@ export function CitasPage() {
                       <option value={2}>Consultorio 2</option>
                       <option value={3}>Consultorio 3</option>
                     </select>
+                  </div>
+
+                  {/* Nueva columna: Duración estimada */}
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Duración estimada (minutos)
+                    </label>
+                    <select
+                      {...form.register('duration_minutes', { valueAsNumber: true })}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      <option value={15}>15 minutos</option>
+                      <option value={20}>20 minutos</option>
+                      <option value={30}>30 minutos</option>
+                      <option value={40}>40 minutos</option>
+                      <option value={60}>60 minutos</option>
+                    </select>
+                  </div>
+
+                  {/* Nueva columna: Hora final */}
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Hora final
+                    </label>
+                    <input
+                      type="text"
+                      {...form.register('hora_fin')}
+                      readOnly
+                      className="w-full p-2 rounded-md border bg-gray-100 cursor-not-allowed"
+                      style={{
+                        background: currentTheme.colors.background,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    />
                   </div>
                 </div>
               </div>
