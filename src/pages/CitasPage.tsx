@@ -171,7 +171,7 @@ export function CitasPage() {
         });    
         console.log('DEBUG: Enviando a sintomasconsulta:');
         console.log('DEBUG: p_fechanac:', selectedPatient.FechaNacimiento.replace(/-/g, '/'));
-        console.log('DEBUG: fechaNacimiento:', selectedPatient.FechaNacimiento);
+        console.log('DEBUG: fechaNacimiento:', specialty);
 
         if (error) throw error;
         // Update state with the fetched symptoms
