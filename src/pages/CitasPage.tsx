@@ -38,7 +38,7 @@ const HORARIOS_CONSULTA = [
   "17:00",
   "17:30",
   "18:00",
-])
+]
 
 const formSchema = z.object({
   tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia', 'control']),
