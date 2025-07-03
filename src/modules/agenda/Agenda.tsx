@@ -282,8 +282,6 @@ export function Agenda() {
               </h2>
               <Link
                 to="/citas"
-                //className={buttonStyle.base}
-                //style={buttonStyle.primary}
                 className={clsx(buttonClasses.base, buttonClasses.primary)}
               >
                 <CalendarPlus className="h-4 w-4 mr-0" />
@@ -437,8 +435,6 @@ export function Agenda() {
         title="Seleccionar Paciente"
         actions={
           <button
-            //className={buttonStyle.base}
-            //style={buttonStyle.primary}
             className={clsx(buttonClasses.base, buttonClasses.primary)}
             onClick={() => setShowPatientSelectionModal(false)}
           >
@@ -474,8 +470,7 @@ export function Agenda() {
         title="Selección de Paciente Requerida"
         actions={
           <button
-            className={buttonStyle.base}
-            style={buttonStyle.primary}
+            className={clsx(buttonClasses.base, buttonClasses.primary)}
             onClick={() => {
               setShowWarningModal(false);
               setShowPatientSelectionModal(true);
