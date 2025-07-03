@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching user role:', error);
         return null;
       } else {
-        console.log('Rol del usuario:', data.rol); // Añadir esta línea
+        // console.log('Rol del usuario:', data.rol); // Añadir esta línea
       }
       return data?.rol || null;
     } catch (error) {
