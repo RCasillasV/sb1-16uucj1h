@@ -372,7 +372,7 @@ export function CitasPage() {
                   <input
                     type="text"
                     {...form.register('motivo')}
-                    required placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"
+                    placeholder="Ej: Dolor de cabeza, Fiebre"
                     className="w-full p-2 rounded-md border"
                     style={{
                       background: currentTheme.colors.surface,
