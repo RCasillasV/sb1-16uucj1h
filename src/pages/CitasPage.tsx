@@ -383,6 +383,7 @@ export function CitasPage() {
                   {[
                     { value: 'seguimiento', label: 'Seguimiento' },
                     { value: 'control', label: 'Control rutinario' },
+                    { value: 'urgencia', label: 'Curación' },
                     { value: 'urgencia', label: 'Urgencia' },
                   ].map(option => (
                     <label 
