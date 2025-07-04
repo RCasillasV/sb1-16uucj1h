@@ -339,7 +339,7 @@ export function CitasPage() {
               </div>
             </div>
           </div>
-
+        </div>
         <div className="p-6">
           {success ? (
             <div 
@@ -360,8 +360,7 @@ export function CitasPage() {
                   className="block text-base font-medium mb-1"
                   style={{ color: currentTheme.colors.text }}
                 >
-               </div>
-                  Tipo de Consulta
+                 Tipo de Consulta
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {/* Conditionally render "Primera vez" */}
