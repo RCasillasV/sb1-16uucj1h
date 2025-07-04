@@ -573,7 +573,7 @@ export function CitasPage() {
                   style={{ color: currentTheme.colors.text }}
                 >
                   Agenda de Citas
-                </h3 >
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                   <div>
                     <label 
