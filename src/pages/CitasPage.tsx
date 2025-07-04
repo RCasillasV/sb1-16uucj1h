@@ -209,7 +209,7 @@ export function CitasPage() {
     
     const fetchSymptoms = async () => {
       setIsLoadingSymptoms(true);
-      setSymptomsError(null);api.appointments.create
+      setSymptomsError(null); // api.appointments.create
       
       try {
         const { data: { session } } = await supabase.auth.getSession();
