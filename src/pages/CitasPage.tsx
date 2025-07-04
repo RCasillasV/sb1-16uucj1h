@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, isBefore, parseISO, addMinutes } from 'date-fns'; // Added addMinutes
+import { format, isBefore, parseISO, addMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowLeft, Calendar, Clock, Info, HelpCircle, AlertTriangle, Phone } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -13,9 +13,8 @@ import { Modal } from '../components/Modal';
 import { supabase } from '../lib/supabase';
 import clsx from 'clsx';
 
-// ... (otras definiciones)
+// ... (otras definiciones y constantes)
 
-// Definir los horarios disponibles (de 8:00 a 18:00, cada 30 minutos)
 const HORARIOS_CONSULTA = [
   "08:00",
   "08:30",
@@ -73,6 +72,7 @@ export function CitasPage() {
   const [customSymptom, setCustomSymptom] = useState('');
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
   const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
+  const [showPhoneModal, setShowPhoneModal] = useState(false); // Nuevo estado para el modal de teléfono
 
   // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
@@ -319,13 +319,14 @@ export function CitasPage() {
               >
                 {navigationState?.editMode ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
               </h1>
-              <p 
-                className="text-lg font-bold"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                {selectedPatient.Nombre} {selectedPatient.Paterno} {selectedPatient.Materno}
-              
-              {selectedPatient.Telefono && (
+              <div className="flex items-center gap-2"> {/* Contenedor para el nombre y el icono */}
+                <p 
+                  className="text-xl font-bold" // Nombre más grande y negrita
+                  style={{ color: currentTheme.colors.textSecondary }}
+                >
+                  {selectedPatient.Nombre} {selectedPatient.Paterno} {selectedPatient.Materno}
+                </p>
+                {selectedPatient.Telefono && (
                   <button
                     type="button"
                     onClick={() => setShowPhoneModal(true)}
@@ -335,10 +336,9 @@ export function CitasPage() {
                     <Phone className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
                   </button>
                 )}
-                </p>
+              </div>
             </div>
           </div>
-        </div>
 
         <div className="p-6">
           {success ? (
@@ -742,6 +742,7 @@ export function CitasPage() {
               </div>
             </div>
           </Modal>
+
           {/* Modal para mostrar el teléfono del paciente */}
           <Modal
             isOpen={showPhoneModal}
@@ -761,7 +762,7 @@ export function CitasPage() {
               {selectedPatient.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
             </p>
           </Modal>
-       </div>
+        </div>
       </div>
     </div>
   );
