@@ -325,6 +325,16 @@ export function CitasPage() {
               >
                 {selectedPatient.Nombre} {selectedPatient.Paterno} {selectedPatient.Materno}
               </p>
+              {selectedPatient.Telefono && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPhoneModal(true)}
+                    className="p-1 rounded-full hover:bg-black/10 transition-colors"
+                    title="Ver teléfono del paciente"
+                  >
+                    <Phone className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+                  </button>
+                )}
             </div>
           </div>
         </div>
