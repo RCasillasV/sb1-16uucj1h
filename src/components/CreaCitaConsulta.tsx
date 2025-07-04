@@ -426,15 +426,16 @@ export default function AgendarConsulta() {
                             </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
+                                <RadioGroupItem value="control" />
+                              </FormControl>
+                              <FormLabel className="font-normal">Control 
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
                                 <RadioGroupItem value="urgencia" />
                               </FormControl>
                               <FormLabel className="font-normal">Urgencia</FormLabel>
                             </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="control" />
-                              </FormControl>
-                              <FormLabel className="font-normal">Control rutinario</FormLabel>
+rutinario</FormLabel>
                             </FormItem>
                           </RadioGroup>
 
