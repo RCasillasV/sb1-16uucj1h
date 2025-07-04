@@ -98,6 +98,5 @@ export function Patients() {
       </div>
       <PatientListSelector onSelectPatient={handlePatientClick} />
     </div>
-  </div>
   );
 }
