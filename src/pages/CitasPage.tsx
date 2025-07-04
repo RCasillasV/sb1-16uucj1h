@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format, isBefore, parseISO, addMinutes } from 'date-fns'; // Added addMinutes
 import { es } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Clock, Info, HelpCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Info, HelpCircle, AlertTriangle, Phone } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { api } from '../lib/api';
