@@ -96,7 +96,6 @@ export function Patients() {
           </button>
         </div>
       </div>
-
       <PatientListSelector onSelectPatient={handlePatientClick} />
     </div>
   );
