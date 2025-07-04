@@ -320,7 +320,7 @@ export function CitasPage() {
                 {navigationState?.editMode ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
               </h1>
               <p 
-                className="text-sm"
+                className="text-lg font-bold"
                 style={{ color: currentTheme.colors.textSecondary }}
               >
                 {selectedPatient.Nombre} {selectedPatient.Paterno} {selectedPatient.Materno}
