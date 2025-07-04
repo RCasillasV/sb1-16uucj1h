@@ -757,7 +757,7 @@ export function CitasPage() {
           >
             Cerrar
           </button>
-        }
+        
       >
         <p className="text-lg font-medium" style={{ color: currentTheme.colors.text }}>
           {selectedPatient.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
