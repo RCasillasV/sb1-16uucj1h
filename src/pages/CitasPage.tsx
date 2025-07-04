@@ -753,11 +753,11 @@ export function CitasPage() {
           <button
             onClick={() => setShowPhoneModal(false)}
             className={buttonStyle.base}
-            style={buttonStyle.primary}
+            style={buttonStyle.primary} 
           >
             Cerrar
           </button>
-        
+        }
       >
         <p className="text-lg font-medium" style={{ color: currentTheme.colors.text }}>
           {selectedPatient.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
