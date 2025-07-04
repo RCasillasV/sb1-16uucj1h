@@ -201,7 +201,7 @@ export function MainHeader({
 
   const renderPatientNavigation = () => {
     if (!selectedPatient) return null;
-    
+  
     return (
       <div 
         className="flex items-center gap-2 px-6 py-2 border-t overflow-x-auto relative"
