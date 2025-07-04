@@ -742,28 +742,27 @@ export function CitasPage() {
               </div>
             </div>
           </Modal>
-
-          {/* Modal para mostrar el teléfono del paciente */}
-          <Modal
-            isOpen={showPhoneModal}
-            onClose={() => setShowPhoneModal(false)}
-            title="Teléfono del Paciente"
-            actions={
-              <button
-                onClick={() => setShowPhoneModal(false)}
-                className={buttonStyle.base}
-                style={buttonStyle.primary}
-              >
-                Cerrar
-              </button>
-            }
-          >
-            <p className="text-lg font-medium" style={{ color: currentTheme.colors.text }}>
-              {selectedPatient.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
-            </p>
-          </Modal>
         </div>
       </div>
+      {/* Modal para mostrar el teléfono del paciente */}
+      <Modal
+        isOpen={showPhoneModal}
+        onClose={() => setShowPhoneModal(false)}
+        title="Teléfono del Paciente"
+        actions={
+          <button
+            onClick={() => setShowPhoneModal(false)}
+            className={buttonStyle.base}
+            style={buttonStyle.primary}
+          >
+            Cerrar
+          </button>
+        }
+      >
+        <p className="text-lg font-medium" style={{ color: currentTheme.colors.text }}>
+          {selectedPatient.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
+        </p>
+      </Modal>
     </div>
   );
 }
