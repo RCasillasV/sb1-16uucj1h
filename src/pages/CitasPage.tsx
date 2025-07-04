@@ -764,5 +764,6 @@ export function CitasPage() {
         </p>
       </Modal>
     </div>
+  </div>
   );
 }
