@@ -324,7 +324,7 @@ export function CitasPage() {
                 style={{ color: currentTheme.colors.textSecondary }}
               >
                 {selectedPatient.Nombre} {selectedPatient.Paterno} {selectedPatient.Materno}
-              </p>
+              
               {selectedPatient.Telefono && (
                   <button
                     type="button"
@@ -335,6 +335,7 @@ export function CitasPage() {
                     <Phone className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
                   </button>
                 )}
+                </p>
             </div>
           </div>
         </div>
