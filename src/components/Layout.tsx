@@ -85,6 +85,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         setUserInfo({
           authId: session.user.id,
           idbu: userData?.idbu || null,
+          nombre: userData?.nombre || null,
           business_unit: userData?.business_unit || null
         });
       } catch (error) {
