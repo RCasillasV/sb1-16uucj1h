@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Calendar, LayoutDashboard, FileText, Activity, Settings as SettingsIcon, LogOut, Stethoscope, NotebookTabs, FileSpreadsheet, FolderOpen, UserSquare as RulerSquare } from 'lucide-react';
+import { Users, Calendar, Calendar-days, LayoutDashboard, FileText, Activity, Settings as SettingsIcon, LogOut, Stethoscope, NotebookTabs, FileSpreadsheet, FolderOpen, UserSquare as RulerSquare } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { RoleBasedNavigation, NavigationItem } from './RoleBasedNavigation';
 import clsx from 'clsx';
@@ -9,7 +9,7 @@ const baseNavigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Agenda', href: '/agenda/agenda', icon: Calendar, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Pacientes', href: '/patients', icon: Users, roles: ['Administrador', 'Medico', 'Recepcionista'] },
-  { name: 'Citas', href: '/citas', icon: Calendar, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Citas', href: '/citas', icon: Calendar-days, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Historia Clínica', href: '/clinical-history', icon: FileText, roles: ['Administrador', 'Medico'] },
   { name: 'Evolución Clínica', href: '/clinical-evolution', icon: Activity, roles: ['Administrador', 'Medico'] },
   { name: 'Recetas', href: '/prescriptions', icon: FileSpreadsheet, roles: ['Administrador', 'Medico'] },
