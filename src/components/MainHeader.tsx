@@ -289,10 +289,10 @@ export function MainHeader({
       <div className="flex items-center gap-4">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium\" style={{ color: currentTheme.colors.textSecondary }}>
-            ID de Usuario:
+            Bienvenido : 
           </span>
           <span className="font-mono" style={{ color: currentTheme.colors.text }}>
-            {userInfo.authId || 'No identificado'}
+            {userInfo.nombre|| 'No identificado'}
           </span>
         </div>
         <div className="flex flex-col gap-1">
