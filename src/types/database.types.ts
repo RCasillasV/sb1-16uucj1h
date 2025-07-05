@@ -214,7 +214,7 @@ export interface Database {
           sintomas_asociados: string[] | null
           campos_adicionales: Json | null
           hora_fin: string
-           duracion_minutos: number | null
+          duracion_minutos: number | null
         }
         Insert: {
           id?: string
@@ -237,7 +237,7 @@ export interface Database {
           sintomas_asociados?: string[] | null
           campos_adicionales?: Json | null
           hora_fin?: string
-           duracion_minutos: number | null
+          duracion_minutos: number | null
         }
         Update: {
           id?: string
@@ -260,7 +260,7 @@ export interface Database {
           sintomas_asociados?: string[] | null
           campos_adicionales?: Json | null
           hora_fin?: string
-           duracion_minutos: number | null
+          duracion_minutos: number | null
         }
       }
       clinical_histories: {
