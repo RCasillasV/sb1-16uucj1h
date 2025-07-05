@@ -40,7 +40,7 @@ const HORARIOS_CONSULTA = [
 ]
 
 const formSchema = z.object({
-  tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia','seguimiento', 'control']),
+  tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia','revision', 'control']),
   motivo: z.string().min(2, { message: "El motivo es requerido" }),
   tiempo_evolucion: z.string().min(1, { message: "El tiempo de evolución es requerido" }),
   unidad_tiempo: z.enum(['horas', 'dias', 'semanas', 'meses']),
