@@ -417,7 +417,7 @@ export const api = {
             Telefono
           )
         `)
-        .gte('fecha_cita', new Date().toISOString().split('T')[0] to format(startOfDay(new Date()), 'yyyy-MM-dd') // Filter by date only
+        .gte('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd') to format(startOfDay(new Date()), 'yyyy-MM-dd') // Filter by date only
         .order('fecha_cita', { ascending: true })
         .order('hora_cita', { ascending: true });
 
@@ -513,7 +513,7 @@ export const api = {
             Telefono
           )
         `)
-        .gte('fecha_cita', new Date().toISOString().split('T')[0]) // Filter by date only
+        .gte('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd')) // Filter by date only
         .eq('estado', 'programada') // Changed from 'status' to 'estado' and 'scheduled' to 'programada'
         .order('fecha_cita', { ascending: true })
         .order('hora_cita', { ascending: true });
@@ -737,7 +737,7 @@ export const api = {
           supabase
             .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
             .select('id')
-            .gt('fecha_cita', new Date().toISOString().split('T')[0]) // Changed from 'appointment_date' to 'fecha_cita'
+            .gt('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd')) // Changed from 'appointment_date' to 'fecha_cita'
             .eq('estado', 'programada') // Changed from 'status' to 'estado' and 'scheduled' to 'programada'
         ]);
 
