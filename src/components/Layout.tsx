@@ -75,6 +75,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           console.error('Error fetching user data:', rpcError);          
           setUserInfo({
             authId: session.user.id,
+            nombre:null,
             idbu: null,
             business_unit: null
           });
