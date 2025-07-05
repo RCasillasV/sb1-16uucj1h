@@ -208,7 +208,7 @@ export interface Database {
           consultorio: number
           sintomas: string[] | null
           documentos: Json | null
-          tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'control'
+          tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control'
           tiempo_evolucion: number | null
           unidad_tiempo: 'horas' | 'dias' | 'semanas' | 'meses' | null
           sintomas_asociados: string[] | null
@@ -231,7 +231,7 @@ export interface Database {
           consultorio: number
           sintomas?: string[] | null
           documentos?: Json | null
-          tipo_consulta?: 'primera' | 'seguimiento' | 'urgencia' | 'control'
+          tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control'
           tiempo_evolucion?: number | null
           unidad_tiempo?: 'horas' | 'dias' | 'semanas' | 'meses' | null
           sintomas_asociados?: string[] | null
@@ -254,7 +254,7 @@ export interface Database {
           consultorio?: number
           sintomas?: string[] | null
           documentos?: Json | null
-          tipo_consulta?: 'primera' | 'seguimiento' | 'urgencia' | 'control'
+          tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control'
           tiempo_evolucion?: number | null
           unidad_tiempo?: 'horas' | 'dias' | 'semanas' | 'meses' | null
           sintomas_asociados?: string[] | null
