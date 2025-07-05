@@ -417,7 +417,7 @@ export const api = {
             Telefono
           )
         `)
-        .gte('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd') to format(startOfDay(new Date()), 'yyyy-MM-dd') // Filter by date only
+        .gte('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd')) // Filter by date only
         .order('fecha_cita', { ascending: true })
         .order('hora_cita', { ascending: true });
 
