@@ -40,7 +40,7 @@ const HORARIOS_CONSULTA = [
 ]
 
 const formSchema = z.object({
-  tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia', 'control']),
+  tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia','seguimiento', 'control']),
   motivo: z.string().min(2, { message: "El motivo es requerido" }),
   tiempo_evolucion: z.string().min(1, { message: "El tiempo de evolución es requerido" }),
   unidad_tiempo: z.enum(['horas', 'dias', 'semanas', 'meses']),
@@ -383,7 +383,7 @@ export function CitasPage() {
                   {[
                     { value: 'seguimiento', label: 'Seguimiento' },
                     { value: 'control', label: 'Control rutinario' },
-                    { value: 'curacion', label: 'Revisiónn' },
+                    { value: 'revision', label: 'Revisión },
                     { value: 'urgencia', label: 'Urgencia' },
                   ].map(option => (
                     <label 
