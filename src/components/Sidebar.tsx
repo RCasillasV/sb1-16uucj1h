@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Calendar, Calendar-days, LayoutDashboard, FileText, Activity, Settings as SettingsIcon, LogOut, Stethoscope, NotebookTabs, FileSpreadsheet, FolderOpen, UserSquare as RulerSquare } from 'lucide-react';
+import { Users, Calendar, Calendar-Days, LayoutDashboard, FileText, Activity, Settings as SettingsIcon, LogOut, Stethoscope, NotebookTabs, FileSpreadsheet, FolderOpen, UserSquare as RulerSquare } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { RoleBasedNavigation, NavigationItem } from './RoleBasedNavigation';
 import clsx from 'clsx';
