@@ -456,7 +456,7 @@ export const api = {
           campos_adicionales,
           id_user,
           hora_fin,
-          duracion_minutos,
+          duracion_minutos, 
           patients:id_paciente (     
             id,
             Nombre,
@@ -502,6 +502,8 @@ export const api = {
           sintomas_asociados,
           campos_adicionales,
           id_user,
+          hora_fin,
+          duracion_minutos, 
           patients:id_paciente (
             id,
             Nombre,
