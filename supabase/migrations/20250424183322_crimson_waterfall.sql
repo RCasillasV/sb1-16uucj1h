@@ -17,7 +17,7 @@
 -- Add new fields to tcCitas table
 ALTER TABLE "tcCitas" 
   ADD COLUMN IF NOT EXISTS tipo_consulta text NOT NULL DEFAULT 'primera' 
-    CHECK (tipo_consulta IN ('primera', 'seguimiento', 'urgencia', 'control')),
+    CHECK (tipo_consulta IN ('primera', 'seguimiento', 'urgencia','revision', 'control')),
   ADD COLUMN IF NOT EXISTS tiempo_evolucion integer,
   ADD COLUMN IF NOT EXISTS unidad_tiempo text 
     CHECK (unidad_tiempo IN ('horas', 'dias', 'semanas', 'meses')),
