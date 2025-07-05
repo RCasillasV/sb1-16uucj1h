@@ -59,6 +59,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         if (!session?.user) {
           setUserInfo({
             authId: '',
+            nombre:'',
             idbu: null,
             business_unit: null
           });
