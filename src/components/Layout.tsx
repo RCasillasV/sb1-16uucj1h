@@ -34,6 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [showForm, setShowForm] = useState(false);
   const [userInfo, setUserInfo] = useState<{ 
     authId: string; 
+    nombre: string;
     idbu: string | null;
     business_unit: { Nombre: string } | null 
   }>({ 
