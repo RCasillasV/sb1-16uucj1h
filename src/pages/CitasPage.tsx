@@ -319,25 +319,7 @@ export function CitasPage() {
               >
                 {navigationState?.editMode ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
               </h1>
-              <div className="flex items-center gap-2"> {/* Contenedor para el nombre y el icono */}
-                <p 
-                  className="text-xl font-bold" // Nombre más grande y negrita
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  {selectedPatient.Nombre} {selectedPatient.Paterno} {selectedPatient.Materno}
-                </p>
-                {selectedPatient.Telefono && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPhoneModal(true)}
-                    className="p-1 rounded-full hover:bg-black/10 transition-colors"
-                    title="Ver teléfono del paciente"
-                  >
-                    <Phone className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-                  </button>
-                )}
-              </div>
-            </div>
+             </div>
           </div>
         </div>
         <div className="p-6">
