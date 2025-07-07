@@ -162,7 +162,7 @@ export function Sidebar({ isExpanded, setIsExpanded, userRole, packageVersion, h
       onMouseLeave={() => !isMobile && setIsExpanded(false)}
     >
       <div className="h-16 flex items-center px-3">
-        <Link to="/" className="flex items-center gap-2" style={{ color: currentTheme.colors.sidebarText }}>
+        <Link to="../" className="flex items-center gap-2" style={{ color: currentTheme.colors.sidebarText }}>
           <div className="flex items-center justify-center w-7 h-7 rounded-full shrink-0" style={{ background: currentTheme.colors.primary }}>
             <Stethoscope className="w-5 h-5" style={{ color: currentTheme.colors.sidebarText }} />
           </div>
