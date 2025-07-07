@@ -13,7 +13,7 @@ type SortField = 'name' | 'age' | 'gender' | null;
 
 // Define constants for different view modes
 const MODAL_PATIENTS_PER_PAGE = 10;
-const FULL_PATIENTS_PER_PAGE = 14;
+const FULL_PATIENTS_PER_PAGE = 11;
 
 interface PatientListSelectorProps {
   onSelectPatient: (patient: Patient) => void;
