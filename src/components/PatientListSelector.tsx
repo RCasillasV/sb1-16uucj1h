@@ -7,8 +7,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext'; // Importa useSelectedPatient
 import clsx from 'clsx';
 
-import { supabase } from '../supabaseClient';
-
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = 'name' | 'age' | 'gender' | null;
@@ -37,17 +35,7 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
   // Determine how many patients to show per page based on view mode
   const patientsPerPage = isModal ? MODAL_PATIENTS_PER_PAGE : FULL_PATIENTS_PER_PAGE;
 
-useEffect(() => {
-  supabase
-    .from('appointments')
-    .select('*')
-    .then(({ data, error }) => {
-      if (error) console.error('Error de conexión:', error);
-      else console.log('Datos cargados:', data);
-    });
-}, [location.pathname]);
 
-  
   useEffect(() => {
     fetchPatients();
   }, []);
