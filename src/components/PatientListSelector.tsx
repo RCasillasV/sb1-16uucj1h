@@ -7,6 +7,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext'; // Importa useSelectedPatient
 import clsx from 'clsx';
 
+import { supabase } from '../supabaseClient';
+
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = 'name' | 'age' | 'gender' | null;
