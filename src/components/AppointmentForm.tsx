@@ -57,6 +57,19 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
   const [notes, setNotes] = useState(appointment?.notas || '');
   const [isLoading, setIsLoading] = useState(false);
 
+seEffect(() => {
+  supabase
+    .from('appointments')
+    .select('*')
+    .then(({ data, error }) => {
+      if (error) console.error('Error de conexión:', error);
+      else console.log('Datos cargados:', data);
+    });
+}, [location.pathname]);
+
+
+
+  
   useEffect(() => {
     if (!selectedPatient && !appointment) {
       onCancel();
