@@ -35,6 +35,17 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
   // Determine how many patients to show per page based on view mode
   const patientsPerPage = isModal ? MODAL_PATIENTS_PER_PAGE : FULL_PATIENTS_PER_PAGE;
 
+useEffect(() => {
+  supabase
+    .from('appointments')
+    .select('*')
+    .then(({ data, error }) => {
+      if (error) console.error('Error de conexión:', error);
+      else console.log('Datos cargados:', data);
+    });
+}, [location.pathname]);
+
+  
   useEffect(() => {
     fetchPatients();
   }, []);
