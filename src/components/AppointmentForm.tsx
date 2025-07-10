@@ -16,6 +16,10 @@ type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
     Nombre: string;
     Paterno: string;
     Materno: string;
+    FechaNacimiento: string;
+    Sexo: string;
+    Email: string;
+    Telefono: string;
   } | null;
 };
 
@@ -28,12 +32,12 @@ interface AppointmentFormProps {
 const START_HOUR = 8; // 8 AM
 const END_HOUR = 23; // 11 PM
 const INTERVAL_MINUTES = 30;
-const DAYS_TO_SHOW =6;
+const DAYS_TO_SHOW = 6;
 const MAX_DAYS_AHEAD = 60;
 
 export function AppointmentForm({ onSuccess, onCancel, appointment }: AppointmentFormProps) {
   const { currentTheme } = useTheme();
-  const { selectedPatient } = useSelectedPatient();
+  const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,15 +60,21 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
   const [reason, setReason] = useState(appointment?.motivo || '');
   const [notes, setNotes] = useState(appointment?.notas || '');
   const [isLoading, setIsLoading] = useState(false);
-
+  const [status, setStatus] = useState<"programada" | "completada" | "cancelada">(appointment?.estado || 'programada');
 
   useEffect(() => {
     if (!selectedPatient && !appointment) {
       onCancel();
       return;
     }
+    
+    // Si hay un appointment, asegúrate de que el paciente esté seleccionado
+    if (appointment?.patients && !selectedPatient) {
+      setSelectedPatient(appointment.patients);
+    }
+    
     fetchExistingAppointments();
-  }, [selectedDate]);
+  }, [selectedDate, appointment, selectedPatient, setSelectedPatient]);
 
   async function fetchExistingAppointments() {
     try {
@@ -103,22 +113,24 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
 
     const dateString = format(selectedDate, 'yyyy-MM-dd');
 
-    const appointmentData = {
+    const appointmentData: AppointmentInsert = {
       id_paciente: appointment?.id_paciente || selectedPatient?.id,
       fecha_cita: dateString,
       hora_cita: selectedTime,
       id_user: user.id,
       motivo: reason,
       notas: notes || null,
-      estado: 'programada',
+      estado: status,
+      consultorio: appointment?.consultorio || 1,
+      tipo_consulta: appointment?.tipo_consulta || 'primera',
+      duracion_minutos: appointment?.duracion_minutos || 30,
+      hora_fin: appointment?.hora_fin || null,
     };
 
     try {
       if (appointment) {
-        //console.log("Actualizar ", appointmentData);
         await api.appointments.update(appointment.id, appointmentData);
       } else {
-        //console.log("Crear:", appointmentData);
         await api.appointments.create(appointmentData);
       }
       onSuccess();
@@ -348,6 +360,29 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
               borderColor: currentTheme.colors.border,
             }}
           />
+        </div>
+
+        {/* Status */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="status" className="text-sm font-medium whitespace-nowrap" style={{ color: currentTheme.colors.text }}>
+            Estado:
+          </label>
+          <select
+            name="status"
+            id="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as "programada" | "completada" | "cancelada")}
+            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            style={{
+              backgroundColor: currentTheme.colors.surface,
+              color: currentTheme.colors.text,
+              borderColor: currentTheme.colors.border,
+            }}
+          >
+            <option value="programada">Programada</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
         </div>
 
         {/* Notes */}
