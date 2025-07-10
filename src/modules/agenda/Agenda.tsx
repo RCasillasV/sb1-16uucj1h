@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { format, startOfMonth, endOfMonth, parseISO, addMinutes, isBefore } from 'date-fns';
+import { format, startOfMonth, endOfMonth, parseISO, addMinutes, isBefore, startOfWeek } from 'date-fns';
 import esLocale from '@fullcalendar/core/locales/es';
 import { api } from '../../lib/api';
 import { useSelectedPatient } from '../../contexts/SelectedPatientContext';
@@ -34,11 +34,10 @@ export function Agenda() {
     end: endOfMonth(new Date())
   });
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
-  const [shouldSyncCalendars, setShouldSyncCalendars] = useState(false);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
-  const isInitialMount = useRef(true); // Nuevo ref para controlar la carga inicial
+  const isInitialMount = useRef(true);
   const { buttonClasses } = useStyles();
 
 
@@ -52,26 +51,22 @@ export function Agenda() {
   }, []);
 
   useEffect(() => {
-    if (calendarRef.current && isInitialMount.current) { // Solo se ejecuta en la carga inicial
+    if (calendarRef.current && isInitialMount.current) {
       const calendarApi = calendarRef.current.getApi();
       const now = new Date();
       const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
 
-      // Scroll to current time with offset
       calendarApi.scrollToTime(scrollTime);
 
-      // Ajuste fino de la posición de desplazamiento para centrar la hora actual
       if (calendarWrapperRef.current) {
         const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
         if (timeGridContainer) {
           const containerHeight = timeGridContainer.clientHeight;
           const currentOffset = timeGridContainer.scrollTop;
-          // Desplaza hacia arriba un tercio de la altura del contenedor para centrar
-          // la hora actual, ya que scrollToTime la coloca al inicio de la vista.
           timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
         }
       }
-      isInitialMount.current = false; // Marca que la carga inicial ya ocurrió
+      isInitialMount.current = false;
     }
   }, [calendarView]);
 
@@ -82,17 +77,7 @@ export function Agenda() {
   const handleMonthChange = (date: Date) => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
-      setShouldSyncCalendars(false);
       calendarApi.gotoDate(date);
-    }
-  };
-
-  const handleTodayClick = () => {
-    const today = new Date();
-    setSelectedDate(today);
-    if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.today();
     }
   };
 
@@ -135,7 +120,6 @@ export function Agenda() {
   };
 
   const handleEventDidMount = (info: EventMountArg) => {
-    // Añadir evento de doble clic para mostrar detalles
     info.el.addEventListener('dblclick', () => {
       setCurrentAppointmentDetails(info.event);
       setShowAppointmentDetailsModal(true);
@@ -145,12 +129,10 @@ export function Agenda() {
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     if (!selectedPatient) {
       setShowPatientSelectionModal(true);
-      // Store the selected date for later use when a patient is selected
       setTempSelectedDate(selectInfo.start);
       return;
     }
 
-    // Navegar a CitasPage con la fecha seleccionada
     navigate('/citas', {
       state: {
         selectedDate: selectInfo.start,
@@ -160,7 +142,6 @@ export function Agenda() {
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
-    // Al hacer un solo clic, navegar a CitasPage para editar la cita
     navigate('/citas', {
       state: {
         editMode: true,
@@ -176,47 +157,31 @@ export function Agenda() {
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
-    setShouldSyncCalendars(true);
+
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi.gotoDate(date);
 
-      // If in month view, switch to week view
       if (calendarApi.view.type === 'dayGridMonth') {
         calendarApi.changeView('timeGridWeek');
         setCalendarView('timeGridWeek');
-      }
-
-      // Update view if date is outside current view
-      const view = calendarApi.view;
-      const viewStart = view.currentStart;
-      const viewEnd = view.currentEnd;
-
-      if (date < viewStart || date >= viewEnd) {
-        if (view.type === 'timeGridWeek') {
-          calendarApi.gotoDate(date);
-        } else if (view.type === 'dayGridMonth') {
-          calendarApi.gotoDate(date);
-        }
       }
     }
   };
 
   const handleDatesSet = (arg: DatesSetArg) => {
-    if (!shouldSyncCalendars) {
-      const effectiveStartDate = arg.view.type === 'dayGridMonth' ? startOfMonth(arg.view.currentStart) : arg.start;
+    const effectiveStartDate = arg.view.type === 'dayGridMonth' ? startOfMonth(arg.view.currentStart) : startOfWeek(arg.start, { weekStartsOn: 1 });
 
-      setCurrentViewDates({
-        start: effectiveStartDate,
-        end: arg.end
-      });
+    setCurrentViewDates({
+      start: effectiveStartDate,
+      end: arg.end
+    });
 
-      // Update selected date if it's outside the new view
-      if (selectedDate < arg.start || selectedDate >= arg.end) {
-        //setSelectedDate(arg.start);
-      }
+    if (!isBefore(selectedDate, arg.start) && !isBefore(arg.end, selectedDate)) {
+      // selectedDate is still within the new view, do nothing
+    } else {
+      setSelectedDate(arg.start);
     }
-    setShouldSyncCalendars(false);
   };
 
   return (
@@ -324,7 +289,6 @@ export function Agenda() {
                   }
                 }}
                 height="100%"
-                //contentHeight="100%"
                 aspectRatio={2}
                 handleWindowResize={true}
                 stickyHeaderDates={true}
@@ -433,7 +397,6 @@ export function Agenda() {
             setSelectedPatient(patient);
             setShowPatientSelectionModal(false);
 
-            // If we have stored appointment data, navigate to citas with it
             if (tempSelectedDate) {
               navigate('/citas', {
                 state: {
@@ -467,7 +430,6 @@ export function Agenda() {
         <p>Para continuar, necesita seleccionar un paciente.</p>
       </Modal>
 
-      {/* Modal de detalles de cita */}
       <Modal
         isOpen={showAppointmentDetailsModal}
         onClose={handleCloseDetailsModal}
@@ -567,4 +529,3 @@ export function Agenda() {
     </div>
   );
 }
- 
