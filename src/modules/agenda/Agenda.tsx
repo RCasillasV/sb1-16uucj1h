@@ -37,26 +37,20 @@ export function Agenda() {
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { buttonClasses } = useStyles();
+
   const initialScrollTime = useMemo(() => {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`; }, []);
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+  }, []);
 
   useEffect(() => {
-    if (calendarRef.current && isInitialMount.current) {
-      const calendarApi = calendarRef.current.getApi();
-      const now = new Date();
-      const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
 
- 
-      if (calendarWrapperRef.current) {
-        const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
-        if (timeGridContainer) {
-          const containerHeight = timeGridContainer.clientHeight;
-        }
-      }
-      isInitialMount.current = false;
-    }
-  }, [calendarView]);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchAppointments();
@@ -232,7 +226,7 @@ export function Agenda() {
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="timeGridWeek"
-                initialScroll={initialScrollTime} 
+                initialScroll={initialScrollTime}
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',
@@ -517,4 +511,4 @@ export function Agenda() {
       </Modal>
     </div>
   );
-}
+}```
