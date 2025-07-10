@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -36,8 +36,6 @@ export function Agenda() {
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  //const calendarWrapperRef = useRef<HTMLDivElement>(null);
-  //const isInitialMount = useRef(true);
   const { buttonClasses } = useStyles();
   const initialScrollTime = useMemo(() => {
   const now = new Date();
