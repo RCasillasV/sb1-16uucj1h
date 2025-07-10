@@ -16,9 +16,12 @@ import { useStyles } from '../../hooks/useStyles';
 
 type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
   patients: {
+    id : string;
     Nombre: string;
     Paterno: string;
     Materno: string;
+    FechaNacimiento: string;
+    Sexo: string;
     Email: string | null;
     Telefono: string | null;
   } | null;
