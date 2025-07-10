@@ -12,6 +12,8 @@ import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 import { useStyles } from '../../hooks/useStyles';
 
+
+
 type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
   patients: {
     Nombre: string;
@@ -34,6 +36,7 @@ export function Appointments() {
   const location = useLocation();
   const navigate = useNavigate();
   const filter = location.state?.filter;
+  const { buttonClasses } = useStyles();
 
   useEffect(() => {
     fetchAppointments();
