@@ -16,7 +16,7 @@ import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCir
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
-import { useStyles } from '../../hooks/useStyles'; // Importar useStyles
+import { useStyles } from '../../hooks/useStyles';
 
 export function Agenda() {
   const { currentTheme } = useTheme();
@@ -37,8 +37,7 @@ export function Agenda() {
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const calendarWrapperRef = useRef<HTMLDivElement>(null); // Add this ref
-  const isInitialMount = useRef(true); // Add this ref
+  const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const { buttonClasses } = useStyles();
 
   const initialScrollTime = useMemo(() => {
@@ -56,8 +55,9 @@ export function Agenda() {
   }, []);
 
   // This useEffect will handle scrolling to the current time after the calendar renders
+  // It will run on every mount and when calendarView changes
   useEffect(() => {
-    if (calendarRef.current && isInitialMount.current) {
+    if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       const now = new Date();
       const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
@@ -74,9 +74,8 @@ export function Agenda() {
           timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
         }
       }
-      isInitialMount.current = false; // Ensure it only runs once on initial mount
     }
-  }, [calendarView]); // Re-run if calendar view changes (e.g., from month to week)
+  }, [calendarView]); // Depend on calendarView to re-scroll if view changes
 
   useEffect(() => {
     fetchAppointments();
@@ -225,7 +224,7 @@ export function Agenda() {
 
           {/* Main Calendar */}
           <div
-            ref={calendarWrapperRef} // Attach the ref here
+            ref={calendarWrapperRef}
             className={clsx(
               'flex-1 rounded-lg shadow-lg transition-all duration-100 flex flex-col',
               isMobile && 'hidden'
