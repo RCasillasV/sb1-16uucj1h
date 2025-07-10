@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
-import { useStyles } from '../../hooks/useStyles';
+import { useStyles } from '../hooks/useStyles';
 
 
 
