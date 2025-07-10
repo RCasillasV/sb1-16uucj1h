@@ -62,8 +62,8 @@ export function Agenda() {
         const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
         if (timeGridContainer) {
           const containerHeight = timeGridContainer.clientHeight;
-          const currentOffset = timeGridContainer.scrollTop;
-          timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
+          //const currentOffset = timeGridContainer.scrollTop;
+          //timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
         }
       }
       isInitialMount.current = false;
