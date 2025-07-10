@@ -19,7 +19,7 @@ type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
   } | null;
 };
 
-interface AppointmentFormProps {
+interface AppointmentsProps { // Renamed interface
   onSuccess: () => void;
   onCancel: () => void;
   appointment?: AppointmentWithPatient | null;
@@ -31,7 +31,7 @@ const INTERVAL_MINUTES = 30;
 const DAYS_TO_SHOW =6;
 const MAX_DAYS_AHEAD = 60;
 
-export function AppointmentForm({ onSuccess, onCancel, appointment }: AppointmentFormProps) {
+export default function Appointments({ onSuccess, onCancel, appointment }: AppointmentsProps) { // Renamed function and changed export
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user } = useAuth();
@@ -425,4 +425,3 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
     </div>
   );
 }
-
