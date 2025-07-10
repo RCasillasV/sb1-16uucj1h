@@ -16,7 +16,7 @@ import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
-import { format, startOfMonth, endOfMonth, parseISO, addMinutes, isBefore, startOfWeek } from 'date-fns';
+
 
 export function Agenda() {
   const { currentTheme } = useTheme();
