@@ -39,22 +39,9 @@ export function Agenda() {
   //const calendarWrapperRef = useRef<HTMLDivElement>(null);
   //const isInitialMount = useRef(true);
   const { buttonClasses } = useStyles();
-
-
-/*  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-*/
-   const initialScrollTime = useMemo(() => {
-   const now = new Date();
-   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`; }, []);
-
-
-  
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const initialScrollTime = useMemo(() => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`; }, []);
 
   useEffect(() => {
     if (calendarRef.current && isInitialMount.current) {
@@ -62,14 +49,11 @@ export function Agenda() {
       const now = new Date();
       const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
 
-      //calendarApi.scrollToTime(scrollTime);
-
+ 
       if (calendarWrapperRef.current) {
         const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
         if (timeGridContainer) {
           const containerHeight = timeGridContainer.clientHeight;
-          //const currentOffset = timeGridContainer.scrollTop;
-          //timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
         }
       }
       isInitialMount.current = false;
