@@ -1,3 +1,4 @@
+// src/pages/Appointments.tsx
 import React, { useState, useEffect } from 'react';
 import { CalendarPlus, Search, Mail, Phone, MessageCircle, Calendar } from 'lucide-react';
 import { api } from '../lib/api';
@@ -11,8 +12,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 import { useStyles } from '../hooks/useStyles';
-
-
 
 type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
   patients: {
@@ -53,12 +52,12 @@ export function Appointments() {
       if (filter === 'today') {
         const today = startOfDay(new Date());
         filteredData = data.filter(appointment => 
-          isEqual(startOfDay(new Date(appointment.fecha_cita)), today)
+          isEqual(startOfDay(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`)), today)
         );
       } else if (filter === 'upcoming') {
         const now = new Date();
         filteredData = data.filter(appointment => 
-          new Date(appointment.fecha_cita) > now
+          new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`) > now
         );
       }
 
@@ -74,7 +73,7 @@ export function Appointments() {
     appointment.patients?.Nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     appointment.patients?.Paterno.toLowerCase().includes(searchTerm.toLowerCase()) ||
     appointment.patients?.Materno.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.reason.toLowerCase().includes(searchTerm.toLowerCase())
+    appointment.motivo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAppointmentCreated = () => {
@@ -106,27 +105,27 @@ export function Appointments() {
   };
 
   const handleWhatsAppReminder = (appointment: AppointmentWithPatient) => {
-    if (!appointment.patients?.phone) return;
+    if (!appointment.patients?.Telefono) return;
     
-    const dateTime = format(new Date(appointment.fecha_cita), "PPp", { locale: es });
+    const dateTime = format(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
     const message = `Recordatorio: Su cita está programada para ${dateTime}`;
-    const url = `https://api.whatsapp.com/send?phone=52${appointment.patients.phone}&text=${encodeURIComponent(message)}`;
+    const url = `https://api.whatsapp.com/send?phone=52${appointment.patients.Telefono}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
 
   const handleEmailReminder = (appointment: AppointmentWithPatient) => {
-    if (!appointment.patients?.email) return;
+    if (!appointment.patients?.Email) return;
     
-    const dateTime = format(new Date(appointment.fecha_cita), "PPp", { locale: es });
+    const dateTime = format(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
     const subject = `Recordatorio de Cita Médica`;
     const body = `Recordatorio: Su cita está programada para ${dateTime}`;
-    const mailtoUrl = `mailto:${appointment.patients.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoUrl = `mailto:${appointment.patients.Email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
   };
 
   const handlePhoneCall = (appointment: AppointmentWithPatient) => {
-    if (!appointment.patients?.phone) return;
-    window.location.href = `tel:${appointment.patients.phone}`;
+    if (!appointment.patients?.Telefono) return;
+    window.location.href = `tel:${appointment.patients.Telefono}`;
   };
 
   if (showForm) {
@@ -280,7 +279,7 @@ export function Appointments() {
                     className="px-6 py-2 whitespace-nowrap"
                     onClick={() => handleAppointmentClick(appointment)}
                   >
-                    {format(new Date(appointment.fecha_cita), "PPp", { locale: es })}
+                    {format(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es })}
                   </td>
                   <td 
                     className="px-6 py-2 whitespace-nowrap"
@@ -292,7 +291,7 @@ export function Appointments() {
                     className="px-6 py-2 whitespace-nowrap"
                     onClick={() => handleAppointmentClick(appointment)}
                   >
-                    {appointment.reason}
+                    {appointment.motivo}
                   </td>
                   <td 
                     className="px-6 py-2 whitespace-nowrap"
@@ -300,30 +299,30 @@ export function Appointments() {
                   >
                     <span className={clsx(
                       'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                      appointment.status === 'scheduled' && 'bg-green-100 text-green-800',
-                      appointment.status === 'cancelled' && 'bg-red-100 text-red-800',
-                      appointment.status === 'completed' && 'bg-yellow-100 text-yellow-800'
+                      appointment.estado === 'programada' && 'bg-green-100 text-green-800',
+                      appointment.estado === 'cancelada' && 'bg-red-100 text-red-800',
+                      appointment.estado === 'completada' && 'bg-yellow-100 text-yellow-800'
                     )}>
-                      {appointment.status === 'scheduled' ? 'Programada' :
-                       appointment.status === 'cancelled' ? 'Cancelada' : 'Completada'}
+                      {appointment.estado === 'programada' ? 'Programada' :
+                       appointment.estado === 'cancelada' ? 'Cancelada' : 'Completada'}
                     </span>
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-center">
-                    {appointment.status === 'scheduled' ? (
+                    {appointment.estado === 'programada' ? (
                       <div className="flex justify-center space-x-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleWhatsAppReminder(appointment);
                           }}
-                          disabled={!isValidPhone(appointment.patients?.phone)}
+                          disabled={!isValidPhone(appointment.patients?.Telefono)}
                           className={clsx(
                             'p-2 rounded-full transition-all',
-                            isValidPhone(appointment.patients?.phone)
+                            isValidPhone(appointment.patients?.Telefono)
                               ? 'hover:bg-green-100 text-green-600 cursor-pointer'
                               : 'text-gray-300 cursor-not-allowed'
                           )}
-                          title={isValidPhone(appointment.patients?.phone) ? 'Enviar recordatorio por WhatsApp' : 'Teléfono no disponible'}
+                          title={isValidPhone(appointment.patients?.Telefono) ? 'Enviar recordatorio por WhatsApp' : 'Teléfono no disponible'}
                         >
                           <MessageCircle className="w-5 h-5" />
                         </button>
@@ -332,14 +331,14 @@ export function Appointments() {
                             e.stopPropagation();
                             handleEmailReminder(appointment);
                           }}
-                          disabled={!isValidEmail(appointment.patients?.email)}
+                          disabled={!isValidEmail(appointment.patients?.Email)}
                           className={clsx(
                             'p-2 rounded-full transition-all',
-                            isValidEmail(appointment.patients?.email)
+                            isValidEmail(appointment.patients?.Email)
                               ? 'hover:bg-blue-100 text-blue-600 cursor-pointer'
                               : 'text-gray-300 cursor-not-allowed'
                           )}
-                          title={isValidEmail(appointment.patients?.email) ? 'Enviar recordatorio por email' : 'Email no disponible'}
+                          title={isValidEmail(appointment.patients?.Email) ? 'Enviar recordatorio por email' : 'Email no disponible'}
                         >
                           <Mail className="w-5 h-5" />
                         </button>
@@ -348,14 +347,14 @@ export function Appointments() {
                             e.stopPropagation();
                             handlePhoneCall(appointment);
                           }}
-                          disabled={!isValidPhone(appointment.patients?.phone)}
+                          disabled={!isValidPhone(appointment.patients?.Telefono)}
                           className={clsx(
                             'p-2 rounded-full transition-all',
-                            isValidPhone(appointment.patients?.phone)
+                            isValidPhone(appointment.patients?.Telefono)
                               ? 'hover:bg-purple-100 text-purple-600 cursor-pointer'
                               : 'text-gray-300 cursor-not-allowed'
                           )}
-                          title={isValidPhone(appointment.patients?.phone) ? 'Llamar al paciente' : 'Teléfono no disponible'}
+                          title={isValidPhone(appointment.patients?.Telefono) ? 'Llamar al paciente' : 'Teléfono no disponible'}
                         >
                           <Phone className="w-5 h-5" />
                         </button>
