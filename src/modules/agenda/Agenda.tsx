@@ -1,3 +1,4 @@
+// src/modules/agenda/Agenda.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -36,6 +37,8 @@ export function Agenda() {
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const calendarWrapperRef = useRef<HTMLDivElement>(null); // Add this ref
+  const isInitialMount = useRef(true); // Add this ref
   const { buttonClasses } = useStyles();
 
   const initialScrollTime = useMemo(() => {
@@ -51,6 +54,29 @@ export function Agenda() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // This useEffect will handle scrolling to the current time after the calendar renders
+  useEffect(() => {
+    if (calendarRef.current && isInitialMount.current) {
+      const calendarApi = calendarRef.current.getApi();
+      const now = new Date();
+      const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+
+      calendarApi.scrollToTime(scrollTime);
+
+      // Optional: Adjust scroll position slightly to center the current time
+      if (calendarWrapperRef.current) {
+        const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
+        if (timeGridContainer) {
+          const containerHeight = timeGridContainer.clientHeight;
+          const currentOffset = timeGridContainer.scrollTop;
+          // Scroll up by 1/3 of the container height to show more of the past
+          timeGridContainer.scrollTop = currentOffset - (containerHeight / 3);
+        }
+      }
+      isInitialMount.current = false; // Ensure it only runs once on initial mount
+    }
+  }, [calendarView]); // Re-run if calendar view changes (e.g., from month to week)
 
   useEffect(() => {
     fetchAppointments();
@@ -199,6 +225,7 @@ export function Agenda() {
 
           {/* Main Calendar */}
           <div
+            ref={calendarWrapperRef} // Attach the ref here
             className={clsx(
               'flex-1 rounded-lg shadow-lg transition-all duration-100 flex flex-col',
               isMobile && 'hidden'
