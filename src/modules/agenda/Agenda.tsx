@@ -36,16 +36,22 @@ export function Agenda() {
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
   const [calendarView, setCalendarView] = useState<'dayGridMonth' | 'timeGridWeek'>('timeGridWeek');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const calendarWrapperRef = useRef<HTMLDivElement>(null);
-  const isInitialMount = useRef(true);
+  //const calendarWrapperRef = useRef<HTMLDivElement>(null);
+  //const isInitialMount = useRef(true);
   const { buttonClasses } = useStyles();
 
 
-  useEffect(() => {
+/*  useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
+*/
+   const initialScrollTime = useMemo(() => {
+   const now = new Date();
+   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`; }, []);
 
+
+  
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -244,6 +250,7 @@ export function Agenda() {
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="timeGridWeek"
+                initialScroll={initialScrollTime} 
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',
