@@ -53,12 +53,12 @@ export function Appointments() {
       if (filter === 'today') {
         const today = startOfDay(new Date());
         filteredData = data.filter(appointment => 
-          isEqual(startOfDay(new Date(appointment.appointment_date)), today)
+          isEqual(startOfDay(new Date(appointment.fecha_cita)), today)
         );
       } else if (filter === 'upcoming') {
         const now = new Date();
         filteredData = data.filter(appointment => 
-          new Date(appointment.appointment_date) > now
+          new Date(appointment.fecha_cita) > now
         );
       }
 
@@ -108,7 +108,7 @@ export function Appointments() {
   const handleWhatsAppReminder = (appointment: AppointmentWithPatient) => {
     if (!appointment.patients?.phone) return;
     
-    const dateTime = format(new Date(appointment.appointment_date), "PPp", { locale: es });
+    const dateTime = format(new Date(appointment.fecha_cita), "PPp", { locale: es });
     const message = `Recordatorio: Su cita está programada para ${dateTime}`;
     const url = `https://api.whatsapp.com/send?phone=52${appointment.patients.phone}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
@@ -117,7 +117,7 @@ export function Appointments() {
   const handleEmailReminder = (appointment: AppointmentWithPatient) => {
     if (!appointment.patients?.email) return;
     
-    const dateTime = format(new Date(appointment.appointment_date), "PPp", { locale: es });
+    const dateTime = format(new Date(appointment.fecha_cita), "PPp", { locale: es });
     const subject = `Recordatorio de Cita Médica`;
     const body = `Recordatorio: Su cita está programada para ${dateTime}`;
     const mailtoUrl = `mailto:${appointment.patients.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -280,7 +280,7 @@ export function Appointments() {
                     className="px-6 py-2 whitespace-nowrap"
                     onClick={() => handleAppointmentClick(appointment)}
                   >
-                    {format(new Date(appointment.appointment_date), "PPp", { locale: es })}
+                    {format(new Date(appointment.fecha_cita), "PPp", { locale: es })}
                   </td>
                   <td 
                     className="px-6 py-2 whitespace-nowrap"
