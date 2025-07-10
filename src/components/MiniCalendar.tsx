@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
@@ -21,16 +21,24 @@ interface MiniCalendarProps {
 export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDates, onMonthChange }: MiniCalendarProps) {
   const { currentTheme } = useTheme();
   const [currentMonth, setCurrentMonth] = React.useState(startOfMonth(selectedDate));
+  const localNavigation = useRef(false); // New ref to track local navigation
 
   React.useEffect(() => {
-    if (!isSameMonth(currentMonth, currentViewDates.start)) {
-      setCurrentMonth(startOfMonth(currentViewDates.start));
+    // Only update currentMonth from external changes if not initiated locally
+    if (!localNavigation.current) {
+      if (!isSameMonth(currentMonth, currentViewDates.start)) {
+        setCurrentMonth(startOfMonth(currentViewDates.start));
+      }
+    } else {
+      // Reset localNavigation after it has been processed
+      localNavigation.current = false;
     }
-  }, [currentViewDates]);
+  }, [currentViewDates, currentMonth]);
 
   // Handle today button click
   const handleTodayClick = () => {
     const today = new Date();
+    localNavigation.current = true; // Mark as local navigation
     setCurrentMonth(startOfMonth(today));
     onDateSelect(today);
     onMonthChange?.(today);
@@ -71,12 +79,14 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
   // Navigation handlers with synchronization
   const handlePrevMonth = () => {
     const newMonth = subMonths(currentMonth, 1);
+    localNavigation.current = true; // Mark as local navigation
     setCurrentMonth(newMonth);
     onMonthChange?.(newMonth);
   };
 
   const handleNextMonth = () => {
     const newMonth = addMonths(currentMonth, 1);
+    localNavigation.current = true; // Mark as local navigation
     setCurrentMonth(newMonth);
     onMonthChange?.(newMonth);
   };
