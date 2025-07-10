@@ -17,6 +17,7 @@ import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
+import { isBefore, parseISO } from 'date-fns'; 
 
 export function Agenda() {
   const { currentTheme } = useTheme();
@@ -91,23 +92,30 @@ export function Agenda() {
   const fetchAppointments = async () => {
     try {
       const appointments = await api.appointments.getAll();
-      const calendarEvents = appointments.map(appointment => ({
-        id: appointment.id,
-        title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
-        start: parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`),
-        end: appointment.hora_fin ? parseISO(`${appointment.fecha_cita}T${appointment.hora_fin}`) : addMinutes(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`), appointment.duracion_minutos || 15),
-        backgroundColor: getEventColor(appointment.estado),
-        extendedProps: {
-          status: appointment.estado,
-          patient: appointment.patients,
-          reason: appointment.motivo,
-          notas: appointment.notas,
-          consultorio: appointment.consultorio || 1,
-          tiempo_evolucion: appointment.tiempo_evolucion,
-          unidad_tiempo: appointment.unidad_tiempo,
-          tipo_consulta: appointment.tipo_consulta,
-        }
-      }));
+      const now = new Date(); // Get current date and time
+
+      const calendarEvents = appointments.map(appointment => {
+        const appointmentDateTime = parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`);
+        const isPastEvent = isBefore(appointmentDateTime, now); // Check if the event is in the past
+
+        return {
+          id: appointment.id,
+          title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
+          start: appointmentDateTime,
+          end: appointment.hora_fin ? parseISO(`${appointment.fecha_cita}T${appointment.hora_fin}`) : addMinutes(appointmentDateTime, appointment.duracion_minutos || 15),
+          backgroundColor: isPastEvent ? '#9CA3AF' : getEventColor(appointment.estado), // Assign a different color for past events
+          extendedProps: {
+            status: appointment.estado,
+            patient: appointment.patients,
+            reason: appointment.motivo,
+            notas: appointment.notas,
+            consultorio: appointment.consultorio || 1,
+            tiempo_evolucion: appointment.tiempo_evolucion,
+            unidad_tiempo: appointment.unidad_tiempo,
+            tipo_consulta: appointment.tipo_consulta,
+          }
+        };
+      });
       setEvents(calendarEvents);
     } catch (error) {
       console.error('Error al cargar las citas:', error);
