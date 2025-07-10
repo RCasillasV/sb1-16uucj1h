@@ -118,6 +118,15 @@ function App() {
                   </PrivateRoute>
                 } />
                 
+               <Route path="/appointments" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Citas/>
+                    </Layout>
+                  </PrivateRoute>
+                } />
+     
+                
                 <Route path="/cie10" element={
                   <PrivateRoute>
                     <Layout>
