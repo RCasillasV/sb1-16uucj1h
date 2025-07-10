@@ -56,7 +56,7 @@ export function Agenda() {
       const now = new Date();
       const scrollTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
 
-      calendarApi.scrollToTime(scrollTime);
+      //calendarApi.scrollToTime(scrollTime);
 
       if (calendarWrapperRef.current) {
         const timeGridContainer = calendarRef.current.getApi().el.querySelector('.fc-timegrid-body');
