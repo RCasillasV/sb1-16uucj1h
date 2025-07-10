@@ -102,7 +102,7 @@ export function Agenda() {
           title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
           start: appointmentDateTime,
           end: appointment.hora_fin ? parseISO(`${appointment.fecha_cita}T${appointment.hora_fin}`) : addMinutes(appointmentDateTime, appointment.duracion_minutos || 15),
-          backgroundColor: isPastEvent ? '#9CA3AF' : getEventColor(appointment.estado), // Assign a different color for past events
+          backgroundColor: isPastEvent ? {currentTheme.colors.primary} : getEventColor(appointment.estado), // Assign a different color for past events
           extendedProps: {
             status: appointment.estado,
             patient: appointment.patients,
