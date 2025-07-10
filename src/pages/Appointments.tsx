@@ -263,32 +263,48 @@ export function Appointments() {
                   <tr
                     key={appointment.id}
                     className={clsx(
-                      "hover:bg-gray-50 cursor-pointer",
-                      isPastAppointment ? 'opacity-50' : '' // Apply opacity if past
+                      "hover:bg-gray-50",
+                      isPastAppointment ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer' // Apply opacity and change cursor if past
                     )}
                     style={{ color: isPastAppointment ? currentTheme.colors.textSecondary : currentTheme.colors.text }}
                   >
                     <td
                       className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => handleAppointmentClick(appointment)}
+                      onClick={() => {
+                        if (!isPastAppointment) {
+                          handleAppointmentClick(appointment);
+                        }
+                      }}
                     >
                       {format(appointmentDateTime, "PPp", { locale: es })}
                     </td>
                     <td
                       className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => handleAppointmentClick(appointment)}
+                      onClick={() => {
+                        if (!isPastAppointment) {
+                          handleAppointmentClick(appointment);
+                        }
+                      }}
                     >
                       {appointment.patients?.Nombre} {appointment.patients?.Paterno} {appointment.patients?.Materno}
                     </td>
                     <td
                       className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => handleAppointmentClick(appointment)}
+                      onClick={() => {
+                        if (!isPastAppointment) {
+                          handleAppointmentClick(appointment);
+                        }
+                      }}
                     >
                       {appointment.motivo}
                     </td>
                     <td
                       className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => handleAppointmentClick(appointment)}
+                      onClick={() => {
+                        if (!isPastAppointment) {
+                          handleAppointmentClick(appointment);
+                        }
+                      }}
                     >
                       <span className={clsx(
                         'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
