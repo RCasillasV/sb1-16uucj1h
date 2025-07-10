@@ -121,7 +121,7 @@ function App() {
                <Route path="/appointments" element={
                   <PrivateRoute>
                     <Layout>
-                      <Citas/>
+                      <Appointments/>
                     </Layout>
                   </PrivateRoute>
                 } />
