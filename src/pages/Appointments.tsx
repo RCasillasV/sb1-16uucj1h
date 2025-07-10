@@ -1,408 +1,428 @@
-// src/pages/Appointments.tsx
 import React, { useState, useEffect } from 'react';
-import { CalendarPlus, Search, Mail, Phone, MessageCircle, Calendar } from 'lucide-react';
-import { api } from '../lib/api';
-import { format, startOfDay, isEqual, isBefore, parseISO } from 'date-fns'; // Importar isBefore y parseISO
+import { format, parse, addDays, isEqual, isBefore, startOfDay, addMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { api } from '../lib/api';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import type { Database } from '../types/database.types';
-import { AppointmentForm } from '../components/AppointmentForm';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Modal } from '../components/Modal';
+import { useAuth } from '../contexts/AuthContext';
 import clsx from 'clsx';
-import { useStyles } from '../hooks/useStyles'; // Importar useStyles
 
+type AppointmentInsert = Database['public']['Tables']['tcCitas']['Insert'];
 type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
   patients: {
-    id : string;
+    id: string;
     Nombre: string;
     Paterno: string;
     Materno: string;
-    FechaNacimiento: string;
-    Sexo: string;
-    Email: string | null;
-    Telefono: string | null;
   } | null;
 };
 
-export function Appointments() {
+interface AppointmentFormProps {
+  onSuccess: () => void;
+  onCancel: () => void;
+  appointment?: AppointmentWithPatient | null;
+}
+
+const START_HOUR = 8; // 8 AM
+const END_HOUR = 23; // 11 PM
+const INTERVAL_MINUTES = 30;
+const DAYS_TO_SHOW =6;
+const MAX_DAYS_AHEAD = 60;
+
+export function AppointmentForm({ onSuccess, onCancel, appointment }: AppointmentFormProps) {
   const { currentTheme } = useTheme();
-  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showForm, setShowForm] = useState(false);
   const { selectedPatient } = useSelectedPatient();
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithPatient | null>(null);
-  const [showWarningModal, setShowWarningModal] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const filter = location.state?.filter;
-  const { buttonClasses } = useStyles(); // Llamar useStyles aquí
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    appointment 
+      ? new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`)
+      : startOfDay(new Date())
+  );
+  const [existingAppointments, setExistingAppointments] = useState<Database['public']['Tables']['tcCitas']['Row'][]>([]);
+  const [selectedTime, setSelectedTime] = useState<string | null>(
+    appointment 
+      ? appointment.hora_cita
+      : null
+  );
+  const [startDate, setStartDate] = useState<Date>(startOfDay(
+    appointment 
+      ? new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`)
+      : new Date()
+  ));
+  const [reason, setReason] = useState(appointment?.motivo || '');
+  const [notes, setNotes] = useState(appointment?.notas || '');
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<"programada" | "completada" | "cancelada">(appointment?.estado || 'programada');
+
 
   useEffect(() => {
-    fetchAppointments();
-  }, [filter]);
-
-  async function fetchAppointments() {
-    try {
-      const data = await api.appointments.getAll();
-      let filteredData = data;
-
-      if (filter === 'today') {
-        const today = startOfDay(new Date());
-        filteredData = data.filter(appointment =>
-          isEqual(startOfDay(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`)), today)
-        );
-      } else if (filter === 'upcoming') {
-        const now = new Date();
-        filteredData = data.filter(appointment =>
-          parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`) > now
-        );
-      }
-
-      setAppointments(filteredData);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const filteredAppointments = appointments.filter(appointment =>
-    (appointment.patients?.Nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.patients?.Paterno?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.patients?.Materno?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.motivo.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const handleAppointmentCreated = () => {
-    setShowForm(false);
-    setSelectedAppointment(null);
-    fetchAppointments();
-  };
-
-  const handleNewAppointment = () => {
-    if (!selectedPatient) {
-      setShowWarningModal(true);
+    if (!selectedPatient && !appointment) {
+      onCancel();
       return;
     }
-    setSelectedAppointment(null);
-    setShowForm(true);
-  };
+    fetchExistingAppointments();
+  }, [selectedDate, appointment]); // Added appointment to dependencies to refetch when editing
 
-  const handleAppointmentClick = (appointment: AppointmentWithPatient) => {
-    setSelectedAppointment(appointment);
-    setShowForm(true);
-  };
-
-  const isValidPhone = (phone: string | null): boolean => {
-    return !!phone && /^\d{10}$/.test(phone);
-  };
-
-  const isValidEmail = (email: string | null): boolean => {
-    return !!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  const handleWhatsAppReminder = (appointment: AppointmentWithPatient) => {
-    if (!appointment.patients?.Telefono) return;
-
-    const dateTime = format(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
-    const message = `Recordatorio: Su cita está programada para ${dateTime}`;
-    const url = `https://api.whatsapp.com/send?phone=52${appointment.patients.Telefono}&text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
-  };
-
-  const handleEmailReminder = (appointment: AppointmentWithPatient) => {
-    if (!appointment.patients?.Email) return;
-
-    const dateTime = format(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
-    const subject = `Recordatorio de Cita Médica`;
-    const body = `Recordatorio: Su cita está programada para ${dateTime}`;
-    const mailtoUrl = `mailto:${appointment.patients.Email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
-  };
-
-  const handlePhoneCall = (appointment: AppointmentWithPatient) => {
-    if (!appointment.patients?.Telefono) return;
-    window.location.href = `tel:${appointment.patients.Telefono}`;
-  };
-
-  if (showForm) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <AppointmentForm
-          onSuccess={handleAppointmentCreated}
-          onCancel={() => {
-            setShowForm(false);
-            setSelectedAppointment(null);
-          }}
-          appointment={selectedAppointment}
-        />
-      </div>
-    );
+  async function fetchExistingAppointments() {
+    try {
+      const data = await api.appointments.getAll();
+      setExistingAppointments(
+        data.filter(a => a.id !== appointment?.id)
+      );
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
   }
 
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center gap-2">
-          <Calendar
-            className="h-6 w-6"
-            style={{ color: currentTheme.colors.primary }}
-          />
-          <h1
-            className="text-2xl font-bold"
-            style={{ color: currentTheme.colors.text }}
-          >
-            {filter === 'today' ? 'Citas de Hoy' :
-             filter === 'upcoming' ? 'Próximas Citas' :
-             'Citas'}
-          </h1>
-        </div>
-        <button
-          onClick={handleNewAppointment}
-          className={clsx(buttonClasses.base, buttonClasses.primary)}
-        >
-          <CalendarPlus className="h-5 w-5 mr-1" />
-          Nueva Cita
-        </button>
-      </div>
+  const isTimeSlotTaken = (hour: number, minute: number) => {
+    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
+    
+    return existingAppointments.some(appointment => 
+      appointment.fecha_cita === dateString && appointment.hora_cita === timeString
+    );
+  };
 
-      <div className="mb-5">
-        <div className="relative">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5"
-            style={{ color: currentTheme.colors.textSecondary }}
-          />
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedTime) {
+      setError('Seleccione una hora para la cita');
+      return;
+    }
+
+    if (!user) {
+      setError('Usuario no autenticado');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
+
+    const appointmentData: AppointmentInsert = {
+      id_paciente: appointment?.id_paciente || selectedPatient?.id,
+      fecha_cita: dateString,
+      hora_cita: selectedTime,
+      id_user: user.id,
+      motivo: reason,
+      notas: notes || null,
+      estado: status, // Use the selected status
+      consultorio: appointment?.consultorio || 1, // Keep existing or default
+      tipo_consulta: appointment?.tipo_consulta || 'primera', // Keep existing or default
+      duracion_minutos: appointment?.duracion_minutos || 30, // Keep existing or default
+      hora_fin: appointment?.hora_fin || null, // Keep existing or default
+    };
+
+    try {
+      if (appointment) {
+        await api.appointments.update(appointment.id, appointmentData);
+      } else {
+        await api.appointments.create(appointmentData);
+      }
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar la cita');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePrevWeek = () => {
+    const newStartDate = addDays(startDate, -DAYS_TO_SHOW);
+    if (!isBefore(newStartDate, startOfDay(new Date()))) {
+      setStartDate(newStartDate);
+    }
+  };
+
+  const handleNextWeek = () => {
+    const newStartDate = addDays(startDate, DAYS_TO_SHOW);
+    const maxDate = addDays(startOfDay(new Date()), MAX_DAYS_AHEAD - DAYS_TO_SHOW);
+    if (!isBefore(maxDate, newStartDate)) {
+      setStartDate(newStartDate);
+    }
+  };
+
+  const dateRange = Array.from({ length: DAYS_TO_SHOW }, (_, i) => addDays(startDate, i));
+  const today = startOfDay(new Date());
+  const maxDate = addDays(today, MAX_DAYS_AHEAD);
+  const canGoBack = !isEqual(startDate, today);
+  const canGoForward = !isEqual(addDays(startDate, DAYS_TO_SHOW), maxDate);
+
+  const selectedDateTime = selectedTime 
+    ? `${format(selectedDate, "EEEE d 'de' MMMM 'de' yyyy", { locale: es })} a las ${selectedTime} horas`
+    : null;
+
+  const timeSlots = [];
+  for (let hour = START_HOUR; hour < END_HOUR; hour++) {
+    for (let minute = 0; minute < 60; minute += INTERVAL_MINUTES) {
+      timeSlots.push({ hour, minute });
+    }
+  }
+
+  if (!selectedPatient && !appointment) return null;
+
+  const patient = appointment?.patients || selectedPatient;
+
+  const buttonStyle = {
+    base: clsx(
+      'px-4 py-2 rounded-md transition-colors',
+      currentTheme.buttons.style === 'pill' && 'rounded-full',
+      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
+      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
+      currentTheme.buttons.animation && 'hover:scale-105'
+    ),
+    primary: {
+      background: currentTheme.colors.buttonPrimary,
+      color: currentTheme.colors.buttonText,
+    },
+    secondary: {
+      background: 'transparent',
+      border: `1px solid ${currentTheme.colors.border}`,
+      color: currentTheme.colors.text,
+    },
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+          <h2 className="text-2xl font-bold">{appointment ? 'Editar Cita' : 'Nueva Cita'}</h2>
+        </div>
+        {selectedDateTime && (
+          <p className="text-blue-600 font-medium">
+            {selectedDateTime}
+          </p>
+        )}
+      </div>
+      
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Calendar */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <label className="block text-sm font-medium" style={{ color: currentTheme.colors.text }}>
+              Fecha
+            </label>
+            <span className="text-gray-600 font-medium">
+              {format(startDate, "MMMM yyyy", { locale: es })}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              type="button"
+              onClick={handlePrevWeek}
+              disabled={!canGoBack}
+              className={clsx(
+                'p-2 rounded-md',
+                canGoBack
+                  ? 'hover:bg-gray-100'
+                  : 'opacity-50 cursor-not-allowed'
+              )}
+              style={{ color: currentTheme.colors.text }}
+            >
+              <ChevronLeft className="h-5 w-4" />
+            </button>
+            <div className="grid grid-cols-6 gap-2 flex-1 mx-4">
+              {dateRange.map((date) => {
+                const isSelected = isEqual(startOfDay(date), startOfDay(selectedDate));
+                const isPast = isBefore(date, today);
+                return (
+                  <button
+                    key={date.toISOString()}
+                    type="button"
+                    disabled={isPast}
+                    onClick={() => setSelectedDate(date)}
+                    className={clsx(
+                      'p-2 text-center rounded-md transition-colors',
+                      isPast ? 'opacity-50 cursor-not-allowed' : 'hover:bg-opacity-10',
+                      isSelected ? 'text-white' : ''
+                    )}
+                    style={{
+                      backgroundColor: isSelected 
+                        ? currentTheme.colors.primary 
+                        : isPast 
+                          ? currentTheme.colors.border
+                          : 'transparent',
+                      color: isSelected 
+                        ? currentTheme.colors.buttonText
+                        : currentTheme.colors.text
+                    }}
+                  >
+                    <div className="text-xs mb-1">{format(date, 'EEE', { locale: es })}</div>
+                    <div className="font-semibold">{format(date, 'd')}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={handleNextWeek}
+              disabled={!canGoForward}
+              className={clsx(
+                'p-2 rounded-md',
+                canGoForward
+                  ? 'hover:bg-gray-100'
+                  : 'opacity-50 cursor-not-allowed'
+              )}
+              style={{ color: currentTheme.colors.text }}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Time slots - 6x6 grid */}
+        <div className="mb-2">
+          <label className="block text-sm font-medium mb-2" style={{ color: currentTheme.colors.text }}>
+            Hora
+          </label>
+          <div className="grid grid-cols-6 gap-2">
+            {timeSlots.map(({ hour, minute }) => {
+              const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+              const isTaken = isTimeSlotTaken(hour, minute);
+              const isSelected = selectedTime === timeString;
+              return (
+                <button
+                  key={timeString}
+                  type="button"
+                  disabled={isTaken}
+                  onClick={() => setSelectedTime(timeString)}
+                  className={clsx(
+                    'p-2 text-center rounded-md transition-colors',
+                    isTaken ? 'opacity-50 cursor-not-allowed' : 'hover:bg-opacity-10'
+                  )}
+                  style={{
+                    backgroundColor: isSelected 
+                      ? currentTheme.colors.primary 
+                      : isTaken 
+                        ? currentTheme.colors.border
+                        : 'transparent',
+                    color: isSelected 
+                      ? currentTheme.colors.buttonText
+                      : currentTheme.colors.text
+                  }}
+                >
+                  {timeString}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Patient selection */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium whitespace-nowrap" style={{ color: currentTheme.colors.text }}>
+            Paciente:
+          </label>
+          <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded-md">
+            <span className="font-medium">
+              {patient?.Nombre} {patient?.Paterno}
+            </span>
+          </div>
+        </div>
+
+        {/* Reason */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="reason" className="text-sm font-medium whitespace-nowrap" style={{ color: currentTheme.colors.text }}>
+            Razón:
+          </label>
           <input
             type="text"
-            placeholder="Buscar citas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2"
+            name="reason"
+            id="reason"
+            required
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             style={{
               backgroundColor: currentTheme.colors.surface,
-              borderColor: currentTheme.colors.border,
               color: currentTheme.colors.text,
+              borderColor: currentTheme.colors.border,
             }}
           />
         </div>
-      </div>
 
-      <div
-        className="rounded-lg shadow overflow-hidden"
-        style={{
-          background: currentTheme.colors.surface,
-          borderColor: currentTheme.colors.border,
-        }}
-      >
-        <table className="min-w-full divide-y" style={{ borderColor: currentTheme.colors.border }}>
-          <thead>
-            <tr style={{ background: currentTheme.colors.background }}>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Fecha y Hora
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Paciente
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Motivo
-              </th>
-              <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Estado
-              </th>
-              <th
-                className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Recordar cita
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-2 text-center"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Cargando citas...
-                </td>
-              </tr>
-            ) : filteredAppointments.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-2 text-center"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  No hay citas programadas
-                </td>
-              </tr>
-            ) : (
-              filteredAppointments.map((appointment) => {
-                const appointmentDateTime = parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`);
-                const isPastAppointment = isBefore(appointmentDateTime, new Date());
-                const isDisabled = isPastAppointment; // Disable buttons if appointment is in the past
-
-                return (
-                  <tr
-                    key={appointment.id}
-                    className={clsx(
-                      "hover:bg-gray-50",
-                      isPastAppointment ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer' // Apply opacity and change cursor if past
-                    )}
-                    style={{ color: isPastAppointment ? currentTheme.colors.textSecondary : currentTheme.colors.text }}
-                  >
-                    <td
-                      className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => {
-                        if (!isPastAppointment) {
-                          handleAppointmentClick(appointment);
-                        }
-                      }}
-                    >
-                      {format(appointmentDateTime, "PPp", { locale: es })}
-                    </td>
-                    <td
-                      className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => {
-                        if (!isPastAppointment) {
-                          handleAppointmentClick(appointment);
-                        }
-                      }}
-                    >
-                      {appointment.patients?.Nombre} {appointment.patients?.Paterno} {appointment.patients?.Materno}
-                    </td>
-                    <td
-                      className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => {
-                        if (!isPastAppointment) {
-                          handleAppointmentClick(appointment);
-                        }
-                      }}
-                    >
-                      {appointment.motivo}
-                    </td>
-                    <td
-                      className="px-6 py-2 whitespace-nowrap"
-                      onClick={() => {
-                        if (!isPastAppointment) {
-                          handleAppointmentClick(appointment);
-                        }
-                      }}
-                    >
-                      <span className={clsx(
-                        'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                        appointment.estado === 'programada' && 'bg-green-100 text-green-800',
-                        appointment.estado === 'cancelada' && 'bg-red-100 text-red-800',
-                        appointment.estado === 'completada' && 'bg-yellow-100 text-yellow-800'
-                      )}>
-                        {appointment.estado === 'programada' ? 'Programada' :
-                         appointment.estado === 'cancelada' ? 'Cancelada' : 'Completada'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-center">
-                      {appointment.estado === 'programada' ? (
-                        <div className="flex justify-center space-x-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleWhatsAppReminder(appointment);
-                            }}
-                            disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
-                            className={clsx(
-                              'p-2 rounded-full transition-all',
-                              (isDisabled || !isValidPhone(appointment.patients?.Telefono))
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'hover:bg-green-100 text-green-600 cursor-pointer'
-                            )}
-                            title={isValidPhone(appointment.patients?.Telefono) ? 'Enviar recordatorio por WhatsApp' : 'Teléfono no disponible'}
-                          >
-                            <MessageCircle className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEmailReminder(appointment);
-                            }}
-                            disabled={isDisabled || !isValidEmail(appointment.patients?.Email)}
-                            className={clsx(
-                              'p-2 rounded-full transition-all',
-                              (isDisabled || !isValidEmail(appointment.patients?.Email))
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'hover:bg-blue-100 text-blue-600 cursor-pointer'
-                            )}
-                            title={isValidEmail(appointment.patients?.Email) ? 'Enviar recordatorio por email' : 'Email no disponible'}
-                          >
-                            <Mail className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePhoneCall(appointment);
-                            }}
-                            disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
-                            className={clsx(
-                              'p-2 rounded-full transition-all',
-                              (isDisabled || !isValidPhone(appointment.patients?.Telefono))
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'hover:bg-purple-100 text-purple-600 cursor-pointer'
-                            )}
-                            title={isValidPhone(appointment.patients?.Telefono) ? 'Llamar al paciente' : 'Teléfono no disponible'}
-                          >
-                            <Phone className="w-5 h-5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <span
-                          className="text-sm"
-                          style={{ color: currentTheme.colors.textSecondary }}
-                        >
-                          No aplica
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <Modal
-        isOpen={showWarningModal}
-        onClose={() => setShowWarningModal(false)}
-        title="Selección de Paciente Requerida"
-        actions={
-          <button
-            className={clsx(buttonClasses.base, buttonClasses.outline)}
-            onClick={() => {
-              setShowWarningModal(false);
-              navigate('/patients');
+        {/* Status */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="status" className="text-sm font-medium whitespace-nowrap" style={{ color: currentTheme.colors.text }}>
+            Estado:
+          </label>
+          <select
+            name="status"
+            id="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as "programada" | "completada" | "cancelada")}
+            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            style={{
+              backgroundColor: currentTheme.colors.surface,
+              color: currentTheme.colors.text,
+              borderColor: currentTheme.colors.border,
             }}
           >
-            Entendido
+            <option value="programada">Programada</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+
+        {/* Notes */}
+        <div>
+          <label htmlFor="notes" className="block text-sm font-medium mb-2" style={{ color: currentTheme.colors.text }}>
+            Notas adicionales:
+          </label>
+          <textarea
+            name="notes"
+            id="notes"
+            rows={3}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            style={{
+              backgroundColor: currentTheme.colors.surface,
+              color: currentTheme.colors.text,
+              borderColor: currentTheme.colors.border,
+            }}
+          />
+        </div>
+
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className={buttonStyle.base}
+            style={buttonStyle.secondary}
+          >
+            Cancelar
           </button>
-        }
-      >
-        <p>Por favor, seleccione un paciente primero desde la sección de Pacientes.</p>
-      </Modal>
+          <button
+            type="submit"
+            disabled={loading || !selectedTime || isLoading}
+            className={clsx(buttonStyle.base, 'disabled:opacity-50')}
+            style={buttonStyle.primary}
+          >
+            {isLoading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                {appointment ? 'Actualizando...' : 'Guardando...'}
+              </div>
+            ) : (
+              appointment ? 'Actualizar' : 'Guardar'
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
+
