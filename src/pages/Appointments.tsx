@@ -12,7 +12,7 @@ import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 import { useStyles } from '../../hooks/useStyles';
 
-type AppointmentWithPatient = Database['public']['Tables']['appointments']['Row'] & {
+type AppointmentWithPatient = Database['public']['Tables']['tcCitas']['Row'] & {
   patients: {
     Nombre: string;
     Paterno: string;
