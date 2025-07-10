@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarPlus, Search, Mail, Phone, MessageCircle, Calendar } from 'lucide-react';
 import { api } from '../lib/api';
-import { format, startOfDay, endOfDay, isEqual, isBefore } from 'date-fns'; // Importar isBefore
+import { format, startOfDay, isEqual, isBefore, parseISO } from 'date-fns'; // Importar isBefore y parseISO
 import { es } from 'date-fns/locale';
 import type { Database } from '../types/database.types';
 import { AppointmentForm } from '../components/AppointmentForm';
@@ -52,12 +52,12 @@ export function Appointments() {
       if (filter === 'today') {
         const today = startOfDay(new Date());
         filteredData = data.filter(appointment =>
-          isEqual(startOfDay(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`)), today)
+          isEqual(startOfDay(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`)), today)
         );
       } else if (filter === 'upcoming') {
         const now = new Date();
         filteredData = data.filter(appointment =>
-          new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`) > now
+          parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`) > now
         );
       }
 
@@ -70,10 +70,10 @@ export function Appointments() {
   }
 
   const filteredAppointments = appointments.filter(appointment =>
-    appointment.patients?.Nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.patients?.Paterno.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.patients?.Materno.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.motivo.toLowerCase().includes(searchTerm.toLowerCase())
+    (appointment.patients?.Nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    appointment.patients?.Paterno?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    appointment.patients?.Materno?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    appointment.motivo.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleAppointmentCreated = () => {
@@ -107,7 +107,7 @@ export function Appointments() {
   const handleWhatsAppReminder = (appointment: AppointmentWithPatient) => {
     if (!appointment.patients?.Telefono) return;
 
-    const dateTime = format(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
+    const dateTime = format(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
     const message = `Recordatorio: Su cita está programada para ${dateTime}`;
     const url = `https://api.whatsapp.com/send?phone=52${appointment.patients.Telefono}&text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
@@ -116,7 +116,7 @@ export function Appointments() {
   const handleEmailReminder = (appointment: AppointmentWithPatient) => {
     if (!appointment.patients?.Email) return;
 
-    const dateTime = format(new Date(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
+    const dateTime = format(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`), "PPp", { locale: es });
     const subject = `Recordatorio de Cita Médica`;
     const body = `Recordatorio: Su cita está programada para ${dateTime}`;
     const mailtoUrl = `mailto:${appointment.patients.Email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -143,20 +143,6 @@ export function Appointments() {
     );
   }
 
-  const buttonStyle = {
-    base: clsx(
-      'flex items-center px-4 py-2 transition-all duration-200',
-      currentTheme.buttons.style === 'pill' && 'rounded-full',
-      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
-      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
-      currentTheme.buttons.animation && 'hover:scale-105'
-    ),
-    primary: {
-      background: currentTheme.colors.buttonPrimary,
-      color: currentTheme.colors.buttonText,
-    },
-  };
-
   return (
     <div>
       <div className="flex justify-between items-center mb-2">
@@ -176,8 +162,7 @@ export function Appointments() {
         </div>
         <button
           onClick={handleNewAppointment}
-          className={clsx(buttonClasses.base, buttonClasses.outline)}
-          style={buttonStyle.primary}
+          className={clsx(buttonClasses.base, buttonClasses.primary)}
         >
           <CalendarPlus className="h-5 w-5 mr-1" />
           Nueva Cita
@@ -202,135 +187,7 @@ export function Appointments() {
               color: currentTheme.colors.text,
             }}
           />
-        </div> <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-2 text-center"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Cargando citas...
-                </td>
-              </tr>
-            ) : filteredAppointments.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-2 text-center"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  No hay citas programadas
-                </td>
-              </tr>
-            ) : (
-              filteredAppointments.map((appointment) => ( // CAMBIO AQUÍ: de `{` a `(`
-                <tr
-                  key={appointment.id}
-                  className={clsx(
-                    "hover:bg-gray-50 cursor-pointer",
-                    isPastAppointment ? 'text-gray-400' : '' // Apply gray color if past
-                  )}
-                  style={{ color: isPastAppointment ? currentTheme.colors.textSecondary : currentTheme.colors.text }}
-                >
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    {format(appointmentDateTime, "PPp", { locale: es })}
-                  </td>
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    {appointment.patients?.Nombre} {appointment.patients?.Paterno} {appointment.patients?.Materno}
-                  </td>
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    {appointment.motivo}
-                  </td>
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    <span className={clsx(
-                      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                      appointment.estado === 'programada' && 'bg-green-100 text-green-800',
-                      appointment.estado === 'cancelada' && 'bg-red-100 text-red-800',
-                      appointment.estado === 'completada' && 'bg-yellow-100 text-yellow-800'
-                    )}>
-                      {appointment.estado === 'programada' ? 'Programada' :
-                       appointment.estado === 'cancelada' ? 'Cancelada' : 'Completada'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-center">
-                    {appointment.estado === 'programada' ? (
-                      <div className="flex justify-center space-x-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleWhatsAppReminder(appointment);
-                          }}
-                          disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
-                          className={clsx(
-                            'p-2 rounded-full transition-all',
-                            (isDisabled || !isValidPhone(appointment.patients?.Telefono))
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'hover:bg-green-100 text-green-600 cursor-pointer'
-                          )}
-                          title={isValidPhone(appointment.patients?.Telefono) ? 'Enviar recordatorio por WhatsApp' : 'Teléfono no disponible'}
-                        >
-                          <MessageCircle className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEmailReminder(appointment);
-                          }}
-                          disabled={isDisabled || !isValidEmail(appointment.patients?.Email)}
-                          className={clsx(
-                            'p-2 rounded-full transition-all',
-                            (isDisabled || !isValidEmail(appointment.patients?.Email))
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'hover:bg-blue-100 text-blue-600 cursor-pointer'
-                          )}
-                          title={isValidEmail(appointment.patients?.Email) ? 'Enviar recordatorio por email' : 'Email no disponible'}
-                        >
-                          <Mail className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePhoneCall(appointment);
-                          }}
-                          disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
-                          className={clsx(
-                            'p-2 rounded-full transition-all',
-                            (isDisabled || !isValidPhone(appointment.patients?.Telefono))
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'hover:bg-purple-100 text-purple-600 cursor-pointer'
-                          )}
-                          title={isValidPhone(appointment.patients?.Telefono) ? 'Llamar al paciente' : 'Teléfono no disponible'}
-                        >
-                          <Phone className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        className="text-sm"
-                        style={{ color: currentTheme.colors.textSecondary }}
-                      >
-                        No aplica
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              )) // CAMBIO AQUÍ: de `}` a `)`
-            )}
-          </tbody>
-        </table>
+        </div>
       </div>
 
       <div
@@ -375,11 +232,6 @@ export function Appointments() {
               </th>
             </tr>
           </thead>
-
-// src/pages/Appointments.tsx
-
-// ... (código existente)
-
           <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
             {loading ? (
               <tr>
@@ -402,117 +254,119 @@ export function Appointments() {
                 </td>
               </tr>
             ) : (
-              filteredAppointments.map((appointment) => ( // CAMBIO AQUÍ: de `{` a `(`
-                <tr
-                  key={appointment.id}
-                  className={clsx(
-                    "hover:bg-gray-50 cursor-pointer",
-                    isPastAppointment ? 'text-gray-400' : '' // Apply gray color if past
-                  )}
-                  style={{ color: isPastAppointment ? currentTheme.colors.textSecondary : currentTheme.colors.text }}
-                >
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    {format(appointmentDateTime, "PPp", { locale: es })}
-                  </td>
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    {appointment.patients?.Nombre} {appointment.patients?.Paterno} {appointment.patients?.Materno}
-                  </td>
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    {appointment.motivo}
-                  </td>
-                  <td
-                    className="px-6 py-2 whitespace-nowrap"
-                    onClick={() => handleAppointmentClick(appointment)}
-                  >
-                    <span className={clsx(
-                      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                      appointment.estado === 'programada' && 'bg-green-100 text-green-800',
-                      appointment.estado === 'cancelada' && 'bg-red-100 text-red-800',
-                      appointment.estado === 'completada' && 'bg-yellow-100 text-yellow-800'
-                    )}>
-                      {appointment.estado === 'programada' ? 'Programada' :
-                       appointment.estado === 'cancelada' ? 'Cancelada' : 'Completada'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-center">
-                    {appointment.estado === 'programada' ? (
-                      <div className="flex justify-center space-x-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleWhatsAppReminder(appointment);
-                          }}
-                          disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
-                          className={clsx(
-                            'p-2 rounded-full transition-all',
-                            (isDisabled || !isValidPhone(appointment.patients?.Telefono))
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'hover:bg-green-100 text-green-600 cursor-pointer'
-                          )}
-                          title={isValidPhone(appointment.patients?.Telefono) ? 'Enviar recordatorio por WhatsApp' : 'Teléfono no disponible'}
-                        >
-                          <MessageCircle className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEmailReminder(appointment);
-                          }}
-                          disabled={isDisabled || !isValidEmail(appointment.patients?.Email)}
-                          className={clsx(
-                            'p-2 rounded-full transition-all',
-                            (isDisabled || !isValidEmail(appointment.patients?.Email))
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'hover:bg-blue-100 text-blue-600 cursor-pointer'
-                          )}
-                          title={isValidEmail(appointment.patients?.Email) ? 'Enviar recordatorio por email' : 'Email no disponible'}
-                        >
-                          <Mail className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePhoneCall(appointment);
-                          }}
-                          disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
-                          className={clsx(
-                            'p-2 rounded-full transition-all',
-                            (isDisabled || !isValidPhone(appointment.patients?.Telefono))
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'hover:bg-purple-100 text-purple-600 cursor-pointer'
-                          )}
-                          title={isValidPhone(appointment.patients?.Telefono) ? 'Llamar al paciente' : 'Teléfono no disponible'}
-                        >
-                          <Phone className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        className="text-sm"
-                        style={{ color: currentTheme.colors.textSecondary }}
-                      >
-                        No aplica
-                      </span>
+              filteredAppointments.map((appointment) => {
+                const appointmentDateTime = parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`);
+                const isPastAppointment = isBefore(appointmentDateTime, new Date());
+                const isDisabled = isPastAppointment; // Disable buttons if appointment is in the past
+
+                return (
+                  <tr
+                    key={appointment.id}
+                    className={clsx(
+                      "hover:bg-gray-50 cursor-pointer",
+                      isPastAppointment ? 'opacity-50' : '' // Apply opacity if past
                     )}
-                  </td>
-                </tr>
-              )) // CAMBIO AQUÍ: de `}` a `)`
+                    style={{ color: isPastAppointment ? currentTheme.colors.textSecondary : currentTheme.colors.text }}
+                  >
+                    <td
+                      className="px-6 py-2 whitespace-nowrap"
+                      onClick={() => handleAppointmentClick(appointment)}
+                    >
+                      {format(appointmentDateTime, "PPp", { locale: es })}
+                    </td>
+                    <td
+                      className="px-6 py-2 whitespace-nowrap"
+                      onClick={() => handleAppointmentClick(appointment)}
+                    >
+                      {appointment.patients?.Nombre} {appointment.patients?.Paterno} {appointment.patients?.Materno}
+                    </td>
+                    <td
+                      className="px-6 py-2 whitespace-nowrap"
+                      onClick={() => handleAppointmentClick(appointment)}
+                    >
+                      {appointment.motivo}
+                    </td>
+                    <td
+                      className="px-6 py-2 whitespace-nowrap"
+                      onClick={() => handleAppointmentClick(appointment)}
+                    >
+                      <span className={clsx(
+                        'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                        appointment.estado === 'programada' && 'bg-green-100 text-green-800',
+                        appointment.estado === 'cancelada' && 'bg-red-100 text-red-800',
+                        appointment.estado === 'completada' && 'bg-yellow-100 text-yellow-800'
+                      )}>
+                        {appointment.estado === 'programada' ? 'Programada' :
+                         appointment.estado === 'cancelada' ? 'Cancelada' : 'Completada'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-center">
+                      {appointment.estado === 'programada' ? (
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleWhatsAppReminder(appointment);
+                            }}
+                            disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
+                            className={clsx(
+                              'p-2 rounded-full transition-all',
+                              (isDisabled || !isValidPhone(appointment.patients?.Telefono))
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'hover:bg-green-100 text-green-600 cursor-pointer'
+                            )}
+                            title={isValidPhone(appointment.patients?.Telefono) ? 'Enviar recordatorio por WhatsApp' : 'Teléfono no disponible'}
+                          >
+                            <MessageCircle className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEmailReminder(appointment);
+                            }}
+                            disabled={isDisabled || !isValidEmail(appointment.patients?.Email)}
+                            className={clsx(
+                              'p-2 rounded-full transition-all',
+                              (isDisabled || !isValidEmail(appointment.patients?.Email))
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'hover:bg-blue-100 text-blue-600 cursor-pointer'
+                            )}
+                            title={isValidEmail(appointment.patients?.Email) ? 'Enviar recordatorio por email' : 'Email no disponible'}
+                          >
+                            <Mail className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePhoneCall(appointment);
+                            }}
+                            disabled={isDisabled || !isValidPhone(appointment.patients?.Telefono)}
+                            className={clsx(
+                              'p-2 rounded-full transition-all',
+                              (isDisabled || !isValidPhone(appointment.patients?.Telefono))
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'hover:bg-purple-100 text-purple-600 cursor-pointer'
+                            )}
+                            title={isValidPhone(appointment.patients?.Telefono) ? 'Llamar al paciente' : 'Teléfono no disponible'}
+                          >
+                            <Phone className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span
+                          className="text-sm"
+                          style={{ color: currentTheme.colors.textSecondary }}
+                        >
+                          No aplica
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
-
-{/* ... (resto del código) ... */}
-
-          
       </div>
 
       <Modal
