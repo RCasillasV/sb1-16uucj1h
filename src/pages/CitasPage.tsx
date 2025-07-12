@@ -563,7 +563,7 @@ export function CitasPage() {
                       className="block text-sm font-medium mb-1"
                       style={{ color: currentTheme.colors.text }}
                     >
-                      Fecha
+                      Fecha <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -583,7 +583,7 @@ export function CitasPage() {
                       className="block text-sm font-medium mb-1"
                       style={{ color: currentTheme.colors.text }}
                     >
-                      Hora
+                      Hora <span className="text-red-500">*</span>
                     </label>
                     <select
                       {...form.register('hora_cita')}
@@ -605,7 +605,7 @@ export function CitasPage() {
                       className="block text-sm font-medium mb-1"
                       style={{ color: currentTheme.colors.text }}
                     >
-                      Consultorio
+                      Consultorio <span className="text-red-500">*</span>
                     </label>
                     <select
                       {...form.register('consultorio', { valueAsNumber: true })}
@@ -628,7 +628,7 @@ export function CitasPage() {
                       className="block text-sm font-medium mb-1"
                       style={{ color: currentTheme.colors.text }}
                     >
-                      Duración minutos
+                      Duración minutos <span className="text-red-500">*</span>
                     </label>
                     <select
                       {...form.register('duracion_minutos', { valueAsNumber: true })}
