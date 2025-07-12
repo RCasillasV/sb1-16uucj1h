@@ -342,7 +342,7 @@ export function CitasPage() {
                   className="block text-base font-medium mb-1"
                   style={{ color: currentTheme.colors.text }}
                 >
-                 Tipo de Consulta
+                 Tipo de Consulta <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {/* Conditionally render "Primera vez" */}
