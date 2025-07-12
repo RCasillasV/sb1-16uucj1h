@@ -393,7 +393,7 @@ export function CitasPage() {
                     className="block text-sm font-medium mb-1"
                     style={{ color: currentTheme.colors.text }}
                   >
-                    Motivo Principal  <span className="text-destructive">*</span>
+                    Motivo Principal  <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
