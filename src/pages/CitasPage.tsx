@@ -15,29 +15,33 @@ import clsx from 'clsx';
 
 // ... (otras definiciones y constantes)
 
-const HORARIOS_CONSULTA = [
-  "08:00",
-  "08:30",
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
-  "17:00",
-  "17:30",
-  "18:00",
-]
+const generateSchedule = (startTime, endTime, intervalMinutes) => {
+  const times = [];
+  
+  // Convertimos las horas de inicio y fin a objetos Date para manipularlas
+  // Usamos el 1 de enero de 2000 como referencia, solo nos importan las horas
+  const start = new Date(`2000/01/01 ${startTime}`);
+  const end = new Date(`2000/01/01 ${endTime}`);
+  
+  // Bucle para iterar y añadir los intervalos
+  let currentTime = new Date(start);
+  
+  while (currentTime <= end) {
+    // Formateamos la hora actual a HH:MM (ej. 08:00)
+    // Usamos padStart para asegurar el formato de 2 dígitos (ej. 8 -> 08)
+    const hours = currentTime.getHours().toString().padStart(2, '0');
+    const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+    times.push(`${hours}:${minutes}`);
+    
+    // Añadimos el intervalo de minutos para la siguiente iteración
+    currentTime.setMinutes(currentTime.getMinutes() + intervalMinutes);
+  }
+  
+  return times;
+};
+
+// Generamos los horarios de 08:00 a 18:00 con intervalos de 30 minutos
+const HORARIOS_CONSULTA = generateSchedule("08:00", "21:45", 15);
 
 const formSchema = z.object({
   tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia','revision', 'control']),
