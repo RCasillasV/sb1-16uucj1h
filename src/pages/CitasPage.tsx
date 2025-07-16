@@ -240,7 +240,7 @@ export function CitasPage() {
           return;
         }
 
-        const { data, error } = await supabase.rpc('SintomasConsulta', { 
+        const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd'), 
           p_especialidad: specialty
         });    
