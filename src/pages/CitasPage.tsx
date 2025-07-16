@@ -13,6 +13,11 @@ import { Modal } from '../components/Modal';
 import { supabase } from '../lib/supabase';
 import clsx from 'clsx';
 
+// Interface for symptom objects
+interface Symptom {
+  nombre: string;
+}
+
 // ... (otras definiciones y constantes)
 
 const generateSchedule = (startTime, endTime, intervalMinutes) => {
@@ -67,7 +72,7 @@ export function CitasPage() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const navigate = useNavigate();
-  const [dynamicSymptoms, setDynamicSymptoms] = useState<string[]>([]);
+  const [dynamicSymptoms, setDynamicSymptoms] = useState<Symptom[]>([]);
   const [isLoadingSymptoms, setIsLoadingSymptoms] = useState(false);
   const [symptomsError, setSymptomsError] = useState<string | null>(null);
   const location = useLocation();
