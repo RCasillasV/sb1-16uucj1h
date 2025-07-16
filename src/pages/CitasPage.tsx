@@ -251,7 +251,7 @@ export function CitasPage() {
         });    
         
         if (error) throw error;
-        setDynamicSymptoms(data || []);
+        setDynamicSymptoms(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error fetching symptoms:', error);
         setSymptomsError('No se pudieron cargar los síntomas');
