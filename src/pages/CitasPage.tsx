@@ -62,7 +62,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export function CitasPage() {
   const { currentTheme } = useTheme();
-  const { selectedPatient } = useSelectedPatient();
+  const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const navigate = useNavigate();
   const [dynamicSymptoms, setDynamicSymptoms] = useState<Symptom[]>([]);
   const [isLoadingSymptoms, setIsLoadingSymptoms] = useState(false);
@@ -74,6 +74,7 @@ export function CitasPage() {
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
   const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
   const [showPhoneModal, setShowPhoneModal] = useState(false); // Nuevo estado para el modal de teléfono
+  const [error, setError] = useState<string | null>(null);
 
   // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
@@ -111,6 +112,13 @@ export function CitasPage() {
       hora_fin: '', // Will be calculated
     },
   });
+
+  // Effect to handle patient from navigation state
+  useEffect(() => {
+    if (navigationState?.selectedPatient && !selectedPatient) {
+      setSelectedPatient(navigationState.selectedPatient);
+    }
+  }, [navigationState?.selectedPatient, selectedPatient, setSelectedPatient]);
 
   // Effect to check for previous appointments
   useEffect(() => {
@@ -315,15 +323,44 @@ export function CitasPage() {
 
   if (!selectedPatient) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-lg mb-4">Por favor seleccione un paciente primero</p>
-        <button
-          onClick={() => navigate('/patients')}
-          className={buttonStyle.base}
-          style={buttonStyle.primary}
+      <div className="max-w-4xl mx-auto p-2">
+        <div 
+          className="bg-white rounded-lg shadow-lg overflow-hidden"
+          style={{ 
+            background: currentTheme.colors.surface,
+            borderColor: currentTheme.colors.border,
+          }}
         >
-          Ir a Pacientes
-        </button>
+          <div 
+            className="p-4 border-b"
+            style={{ 
+              background: `${currentTheme.colors.primary}10`,
+              borderColor: currentTheme.colors.border,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <Calendar className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+              <h1 
+                className="text-2xl font-bold"
+                style={{ color: currentTheme.colors.text }}
+              >
+                Selección de Paciente Requerida
+              </h1>
+            </div>
+          </div>
+          <div className="p-6 text-center">
+            <p className="text-lg mb-4" style={{ color: currentTheme.colors.text }}>
+              Para agendar una cita, primero debe seleccionar un paciente
+            </p>
+            <button
+              onClick={() => navigate('/patients')}
+              className={buttonStyle.base}
+              style={buttonStyle.primary}
+            >
+              Ir a Pacientes
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -524,8 +561,304 @@ export function CitasPage() {
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {/* Use dynamicSymptoms here */}
-                    {Array.isArray(dynamicSymptoms) && dynamicSymptoms.map(sintoma => {
-                       const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma);
+                    {isLoadingSymptoms ? (
+                      <div className="flex items-center gap-2 text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: currentTheme.colors.primary }}></div>
+                        Cargando síntomas...
+                      </div>
+                    ) : Array.isArray(dynamicSymptoms) && dynamicSymptoms.length > 0 ? (
+                      dynamicSymptoms.map(sintoma => {
+                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma);
+                        return (
+                          <button
+                            key={sintoma.sintoma} 
+                            type="button"
+                            onClick={() => {
+                              const current = form.getValues('sintomas_asociados');
+                              if (isSelected) {
+                                form.setValue('sintomas_asociados', 
+                                  current.filter(s => s !== sintoma.sintoma)
+                                );
+                              } else {
+                                form.setValue('sintomas_asociados', [...current, sintoma.sintoma]);
+                              }
+                            }}
+                            className={clsx(
+                              'px-3 py-1 rounded-md text-sm transition-colors border',
+                              isSelected && 'bg-slate-800 text-white border-slate-900',
+                              !isSelected && 'bg-white hover:bg-slate-50 border-slate-200'
+                            )}
+                            style={{
+                              color: isSelected ? '#fff' : currentTheme.colors.text,
+                            }}
+                          >
+                            {sintoma.sintoma}
+                            <span className="ml-1 text-xs opacity-70">
+                              ({sintoma.frecuencia}%)
+                            </span>
+                          </button>
+                        ); 
+                      })
+                    ) : (
+                      <div className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                        No hay síntomas disponibles para esta especialidad y edad
+                      </div>
+                    )}
+
+                    {/* Mostrar síntomas personalizados agregados */}
+                    {form.watch('sintomas_asociados')
+                      ?.filter(
+                        (id) =>
+                         !dynamicSymptoms.some(sintoma => sintoma.sintoma === id),
+                      )
+                      .map((customTag) => (
+                        <div
+                          key={customTag}
+                          className="flex items-center bg-slate-800 text-white px-2 py-0.5 rounded-md text-xs font-medium border border-slate-900"
+                        >
+                          {customTag}
+                          <button
+                            type="button"
+                            className="ml-1 text-white hover:text-slate-200"
+                            onClick={() => {
+                              form.setValue('sintomas_asociados', form.getValues('sintomas_asociados')?.filter((id) => id !== customTag));
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customSymptom}
+                      onChange={(e) => setCustomSymptom(e.target.value)}
+                      placeholder="Agregar otro síntoma"
+                      className="flex-1 p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (e.currentTarget.value.trim()) {
+                            const newTag = e.currentTarget.value.trim()
+                            if (newTag && !form.getValues('sintomas_asociados')?.includes(newTag)) {
+                              form.setValue('sintomas_asociados', [...(form.getValues('sintomas_asociados') || []), newTag]);
+                              setCustomSymptom('');;
+                            }
+                          }
+                        }
+                      }}
+                    />                
+                  </div>
+                </div>
+              </div>
+
+              {/* Agenda de Citas */}
+              <div>
+                <h3 
+                  className="text-base font-medium mb-2"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  Agenda de Citas
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Fecha <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      {...form.register('fecha_cita')}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                      min={format(new Date(), 'yyyy-MM-dd')}
+                    />
+                  </div>
+
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Hora <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      {...form.register('hora_cita')}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      {HORARIOS_CONSULTA.map(hora => (
+                        <option key={hora} value={hora}>{hora}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Consultorio <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      {...form.register('consultorio', { valueAsNumber: true })}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      <option value={1}>Consultorio 1</option>
+                      <option value={2}>Consultorio 2</option>
+                      <option value={3}>Consultorio 3</option>
+                    </select>
+                  </div>
+
+                  {/* Nueva columna: Duración estimada */}
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Duración minutos <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      {...form.register('duracion_minutos', { valueAsNumber: true })}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      <option value={15}>15 minutos</option>
+                      <option value={20}>20 minutos</option>
+                      <option value={30}>30 minutos</option>
+                      <option value={40}>40 minutos</option>
+                      <option value={60}>60 minutos</option>
+                    </select>
+                  </div>
+
+                  {/* Nueva columna: Hora final */}
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Hora final
+                    </label>
+                    <input
+                      type="text"
+                      {...form.register('hora_fin')}
+                      readOnly
+                      className="w-full p-2 rounded-md border bg-gray-100 cursor-not-allowed"
+                      style={{
+                        background: currentTheme.colors.background,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className={clsx(buttonStyle.base, 'border')}
+                  style={{
+                    background: 'transparent',
+                    borderColor: currentTheme.colors.border,
+                    color: currentTheme.colors.text,
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={clsx(buttonStyle.base, 'disabled:opacity-50')}
+                  style={buttonStyle.primary}
+                >
+                  {loading ? 'Guardando...' : navigationState?.editMode ? 'Actualizar' : 'Agendar'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Modal de error de fecha/hora */}
+          <Modal
+            isOpen={showDateTimeErrorModal}
+            onClose={() => setShowDateTimeErrorModal(false)}
+            title="Fecha y Hora No Válidas"
+            actions={
+              <button
+                onClick={() => setShowDateTimeErrorModal(false)}
+                className={buttonStyle.base}
+                style={buttonStyle.primary}
+              >
+                Aceptar
+              </button>
+            }
+          >
+            <div className="flex items-start gap-3">
+              <AlertTriangle 
+                className="h-6 w-6 mt-1 flex-shrink-0" 
+                style={{ color: '#F59E0B' }} 
+              />
+              <div>
+                <p className="mb-2" style={{ color: currentTheme.colors.text }}>
+                  No es posible agendar citas para fechas y horas anteriores al momento actual.
+                </p>
+                <p style={{ color: currentTheme.colors.textSecondary }}>
+                  Por favor, seleccione una fecha y hora futura.
+                </p>
+              </div>
+            </div>
+          </Modal>
+        </div>
+      </div>
+      {/* Modal para mostrar el teléfono del paciente */}
+      <Modal
+        isOpen={showPhoneModal}
+        onClose={() => setShowPhoneModal(false)}
+        title="Teléfono del Paciente"
+        actions={
+          <button
+            onClick={() => setShowPhoneModal(false)}
+            className={buttonStyle.base}
+            style={buttonStyle.primary} 
+          >
+            Cerrar
+          </button>
+        }
+      >
+        <p className="text-lg font-medium" style={{ color: currentTheme.colors.text }}>
+          {selectedPatient?.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
+        </p>
+      </Modal>
+    </div>
+  );
+}
                       return (
                         <button
                           key={sintoma.sintoma} 
