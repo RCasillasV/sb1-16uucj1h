@@ -336,6 +336,34 @@ export function CitasPage() {
           </div>
         </div>
         <div className="p-6">
+// Inside the main return of CitasPage, within the form or just before it
+// For example, after the `error` block for form submission:
+{error && (
+  <div
+    className="mb-4 p-4 rounded-md"
+    style={{
+      background: '#FEE2E2',
+      color: '#DC2626',
+    }}
+  >
+    {error}
+  </div>
+)}
+{/* Add this new block for symptomsError */}
+{symptomsError && (
+  <div
+    className="mb-4 p-4 rounded-md"
+    style={{
+      background: '#FEE2E2',
+      color: '#DC2626',
+    }}
+  >
+    {symptomsError}
+  </div>
+)}
+
+
+          
           {success ? (
             <div 
               className="p-4 rounded-md"
