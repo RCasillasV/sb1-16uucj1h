@@ -251,15 +251,12 @@ export function CitasPage() {
         });    
         
         if (error) throw error;
-        // Ensure dynamicSymptoms is always an array
-        if (data === null || data === undefined) {
-          setDynamicSymptoms([]);
-        } else if (Array.isArray(data)) {
-          setDynamicSymptoms(data);
-        } else {
-          console.warn('sintomasconsulta returned non-array data:', data);
-          setDynamicSymptoms([]);
-        }
+         if (data && data.sintomas && Array.isArray(data.sintomas)) {
+            setDynamicSymptoms(data.sintomas);
+          } else {
+            console.warn('sintomasconsulta returned unexpected data format or empty symptoms:', data);
+            setDynamicSymptoms([]);
+         }        
       } catch (error) {
         console.error('Error fetching symptoms:', error);
         setSymptomsError('No se pudieron cargar los síntomas');
@@ -268,7 +265,6 @@ export function CitasPage() {
         setIsLoadingSymptoms(false);
       }
     };
-    
     fetchSymptoms();
   }, [selectedPatient]);
 
