@@ -15,7 +15,8 @@ import clsx from 'clsx';
 
 // Interface for symptom objects
 interface Symptom {
-  nombre: string;
+  sintoma: string; // Cambiado de 'nombre' a 'sintoma'
+  frecuencia: number; // Añadido el nuevo campo 'frecuencia'
 }
 
 const generateSchedule = (startTime, endTime, intervalMinutes) => {
