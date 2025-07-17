@@ -48,7 +48,7 @@ export function Agenda() {
   };
 
   const { remainingTime, isCountingDown, resetTimer } = useIdleTimer({
-    idleTimeoutMs: 14 * 60 * 1000, // 14 minutos
+    idleTimeoutMs: 2 * 60 * 1000, // 14 minutos
     countdownDurationMs: 60 * 1000, // 60 segundos
     onTimeout: handleAppReload
   });
