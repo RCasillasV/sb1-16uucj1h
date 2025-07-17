@@ -270,6 +270,7 @@ export function CitasPage() {
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd'), 
           p_especialidad: specialty
+           console.log('fetchSymptoms: Cadena de fecha enviada a RPC (p_fechanac):', dateToSendToRpc);
         });    
         
         if (error) {
