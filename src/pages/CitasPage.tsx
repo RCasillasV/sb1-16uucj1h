@@ -18,34 +18,25 @@ interface Symptom {
   nombre: string;
 }
 
-// ... (otras definiciones y constantes)
-
 const generateSchedule = (startTime, endTime, intervalMinutes) => {
   const times = [];
   
-  // Convertimos las horas de inicio y fin a objetos Date para manipularlas
-  // Usamos el 1 de enero de 2000 como referencia, solo nos importan las horas
   const start = new Date(`2000/01/01 ${startTime}`);
   const end = new Date(`2000/01/01 ${endTime}`);
   
-  // Bucle para iterar y añadir los intervalos
   let currentTime = new Date(start);
   
   while (currentTime <= end) {
-    // Formateamos la hora actual a HH:MM (ej. 08:00)
-    // Usamos padStart para asegurar el formato de 2 dígitos (ej. 8 -> 08)
     const hours = currentTime.getHours().toString().padStart(2, '0');
     const minutes = currentTime.getMinutes().toString().padStart(2, '0');
     times.push(`${hours}:${minutes}`);
     
-    // Añadimos el intervalo de minutos para la siguiente iteración
     currentTime.setMinutes(currentTime.getMinutes() + intervalMinutes);
   }
   
   return times;
 };
 
-// Generamos los horarios de 08:00 a 18:00 con intervalos de 30 minutos
 const HORARIOS_CONSULTA = generateSchedule("08:00", "21:45", 15);
 
 const formSchema = z.object({
@@ -214,55 +205,84 @@ export function CitasPage() {
 
   // Fetch symptoms based on patient age
   useEffect(() => {
-    if (!selectedPatient || !selectedPatient.FechaNacimiento) return;
-    
     const fetchSymptoms = async () => {
+      console.log('fetchSymptoms: Starting...');
+      if (!selectedPatient) {
+        console.log('fetchSymptoms: No selected patient. Exiting.');
+        return;
+      }
+      if (!selectedPatient.FechaNacimiento) {
+        console.log('fetchSymptoms: Selected patient has no birth date. Exiting.');
+        return;
+      }
+      console.log('fetchSymptoms: Selected Patient ID:', selectedPatient.id);
+      console.log('fetchSymptoms: Selected Patient Birth Date:', selectedPatient.FechaNacimiento);
+
       setIsLoadingSymptoms(true);
-      setSymptomsError(null); // api.appointments.create
+      setSymptomsError(null); // Clear previous errors
       
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) {
+          console.log('fetchSymptoms: No authenticated user session. Exiting.');
           setSymptomsError('Usuario no autenticado');
           setIsLoadingSymptoms(false);
           return;
         }
+        console.log('fetchSymptoms: User ID:', session.user.id);
 
         const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
           user_id: session.user.id
         });
 
-        if (userError || !userData?.idbu) {
+        if (userError) {
+          console.error('fetchSymptoms: Error getting user business unit:', userError);
+          setSymptomsError('Error al obtener la unidad de negocio del usuario: ' + userError.message);
+          setIsLoadingSymptoms(false);
+          return;
+        }
+        if (!userData?.idbu) {
+          console.log('fetchSymptoms: User has no assigned business unit. Exiting.');
           setSymptomsError('No se pudo obtener la unidad de negocio del usuario');
           setIsLoadingSymptoms(false);
           return;
         }
+        console.log('fetchSymptoms: User Business Unit ID:', userData.idbu);
 
         const specialty = await api.businessUnits.getById(userData.idbu);
         if (!specialty) {
+          console.log('fetchSymptoms: Could not get specialty for business unit. Exiting.');
           setSymptomsError('No se pudo obtener la especialidad de la unidad de negocio');
           setIsLoadingSymptoms(false);
           return;
         }
+        console.log('fetchSymptoms: Fetched Specialty:', specialty);
 
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
           p_fechanac: format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd'), 
           p_especialidad: specialty
         });    
         
-        if (error) throw error;
-         if (data && data.sintomas && Array.isArray(data.sintomas)) {
+        if (error) {
+          console.error('fetchSymptoms: Error from sintomasconsulta RPC:', error);
+          throw error; // Re-throw to be caught by the outer catch block
+        }
+        console.log('fetchSymptoms: Raw RPC data received:', data);
+
+        if (data && data.sintomas && Array.isArray(data.sintomas)) {
             setDynamicSymptoms(data.sintomas);
+            console.log('fetchSymptoms: Symptoms set successfully:', data.sintomas);
           } else {
-            console.warn('sintomasconsulta returned unexpected data format or empty symptoms:', data);
+            console.warn('fetchSymptoms: sintomasconsulta returned unexpected data format or empty symptoms:', data);
             setDynamicSymptoms([]);
          }        
       } catch (error) {
-        console.error('Error fetching symptoms:', error);
-        setSymptomsError('No se pudieron cargar los síntomas');
+        console.error('fetchSymptoms: General error during symptom fetch:', error);
+        setSymptomsError(error instanceof Error ? error.message : 'No se pudieron cargar los síntomas');
         setDynamicSymptoms([]);
       } finally {
         setIsLoadingSymptoms(false);
+        console.log('fetchSymptoms: Finished.');
       }
     };
     fetchSymptoms();
@@ -336,8 +356,6 @@ export function CitasPage() {
           </div>
         </div>
         <div className="p-6">
-// Inside the main return of CitasPage, within the form or just before it
-// For example, after the `error` block for form submission:
 {error && (
   <div
     className="mb-4 p-4 rounded-md"
@@ -349,7 +367,6 @@ export function CitasPage() {
     {error}
   </div>
 )}
-{/* Add this new block for symptomsError */}
 {symptomsError && (
   <div
     className="mb-4 p-4 rounded-md"
