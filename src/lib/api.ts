@@ -14,7 +14,7 @@ type Medication = Tables['medications']['Row'];
 
 
 // Cache configuration
-const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 const cache = new Map<string, { data: any; timestamp: number }>();
 
 // Performance metrics
