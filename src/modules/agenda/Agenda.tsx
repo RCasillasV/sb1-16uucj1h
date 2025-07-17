@@ -259,7 +259,7 @@ export function Agenda() {
                 ref={calendarRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="timeGridWeek"
-                initialScroll={initialScrollTime}
+                scrollTime={initialScrollTime}
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',

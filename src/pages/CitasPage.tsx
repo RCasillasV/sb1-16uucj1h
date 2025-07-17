@@ -251,7 +251,15 @@ export function CitasPage() {
         });    
         
         if (error) throw error;
-        setDynamicSymptoms(Array.isArray(data) ? data : []);
+        // Ensure dynamicSymptoms is always an array
+        if (data === null || data === undefined) {
+          setDynamicSymptoms([]);
+        } else if (Array.isArray(data)) {
+          setDynamicSymptoms(data);
+        } else {
+          console.warn('sintomasconsulta returned non-array data:', data);
+          setDynamicSymptoms([]);
+        }
       } catch (error) {
         console.error('Error fetching symptoms:', error);
         setSymptomsError('No se pudieron cargar los síntomas');
@@ -474,7 +482,7 @@ export function CitasPage() {
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {/* Use dynamicSymptoms here */}
-                    {dynamicSymptoms.map(sintoma => {
+                    {Array.isArray(dynamicSymptoms) && dynamicSymptoms.map(sintoma => {
                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.nombre);
                       return (
                         <button
