@@ -525,19 +525,19 @@ export function CitasPage() {
                   <div className="flex flex-wrap gap-2">
                     {/* Use dynamicSymptoms here */}
                     {Array.isArray(dynamicSymptoms) && dynamicSymptoms.map(sintoma => {
-                       const isSelected = form.watch('sintomas_asociados').includes(sintoma.nombre);
+                       const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma);
                       return (
                         <button
-                          key={sintoma.nombre} 
+                          key={sintoma.sintoma} 
                           type="button"
                           onClick={() => {
                             const current = form.getValues('sintomas_asociados');
                             if (isSelected) {
                               form.setValue('sintomas_asociados', 
-                                current.filter(s => s !== sintoma.nombre)
+                                current.filter(s => s !== sintoma.sintoma)
                               );
                             } else {
-                              form.setValue('sintomas_asociados', [...current, sintoma.nombre]);
+                              form.setValue('sintomas_asociados', [...current, sintoma.sintoma]);
                             }
                           }}
                           className={clsx(
@@ -549,7 +549,7 @@ export function CitasPage() {
                             color: isSelected ? '#fff' : currentTheme.colors.text,
                           }}
                         >
-                          {sintoma.nombre}
+                          {sintoma.sintoma}
                         </button>
                       ); 
                     })}
@@ -558,7 +558,7 @@ export function CitasPage() {
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                         !dynamicSymptoms.some(sintoma => sintoma.nombre === id),
+                         !dynamicSymptoms.some(sintoma => sintoma.sintoma === id),
                       )
                       .map((customTag) => (
                         <div
