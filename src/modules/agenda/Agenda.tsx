@@ -16,6 +16,7 @@ import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
+import { useIdleTimer } from '../../hooks/useIdleTimer';
 
 
 export function Agenda() {
@@ -39,6 +40,18 @@ export function Agenda() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const { buttonClasses } = useStyles();
+
+  // Configurar el timer de inactividad
+  const handleAppReload = () => {
+    console.log('Recargando aplicación por inactividad...');
+    window.location.reload();
+  };
+
+  const { remainingTime, isCountingDown, resetTimer } = useIdleTimer({
+    idleTimeoutMs: 14 * 60 * 1000, // 14 minutos
+    countdownDurationMs: 60 * 1000, // 60 segundos
+    onTimeout: handleAppReload
+  });
 
   const initialScrollTime = useMemo(() => {
     const now = new Date();
@@ -542,6 +555,42 @@ export function Agenda() {
           </div>
         )}
       </Modal>
+
+      {/* Contador de inactividad */}
+      {isCountingDown && (
+        <div 
+          className="fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg border-2 animate-pulse"
+          style={{
+            background: currentTheme.colors.surface,
+            borderColor: remainingTime <= 10 ? '#EF4444' : '#F59E0B',
+            color: currentTheme.colors.text,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-3 h-3 rounded-full animate-pulse"
+              style={{
+                background: remainingTime <= 10 ? '#EF4444' : '#F59E0B'
+              }}
+            />
+            <div>
+              <p className="text-sm font-medium">
+                Sesión por expirar
+              </p>
+              <p className="text-lg font-bold">
+                {remainingTime} segundos
+              </p>
+              <button
+                onClick={resetTimer}
+                className="text-xs underline hover:no-underline mt-1"
+                style={{ color: currentTheme.colors.primary }}
+              >
+                Mantener sesión activa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
