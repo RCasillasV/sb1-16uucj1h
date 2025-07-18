@@ -52,6 +52,7 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({ item, isActive, isExpanded
         style={{
           color: currentTheme.colors.sidebarText,
           background: isActive ? currentTheme.colors.sidebarHover : 'transparent',
+          zIndex: 1,
         }}
       >
         <Icon 
@@ -83,8 +84,7 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({ item, isActive, isExpanded
             {item.count}
           </span>
         )}
-      </Link>
-      
+         
       {/* Tooltip */}
       {!isExpanded && (
         <div 
@@ -101,6 +101,7 @@ const NavLink: React.FC<NavLinkProps> = React.memo(({ item, isActive, isExpanded
           {item.name}
         </div>
       )}
+     </Link>
     </div>
   );
 });
