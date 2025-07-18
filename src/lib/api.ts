@@ -17,6 +17,108 @@ type Medication = Tables['medications']['Row'];
 const CACHE_DURATION = 20 * 60 * 1000; // 20 minutos de cache
 const cache = new Map<string, { data: any; timestamp: number }>();
 
+// Persistent cache utilities
+const STORAGE_PREFIX = 'doctorsoft_cache_';
+
+const persistentCache = {
+  set: (key: string, data: any, timestamp: number) => {
+    try {
+      const cacheData = { data, timestamp };
+      localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(cacheData));
+    } catch (error) {
+      console.warn('Failed to save to localStorage:', error);
+    }
+  },
+
+  get: (key: string): { data: any; timestamp: number } | null => {
+    try {
+      const stored = localStorage.getItem(STORAGE_PREFIX + key);
+      if (!stored) return null;
+      return JSON.parse(stored);
+    } catch (error) {
+      console.warn('Failed to read from localStorage:', error);
+      return null;
+    }
+  },
+
+  delete: (key: string) => {
+    try {
+      localStorage.removeItem(STORAGE_PREFIX + key);
+    } catch (error) {
+      console.warn('Failed to delete from localStorage:', error);
+    }
+  },
+
+  clear: () => {
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(STORAGE_PREFIX)) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to clear localStorage cache:', error);
+    }
+  }
+};
+
+// Enhanced cache utilities
+const cacheUtils = {
+  get: (key: string) => {
+    // First try memory cache
+    const memoryCache = cache.get(key);
+    if (memoryCache && Date.now() - memoryCache.timestamp < CACHE_DURATION) {
+      metrics.cacheHits++;
+      return memoryCache.data;
+    }
+
+    // Then try persistent cache
+    const persistentData = persistentCache.get(key);
+    if (persistentData && Date.now() - persistentData.timestamp < CACHE_DURATION) {
+      // Load back into memory cache for faster future access
+      cache.set(key, persistentData);
+      metrics.cacheHits++;
+      return persistentData.data;
+    }
+
+    metrics.cacheMisses++;
+    return null;
+  },
+
+  set: (key: string, data: any) => {
+    const timestamp = Date.now();
+    // Save to both memory and persistent cache
+    cache.set(key, { data, timestamp });
+    persistentCache.set(key, data, timestamp);
+  },
+
+  delete: (key: string) => {
+    cache.delete(key);
+    persistentCache.delete(key);
+  },
+
+  invalidatePattern: (pattern: string) => {
+    // Invalidate memory cache
+    for (const key of cache.keys()) {
+      if (key.includes(pattern)) {
+        cache.delete(key);
+      }
+    }
+    
+    // Invalidate persistent cache
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(storageKey => {
+        if (storageKey.startsWith(STORAGE_PREFIX) && storageKey.includes(pattern)) {
+          localStorage.removeItem(storageKey);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to invalidate persistent cache pattern:', error);
+    }
+  }
+};
 // Performance metrics
 const metrics = {
   appointmentFetchTime: 0,
@@ -159,14 +261,12 @@ export const api = {
   patients: {
     async getAll() {
       const cacheKey = 'patients:all';
-      const cached = cache.get(cacheKey);
+      const cached = cacheUtils.get(cacheKey);
       
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        metrics.cacheHits++;
-        return cached.data;
+      if (cached) {
+        return cached;
       }
 
-      metrics.cacheMisses++;
       const { data, error } = await supabase
         .from('tcPacientes')
         .select(`
@@ -217,15 +317,15 @@ export const api = {
         return [];
       }
 
-      cache.set(cacheKey, { data, timestamp: Date.now() });
+      cacheUtils.set(cacheKey, data || []);
       return data || [];
     },
 
     async getById(id: string) {
       const cacheKey = `patient:${id}`;
-      const cached = cache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        return cached.data;
+      const cached = cacheUtils.get(cacheKey);
+      if (cached) {
+        return cached;
       }
 
       const { data, error } = await supabase
@@ -279,7 +379,7 @@ export const api = {
         return null;
       }
 
-      cache.set(cacheKey, { data, timestamp: Date.now() });
+      cacheUtils.set(cacheKey, data);
       return data;
     },
 
@@ -325,7 +425,7 @@ export const api = {
       }
 
       // Invalidate cache
-      cache.delete('patients:all');
+      cacheUtils.delete('patients:all');
       return data;
     },
 
@@ -365,8 +465,7 @@ export const api = {
       }
 
       // Invalidate cache
-      cache.delete('patients:all');
-      cache.delete(`patient:${id}`);
+      cacheUtils.invalidatePattern('patients');
       return data;
     },
   },
@@ -374,15 +473,13 @@ export const api = {
   appointments: {
     async getAll() {
       const cacheKey = 'appointments:all';
-      const cached = cache.get(cacheKey);
+      const cached = cacheUtils.get(cacheKey);
       const startTime = performance.now();
       
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        metrics.cacheHits++;
-        return cached.data;
+      if (cached) {
+        return cached;
       }
 
-      metrics.cacheMisses++;
       // Calculate date 7 days ago from the start of today
       const sevenDaysAgo = subDays(startOfDay(new Date()), 7); 
 
@@ -432,7 +529,7 @@ export const api = {
         return [];
       }
 
-      cache.set(cacheKey, { data, timestamp: Date.now() });
+      cacheUtils.set(cacheKey, data || []);
       return data || [];
     },
 
@@ -557,7 +654,7 @@ export const api = {
       }
 
       // Invalidate cache
-      cache.delete('appointments:all');
+      cacheUtils.delete('appointments:all');
       return data;
     },
 
@@ -575,7 +672,7 @@ export const api = {
       }
 
       // Invalidate cache
-      cache.delete('appointments:all');
+      cacheUtils.delete('appointments:all');
       
       // Return immediately for better UI responsiveness
       return { id, ...appointment };
@@ -718,9 +815,9 @@ export const api = {
   stats: {
     async getDashboardStats() {
       const cacheKey = 'stats:dashboard';
-      const cached = cache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        return cached.data;
+      const cached = cacheUtils.get(cacheKey);
+      if (cached) {
+        return cached;
       }
 
       const today = new Date();
@@ -753,7 +850,7 @@ export const api = {
           upcomingAppointments: upcomingAppointments?.length || 0,
         };
 
-        cache.set(cacheKey, { data: stats, timestamp: Date.now() });
+        cacheUtils.set(cacheKey, stats);
         return stats;
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
