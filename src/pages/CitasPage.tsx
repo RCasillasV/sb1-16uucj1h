@@ -488,19 +488,19 @@ export function CitasPage() {
                       <p style={{ color: '#DC2626' }}>{symptomsError}</p>
                     ) : (
                       dynamicSymptoms.map(sintoma => {
-                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.nombre);
+                        const isSelected = form.watch('sintomas_asociados').includes(sintomas.sintoma);
                         return (
                           <button
-                            key={sintoma.nombre} 
+                            key={sintomas.sintoma} 
                             type="button"
                             onClick={() => {
                               const current = form.getValues('sintomas_asociados');
                               if (isSelected) {
                                 form.setValue('sintomas_asociados', 
-                                  current.filter(s => s !== sintoma.nombre)
+                                  current.filter(s => s !== sintomas.sintoma)
                                 );
                               } else {
-                                form.setValue('sintomas_asociados', [...current, sintoma.nombre]);
+                                form.setValue('sintomas_asociados', [...current, sintomas.sintoma]);
                               }
                             }}
                             className={clsx(
@@ -512,7 +512,7 @@ export function CitasPage() {
                               color: isSelected ? '#fff' : currentTheme.colors.text,
                             }}
                           >
-                            {sintoma.nombre}
+                            {sintomas.sintoma}
                           </button>
                         ); 
                       })
@@ -522,7 +522,7 @@ export function CitasPage() {
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                         !dynamicSymptoms.some(sintoma => sintoma.nombre === id),
+                         !dynamicSymptoms.some(sintoma => sintomas.sintoma === id),
                       )
                       .map((customTag) => (
                         <div
