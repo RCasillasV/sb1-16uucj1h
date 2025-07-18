@@ -76,7 +76,6 @@ export function CitasPage() {
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
   const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
   const [showPhoneModal, setShowPhoneModal] = useState(false); // Nuevo estado para el modal de teléfono
-  const [editingAppointment, setEditingAppointment] = useState(false);
 
   // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
@@ -719,12 +718,11 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                   className={clsx(buttonStyle.base, 'disabled:opacity-50')}
                   style={buttonStyle.primary}
                 >
-                  {loading ? 'Guardando...' : editingAppointment ? 'Actualizar' : 'Agendar'}
+                  {loading ? 'Guardando...' : navigationState?.editMode ? 'Actualizar' : 'Agendar'}
                 </button>
               </div>
             </form>
-            )}
-          </div>
+          )}
 
           {/* Modal de error de fecha/hora */}
           <Modal
