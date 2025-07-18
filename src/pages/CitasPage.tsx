@@ -330,13 +330,8 @@ export function CitasPage() {
     });
   };
 
-  // Get available time slots based on current form values
-  const getAvailableTimeSlots = (): string[] => {
-    const duration = form.watch('duracion_minutos') || 30;
-    return HORARIOS_CONSULTA.filter(timeSlot => isTimeSlotAvailable(timeSlot, duration));
-  };
-
-  const availableTimeSlots = getAvailableTimeSlots();
+  // Note: We now show all time slots and mark unavailable ones as disabled
+  // instead of filtering them out completely
 
 
   const onSubmit = async (data: FormData) => {
@@ -352,7 +347,8 @@ export function CitasPage() {
     }
     
     // Validar que el horario seleccionado sigue siendo válido
-    if (!isTimeSlotAvailable(data.hora_cita, data.duracion_minutos)) {
+    // Solo validar disponibilidad para nuevas citas, no para ediciones
+    if (!editingAppointment && !isTimeSlotAvailable(data.hora_cita, data.duracion_minutos)) {
       form.setError('hora_cita', { 
         message: 'El horario seleccionado ya no está disponible. Por favor, seleccione otro horario.' 
       });
@@ -835,12 +831,51 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     >
                       {loadingAvailableSlots ? (
                         <option value="">Cargando horarios...</option>
-                      ) : availableTimeSlots.length === 0 ? (
-                        <option value="">No hay horarios disponibles</option>
                       ) : (
-                        availableTimeSlots.map(hora => (
-                          <option key={hora} value={hora}>{hora}</option>
-                        ))
+                        HORARIOS_CONSULTA.map(hora => {
+                          const isAvailable = isTimeSlotAvailable(hora, form.watch('duracion_minutos') || 30);
+                          const isCurrentSelection = form.watch('hora_cita') === hora;
+                          
+                          // Determinar si el horario está en el pasado (solo para el día actual)
+                          const selectedDateStr = form.watch('fecha_cita');
+                          const today = new Date();
+                          const todayStr = format(today, 'yyyy-MM-dd');
+                          const isPast = selectedDateStr === todayStr && new Date(`${selectedDateStr}T${hora}:00`) < today;
+
+                          let label = hora;
+                          let isDisabled = false;
+
+                          if (!isAvailable && !isCurrentSelection) {
+                            // Si no está disponible y NO es la selección actual, deshabilitar
+                            isDisabled = true;
+                            if (isPast) {
+                              label += ' (Pasado)';
+                            } else {
+                              label += ' (Ocupado)';
+                            }
+                          } else if (!isAvailable && isCurrentSelection) {
+                            // Si es la selección actual pero no está disponible, mostrar etiqueta pero no deshabilitar
+                            if (isPast) {
+                              label += ' (Pasado)';
+                            } else {
+                              label += ' (Ocupado)';
+                            }
+                            // No deshabilitar para que el valor inicial se mantenga seleccionado
+                          }
+
+                          return (
+                            <option
+                              key={hora}
+                              value={hora}
+                              disabled={isDisabled}
+                              style={{ 
+                                color: isDisabled ? currentTheme.colors.textSecondary : currentTheme.colors.text 
+                              }}
+                            >
+                              {label}
+                            </option>
+                          );
+                        })
                       )}
                     </select>
                     {form.formState.errors.hora_cita && (
