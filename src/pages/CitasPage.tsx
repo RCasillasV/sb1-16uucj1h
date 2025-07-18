@@ -259,17 +259,18 @@ export function CitasPage() {
         if (error) {
           throw error;
         }
-        console.log('fetchSymptoms: Data from sintomasconsulta RPC:', data);
-        // CAMBIO: Asegurarse de que los datos sean un array y mapear a la interfaz Symptom
-        setDynamicSymptoms(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('fetchSymptoms: Error fetching symptoms:', error);
-        setSymptomsError('No se pudieron cargar los síntomas');
-        setDynamicSymptoms([]);
-      } finally {
-        setIsLoadingSymptoms(false);
-      }
-    };
+   console.log('fetchSymptoms: Data from sintomasconsulta RPC:', data);
+    
+    // CAMBIO CRÍTICO AQUÍ: Acceder a data.sintomas
+    setDynamicSymptoms(data?.sintomas || []); // Asegúrate de que data.sintomas sea el arreglo
+  } catch (error) {
+    console.error('fetchSymptoms: Error fetching symptoms:', error);
+    setSymptomsError('No se pudieron cargar los síntomas');
+    setDynamicSymptoms([]);
+  } finally {
+    setIsLoadingSymptoms(false);
+  }
+};
     
     fetchSymptoms();
   }, [selectedPatient]);
