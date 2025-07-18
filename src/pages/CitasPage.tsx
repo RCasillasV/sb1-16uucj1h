@@ -280,6 +280,20 @@ export function CitasPage() {
       const appointmentEnd = appointment.hora_fin 
         ? new Date(`2000-01-01T${appointment.hora_fin}`)
         : addMinutes(appointmentStart, appointment.duracion_minutos || 30);
+
+   // Debugging logs for overlap logic
+      console.log('--- Checking Slot ---'); // <-- AÑADIR ESTOS LOGS
+      console.log('Slot:', timeSlot, 'Duration:', duration);
+      console.log('Slot Start:', slotStart.toISOString());
+      console.log('Slot End:', slotEnd.toISOString());
+      console.log('Appointment:', appointment.motivo, 'ID:', appointment.id);
+      console.log('Appointment Start:', appointmentStart.toISOString());
+      console.log('Appointment End:', appointmentEnd.toISOString());
+      const overlaps = (slotStart < appointmentEnd && slotEnd > appointmentStart);
+      console.log('Overlaps:', overlaps);
+      console.log('---------------------');
+
+
       
       // Check for overlap
       return (slotStart < appointmentEnd && slotEnd > appointmentStart);
