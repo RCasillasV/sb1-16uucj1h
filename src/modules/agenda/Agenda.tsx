@@ -596,7 +596,7 @@ export function Agenda() {
           </button>
         }
       >
-        <p>No es posible agendar citas en el pasado. Por favor, seleccione un horario futuro.</p>
+        <p>Por favor, seleccione un día y horario futuro para continuar con la reserva.</p>
       </Modal>
 
       {/* Contador de inactividad */}
