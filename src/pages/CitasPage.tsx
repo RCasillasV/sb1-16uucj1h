@@ -76,6 +76,7 @@ export function CitasPage() {
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
   const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
   const [showPhoneModal, setShowPhoneModal] = useState(false); // Nuevo estado para el modal de teléfono
+  const [editingAppointment, setEditingAppointment] = useState(false);
 
   // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
@@ -528,7 +529,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                         !dynamicSymptoms.some(sintoma => sintoma.sintoma === id), // CAMBIO: sintoma.sintoma
+                         !dynamicSymptoms.some(sintoma => sintoma.sintoma === id) // CAMBIO: sintoma.sintoma
                       )
                       .map((customTag) => (
                         <div
@@ -565,10 +566,10 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           if (e.currentTarget.value.trim()) {
-                            const newTag = e.currentTarget.value.trim()
+                            const newTag = e.currentTarget.value.trim();
                             if (newTag && !form.getValues('sintomas_asociados')?.includes(newTag)) {
                               form.setValue('sintomas_asociados', [...(form.getValues('sintomas_asociados') || []), newTag]);
-                              setCustomSymptom('');;
+                              setCustomSymptom('');
                             }
                           }
                         }
@@ -722,8 +723,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 </button>
               </div>
             </form>
-            )
-          )}
+            )}
+          </div>
 
           {/* Modal de error de fecha/hora */}
           <Modal
