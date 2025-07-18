@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format, isBefore, parseISO, addMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowLeft, Calendar, Clock, Info, HelpCircle, AlertTriangle, Phone } from 'lucide-react';
+import { Calendar, Clock, Info, HelpCircle, AlertTriangle, Phone } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { api } from '../lib/api';
@@ -18,34 +18,27 @@ interface Symptom {
   nombre: string;
 }
 
-// ... (otras definiciones y constantes)
-
-const generateSchedule = (startTime, endTime, intervalMinutes) => {
+// Function to generate time slots
+const generateSchedule = (startTime: string, endTime: string, intervalMinutes: number) => {
   const times = [];
   
-  // Convertimos las horas de inicio y fin a objetos Date para manipularlas
-  // Usamos el 1 de enero de 2000 como referencia, solo nos importan las horas
   const start = new Date(`2000/01/01 ${startTime}`);
   const end = new Date(`2000/01/01 ${endTime}`);
   
-  // Bucle para iterar y añadir los intervalos
   let currentTime = new Date(start);
   
   while (currentTime <= end) {
-    // Formateamos la hora actual a HH:MM (ej. 08:00)
-    // Usamos padStart para asegurar el formato de 2 dígitos (ej. 8 -> 08)
     const hours = currentTime.getHours().toString().padStart(2, '0');
     const minutes = currentTime.getMinutes().toString().padStart(2, '0');
     times.push(`${hours}:${minutes}`);
     
-    // Añadimos el intervalo de minutos para la siguiente iteración
     currentTime.setMinutes(currentTime.getMinutes() + intervalMinutes);
   }
   
   return times;
 };
 
-// Generamos los horarios de 08:00 a 18:00 con intervalos de 30 minutos
+// Generate time slots from 08:00 to 21:45 with 15-minute intervals
 const HORARIOS_CONSULTA = generateSchedule("08:00", "21:45", 15);
 
 const formSchema = z.object({
@@ -191,7 +184,7 @@ export function CitasPage() {
         consultorio: data.consultorio,
         notas: data.notas || null,
         tipo_consulta: data.tipo_consulta,
-        tiempo_evolucion: parseInt(data.tiempo_evolucion),
+        tiempo_evolucion: parseInt(data.tiempo_evolucion || '0'), // Ensure it's a number
         unidad_tiempo: data.unidad_tiempo,
         sintomas_asociados: data.sintomas_asociados,
         urgente: data.urgente,
@@ -214,17 +207,22 @@ export function CitasPage() {
 
   // Fetch symptoms based on patient age
   useEffect(() => {
-    if (!selectedPatient || !selectedPatient.FechaNacimiento) return;
+    if (!selectedPatient || !selectedPatient.FechaNacimiento) {
+      console.log('fetchSymptoms: No selected patient or birth date.');
+      setDynamicSymptoms([]); // Clear symptoms if no patient selected
+      return;
+    }
     
     const fetchSymptoms = async () => {
       setIsLoadingSymptoms(true);
-      setSymptomsError(null); // api.appointments.create
+      setSymptomsError(null);
       
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) {
           setSymptomsError('Usuario no autenticado');
           setIsLoadingSymptoms(false);
+          console.error('fetchSymptoms: No authenticated user session.');
           return;
         }
 
@@ -235,25 +233,35 @@ export function CitasPage() {
         if (userError || !userData?.idbu) {
           setSymptomsError('No se pudo obtener la unidad de negocio del usuario');
           setIsLoadingSymptoms(false);
+          console.error('fetchSymptoms: Error getting user business unit:', userError);
           return;
         }
+        console.log('fetchSymptoms: User IDBU:', userData.idbu);
 
         const specialty = await api.businessUnits.getById(userData.idbu);
         if (!specialty) {
           setSymptomsError('No se pudo obtener la especialidad de la unidad de negocio');
           setIsLoadingSymptoms(false);
+          console.error('fetchSymptoms: No specialty found for business unit:', userData.idbu);
           return;
         }
+        console.log('fetchSymptoms: Business Unit Specialty:', specialty);
+
+        const formattedBirthDate = format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd');
+        console.log('fetchSymptoms: Patient Birth Date (formatted):', formattedBirthDate);
 
         const { data, error } = await supabase.rpc('sintomasconsulta', { 
-          p_fechanac: format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd'), 
+          p_fechanac: formattedBirthDate, 
           p_especialidad: specialty
         });    
         
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
+        console.log('fetchSymptoms: Data from sintomasconsulta RPC:', data);
         setDynamicSymptoms(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error('Error fetching symptoms:', error);
+        console.error('fetchSymptoms: Error fetching symptoms:', error);
         setSymptomsError('No se pudieron cargar los síntomas');
         setDynamicSymptoms([]);
       } finally {
@@ -474,35 +482,41 @@ export function CitasPage() {
                 <div className="space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {/* Use dynamicSymptoms here */}
-                    {dynamicSymptoms.map(sintoma => {
-                       const isSelected = form.watch('sintomas_asociados').includes(sintoma.nombre);
-                      return (
-                        <button
-                          key={sintoma.nombre} 
-                          type="button"
-                          onClick={() => {
-                            const current = form.getValues('sintomas_asociados');
-                            if (isSelected) {
-                              form.setValue('sintomas_asociados', 
-                                current.filter(s => s !== sintoma.nombre)
-                              );
-                            } else {
-                              form.setValue('sintomas_asociados', [...current, sintoma.nombre]);
-                            }
-                          }}
-                          className={clsx(
-                            'px-3 py-1 rounded-md text-sm transition-colors border',
-                            isSelected && 'bg-slate-800 text-white border-slate-900',
-                            !isSelected && 'bg-white hover:bg-slate-50 border-slate-200'
-                          )}
-                          style={{
-                            color: isSelected ? '#fff' : currentTheme.colors.text,
-                          }}
-                        >
-                          {sintoma.nombre}
-                        </button>
-                      ); 
-                    })}
+                    {isLoadingSymptoms ? (
+                      <p style={{ color: currentTheme.colors.textSecondary }}>Cargando síntomas...</p>
+                    ) : symptomsError ? (
+                      <p style={{ color: '#DC2626' }}>{symptomsError}</p>
+                    ) : (
+                      dynamicSymptoms.map(sintoma => {
+                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.nombre);
+                        return (
+                          <button
+                            key={sintoma.nombre} 
+                            type="button"
+                            onClick={() => {
+                              const current = form.getValues('sintomas_asociados');
+                              if (isSelected) {
+                                form.setValue('sintomas_asociados', 
+                                  current.filter(s => s !== sintoma.nombre)
+                                );
+                              } else {
+                                form.setValue('sintomas_asociados', [...current, sintoma.nombre]);
+                              }
+                            }}
+                            className={clsx(
+                              'px-3 py-1 rounded-md text-sm transition-colors border',
+                              isSelected && 'bg-slate-800 text-white border-slate-900',
+                              !isSelected && 'bg-white hover:bg-slate-50 border-slate-200'
+                            )}
+                            style={{
+                              color: isSelected ? '#fff' : currentTheme.colors.text,
+                            }}
+                          >
+                            {sintoma.nombre}
+                          </button>
+                        ); 
+                      })
+                    )}
 
                     {/* Mostrar síntomas personalizados agregados */}
                     {form.watch('sintomas_asociados')
