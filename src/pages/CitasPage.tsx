@@ -77,6 +77,10 @@ export function CitasPage() {
   const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
   const [showPhoneModal, setShowPhoneModal] = useState(false); // Nuevo estado para el modal de teléfono
 
+  // Estado para edición de citas
+  const [editingAppointment, setEditingAppointment] = useState<any>(null);
+  const [loadingAppointment, setLoadingAppointment] = useState(false);
+
   // Obtener datos del estado de navegación si vienen de Agenda
   const navigationState = location.state as {
     selectedDate?: Date;
@@ -94,6 +98,56 @@ export function CitasPage() {
   const initialTime = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'HH:mm')
     : '09:00';
+
+  // useEffect para cargar datos de cita en modo edición
+  useEffect(() => {
+    const loadAppointment = async () => {
+      console.log('CitasPage: useEffect - navigationState:', navigationState);
+      if (navigationState?.editMode && navigationState?.appointmentId) {
+        setLoadingAppointment(true);
+        console.log('CitasPage: Fetching appointment with ID:', navigationState.appointmentId);
+        try {
+          const fetchedAppointment = await api.appointments.getById(navigationState.appointmentId);
+          console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
+          if (fetchedAppointment) {
+            setEditingAppointment(fetchedAppointment);
+            
+            // Precargar el formulario con los datos de la cita
+            form.reset({
+              tipo_consulta: fetchedAppointment.tipo_consulta,
+              motivo: fetchedAppointment.motivo,
+              tiempo_evolucion: fetchedAppointment.tiempo_evolucion?.toString() || '',
+              unidad_tiempo: fetchedAppointment.unidad_tiempo || 'dias',
+              sintomas_asociados: fetchedAppointment.sintomas_asociados || [],
+              fecha_cita: fetchedAppointment.fecha_cita,
+              hora_cita: fetchedAppointment.hora_cita,
+              consultorio: fetchedAppointment.consultorio,
+              urgente: fetchedAppointment.urgente,
+              mismo_motivo: false,
+              notas: fetchedAppointment.notas || '',
+              duracion_minutos: fetchedAppointment.duracion_minutos || 30,
+              hora_fin: fetchedAppointment.hora_fin || '',
+            });
+            console.log('CitasPage: Form values after reset:', form.getValues());
+            
+            // Establecer el paciente seleccionado
+            if (fetchedAppointment.patients) {
+              setSelectedPatient(fetchedAppointment.patients);
+            }
+          }
+        } catch (err) {
+          console.error('CitasPage: Error loading appointment for editing:', err);
+          form.setError('root', { 
+            message: 'Error al cargar los datos de la cita' 
+          });
+        } finally {
+          setLoadingAppointment(false);
+        }
+      }
+    };
+    
+    loadAppointment();
+  }, [navigationState?.editMode, navigationState?.appointmentId, form, setSelectedPatient]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -361,7 +415,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 className="text-2xl font-bold"
                 style={{ color: currentTheme.colors.text }}
               >
-                {navigationState?.editMode ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
+                {editingAppointment ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
               </h1>
              </div>
           </div>
