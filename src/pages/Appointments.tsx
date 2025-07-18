@@ -39,6 +39,16 @@ export function Appointments() {
   const [showForm, setShowForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithPatient | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchAppointments();
@@ -151,6 +161,18 @@ export function Appointments() {
     const searchString = `${appointment.patients?.Nombre || ''} ${appointment.patients?.Paterno || ''} ${appointment.motivo || ''}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
   });
+
+  const formatAppointmentDate = (dateString: string, timeString: string) => {
+    const appointmentDateTime = parseISO(`${dateString}T${timeString}`);
+    
+    if (isMobile) {
+      // Formato compacto para móviles: dd/mm/yy hh:mm
+      return format(appointmentDateTime, "dd/MM/yy HH:mm");
+    } else {
+      // Formato completo para pantallas grandes
+      return format(appointmentDateTime, "d 'de' MMMM 'a las' HH:mm", { locale: es });
+    }
+  };
 
   const buttonStyle = {
     base: clsx(
@@ -341,7 +363,7 @@ export function Appointments() {
                       style={{ color: currentTheme.colors.text }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {format(parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`), "d 'de' MMMM 'a las' HH:mm", { locale: es })}
+                        {formatAppointmentDate(appointment.fecha_cita, appointment.hora_cita)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {appointment.patients ? `${appointment.patients.Nombre} ${appointment.patients.Paterno}` : 'Paciente no encontrado'}
