@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { format, startOfDay } from 'date-fns';
+import { format, startOfDay, subDays } from 'date-fns'; // Import subDays
 import type { Database } from '../types/database.types';
 
 type Tables = Database['public']['Tables'];
@@ -383,6 +383,9 @@ export const api = {
       }
 
       metrics.cacheMisses++;
+      // Calculate date 7 days ago from the start of today
+      const sevenDaysAgo = subDays(startOfDay(new Date()), 7); 
+
       const { data, error } = await supabase
         .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
         .select(`
@@ -418,7 +421,7 @@ export const api = {
             Telefono
           )
         `)
-        .gte('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd')) // Filter by date only
+        .gte('fecha_cita', format(sevenDaysAgo, 'yyyy-MM-dd')) // Filter from 7 days ago
         .order('fecha_cita', { ascending: true })
         .order('hora_cita', { ascending: true });
 
@@ -817,8 +820,8 @@ export const api = {
       diagnosis?: string;
       medications: Array<{
         name: string;
-        presentation: string;
         concentration: string;
+        presentation: string;
         dosage: string;
         frequency: string;
         duration: string;
