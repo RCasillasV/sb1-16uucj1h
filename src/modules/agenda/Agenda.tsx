@@ -354,6 +354,7 @@ export function Agenda() {
                   .fc .fc-toolbar-title {
                     color: ${currentTheme.colors.text};
                     font-size: 1.25em !important;
+                    font-weight: bold;
                   }
                   .fc .fc-col-header-cell {
                     color: ${currentTheme.colors.textSecondary};
