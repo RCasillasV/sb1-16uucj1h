@@ -130,14 +130,32 @@ export function CitasPage() {
   useEffect(() => {
     const loadAppointment = async () => {
       console.log('CitasPage: useEffect - navigationState:', navigationState);
+      console.log('CitasPage: useEffect - navigationState:', navigationState);
       if (navigationState?.editMode && navigationState?.appointmentId) {
         setLoadingAppointment(true);
+        console.log('CitasPage: Fetching appointment with ID:', navigationState.appointmentId);
         console.log('CitasPage: Fetching appointment with ID:', navigationState.appointmentId);
         try {
           const fetchedAppointment = await api.appointments.getById(navigationState.appointmentId);
           console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
+          console.log('CitasPage: Fetched Appointment hora_cita (raw):', fetchedAppointment.hora_cita);
+          
+          console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
           if (fetchedAppointment) {
             setEditingAppointment(fetchedAppointment);
+            
+            // Formatear hora_cita a HH:MM si viene en formato HH:MM:SS
+            const formattedHoraCita = fetchedAppointment.hora_cita.includes(':') 
+              ? fetchedAppointment.hora_cita.substring(0, 5) 
+              : fetchedAppointment.hora_cita;
+            console.log('CitasPage: Fetched Appointment hora_cita (formatted):', formattedHoraCita);
+            
+            // Formatear hora_fin si existe
+            const formattedHoraFin = fetchedAppointment.hora_fin 
+              ? (fetchedAppointment.hora_fin.includes(':') 
+                  ? fetchedAppointment.hora_fin.substring(0, 5) 
+                  : fetchedAppointment.hora_fin)
+              : '';
             
             // Precargar el formulario con los datos de la cita
             form.reset({
@@ -147,13 +165,13 @@ export function CitasPage() {
               unidad_tiempo: fetchedAppointment.unidad_tiempo || 'dias',
               sintomas_asociados: fetchedAppointment.sintomas_asociados || [],
               fecha_cita: fetchedAppointment.fecha_cita,
-              hora_cita: fetchedAppointment.hora_cita,
+              hora_cita: formattedHoraCita,
               consultorio: fetchedAppointment.consultorio,
               urgente: fetchedAppointment.urgente,
               mismo_motivo: false,
               notas: fetchedAppointment.notas || '',
               duracion_minutos: fetchedAppointment.duracion_minutos || 30,
-              hora_fin: fetchedAppointment.hora_fin || '',
+              hora_fin: formattedHoraFin,
             });
             console.log('CitasPage: Form values after reset:', form.getValues());
             
