@@ -586,7 +586,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 >
                   Agenda de Citas
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6"> 
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5"> 
                   <div>
                     <label 
                       className="block text-sm font-medium mb-1"
