@@ -630,6 +630,7 @@ export const api = {
     },
 
     async getById(id: string) {
+      console.log('api.appointments.getById called with ID:', id);
       const { data, error } = await supabase
         .from('tcCitas')
         .select(`
@@ -669,10 +670,12 @@ export const api = {
         .single();
 
       if (error) {
+        console.error('api.appointments.getById: Error fetching appointment by ID:', error);
         console.error('Error fetching appointment by ID:', error);
         throw error;
       }
 
+      console.log('api.appointments.getById: Supabase response data:', data);
       return data;
     },
 

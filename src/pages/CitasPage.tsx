@@ -117,7 +117,7 @@ export function CitasPage() {
   // Effect to check for previous appointments
   useEffect(() => {
     const checkPreviousAppointments = async () => {
-      if (!selectedPatient) {
+      if (!selectedPatient || editingAppointment) {
         setHasPreviousAppointments(false);
         return;
       }
@@ -139,7 +139,7 @@ export function CitasPage() {
     };
 
     checkPreviousAppointments();
-  }, [selectedPatient, form]);
+  }, [selectedPatient, form, editingAppointment]);
 
   // Effect to calculate hora_fin
   useEffect(() => {
@@ -176,23 +176,42 @@ export function CitasPage() {
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id || null;
 
-      await api.appointments.create({
-        id_paciente: selectedPatient.id,
-        fecha_cita: data.fecha_cita,
-        hora_cita: data.hora_cita,
-        motivo: data.motivo,
-        estado: 'programada',
-        consultorio: data.consultorio,
-        notas: data.notas || null,
-        tipo_consulta: data.tipo_consulta,
-        tiempo_evolucion: parseInt(data.tiempo_evolucion || '0'), // Ensure it's a number
-        unidad_tiempo: data.unidad_tiempo,
-        sintomas_asociados: data.sintomas_asociados,
-        urgente: data.urgente,
-        id_user: userId,
-        duracion_minutos: data.duracion_minutos, // Nuevo campo
-        hora_fin: data.hora_fin, // Nuevo campo
-      });
+      if (editingAppointment) {
+        // Update existing appointment
+        await api.appointments.update(editingAppointment.id, {
+          fecha_cita: data.fecha_cita,
+          hora_cita: data.hora_cita,
+          motivo: data.motivo,
+          consultorio: data.consultorio,
+          notas: data.notas || null,
+          tipo_consulta: data.tipo_consulta,
+          tiempo_evolucion: parseInt(data.tiempo_evolucion || '0'),
+          unidad_tiempo: data.unidad_tiempo,
+          sintomas_asociados: data.sintomas_asociados,
+          urgente: data.urgente,
+          duracion_minutos: data.duracion_minutos,
+          hora_fin: data.hora_fin,
+        });
+      } else {
+        // Create new appointment
+        await api.appointments.create({
+          id_paciente: selectedPatient.id,
+          fecha_cita: data.fecha_cita,
+          hora_cita: data.hora_cita,
+          motivo: data.motivo,
+          estado: 'programada',
+          consultorio: data.consultorio,
+          notas: data.notas || null,
+          tipo_consulta: data.tipo_consulta,
+          tiempo_evolucion: parseInt(data.tiempo_evolucion || '0'),
+          unidad_tiempo: data.unidad_tiempo,
+          sintomas_asociados: data.sintomas_asociados,
+          urgente: data.urgente,
+          id_user: userId,
+          duracion_minutos: data.duracion_minutos,
+          hora_fin: data.hora_fin,
+        });
+      }
 
       setSuccess(true);
       setTimeout(() => { 
@@ -200,7 +219,9 @@ export function CitasPage() {
       }, 2000);
     } catch (error) {
       console.error('Error creating appointment:', error);
-      form.setError('root', { message: 'Error al crear la cita' });
+      form.setError('root', { 
+        message: editingAppointment ? 'Error al actualizar la cita' : 'Error al crear la cita' 
+      });
     } finally {
       setLoading(false);
     }
@@ -354,7 +375,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 color: '#03543F',
               }}
             >
-              Cita agendada exitosamente. Redirigiendo...
+              {editingAppointment ? 'Cita actualizada exitosamente.' : 'Cita agendada exitosamente.'} Redirigiendo...
             </div>
           ) : (
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -718,7 +739,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                   className={clsx(buttonStyle.base, 'disabled:opacity-50')}
                   style={buttonStyle.primary}
                 >
-                  {loading ? 'Guardando...' : navigationState?.editMode ? 'Actualizar' : 'Agendar'}
+                  {loading ? 'Guardando...' : editingAppointment ? 'Actualizar' : 'Agendar'}
                 </button>
               </div>
             </form>
@@ -727,10 +748,13 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
           {/* Modal de error de fecha/hora */}
           <Modal
             isOpen={showDateTimeErrorModal}
+      console.log('CitasPage: useEffect - navigationState:', navigationState);
             onClose={() => setShowDateTimeErrorModal(false)}
             title="Fecha y Hora No Válidas"
+        console.log('CitasPage: Fetching appointment with ID:', navigationState.appointmentId);
             actions={
               <button
+          console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
                 onClick={() => setShowDateTimeErrorModal(false)}
                 className={buttonStyle.base}
                 style={buttonStyle.primary}
@@ -763,8 +787,10 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
         title="Teléfono del Paciente"
         actions={
           <button
+            console.log('CitasPage: Form values after reset:', form.getValues());
             onClick={() => setShowPhoneModal(false)}
             className={buttonStyle.base}
+          console.error('CitasPage: Error loading appointment for editing:', err);
             style={buttonStyle.primary} 
           >
             Cerrar
