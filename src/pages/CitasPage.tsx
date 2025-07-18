@@ -177,57 +177,7 @@ export function CitasPage() {
   }, [navigationState?.editMode, navigationState?.appointmentId, form, setSelectedPatient]);
 
   // Effect to check for previous appointments
- useEffect(() => {
-  const loadAppointment = async () => {
-    console.log('CitasPage: useEffect - navigationState:', navigationState);
-    if (navigationState?.editMode && navigationState?.appointmentId) {
-      setLoadingAppointment(true);
-      console.log('CitasPage: Fetching appointment with ID:', navigationState.appointmentId);
-      try {
-        const fetchedAppointment = await api.appointments.getById(navigationState.appointmentId);
-        console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
-        console.log('CitasPage: Fetched Appointment hora_cita (raw):', fetchedAppointment.hora_cita); // Log antes de formatear
-
-        if (fetchedAppointment) {
-          setEditingAppointment(fetchedAppointment);
-
-          // Formatear hora_cita a HH:MM si es necesario
-          const formattedHoraCita = fetchedAppointment.hora_cita.substring(0, 5);
-          console.log('CitasPage: Fetched Appointment hora_cita (formatted):', formattedHoraCita); // Log después de formatear
-
-          // Precargar el formulario con los datos de la cita
-          form.reset({
-            tipo_consulta: fetchedAppointment.tipo_consulta,
-            motivo: fetchedAppointment.motivo,
-            tiempo_evolucion: fetchedAppointment.tiempo_evolucion?.toString() || '',
-            unidad_tiempo: fetchedAppointment.unidad_tiempo || 'dias',
-            sintomas_asociados: fetchedAppointment.sintomas_asociados || [],
-            fecha_cita: fetchedAppointment.fecha_cita,
-            hora_cita: formattedHoraCita, // Usar la hora formateada
-            consultorio: fetchedAppointment.consultorio,
-            urgente: fetchedAppointment.urgente,
-            mismo_motivo: false,
-            notas: fetchedAppointment.notas || '',
-            duracion_minutos: fetchedAppointment.duracion_minutos || 30,
-            hora_fin: fetchedAppointment.hora_fin || '',
-          });
-          console.log('CitasPage: Form values after reset:', form.getValues());
-          // ... (resto del código)
-        }
-      } catch (err) {
-        console.error('CitasPage: Error loading appointment for editing:', err);
-        form.setError('root', {
-          message: 'Error al cargar los datos de la cita'
-        });
-      } finally {
-        setLoadingAppointment(false);
-      }
-    }
-  };
-
-  loadAppointment();
-}, [navigationState?.editMode, navigationState?.appointmentId, form, setSelectedPatient]);
-
+  
   // Fetch symptoms based on patient age
   useEffect(() => {
     if (!selectedPatient || !selectedPatient.FechaNacimiento) {
