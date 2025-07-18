@@ -353,6 +353,7 @@ export function Agenda() {
                   }
                   .fc .fc-toolbar-title {
                     color: ${currentTheme.colors.text};
+                    font-size: 1em !important;
                   }
                   .fc .fc-col-header-cell {
                     color: ${currentTheme.colors.textSecondary};
