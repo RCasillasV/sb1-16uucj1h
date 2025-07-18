@@ -112,7 +112,11 @@ export function CitasPage() {
     editMode?: boolean;
     appointmentId?: string;
     selectedPatient?: any;
+    viewOnly?: boolean;
   } | null;
+
+  // Estado para modo de solo lectura
+  const [isViewOnlyMode, setIsViewOnlyMode] = useState(navigationState?.viewOnly || false);
 
   // Configurar fecha inicial basada en la navegación
   const initialDate = navigationState?.selectedDate 
@@ -182,6 +186,13 @@ export function CitasPage() {
             // Establecer el paciente seleccionado
             if (fetchedAppointment.patients) {
               setSelectedPatient(fetchedAppointment.patients);
+            }
+            
+            // Verificar si la cita es pasada y establecer modo de solo lectura
+            const appointmentDateTime = parseISO(`${fetchedAppointment.fecha_cita}T${fetchedAppointment.hora_cita}`);
+            const now = new Date();
+            if (isBefore(appointmentDateTime, now)) {
+              setIsViewOnlyMode(true);
             }
           }
         } catch (err) {
@@ -520,6 +531,7 @@ export function CitasPage() {
   }
 
 console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms); 
+                  disabled={isViewOnlyMode}
 
 
   return (  
@@ -541,11 +553,12 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
           <div className="flex items-center gap-3">
             <Calendar className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
             <div>
+                  disabled={isViewOnlyMode}
               <h1 
                 className="text-2xl font-bold"
                 style={{ color: currentTheme.colors.text }}
               >
-                {editingAppointment ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
+                {isViewOnlyMode ? 'Ver Cita Médica' : editingAppointment ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
               </h1>
              </div>
           </div>
@@ -647,6 +660,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="number"
                       {...form.register('tiempo_evolucion')}
+                      disabled={isViewOnlyMode}
                       placeholder="Ej: 2"
                       className="w-full p-2 rounded-md border"
                       style={{
@@ -666,6 +680,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('unidad_tiempo')}
+                      disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -704,6 +719,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                           <button
                             key={sintoma.sintoma} // CAMBIO: sintoma.sintoma
                             type="button"
+                            disabled={isViewOnlyMode}
                             onClick={() => {
                               const current = form.getValues('sintomas_asociados');
                               if (isSelected) {
@@ -717,7 +733,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                             className={clsx(
                               'px-3 py-1 rounded-md text-sm transition-colors border',
                               isSelected && 'bg-slate-800 text-white border-slate-900',
-                              !isSelected && 'bg-white hover:bg-slate-50 border-slate-200'
+                              !isSelected && 'bg-white hover:bg-slate-50 border-slate-200',
+                              isViewOnlyMode && 'opacity-50 cursor-not-allowed'
                             )}
                             style={{
                               color: isSelected ? '#fff' : currentTheme.colors.text,
@@ -744,6 +761,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                           <button
                             type="button"
                             className="ml-1 text-white hover:text-slate-200"
+                            disabled={isViewOnlyMode}
                             onClick={() => {
                               form.setValue('sintomas_asociados', form.getValues('sintomas_asociados')?.filter((id) => id !== customTag));
                             }}
@@ -758,6 +776,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="text"
                       value={customSymptom}
+                      disabled={isViewOnlyMode}
                       onChange={(e) => setCustomSymptom(e.target.value)}
                       placeholder="Agregar otro síntoma"
                       className="flex-1 p-2 rounded-md border"
@@ -802,6 +821,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="date"
                       {...form.register('fecha_cita')}
+                      disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -821,7 +841,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('hora_cita')}
-                      disabled={loadingAvailableSlots}
+                      disabled={loadingAvailableSlots || isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -894,6 +914,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('consultorio', { valueAsNumber: true })}
+                      disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -917,6 +938,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('duracion_minutos', { valueAsNumber: true })}
+                      disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -944,6 +966,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                       type="text"
                       {...form.register('hora_fin')}
                       readOnly
+                      disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border bg-gray-100 cursor-not-allowed"
                       style={{
                         background: currentTheme.colors.background,
@@ -958,7 +981,9 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => navigate(-1)}
+                  required 
+                  disabled={isViewOnlyMode}
+                  placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"
                   className={clsx(buttonStyle.base, 'border')}
                   style={{
                     background: 'transparent',
@@ -966,16 +991,18 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     color: currentTheme.colors.text,
                   }}
                 >
-                  Cancelar
+                  {isViewOnlyMode ? 'Cerrar' : 'Cancelar'}
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={clsx(buttonStyle.base, 'disabled:opacity-50')}
-                  style={buttonStyle.primary}
-                >
-                  {loading ? 'Guardando...' : editingAppointment ? 'Actualizar' : 'Agendar'}
-                </button>
+                {!isViewOnlyMode && (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={clsx(buttonStyle.base, 'disabled:opacity-50')}
+                    style={buttonStyle.primary}
+                  >
+                    {loading ? 'Guardando...' : editingAppointment ? 'Actualizar' : 'Agendar'}
+                  </button>
+                )}
               </div>
             </form>
           )}

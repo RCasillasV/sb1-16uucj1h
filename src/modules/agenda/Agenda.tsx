@@ -140,6 +140,7 @@ export function Agenda() {
             tiempo_evolucion: appointment.tiempo_evolucion,
             unidad_tiempo: appointment.unidad_tiempo,
             tipo_consulta: appointment.tipo_consulta,
+            isPastEvent: isPastEvent,
           }
         };
       });
@@ -194,11 +195,14 @@ export function Agenda() {
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
+    const isPastEvent = clickInfo.event.extendedProps?.isPastEvent || false;
+    
     navigate('/citas', {
       state: {
         editMode: true,
         appointmentId: clickInfo.event.id,
-        selectedPatient: selectedPatient
+        selectedPatient: selectedPatient,
+        viewOnly: isPastEvent
       }
     });
   };
