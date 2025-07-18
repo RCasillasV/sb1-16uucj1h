@@ -781,6 +781,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('hora_cita')}
+                      disabled={loadingAvailableSlots}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -788,10 +789,21 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                         color: currentTheme.colors.text,
                       }}
                     >
-                      {HORARIOS_CONSULTA.map(hora => (
-                        <option key={hora} value={hora}>{hora}</option>
-                      ))}
+                      {loadingAvailableSlots ? (
+                        <option value="">Cargando horarios...</option>
+                      ) : availableTimeSlots.length === 0 ? (
+                        <option value="">No hay horarios disponibles</option>
+                      ) : (
+                        availableTimeSlots.map(hora => (
+                          <option key={hora} value={hora}>{hora}</option>
+                        ))
+                      )}
                     </select>
+                    {form.formState.errors.hora_cita && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {form.formState.errors.hora_cita.message}
+                      </p>
+                    )}
                   </div>
 
                   <div>
