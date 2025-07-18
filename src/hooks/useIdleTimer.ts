@@ -1,4 +1,3 @@
-// src/hooks/useIdleTimer.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 // ... (interfaz y tipos)
