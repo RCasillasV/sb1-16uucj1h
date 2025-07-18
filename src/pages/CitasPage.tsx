@@ -15,8 +15,8 @@ import clsx from 'clsx';
  
 // Interface for symptom objects
 interface Symptom {
-  sintoma: string; 
-  frecuencia: number; 
+  sintoma: string; // CAMBIO: De 'nombre' a 'sintoma'
+  frecuencia: number; // CAMBIO: Añadida la propiedad 'frecuencia'
 }
 
 // Function to generate time slots
@@ -260,6 +260,7 @@ export function CitasPage() {
           throw error;
         }
         console.log('fetchSymptoms: Data from sintomasconsulta RPC:', data);
+        // CAMBIO: Asegurarse de que los datos sean un array y mapear a la interfaz Symptom
         setDynamicSymptoms(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('fetchSymptoms: Error fetching symptoms:', error);
@@ -489,19 +490,19 @@ export function CitasPage() {
                       <p style={{ color: '#DC2626' }}>{symptomsError}</p>
                     ) : (
                       dynamicSymptoms.map(sintoma => {
-                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma);
+                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma); // CAMBIO: sintoma.sintoma
                         return (
                           <button
-                            key={sintoma.sintoma} 
+                            key={sintoma.sintoma} // CAMBIO: sintoma.sintoma
                             type="button"
                             onClick={() => {
                               const current = form.getValues('sintomas_asociados');
                               if (isSelected) {
                                 form.setValue('sintomas_asociados', 
-                                  current.filter(s => s !== sintoma.sintoma)
+                                  current.filter(s => s !== sintoma.sintoma) // CAMBIO: sintoma.sintoma
                                 );
                               } else {
-                                form.setValue('sintomas_asociados', [...current, sintoma.sintoma]);
+                                form.setValue('sintomas_asociados', [...current, sintoma.sintoma]); // CAMBIO: sintoma.sintoma
                               }
                             }}
                             className={clsx(
@@ -513,7 +514,7 @@ export function CitasPage() {
                               color: isSelected ? '#fff' : currentTheme.colors.text,
                             }}
                           >
-                            {sintoma.sintoma}
+                            {sintoma.sintoma} {/* CAMBIO: sintoma.sintoma */}
                           </button>
                         ); 
                       })
@@ -523,7 +524,7 @@ export function CitasPage() {
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                         !dynamicSymptoms.some(sintoma => sintoma.sintoma === id),
+                         !dynamicSymptoms.some(sintoma => sintoma.sintoma === id), // CAMBIO: sintoma.sintoma
                       )
                       .map((customTag) => (
                         <div
