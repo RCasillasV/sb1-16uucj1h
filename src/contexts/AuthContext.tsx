@@ -125,9 +125,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         // If error is session related, just redirect
-        if (error.message.includes('session')) {
+        if (error.message.includes('session') || error.message.includes('Refresh Token') || error.message.includes('Invalid Refresh Token')) {
+          console.warn('Auth error during signOut, likely invalid session. Clearing local storage and redirecting.');
+          localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('rememberMe');
+          localStorage.removeItem('supabase.auth.refreshToken');
+          // Clear any Supabase auth keys from localStorage
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('supabase.auth.')) {
+              localStorage.removeItem(key);
+            }
+          });
           navigate('/login', {
-            state: { message: 'La sesión ha expirado' }
+            state: { message: 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.' }
           });
           return { error: null };
         }
@@ -138,6 +148,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('rememberMe');
       localStorage.removeItem('supabase.auth.refreshToken');
+      // Clear any Supabase auth keys from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          localStorage.removeItem(key);
+        }
+      });
       
       // Reset context state
       setUser(null);
@@ -150,9 +166,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: null };
     } catch (error) {
       console.error('Error signing out:', error);
-      // Always redirect to login with appropriate message
+      // Clear all auth data and redirect to login with appropriate message
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('rememberMe');
+      localStorage.removeItem('supabase.auth.refreshToken');
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          localStorage.removeItem(key);
+        }
+      });
+      setUser(null);
       navigate('/login', {
-        state: { message: 'La sesión ha sido cerrada' }
+        state: { message: 'La sesión ha sido cerrada debido a un error inesperado.' }
       });
       return { error: error as AuthError };
     }
