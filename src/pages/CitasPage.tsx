@@ -64,7 +64,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export function CitasPage() {
   const { currentTheme } = useTheme();
-  const { selectedPatient, setSelectedPatient } = useSelectedPatient();
+  const { selectedPatient } = useSelectedPatient();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -177,7 +177,118 @@ export function CitasPage() {
   }, [navigationState?.editMode, navigationState?.appointmentId, form, setSelectedPatient]);
 
   // Effect to check for previous appointments
-  
+  useEffect(() => {
+    const checkPreviousAppointments = async () => {
+      if (!selectedPatient || editingAppointment) {
+        setHasPreviousAppointments(false);
+        return;
+      }
+      try {
+        const patientAppointments = await api.appointments.getByPatientId(selectedPatient.id);
+        const now = new Date();
+        const previous = patientAppointments.some(app => {
+          const appDateTime = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
+          return isBefore(appDateTime, now);
+        });
+        setHasPreviousAppointments(previous);
+        if (previous && form.getValues('tipo_consulta') === 'primera') {
+          form.setValue('tipo_consulta', 'seguimiento');
+        }
+      } catch (error) {
+        console.error('Error checking previous appointments:', error);
+        setHasPreviousAppointments(false);
+      }
+    };
+
+    checkPreviousAppointments();
+  }, [selectedPatient, form, editingAppointment]);
+
+  // Effect to calculate hora_fin
+  useEffect(() => {
+    const { fecha_cita, hora_cita, duracion_minutos } = form.getValues();
+    if (fecha_cita && hora_cita && duracion_minutos) {
+      try {
+        const startDateTime = parseISO(`${fecha_cita}T${hora_cita}`);
+        const endDateTime = addMinutes(startDateTime, duracion_minutos);
+        form.setValue('hora_fin', format(endDateTime, 'HH:mm'));
+      } catch (e) {
+        console.error('Error calculating end time:', e);
+        form.setValue('hora_fin', '');
+      }
+    } else {
+      form.setValue('hora_fin', '');
+    }
+  }, [form.watch('fecha_cita'), form.watch('hora_cita'), form.watch('duracion_minutos')]);
+
+
+  const onSubmit = async (data: FormData) => {
+    if (!selectedPatient) return;
+    
+    // Validar que la fecha y hora sean futuras
+    const selectedDateTime = new Date(`${data.fecha_cita}T${data.hora_cita}:00`);
+    const now = new Date();
+    
+    if (selectedDateTime <= now) {
+      setShowDateTimeErrorModal(true);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || null;
+
+      if (editingAppointment) {
+        // Update existing appointment
+        await api.appointments.update(editingAppointment.id, {
+          fecha_cita: data.fecha_cita,
+          hora_cita: data.hora_cita,
+          motivo: data.motivo,
+          consultorio: data.consultorio,
+          notas: data.notas || null,
+          tipo_consulta: data.tipo_consulta,
+          tiempo_evolucion: parseInt(data.tiempo_evolucion || '0'),
+          unidad_tiempo: data.unidad_tiempo,
+          sintomas_asociados: data.sintomas_asociados,
+          urgente: data.urgente,
+          duracion_minutos: data.duracion_minutos,
+          hora_fin: data.hora_fin,
+        });
+      } else {
+        // Create new appointment
+        await api.appointments.create({
+          id_paciente: selectedPatient.id,
+          fecha_cita: data.fecha_cita,
+          hora_cita: data.hora_cita,
+          motivo: data.motivo,
+          estado: 'programada',
+          consultorio: data.consultorio,
+          notas: data.notas || null,
+          tipo_consulta: data.tipo_consulta,
+          tiempo_evolucion: parseInt(data.tiempo_evolucion || '0'),
+          unidad_tiempo: data.unidad_tiempo,
+          sintomas_asociados: data.sintomas_asociados,
+          urgente: data.urgente,
+          id_user: userId,
+          duracion_minutos: data.duracion_minutos,
+          hora_fin: data.hora_fin,
+        });
+      }
+
+      setSuccess(true);
+      setTimeout(() => { 
+        navigate('/agenda/agenda');
+      }, 2000);
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      form.setError('root', { 
+        message: editingAppointment ? 'Error al actualizar la cita' : 'Error al crear la cita' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch symptoms based on patient age
   useEffect(() => {
     if (!selectedPatient || !selectedPatient.FechaNacimiento) {
@@ -242,7 +353,7 @@ export function CitasPage() {
   } finally {
     setIsLoadingSymptoms(false);
   }
-};
+}; 
     
     fetchSymptoms();
   }, [selectedPatient]);
