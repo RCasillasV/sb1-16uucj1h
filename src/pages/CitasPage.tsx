@@ -267,40 +267,65 @@ export function CitasPage() {
 
   // Function to check if a time slot is available
   const isTimeSlotAvailable = (timeSlot: string, duration: number): boolean => {
+    const selectedDateStr = form.watch('fecha_cita'); // Obtener la fecha seleccionada del formulario
+    const today = new Date(); // Obtener la fecha y hora actuales
+    const todayStr = format(today, 'yyyy-MM-dd'); // Formatear la fecha actual a string
+
+    // Crear un objeto Date para el inicio del slot actual usando la fecha seleccionada real
+    const currentSlotDateTime = new Date(`${selectedDateStr}T${timeSlot}:00`);
+
+    // NUEVA LÓGICA: Si la fecha seleccionada es hoy, verificar si el slot está en el pasado
+    if (selectedDateStr === todayStr) {
+      if (currentSlotDateTime < today) { // Comparar con la hora actual real
+        console.log(`Slot ${timeSlot} en ${selectedDateStr} está en el pasado respecto a ${format(today, 'HH:mm')}.`);
+        return false; // El slot está en el pasado, por lo tanto no está disponible
+      }
+    }
+
+    // Para las comprobaciones de superposición con otras citas, seguimos usando una fecha ficticia
+    // Esto simplifica las comparaciones de tiempo puro y evita problemas con los cambios de día.
+    const dummyDate = '2000-01-01'; // Fecha ficticia consistente para todas las comparaciones de tiempo
     const slotStart = new Date(`2000-01-01T${timeSlot}:00`);
     const slotEnd = addMinutes(slotStart, duration);
     
     return !appointmentsOnSelectedDate.some(appointment => {
-      // Skip the appointment being edited
+      // Saltar la cita que se está editando
       if (editingAppointment && appointment.id === editingAppointment.id) {
         return false;
       }
       
       // Formatear hora_cita y hora_fin a HH:MM antes de usarlas
       const formattedAppointmentHoraCita = appointment.hora_cita.substring(0, 5);
-      const appointmentStart = new Date(`2000-01-01T${formattedAppointmentHoraCita}`);
+      const appointmentStart = new Date(`${dummyDate}T${formattedAppointmentHoraCita}`);
 
       let formattedAppointmentHoraFin = appointment.hora_fin;
       if (formattedAppointmentHoraFin) {
         formattedAppointmentHoraFin = formattedAppointmentHoraFin.substring(0, 5);
       }
       const appointmentEnd = formattedAppointmentHoraFin
-        ? new Date(`2000-01-01T${formattedAppointmentHoraFin}`)
+        ? new Date(`${dummyDate}T${formattedAppointmentHoraFin}`)
         : addMinutes(appointmentStart, appointment.duracion_minutos || 30);
 
-      // Logs de depuración adicionales
-      console.log('Raw appointment.hora_cita:', appointment.hora_cita);
-      console.log('Formatted appointment.hora_cita:', formattedAppointmentHoraCita);
-      console.log('Raw appointment.hora_fin:', appointment.hora_fin);
-      console.log('Formatted appointment.hora_fin:', formattedAppointmentHoraFin);
-      console.log('Is appointmentStart valid Date?', !isNaN(appointmentStart.getTime()));
-      console.log('Is appointmentEnd valid Date?', !isNaN(appointmentEnd.getTime()));
+      // Logs de depuración para la lógica de superposición
+      console.log('--- Comprobando Slot para Superposición ---');
+      console.log('Slot:', timeSlot, 'Duración:', duration);
+      console.log('Inicio del Slot (fecha ficticia):', slotStart.toISOString());
+      console.log('Fin del Slot (fecha ficticia):', slotEnd.toISOString());
+      console.log('Cita:', appointment.motivo, 'ID:', appointment.id);
+      console.log('Inicio de Cita (fecha ficticia):', appointmentStart.toISOString());
+      console.log('Fin de Cita (fecha ficticia):', appointmentEnd.toISOString());
+      console.log('appointment.hora_cita (original):', appointment.hora_cita);
+      console.log('appointment.hora_cita (formateada):', formattedAppointmentHoraCita);
+      console.log('appointment.hora_fin (original):', appointment.hora_fin);
+      console.log('appointment.hora_fin (formateada):', formattedAppointmentHoraFin);
+      console.log('¿appointmentStart es una fecha válida?', !isNaN(appointmentStart.getTime()));
+      console.log('¿appointmentEnd es una fecha válida?', !isNaN(appointmentEnd.getTime()));
 
       const overlaps = (slotStart < appointmentEnd && slotEnd > appointmentStart);
-      console.log('Overlaps:', overlaps);
+      console.log('Superposición:', overlaps);
       console.log('---------------------');
 
-      // Check for overlap
+      // Comprobar superposición
       return overlaps;
     });
   };
