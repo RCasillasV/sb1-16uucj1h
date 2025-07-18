@@ -64,7 +64,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export function CitasPage() {
   const { currentTheme } = useTheme();
-  const { selectedPatient } = useSelectedPatient();
+  const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const navigate = useNavigate();
   const location = useLocation();
 
