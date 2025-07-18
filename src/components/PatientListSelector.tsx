@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import type { Database } from '../types/database.types';
 import { calculateAge } from '../utils/dateUtils';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext'; // Importa useSelectedPatient
 import clsx from 'clsx';
 
@@ -25,8 +26,10 @@ interface PatientListSelectorProps {
 export function PatientListSelector({ onSelectPatient, onClose, className = '', isModal = false }: PatientListSelectorProps) {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient(); // Obtén el paciente seleccionado del contexto
+  const { user, loading: authLoading } = useAuth();
   const [allPatients, setAllPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>(null);
@@ -37,15 +40,26 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
 
 
   useEffect(() => {
-    fetchPatients();
-  }, []);
+    if (!authLoading && user) {
+      fetchPatients();
+    }
+  }, [user, authLoading]);
 
   async function fetchPatients() {
+    if (!user) {
+      setError('Usuario no autenticado');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
     try {
       const data = await api.patients.getAll();
       setAllPatients(data);
     } catch (error) {
       console.error('Error fetching patients:', error);
+      setError(error instanceof Error ? error.message : 'Error al cargar los pacientes. Por favor, intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -127,6 +141,19 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
 
   return (
     <div className={clsx('flex flex-col', className)}>
+      {error && (
+        <div 
+          className="mb-4 p-3 rounded-md border-l-4"
+          style={{
+            background: '#FEE2E2',
+            borderLeftColor: '#DC2626',
+            color: '#DC2626',
+          }}
+        >
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
+
       <div className="mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" style={{ color: currentTheme.colors.textSecondary }} />
@@ -218,10 +245,10 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
             </tr>
           </thead>
           <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-            {loading ? (
+            {(loading || authLoading) ? (
               <tr>
                 <td colSpan={5} className="px-6 py-2 text-center" style={{ color: currentTheme.colors.textSecondary }}>
-                  Cargando pacientes...
+                  {authLoading ? 'Autenticando...' : 'Cargando pacientes...'}
                 </td>
               </tr>
             ) : displayPatients.length === 0 ? (

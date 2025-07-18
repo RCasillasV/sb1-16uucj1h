@@ -3,6 +3,7 @@ import { FolderOpen, Upload } from 'lucide-react';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { FileUpload } from '../components/FileUpload';
 import { Modal } from '../components/Modal';
@@ -46,6 +47,7 @@ function areFilesContentEqual(arr1: UploadedFile[], arr2: UploadedFile[]): boole
 export function PatientFilesPage() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [initialFiles, setInitialFiles] = useState<UploadedFile[]>([]);
@@ -57,13 +59,21 @@ export function PatientFilesPage() {
       setShowWarningModal(true);
       return;
     }
-    fetchPatientFiles();
-  }, [selectedPatient]);
+    if (!authLoading && user) {
+      fetchPatientFiles();
+    }
+  }, [selectedPatient, user, authLoading]);
 
   const fetchPatientFiles = async () => {
     if (!selectedPatient) return;
+    if (!user) {
+      setError('Usuario no autenticado');
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
+    setError(null);
     try {
       const files = await api.files.getByPatientId(selectedPatient.id);
       if (!areFilesContentEqual(initialFiles, files)) {
@@ -71,7 +81,7 @@ export function PatientFilesPage() {
       }
     } catch (err) {
       console.error('Error fetching patient files:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los archivos del paciente');
+      setError(err instanceof Error ? err.message : 'Error al cargar los archivos del paciente. Por favor, intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -144,13 +154,21 @@ export function PatientFilesPage() {
 
       {error && (
         <div 
-          className="mb-4 p-4 rounded-md"
+          className="mb-4 p-4 rounded-md border-l-4"
           style={{
             background: '#FEE2E2',
+            borderLeftColor: '#DC2626',
             color: '#DC2626',
           }}
         >
-          {error}
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <FolderOpen className="h-5 w-5" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -165,7 +183,7 @@ export function PatientFilesPage() {
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
             <span className="ml-3" style={{ color: currentTheme.colors.text }}>
-              Cargando archivos del paciente...
+              {authLoading ? 'Autenticando...' : 'Cargando archivos del paciente...'}
             </span>
           </div>
         ) : (

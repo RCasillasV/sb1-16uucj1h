@@ -3,6 +3,7 @@ import { Calendar, Users, Clock, LayoutDashboard, Activity, ArrowUp, ArrowDown }
 import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx'; 
@@ -20,6 +21,7 @@ interface StatsCard {
 
 export function Dashboard() {
   const { currentTheme } = useTheme();
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState({
     totalPatients: 0,
     todayAppointments: 0,
@@ -34,11 +36,18 @@ export function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchStats();
-    fetchRecentActivity();
-  }, []);
+    if (!authLoading && user) {
+      fetchStats();
+      fetchRecentActivity();
+    }
+  }, [user, authLoading]);
 
   async function fetchStats() {
+    if (!user) {
+      console.error('Usuario no autenticado');
+      return;
+    }
+
     try {
       const stats = await api.stats.getDashboardStats();
       setStats(stats);
@@ -179,7 +188,7 @@ export function Dashboard() {
                   className="text-3xl font-semibold"
                   style={{ color: currentTheme.colors.text }}
                 >
-                  {loading ? '...' : card.value}
+                  {(loading || authLoading) ? '...' : card.value}
                 </p>
               </div>
               <card.icon 

@@ -3,6 +3,7 @@ import { FileText, Calendar, Clock } from 'lucide-react';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
@@ -14,6 +15,7 @@ import clsx from 'clsx';
 export function ClinicalHistory() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -32,14 +34,22 @@ export function ClinicalHistory() {
       setShowWarningModal(true);
       return;
     }
-    fetchHistory();
-    fetchAppointments();
-  }, [selectedPatient]);
+    if (!authLoading && user) {
+      fetchHistory();
+      fetchAppointments();
+    }
+  }, [selectedPatient, user, authLoading]);
 
   const fetchHistory = async () => {
     if (!selectedPatient) return;
+    if (!user) {
+      setError('Usuario no autenticado');
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
+    setError(null);
     try {
       const data = await api.clinicalHistories.getByPatientId(selectedPatient.id);
       const sortedHistories = data.sort((a, b) => 
@@ -48,7 +58,7 @@ export function ClinicalHistory() {
       setHistories(sortedHistories);
     } catch (err) {
       console.error('ClinicalHistory.tsx: Error fetching clinical history:', err);
-      setError('ClinicalHistory.tsx:Error al cargar la historia clínica');
+      setError(err instanceof Error ? err.message : 'Error al cargar la historia clínica. Por favor, intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -56,6 +66,7 @@ export function ClinicalHistory() {
 
   const fetchAppointments = async () => {
     if (!selectedPatient) return;
+    if (!user) return;
 
     try {
       const appointments = await api.appointments.getAll();
@@ -178,8 +189,22 @@ export function ClinicalHistory() {
         }}
       >
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
-            {error}
+          <div 
+            className="mb-4 p-4 rounded-md border-l-4"
+            style={{
+              background: '#FEE2E2',
+              borderLeftColor: '#DC2626',
+              color: '#DC2626',
+            }}
+          >
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 

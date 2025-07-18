@@ -158,7 +158,7 @@ export function Settings() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-2 lg:px-8">
+    <div className="max-w-7xl mx-auto px-0 sm:px-2 lg:px-8">
       {/* Header */}
       <div 
         className="sticky top-0 z-10 py-4 mb-1"

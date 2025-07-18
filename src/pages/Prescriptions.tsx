@@ -3,6 +3,7 @@ import { FileText } from 'lucide-react';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
@@ -20,6 +21,7 @@ interface Prescription {
 export function Prescriptions() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -33,13 +35,21 @@ export function Prescriptions() {
       setShowWarningModal(true);
       return;
     }
-    fetchPrescriptions();
-  }, [selectedPatient]);
+    if (!authLoading && user) {
+      fetchPrescriptions();
+    }
+  }, [selectedPatient, user, authLoading]);
 
   const fetchPrescriptions = async () => {
     if (!selectedPatient) return;
+    if (!user) {
+      setError('Usuario no autenticado');
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
+    setError(null);
     try {
       const data = await api.prescriptions.getByPatientId(selectedPatient.id);
       const sortedPrescriptions = data
@@ -53,7 +63,7 @@ export function Prescriptions() {
       setPrescriptions(sortedPrescriptions);
     } catch (err) {
       console.error('Error fetching prescriptions:', err);
-      setError('Error al cargar las recetas');
+      setError(err instanceof Error ? err.message : 'Error al cargar las recetas. Por favor, intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -146,8 +156,23 @@ export function Prescriptions() {
         }}
       >
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
-            {error}
+          <div 
+            className="mb-4 p-4 rounded-md border-l-4"
+            style={{
+              background: '#FEE2E2',
+              borderLeftColor: '#DC2626',
+              color: '#DC2626',
+            }}
+          >
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </div>
+          </div>
           </div>
         )}
 

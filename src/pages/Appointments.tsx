@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { api } from '../lib/api';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
+import { useAuth } from '../contexts/AuthContext';
 import { AppointmentForm } from '../components/AppointmentForm';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
@@ -31,6 +32,7 @@ type AppointmentWithPatient = {
 export function Appointments() {
   const { currentTheme } = useTheme();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,11 +53,20 @@ export function Appointments() {
   }, []);
 
   useEffect(() => {
-    fetchAppointments();
-  }, [selectedPatient, filter]);
+    if (!authLoading && user) {
+      fetchAppointments();
+    }
+  }, [selectedPatient, filter, user, authLoading]);
 
   const fetchAppointments = async () => {
+    if (!user) {
+      setError('Usuario no autenticado');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError(null);
     try {
       let data = await api.appointments.getAll();
       
@@ -79,7 +90,7 @@ export function Appointments() {
       setAppointments(data as AppointmentWithPatient[]);
     } catch (err) {
       console.error('Error fetching appointments:', err);
-      setError('Error al cargar las citas');
+      setError(err instanceof Error ? err.message : 'Error al cargar las citas. Por favor, intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -272,13 +283,21 @@ export function Appointments() {
 
       {error && (
         <div 
-          className="mb-4 p-4 rounded-md"
+          className="mb-4 p-4 rounded-md border-l-4"
           style={{
             background: '#FEE2E2',
+            borderLeftColor: '#DC2626',
             color: '#DC2626',
           }}
         >
-          {error}
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <XCircle className="h-5 w-5" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -326,14 +345,14 @@ export function Appointments() {
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-              {loading ? (
+              {(loading || authLoading) ? (
                 <tr>
                   <td 
                     colSpan={5} 
                     className="px-6 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
-                    Cargando citas...
+                    {authLoading ? 'Autenticando...' : 'Cargando citas...'}
                   </td>
                 </tr>
               ) : filteredAppointments.length === 0 ? (

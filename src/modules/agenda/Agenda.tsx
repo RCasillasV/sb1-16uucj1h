@@ -8,6 +8,7 @@ import esLocale from '@fullcalendar/core/locales/es';
 import { api } from '../../lib/api';
 import { useSelectedPatient } from '../../contexts/SelectedPatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Modal } from '../../components/Modal';
 import { PatientListSelector } from '../../components/PatientListSelector';
 import { useNavigate, Link } from 'react-router-dom';
@@ -22,6 +23,7 @@ import { useIdleTimer } from '../../hooks/useIdleTimer';
 export function Agenda() {
   const { currentTheme } = useTheme();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventInput[]>([]);
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -91,8 +93,10 @@ export function Agenda() {
   }, [calendarView]); // Depend on calendarView to re-scroll if view changes
 
   useEffect(() => {
-    fetchAppointments();
-  }, []);
+    if (!authLoading && user) {
+      fetchAppointments();
+    }
+  }, [user, authLoading]);
 
   const handleMonthChange = (date: Date) => {
     if (calendarRef.current) {
@@ -102,6 +106,11 @@ export function Agenda() {
   };
 
   const fetchAppointments = async () => {
+    if (!user) {
+      console.error('Usuario no autenticado');
+      return;
+    }
+
     try {
       const appointments = await api.appointments.getAll();
       const now = new Date(); // Get current date and time
@@ -130,7 +139,7 @@ export function Agenda() {
       });
       setEvents(calendarEvents);
     } catch (error) {
-      console.error('Error al cargar las citas:', error);
+      console.error('Error al cargar las citas en Agenda:', error);
     }
   };
 

@@ -3,6 +3,7 @@ import { Ruler, Plus, Calendar } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
@@ -43,6 +44,7 @@ const initialFormData: FormData = {
 export function Somatometry() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [records, setRecords] = useState<SomatometryRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,12 +56,21 @@ export function Somatometry() {
     if (!selectedPatient) {
       return;
     }
-    fetchRecords();
-  }, [selectedPatient]);
+    if (!authLoading && user) {
+      fetchRecords();
+    }
+  }, [selectedPatient, user, authLoading]);
 
   const fetchRecords = async () => {
     if (!selectedPatient) return;
+    if (!user) {
+      setError('Usuario no autenticado');
+      setLoading(false);
+      return;
+    }
     
+    setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('somatometry_records')
@@ -71,7 +82,7 @@ export function Somatometry() {
       setRecords(data || []);
     } catch (err) {
       console.error('Error fetching somatometry records:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los registros');
+      setError(err instanceof Error ? err.message : 'Error al cargar los registros de somatometría. Por favor, intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -179,13 +190,21 @@ export function Somatometry() {
 
       {error && (
         <div 
-          className="mb-4 p-4 rounded-md"
+          className="mb-4 p-4 rounded-md border-l-4"
           style={{
             background: '#FEE2E2',
+            borderLeftColor: '#DC2626',
             color: '#DC2626',
           }}
         >
-          {error}
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <Ruler className="h-5 w-5" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -239,14 +258,14 @@ export function Somatometry() {
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-              {loading ? (
+              {(loading || authLoading) ? (
                 <tr>
                   <td 
                     colSpan={6} 
                     className="px-6 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
-                    Cargando registros...
+                    {authLoading ? 'Autenticando...' : 'Cargando registros...'}
                   </td>
                 </tr>
               ) : records.length === 0 ? (

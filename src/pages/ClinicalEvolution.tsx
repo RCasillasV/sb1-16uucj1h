@@ -3,6 +3,7 @@ import { Activity } from 'lucide-react';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
 import { RichTextEditor } from '../components/RichTextEditor';
@@ -13,6 +14,7 @@ import clsx from 'clsx';
 export function ClinicalEvolution() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -26,13 +28,21 @@ export function ClinicalEvolution() {
       setShowWarningModal(true);
       return;
     }
-    fetchEvolution();
-  }, [selectedPatient]);
+    if (!authLoading && user) {
+      fetchEvolution();
+    }
+  }, [selectedPatient, user, authLoading]);
 
   const fetchEvolution = async () => {
     if (!selectedPatient) return;
+    if (!user) {
+      setError('Usuario no autenticado');
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
+    setError(null);
     try {
       const data = await api.clinicalEvolution.getByPatientId(selectedPatient.id);
       const sortedEvolutions = data.sort((a, b) => 
@@ -41,7 +51,7 @@ export function ClinicalEvolution() {
       setEvolutions(sortedEvolutions);
     } catch (err) {
       console.error('Error fetching clinical evolution:', err);
-      setError('Error al cargar la evolución clínica');
+      setError(err instanceof Error ? err.message : 'Error al cargar la evolución clínica. Por favor, intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -138,8 +148,23 @@ export function ClinicalEvolution() {
         }}
       >
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
-            {error}
+          <div 
+            className="mb-4 p-4 rounded-md border-l-4"
+            style={{
+              background: '#FEE2E2',
+              borderLeftColor: '#DC2626',
+              color: '#DC2626',
+            }}
+          >
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Activity className="h-5 w-5" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </div>
+          </div>
           </div>
         )}
 
