@@ -523,7 +523,7 @@ export function CitasPage() {
                     {form.watch('sintomas_asociados')
                       ?.filter(
                         (id) =>
-                         !dynamicSymptoms.some(sintoma => sintomas.sintoma === id),
+                         !dynamicSymptoms.some(sintoma => sintoma.sintoma === id),
                       )
                       .map((customTag) => (
                         <div
