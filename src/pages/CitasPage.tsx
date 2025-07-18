@@ -66,10 +66,31 @@ export function CitasPage() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Initialize form first, before any useEffect hooks that depend on it
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      tipo_consulta: 'primera',
+      motivo: '',
+      tiempo_evolucion: '',
+      unidad_tiempo: 'dias',
+      sintomas_asociados: [],
+      fecha_cita: format(new Date(), 'yyyy-MM-dd'), // Will be updated below
+      hora_cita: '09:00', // Will be updated below
+      consultorio: 1,
+      urgente: false,
+      mismo_motivo: false,
+      notas: '',
+      duracion_minutos: 30,
+      hora_fin: '',
+    },
+  });
+
   const [dynamicSymptoms, setDynamicSymptoms] = useState<Symptom[]>([]);
   const [isLoadingSymptoms, setIsLoadingSymptoms] = useState(false);
   const [symptomsError, setSymptomsError] = useState<string | null>(null);
-  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [customSymptom, setCustomSymptom] = useState('');
@@ -98,6 +119,12 @@ export function CitasPage() {
   const initialTime = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'HH:mm')
     : '09:00';
+
+  // Update form defaults based on navigation state
+  React.useEffect(() => {
+    form.setValue('fecha_cita', initialDate);
+    form.setValue('hora_cita', initialTime);
+  }, [form, initialDate, initialTime]);
 
   // useEffect para cargar datos de cita en modo edición
   useEffect(() => {
@@ -148,25 +175,6 @@ export function CitasPage() {
     
     loadAppointment();
   }, [navigationState?.editMode, navigationState?.appointmentId, form, setSelectedPatient]);
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      tipo_consulta: 'primera',
-      motivo: '',
-      tiempo_evolucion: '',
-      unidad_tiempo: 'dias',
-      sintomas_asociados: [],
-      fecha_cita: initialDate,
-      hora_cita: initialTime,
-      consultorio: 1,
-      urgente: false,
-      mismo_motivo: false,
-      notas: '',
-      duracion_minutos: 30, // Default duration
-      hora_fin: '', // Will be calculated
-    },
-  });
 
   // Effect to check for previous appointments
   useEffect(() => {
