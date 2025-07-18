@@ -13,6 +13,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Modal } from '../../components/Modal';
 import { PatientListSelector } from '../../components/PatientListSelector';
+import { AlertModal } from '../../components/AlertModal';
 import { useNavigate, Link } from 'react-router-dom';
 import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
@@ -583,21 +584,13 @@ export function Agenda() {
       </Modal>
 
       {/* Nuevo Modal para advertencia de slot pasado */}
-      <Modal
+      <AlertModal
         isOpen={showPastSlotWarningModal}
         onClose={() => setShowPastSlotWarningModal(false)}
+        type="warning"
         title="Horario no disponible"
-        actions={
-          <button
-            className={clsx(buttonClasses.base, buttonClasses.primary)}
-            onClick={() => setShowPastSlotWarningModal(false)}
-          >
-            Entendido
-          </button>
-        }
-      >
-        <p>Por favor, seleccione un día y horario futuro para continuar con la reserva.</p>
-      </Modal>
+        message="Por favor, seleccione un día y horario futuro para continuar con la reserva."
+      />
 
       {/* Contador de inactividad */}
       {isCountingDown && (
