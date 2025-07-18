@@ -1,3 +1,5 @@
+// src/modules/agenda/Agenda.tsx
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -42,6 +44,9 @@ export function Agenda() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const calendarWrapperRef = useRef<HTMLDivElement>(null);
   const { buttonClasses } = useStyles();
+
+  // Nuevo estado para el modal de advertencia de slot pasado
+  const [showPastSlotWarningModal, setShowPastSlotWarningModal] = useState(false);
 
   // Configurar el timer de inactividad
   const handleAppReload = () => {
@@ -167,6 +172,16 @@ export function Agenda() {
       setShowPatientSelectionModal(true);
       setTempSelectedDate(selectInfo.start);
       return;
+    }
+
+    // NUEVA LÓGICA: Verificar si el slot seleccionado está en el pasado
+    const selectedSlotDateTime = new Date(selectInfo.start);
+    const now = new Date();
+
+    if (selectedSlotDateTime < now) {
+      // Si el slot seleccionado está en el pasado, mostrar un modal de advertencia
+      setShowPastSlotWarningModal(true);
+      return; // No navegar
     }
 
     navigate('/citas', {
@@ -565,6 +580,23 @@ export function Agenda() {
             )}
           </div>
         )}
+      </Modal>
+
+      {/* Nuevo Modal para advertencia de slot pasado */}
+      <Modal
+        isOpen={showPastSlotWarningModal}
+        onClose={() => setShowPastSlotWarningModal(false)}
+        title="Horario no disponible"
+        actions={
+          <button
+            className={clsx(buttonClasses.base, buttonClasses.primary)}
+            onClick={() => setShowPastSlotWarningModal(false)}
+          >
+            Entendido
+          </button>
+        }
+      >
+        <p>No es posible agendar citas en el pasado. Por favor, seleccione un horario futuro.</p>
       </Modal>
 
       {/* Contador de inactividad */}
