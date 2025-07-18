@@ -15,7 +15,8 @@ import clsx from 'clsx';
  
 // Interface for symptom objects
 interface Symptom {
-  nombre: string;
+  sintoma: string; // Cambiado de 'nombre' a 'sintoma'
+  frecuencia: number; // Añadida la propiedad 'frecuencia'
 }
 
 // Function to generate time slots
