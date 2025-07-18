@@ -718,10 +718,11 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                   className={clsx(buttonStyle.base, 'disabled:opacity-50')}
                   style={buttonStyle.primary}
                 >
-                  {loading ? 'Guardando...' : navigationState?.editMode ? 'Actualizar' : 'Agendar'}
+                  {loading ? 'Guardando...' : editingAppointment ? 'Actualizar' : 'Agendar'}
                 </button>
               </div>
             </form>
+            )
           )}
 
           {/* Modal de error de fecha/hora */}

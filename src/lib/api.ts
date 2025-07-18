@@ -629,6 +629,53 @@ export const api = {
       return data || [];
     },
 
+    async getById(id: string) {
+      const { data, error } = await supabase
+        .from('tcCitas')
+        .select(`
+          id,
+          created_at,
+          updated_at,
+          id_paciente,
+          fecha_cita,
+          hora_cita,
+          motivo,
+          estado,
+          notas,
+          urgente,
+          consultorio,
+          sintomas,
+          documentos,
+          tipo_consulta,
+          tiempo_evolucion,
+          unidad_tiempo,
+          sintomas_asociados,
+          campos_adicionales,
+          id_user,
+          hora_fin,
+          duracion_minutos,
+          patients:id_paciente (
+            id,
+            Nombre,
+            Paterno,
+            Materno,
+            FechaNacimiento,
+            Sexo,
+            Email,
+            Telefono
+          )
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching appointment by ID:', error);
+        throw error;
+      }
+
+      return data;
+    },
+
     async create(appointment: Tables['tcCitas']['Insert']) { // Changed from 'appointments' to 'tcCitas'
       if (!validateAppointmentDateTime(appointment.fecha_cita as string, appointment.hora_cita as string)) {
         throw new Error('Cannot create appointments in the past');
