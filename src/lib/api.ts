@@ -679,6 +679,31 @@ export const api = {
       return data;
     },
 
+    async getByDateAndConsultorio(fecha: string, consultorio: number) {
+      const { data, error } = await supabase
+        .from('tcCitas')
+        .select(`
+          id,
+          fecha_cita,
+          hora_cita,
+          hora_fin,
+          duracion_minutos,
+          consultorio,
+          estado
+        `)
+        .eq('fecha_cita', fecha)
+        .eq('consultorio', consultorio)
+        .neq('estado', 'cancelada')
+        .order('hora_cita', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching appointments by date and consultorio:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+
     async create(appointment: Tables['tcCitas']['Insert']) { // Changed from 'appointments' to 'tcCitas'
       if (!validateAppointmentDateTime(appointment.fecha_cita as string, appointment.hora_cita as string)) {
         throw new Error('Cannot create appointments in the past');

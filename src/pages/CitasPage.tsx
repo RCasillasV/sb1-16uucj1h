@@ -98,6 +98,10 @@ export function CitasPage() {
   const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
   const [showPhoneModal, setShowPhoneModal] = useState(false); // Nuevo estado para el modal de teléfono
 
+  // Estado para citas en la fecha seleccionada
+  const [appointmentsOnSelectedDate, setAppointmentsOnSelectedDate] = useState<any[]>([]);
+  const [loadingAvailableSlots, setLoadingAvailableSlots] = useState(false);
+
   // Estado para edición de citas
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const [loadingAppointment, setLoadingAppointment] = useState(false);
@@ -238,6 +242,58 @@ export function CitasPage() {
     }
   }, [form.watch('fecha_cita'), form.watch('hora_cita'), form.watch('duracion_minutos')]);
 
+  // Effect to fetch appointments for selected date and consultorio
+  useEffect(() => {
+    const fetchAppointmentsForDate = async () => {
+      const fecha = form.watch('fecha_cita');
+      const consultorio = form.watch('consultorio');
+      
+      if (!fecha || !consultorio) return;
+      
+      setLoadingAvailableSlots(true);
+      try {
+        const appointments = await api.appointments.getByDateAndConsultorio(fecha, consultorio);
+        setAppointmentsOnSelectedDate(appointments);
+      } catch (error) {
+        console.error('Error fetching appointments for date:', error);
+        setAppointmentsOnSelectedDate([]);
+      } finally {
+        setLoadingAvailableSlots(false);
+      }
+    };
+
+    fetchAppointmentsForDate();
+  }, [form.watch('fecha_cita'), form.watch('consultorio')]);
+
+  // Function to check if a time slot is available
+  const isTimeSlotAvailable = (timeSlot: string, duration: number): boolean => {
+    const slotStart = new Date(`2000-01-01T${timeSlot}:00`);
+    const slotEnd = addMinutes(slotStart, duration);
+    
+    return !appointmentsOnSelectedDate.some(appointment => {
+      // Skip the appointment being edited
+      if (editingAppointment && appointment.id === editingAppointment.id) {
+        return false;
+      }
+      
+      const appointmentStart = new Date(`2000-01-01T${appointment.hora_cita}`);
+      const appointmentEnd = appointment.hora_fin 
+        ? new Date(`2000-01-01T${appointment.hora_fin}`)
+        : addMinutes(appointmentStart, appointment.duracion_minutos || 30);
+      
+      // Check for overlap
+      return (slotStart < appointmentEnd && slotEnd > appointmentStart);
+    });
+  };
+
+  // Get available time slots based on current form values
+  const getAvailableTimeSlots = (): string[] => {
+    const duration = form.watch('duracion_minutos') || 30;
+    return HORARIOS_CONSULTA.filter(timeSlot => isTimeSlotAvailable(timeSlot, duration));
+  };
+
+  const availableTimeSlots = getAvailableTimeSlots();
+
 
   const onSubmit = async (data: FormData) => {
     if (!selectedPatient) return;
@@ -248,6 +304,14 @@ export function CitasPage() {
     
     if (selectedDateTime <= now) {
       setShowDateTimeErrorModal(true);
+      return;
+    }
+    
+    // Validar que el horario seleccionado sigue siendo válido
+    if (!isTimeSlotAvailable(data.hora_cita, data.duracion_minutos)) {
+      form.setError('hora_cita', { 
+        message: 'El horario seleccionado ya no está disponible. Por favor, seleccione otro horario.' 
+      });
       return;
     }
     
