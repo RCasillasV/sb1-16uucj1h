@@ -276,27 +276,32 @@ export function CitasPage() {
         return false;
       }
       
-      const appointmentStart = new Date(`2000-01-01T${appointment.hora_cita}`);
-      const appointmentEnd = appointment.hora_fin 
-        ? new Date(`2000-01-01T${appointment.hora_fin}`)
+      // Formatear hora_cita y hora_fin a HH:MM antes de usarlas
+      const formattedAppointmentHoraCita = appointment.hora_cita.substring(0, 5);
+      const appointmentStart = new Date(`2000-01-01T${formattedAppointmentHoraCita}`);
+
+      let formattedAppointmentHoraFin = appointment.hora_fin;
+      if (formattedAppointmentHoraFin) {
+        formattedAppointmentHoraFin = formattedAppointmentHoraFin.substring(0, 5);
+      }
+      const appointmentEnd = formattedAppointmentHoraFin
+        ? new Date(`2000-01-01T${formattedAppointmentHoraFin}`)
         : addMinutes(appointmentStart, appointment.duracion_minutos || 30);
 
-   // Debugging logs for overlap logic
-      console.log('--- Checking Slot ---'); // <-- AÑADIR ESTOS LOGS
-      console.log('Slot:', timeSlot, 'Duration:', duration);
-      console.log('Slot Start:', slotStart.toISOString());
-      console.log('Slot End:', slotEnd.toISOString());
-      console.log('Appointment:', appointment.motivo, 'ID:', appointment.id);
-      console.log('Appointment Start:', appointmentStart.toISOString());
-      console.log('Appointment End:', appointmentEnd.toISOString());
+      // Logs de depuración adicionales
+      console.log('Raw appointment.hora_cita:', appointment.hora_cita);
+      console.log('Formatted appointment.hora_cita:', formattedAppointmentHoraCita);
+      console.log('Raw appointment.hora_fin:', appointment.hora_fin);
+      console.log('Formatted appointment.hora_fin:', formattedAppointmentHoraFin);
+      console.log('Is appointmentStart valid Date?', !isNaN(appointmentStart.getTime()));
+      console.log('Is appointmentEnd valid Date?', !isNaN(appointmentEnd.getTime()));
+
       const overlaps = (slotStart < appointmentEnd && slotEnd > appointmentStart);
       console.log('Overlaps:', overlaps);
       console.log('---------------------');
 
-
-      
       // Check for overlap
-      return (slotStart < appointmentEnd && slotEnd > appointmentStart);
+      return overlaps;
     });
   };
 
