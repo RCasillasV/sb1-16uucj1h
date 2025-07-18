@@ -802,13 +802,10 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
           {/* Modal de error de fecha/hora */}
           <Modal
             isOpen={showDateTimeErrorModal}
-      console.log('CitasPage: useEffect - navigationState:', navigationState);
             onClose={() => setShowDateTimeErrorModal(false)}
             title="Fecha y Hora No Válidas"
-        console.log('CitasPage: Fetching appointment with ID:', navigationState.appointmentId);
             actions={
               <button
-          console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
                 onClick={() => setShowDateTimeErrorModal(false)}
                 className={buttonStyle.base}
                 style={buttonStyle.primary}
@@ -841,10 +838,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
         title="Teléfono del Paciente"
         actions={
           <button
-            console.log('CitasPage: Form values after reset:', form.getValues());
             onClick={() => setShowPhoneModal(false)}
             className={buttonStyle.base}
-          console.error('CitasPage: Error loading appointment for editing:', err);
             style={buttonStyle.primary} 
           >
             Cerrar
