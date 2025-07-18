@@ -204,7 +204,7 @@ export function CitasPage() {
   }, [selectedPatient, form, editingAppointment]);
 
   // Effect to calculate hora_fin
-  useEffect(() => {
+  useEffect(() => { 
     const { fecha_cita, hora_cita, duracion_minutos } = form.getValues();
     if (fecha_cita && hora_cita && duracion_minutos) {
       try {
@@ -353,7 +353,7 @@ export function CitasPage() {
   } finally {
     setIsLoadingSymptoms(false);
   }
-}; 
+};
     
     fetchSymptoms();
   }, [selectedPatient]);
