@@ -489,19 +489,19 @@ export function CitasPage() {
                       <p style={{ color: '#DC2626' }}>{symptomsError}</p>
                     ) : (
                       dynamicSymptoms.map(sintoma => {
-                        const isSelected = form.watch('sintomas_asociados').includes(sintomas.sintoma);
+                        const isSelected = form.watch('sintomas_asociados').includes(sintoma.sintoma);
                         return (
                           <button
-                            key={sintomas.sintoma} 
+                            key={sintoma.sintoma} 
                             type="button"
                             onClick={() => {
                               const current = form.getValues('sintomas_asociados');
                               if (isSelected) {
                                 form.setValue('sintomas_asociados', 
-                                  current.filter(s => s !== sintomas.sintoma)
+                                  current.filter(s => s !== sintoma.sintoma)
                                 );
                               } else {
-                                form.setValue('sintomas_asociados', [...current, sintomas.sintoma]);
+                                form.setValue('sintomas_asociados', [...current, sintoma.sintoma]);
                               }
                             }}
                             className={clsx(
@@ -513,7 +513,7 @@ export function CitasPage() {
                               color: isSelected ? '#fff' : currentTheme.colors.text,
                             }}
                           >
-                            {sintomas.sintoma}
+                            {sintoma.sintoma}
                           </button>
                         ); 
                       })
