@@ -597,7 +597,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="date"
                       {...form.register('fecha_cita')}
-                      className="w-full p-2 rounded-md border"
+                      className="w-full p-2 rounded-md border text-xs"
                       style={{
                         background: currentTheme.colors.surface,
                         borderColor: currentTheme.colors.border,
