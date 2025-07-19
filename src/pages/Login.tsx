@@ -147,11 +147,7 @@ export function Login() {
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ color: currentTheme.colors.text }}>
      {/* Fondo dinámico */}
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.5 }}>
-        <source src="/assets/      {/* Fondo dinámico */}
-      <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.5 }}>
-        <source src="/assets/istockphoto-1483562425-640_adpp_is.mp4" type="video/mp4" />
-      </video>
-" type="video/mp4" />
+        <source src="/assets/7199220-uhd_1440_2560_25fps.mp4" type="video/mp4" />
       </video>
 
     
