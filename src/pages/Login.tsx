@@ -145,13 +145,14 @@ export function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ color: currentTheme.colors.text }}>
-    
-      <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent backdrop-blur-sm" />
-      <div className="w-full max-w-md p-8 rounded-lg shadow-xl relative backdrop-blur-md" style={{ background: currentTheme.colors.surface }}>
-      {/* Fondo dinámico */}
+     {/* Fondo dinámico */}
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.5 }}>
         <source src="/assets/istockphoto-1483562425-640_adpp_is.mp4" type="video/mp4" />
       </video>
+
+    
+      <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent backdrop-blur-sm" />
+      <div className="w-full max-w-md p-8 rounded-lg shadow-xl relative backdrop-blur-md" style={{ background: currentTheme.colors.surface }}>
         {/* Encabezado de marca o logo */}
         <div className="flex flex-col items-center mb-6">
            {<img src="/assets/images/Logo.png" alt="Logo" className="h-10 mb-2" /> }
