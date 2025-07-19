@@ -156,7 +156,6 @@ export function MainHeader({
                   />
                 </>
               )}
-              { (
               {selectedPatient.Refiere && (
                 <>
                   <Separator />
