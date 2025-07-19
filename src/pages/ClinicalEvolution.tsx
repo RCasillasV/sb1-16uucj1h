@@ -165,7 +165,6 @@ export function ClinicalEvolution() {
               </div>
             </div>
           </div>
-          </div>
         )}
 
         <form onSubmit={handleSubmit} className="mb-8">
