@@ -157,7 +157,7 @@ export function MainHeader({
                 </>
               )}
               { (
-              {selectedPatient.Refiere && ( // Añade este bloque
+              {selectedPatient.Refiere && (
                 <>
                   <Separator />
                   <InfoItem icon={User} text={`Refiere: ${selectedPatient.Refiere}`} />
