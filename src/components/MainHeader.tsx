@@ -152,7 +152,7 @@ export function MainHeader({
                   <Separator />
                   <InfoItem 
                     icon={Calendar} 
-                    text={`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Sin citas programadas'}`}
+                    text={`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Ninguna'}`}
                   />
                 </>
               )}
