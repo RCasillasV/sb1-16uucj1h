@@ -256,7 +256,7 @@ export function Login() {
                 type="email"
                 id="email"
                 {...register('email', {
-                  onChange: () => errors.email && setFormError('email', undefined)
+                  onChange: () => errors.email && clearErrors('email')
                 })}
                 className={clsx(
                   'w-full pl-10 pr-4 py-2 rounded-md border transition-colors',
