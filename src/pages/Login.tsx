@@ -8,7 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import clsx from 'clsx';
 
-// --- Custom InputField component ---
+// --- Componente reutilizable para campos de entrada ---
 function InputField({
   icon, type, id, placeholder, error, register, showToggle, showPassword, onToggleShowPassword
 }) {
@@ -37,7 +37,7 @@ function InputField({
   );
 }
 
-// --- Custom hook for temporary messages ---
+// --- Hook para mensajes temporales ---
 function useTemporaryMessage(message, duration = 10000) {
   const [msg, setMsg] = useState(message);
   useEffect(() => {
@@ -50,7 +50,7 @@ function useTemporaryMessage(message, duration = 10000) {
   return [msg, setMsg];
 }
 
-// --- Zod schema and types ---
+// --- Esquema de validación con Zod ---
 const loginSchema = z.object({
   email: z.string()
     .min(5, 'El correo debe tener al menos 5 caracteres')
@@ -68,7 +68,6 @@ const loginSchema = z.object({
 });
 type LoginFormData = z.infer<typeof loginSchema>;
 
-// --- Main Login component ---
 export function Login() {
   const { currentTheme } = useTheme();
   const navigate = useNavigate();
@@ -76,7 +75,7 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
-  const [lockoutUntil, setLockoutUntil] = useState(null);
+  const [lockoutUntil, setLockoutUntil] = useState<Date | null>(null);
 
   // Mensaje de éxito temporal
   const [successMessage, setSuccessMessage] = useTemporaryMessage(location.state?.message);
@@ -87,14 +86,14 @@ export function Login() {
     formState: { errors },
     setError,
     clearErrors,
-  } = useForm({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { rememberMe: false },
     mode: 'onChange',
   });
 
   // Handler de login
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: LoginFormData) => {
     if (lockoutUntil && new Date() < lockoutUntil) {
       const timeLeft = Math.ceil((lockoutUntil.getTime() - Date.now()) / 1000);
       setError('email', { type: 'locked', message: `Cuenta bloqueada. Intente nuevamente en ${timeLeft} segundos` });
@@ -152,10 +151,22 @@ export function Login() {
       </video>
       <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent backdrop-blur-sm" />
       <div className="w-full max-w-md p-8 rounded-lg shadow-xl relative backdrop-blur-md" style={{ background: currentTheme.colors.surface }}>
-        <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: currentTheme.colors.primary }}>Iniciar Sesión</h2>
+        {/* Encabezado de marca o logo */}
+        <div className="flex flex-col items-center mb-6">
+          {/* <img src="/logo.png" alt="Logo" className="h-12 mb-2" /> */}
+          <h1 className="text-3xl font-bold mb-2" style={{ color: currentTheme.colors.primary }}>
+            DoctorSoft
+          </h1>
+          <h2 className="text-xl font-semibold" style={{ color: currentTheme.colors.text }}>
+            Iniciar Sesión
+          </h2>
+          <p className="text-sm mt-1 text-gray-500">Bienvenido, ingrese sus credenciales para continuar</p>
+        </div>
+        {/* Mensaje de éxito */}
         {successMessage && (
           <div className="mb-4 text-green-700 bg-green-100 rounded p-2 text-center">{successMessage}</div>
         )}
+        {/* Formulario */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <InputField
             icon={<Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: currentTheme.colors.textSecondary }} />}
