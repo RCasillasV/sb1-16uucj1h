@@ -660,7 +660,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="number"
                       {...form.register('tiempo_evolucion')}
-                      disabled={isViewOnlyMode}
+                      //disabled={isViewOnlyMode}
                       placeholder="Ej: 2"
                       className="w-full p-2 rounded-md border"
                       style={{
@@ -719,7 +719,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                           <button
                             key={sintoma.sintoma} // CAMBIO: sintoma.sintoma
                             type="button"
-                            disabled={isViewOnlyMode}
+                            //disabled={isViewOnlyMode}
                             onClick={() => {
                               const current = form.getValues('sintomas_asociados');
                               if (isSelected) {
@@ -761,7 +761,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                           <button
                             type="button"
                             className="ml-1 text-white hover:text-slate-200"
-                            disabled={isViewOnlyMode}
+                            //disabled={isViewOnlyMode}
                             onClick={() => {
                               form.setValue('sintomas_asociados', form.getValues('sintomas_asociados')?.filter((id) => id !== customTag));
                             }}
@@ -821,7 +821,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="date"
                       {...form.register('fecha_cita')}
-                      disabled={isViewOnlyMode}
+                      //disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -914,7 +914,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('consultorio', { valueAsNumber: true })}
-                      disabled={isViewOnlyMode}
+                      //disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -938,7 +938,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('duracion_minutos', { valueAsNumber: true })}
-                      disabled={isViewOnlyMode}
+                      //disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -966,7 +966,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                       type="text"
                       {...form.register('hora_fin')}
                       readOnly
-                      disabled={isViewOnlyMode}
+                      //disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border bg-gray-100 cursor-not-allowed"
                       style={{
                         background: currentTheme.colors.background,
