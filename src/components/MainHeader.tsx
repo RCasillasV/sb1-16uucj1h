@@ -156,6 +156,21 @@ export function MainHeader({
                   />
                 </>
               )}
+              { (
+  <>
+    <Separator />
+    <InfoItem
+      icon={Calendar}
+      text={`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Sin citas programadas'}`}
+    />
+  </>
+)}
+{selectedPatient.Refiere && ( // Añade este bloque
+  <>
+    <Separator />
+    <InfoItem icon={User} text={`Refiere: ${selectedPatient.Refiere}`} />
+  </>
+)}
             </div>
           </div>
         </div>
