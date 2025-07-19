@@ -660,8 +660,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="number"
                       {...form.register('tiempo_evolucion')}
-                      disabled={isViewOnlyMode}
                       placeholder="Ej: 2"
+                      disabled={isViewOnlyMode}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -981,9 +981,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
-                  required 
-                  /*disabled={isViewOnlyMode}
-                  placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"*/
+                  onClick={() => navigate('/agenda/agenda')}
+                  disabled={isViewOnlyMode}
                   className={clsx(buttonStyle.base, 'border')}
                   style={{
                     background: 'transparent',
