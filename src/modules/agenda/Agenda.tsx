@@ -413,6 +413,7 @@ export function Agenda() {
                   }
                   .fc .fc-timegrid-slot {
                     height: 3rem !important;
+                    touch-action: manipulation;
                   }
                   .fc .fc-timegrid-axis {
                     width: 70px !important;
