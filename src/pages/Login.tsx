@@ -18,7 +18,7 @@ const loginSchema = z.object({
     .email('Ingrese un correo electrónico válido')
     .min(1, 'El correo electrónico es requerido'),
   password: z.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')F
     .max(50, 'La contraseña no debe exceder 50 caracteres')
     .regex(/[A-Z]/, 'La contraseña debe contener al menos una mayúscula')
     .regex(/[a-z]/, 'La contraseña debe contener al menos una minúscula')
@@ -199,7 +199,7 @@ export function Login() {
       <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent backdrop-blur-sm" />
 
       <div 
-        className="w-full max-w-md p-8 rounded-lg shadow-xl relative backdrop-blur-md"
+        className="w-full max-w-md p-8 mt-[-50px] rounded-lg shadow-xl relative backdrop-blur-md"
         style={{ 
           background: `${currentTheme.colors.surface}CC`,
           borderColor: currentTheme.colors.border,
