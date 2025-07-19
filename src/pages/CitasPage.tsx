@@ -638,7 +638,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                   <input
                     type="text"
                     {...form.register('motivo')}
-                    //required placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"
+                    disabled={isViewOnlyMode} 
+                    required placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"
                     className="w-full p-2 rounded-md border"
                     style={{
                       background: currentTheme.colors.surface,
