@@ -153,7 +153,7 @@ export function Login() {
       <div className="w-full max-w-md p-8 rounded-lg shadow-xl relative backdrop-blur-md" style={{ background: currentTheme.colors.surface }}>
         {/* Encabezado de marca o logo */}
         <div className="flex flex-col items-center mb-6">
-          {<img src="/logo.png" alt="Logo" className="h-12 mb-2" /> }
+          {<img src="../logo.png" alt="Logo" className="h-12 mb-2" /> }
           <h1 className="text-3xl font-bold mb-2" style={{ color: currentTheme.colors.primary }}>
             DoctorSoft
           </h1>
