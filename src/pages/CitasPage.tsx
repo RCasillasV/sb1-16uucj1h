@@ -553,7 +553,6 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
           <div className="flex items-center gap-3">
             <Calendar className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
             <div>
-                  disabled={isViewOnlyMode}
               <h1 
                 className="text-2xl font-bold"
                 style={{ color: currentTheme.colors.text }}
