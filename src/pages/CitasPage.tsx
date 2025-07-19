@@ -659,8 +659,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     <input
                       type="number"
                       {...form.register('tiempo_evolucion')}
-                      placeholder="Ej: 2"
                       disabled={isViewOnlyMode}
+                      placeholder="Ej: 2"
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
