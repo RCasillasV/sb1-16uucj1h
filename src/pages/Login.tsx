@@ -18,7 +18,7 @@ const loginSchema = z.object({
     .email('Ingrese un correo electrónico válido')
     .min(1, 'El correo electrónico es requerido'),
   password: z.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')F
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
     .max(50, 'La contraseña no debe exceder 50 caracteres')
     .regex(/[A-Z]/, 'La contraseña debe contener al menos una mayúscula')
     .regex(/[a-z]/, 'La contraseña debe contener al menos una minúscula')
