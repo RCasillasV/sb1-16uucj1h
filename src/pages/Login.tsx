@@ -147,7 +147,7 @@ export function Login() {
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ color: currentTheme.colors.text }}>
       {/* Fondo dinámico */}
       <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.1 }}>
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-white-abstract-flowing-background-1748-large.mp4" type="video/mp4" />
+        <source src="/assets/istockphoto-1483562425-640_adpp_is.mp4" type="video/mp4" />
       </video>
       <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent backdrop-blur-sm" />
       <div className="w-full max-w-md p-8 rounded-lg shadow-xl relative backdrop-blur-md" style={{ background: currentTheme.colors.surface }}>
