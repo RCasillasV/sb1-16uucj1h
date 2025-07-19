@@ -173,7 +173,6 @@ export function Prescriptions() {
               </div>
             </div>
           </div>
-          </div>
         )}
 
         {/* Active Prescription Area */}
