@@ -982,8 +982,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 <button
                   type="button"
                   required 
-                  disabled={isViewOnlyMode}
-                  placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"
+                  /*disabled={isViewOnlyMode}
+                  placeholder="Ej: Dolor de cabeza, Fiebre, Malestar general"*/
                   className={clsx(buttonStyle.base, 'border')}
                   style={{
                     background: 'transparent',
