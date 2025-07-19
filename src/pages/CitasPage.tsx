@@ -531,7 +531,7 @@ export function CitasPage() {
   }
 
 console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms); 
-                  disabled={isViewOnlyMode}
+                  //disabled={isViewOnlyMode}
 
 
   return (  
