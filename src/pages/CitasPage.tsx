@@ -982,7 +982,6 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 <button
                   type="button"
                   onClick={() => navigate('/agenda/agenda')}
-                  disabled={isViewOnlyMode}
                   className={clsx(buttonStyle.base, 'border')}
                   style={{
                     background: 'transparent',
