@@ -1,4 +1,3 @@
-```tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User } from 'lucide-react';
