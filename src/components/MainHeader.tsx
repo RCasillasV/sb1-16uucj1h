@@ -1,14 +1,11 @@
-```tsx
-import React from 'react';
+import React from 'react'; 
 import { Link } from 'react-router-dom';
-import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User } from 'lucide-react';
+import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { format, parseISO, isValid } from 'date-fns';
-import { calculateAge } from '../utils/dateUtils';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
 import type { Database } from '../types/database.types';
-import { useAuth } from '../../contexts/AuthContext'; // Importar useAuth
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
@@ -49,11 +46,10 @@ export function MainHeader({
   handleEditPatient
 }: MainHeaderProps) {
   const { currentTheme } = useTheme();
-  const { user } = useAuth(); // Obtener el usuario del contexto de autenticación
 
   const getInitials = (patient: typeof selectedPatient) => {
     if (!patient) return '';
-    return \`${patient.Nombre.charAt(0)}${patient.Paterno.charAt(0)}`.toUpperCase();
+    return `${patient.Nombre.charAt(0)}${patient.Paterno.charAt(0)}`.toUpperCase();
   };
 
   const formatPatientInfo = () => {
@@ -146,7 +142,7 @@ export function MainHeader({
                   <Separator />
                   <InfoItem 
                     icon={Clock} 
-                    text={\`Última: ${lastAppointment ? format(lastAppointment.date, "d 'de' MMM", { locale: es }) : 'Sin citas previas'}`}
+                    text={`Última: ${lastAppointment ? format(lastAppointment.date, "d 'de' MMM", { locale: es }) : 'Sin citas previas'}`}
                   />
                 </>
               )}
@@ -155,15 +151,9 @@ export function MainHeader({
                   <Separator />
                   <InfoItem 
                     icon={Calendar} 
-                    text={\`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Ninguna'}`}
+                    text={`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Sin citas programadas'}`}
                   />
                 </>
-              )}
-              {selectedPatient.Refiere && (
-                <>
-                  <Separator />
-                  <InfoItem icon={User} text={\`Refiere: ${selectedPatient.Refiere}`} />
-               </>
               )}
             </div>
           </div>
@@ -185,7 +175,7 @@ export function MainHeader({
               className="absolute right-0 mt-1 py-1 w-32 rounded-md shadow-lg z-10"
               style={{ 
                 background: currentTheme.colors.surface,
-                border: \`1px solid ${currentTheme.colors.border}`,
+                border: `1px solid ${currentTheme.colors.border}`,
               }}
             >
               <button
@@ -210,8 +200,7 @@ export function MainHeader({
   };
 
   const renderPatientNavigation = () => {
-    // Solo renderizar si hay un paciente seleccionado Y el rol del usuario NO es 'Recepcionista'
-    if (!selectedPatient || user?.userRole === 'Recepcionista') return null;
+    if (!selectedPatient) return null;
   
     return (
       <div 
@@ -334,4 +323,29 @@ export function MainHeader({
     </div>
   );
 }
-```
+
+// Helper function to calculate age
+function calculateAge(birthDate: string) {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  
+  let years = today.getFullYear() - birth.getFullYear();
+  const months = today.getMonth() - birth.getMonth();
+  
+  if (months < 0 || (months === 0 && today.getDate() < birth.getDate())) {
+    years--;
+  }
+  
+  let formatted = '';
+  if (years < 1) {
+    const monthsAge = months + 12;
+    formatted = `${monthsAge} ${monthsAge === 1 ? 'mes' : 'meses'}`;
+  } else {
+    formatted = `${years} ${years === 1 ? 'año' : 'años'}`;
+  }
+  
+  return {
+    years,
+    formatted
+  };
+}
