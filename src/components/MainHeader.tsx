@@ -1,4 +1,3 @@
-```tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User } from 'lucide-react';
@@ -8,7 +7,6 @@ import { calculateAge } from '../utils/dateUtils';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
 import type { Database } from '../types/database.types';
-import { useAuth } from '../../contexts/AuthContext'; // Importar useAuth
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
@@ -49,11 +47,10 @@ export function MainHeader({
   handleEditPatient
 }: MainHeaderProps) {
   const { currentTheme } = useTheme();
-  const { user } = useAuth(); // Obtener el usuario del contexto de autenticación
 
   const getInitials = (patient: typeof selectedPatient) => {
     if (!patient) return '';
-    return \`${patient.Nombre.charAt(0)}${patient.Paterno.charAt(0)}`.toUpperCase();
+    return `${patient.Nombre.charAt(0)}${patient.Paterno.charAt(0)}`.toUpperCase();
   };
 
   const formatPatientInfo = () => {
@@ -146,7 +143,7 @@ export function MainHeader({
                   <Separator />
                   <InfoItem 
                     icon={Clock} 
-                    text={\`Última: ${lastAppointment ? format(lastAppointment.date, "d 'de' MMM", { locale: es }) : 'Sin citas previas'}`}
+                    text={`Última: ${lastAppointment ? format(lastAppointment.date, "d 'de' MMM", { locale: es }) : 'Sin citas previas'}`}
                   />
                 </>
               )}
@@ -155,14 +152,14 @@ export function MainHeader({
                   <Separator />
                   <InfoItem 
                     icon={Calendar} 
-                    text={\`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Ninguna'}`}
+                    text={`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Ninguna'}`}
                   />
                 </>
               )}
               {selectedPatient.Refiere && (
                 <>
                   <Separator />
-                  <InfoItem icon={User} text={\`Refiere: ${selectedPatient.Refiere}`} />
+                  <InfoItem icon={User} text={`Refiere: ${selectedPatient.Refiere}`} />
                </>
               )}
             </div>
@@ -185,7 +182,7 @@ export function MainHeader({
               className="absolute right-0 mt-1 py-1 w-32 rounded-md shadow-lg z-10"
               style={{ 
                 background: currentTheme.colors.surface,
-                border: \`1px solid ${currentTheme.colors.border}`,
+                border: `1px solid ${currentTheme.colors.border}`,
               }}
             >
               <button
@@ -210,8 +207,7 @@ export function MainHeader({
   };
 
   const renderPatientNavigation = () => {
-    // Solo renderizar si hay un paciente seleccionado Y el rol del usuario NO es 'Recepcionista'
-    if (!selectedPatient || user?.userRole === 'Recepcionista') return null;
+    if (!selectedPatient) return null;
   
     return (
       <div 
@@ -334,4 +330,3 @@ export function MainHeader({
     </div>
   );
 }
-```
