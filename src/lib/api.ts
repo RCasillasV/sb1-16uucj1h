@@ -187,27 +187,42 @@ const processBatchUpdates = async () => {
 };
 
 // Get user's business unit ID
-const getUserBusinessUnit = async (): Promise<string> => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) {
-    throw new Error('No authenticated user found');
-  }
+const getUserBusinessUnit = (() => {
+  let cachedIdbu: string | null = null;
+  let cacheTimestamp: number = 0;
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  
+  return async (): Promise<string> => {
+    // Return cached value if still valid
+    if (cachedIdbu && Date.now() - cacheTimestamp < CACHE_DURATION) {
+      return cachedIdbu;
+    }
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      throw new Error('No authenticated user found');
+    }
 
-  const { data: userData, error } = await supabase.rpc('get_user_idbu', {
-    user_id: session.user.id
-  });
+    const { data: userData, error } = await supabase.rpc('get_user_idbu', {
+      user_id: session.user.id
+    });
 
-  if (error) {
-    console.error('Error fetching user business unit:', error);
-    throw new Error('Could not determine user business unit');
-  }
+    if (error) {
+      console.error('Error fetching user business unit:', error);
+      throw new Error('Could not determine user business unit');
+    }
 
-  if (!userData?.idbu) {
-    throw new Error('User has no assigned business unit');
-  }
+    if (!userData?.idbu) {
+      throw new Error('User has no assigned business unit');
+    }
 
-  return userData.idbu;
-};
+    // Cache the result
+    cachedIdbu = userData.idbu;
+    cacheTimestamp = Date.now();
+    
+    return userData.idbu;
+  };
+})();
 
 export const api = {
   files: {

@@ -62,6 +62,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+// Cache para evitar múltiples llamadas a get_user_idbu
+let cachedUserData: { idbu: string; specialty: string } | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
 export function CitasPage() {
   const { currentTheme } = useTheme();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
@@ -435,6 +440,29 @@ export function CitasPage() {
       setSymptomsError(null);
       
       try {
+        // Verificar cache primero
+        if (cachedUserData && Date.now() - cacheTimestamp < CACHE_DURATION) {
+          console.log('fetchSymptoms: Using cached user data');
+          const specialty = cachedUserData.specialty;
+          
+          const formattedBirthDate = format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd');
+          console.log('fetchSymptoms: Patient Birth Date (formatted):', formattedBirthDate);
+
+          const { data, error } = await supabase.rpc('sintomasconsulta', { 
+            p_fechanac: formattedBirthDate, 
+            p_especialidad: specialty
+          });    
+          
+          if (error) {
+            throw error;
+          }
+          
+          console.log('fetchSymptoms: Data from sintomasconsulta RPC:', data);
+          setDynamicSymptoms(data?.sintomas || []);
+          setIsLoadingSymptoms(false);
+          return;
+        }
+        
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) {
           setSymptomsError('Usuario no autenticado');
@@ -464,6 +492,9 @@ export function CitasPage() {
         }
         console.log('fetchSymptoms: Business Unit Specialty:', specialty);
 
+        // Guardar en cache
+        cachedUserData = { idbu: userData.idbu, specialty };
+        cacheTimestamp = Date.now();
         const formattedBirthDate = format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd');
         console.log('fetchSymptoms: Patient Birth Date (formatted):', formattedBirthDate);
 
