@@ -1,3 +1,4 @@
+```tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User } from 'lucide-react';
@@ -7,6 +8,7 @@ import { calculateAge } from '../utils/dateUtils';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
 import type { Database } from '../types/database.types';
+import { useAuth } from '../../contexts/AuthContext'; // Importar useAuth
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
@@ -47,6 +49,7 @@ export function MainHeader({
   handleEditPatient
 }: MainHeaderProps) {
   const { currentTheme } = useTheme();
+  const { user } = useAuth(); // Obtener el usuario del contexto de autenticación
 
   const getInitials = (patient: typeof selectedPatient) => {
     if (!patient) return '';
@@ -207,7 +210,8 @@ export function MainHeader({
   };
 
   const renderPatientNavigation = () => {
-    if (!selectedPatient) return null;
+    // Solo renderizar si hay un paciente seleccionado Y el rol del usuario NO es 'Recepcionista'
+    if (!selectedPatient || user?.userRole === 'Recepcionista') return null;
   
     return (
       <div 
@@ -330,3 +334,4 @@ export function MainHeader({
     </div>
   );
 }
+```
