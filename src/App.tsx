@@ -1,11 +1,13 @@
 import React, { useEffect, lazy, Suspense, useState } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { PrivateRoute } from './components/PrivateRoute';
 import { AuthProvider } from './contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
 import { initializeSupabase } from './lib/supabase';
+import { AuthApiError } from '@supabase/supabase-js';
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
@@ -41,8 +43,10 @@ const PageLoader = () => {
   );
 };
 
-function App() {
-  //console.log('App component started rendering');
+// Componente interno que tiene acceso a useNavigate y useAuth
+function AppContent() {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [initError, setInitError] = useState<Error | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   
@@ -53,12 +57,34 @@ function App() {
         setIsInitialized(true);
       } catch (error) {
         console.error('Failed to initialize Supabase:', error);
+        
+        // Verificar si es un error de refresh token inválido
+        if (error instanceof AuthApiError && 
+            (error.message.includes('Invalid Refresh Token') || 
+             error.message.includes('Refresh Token Not Found'))) {
+          console.log('Invalid refresh token detected, clearing session and redirecting to login');
+          
+          try {
+            // Limpiar la sesión inválida
+            await signOut();
+          } catch (signOutError) {
+            console.warn('Error during signOut, proceeding with redirect:', signOutError);
+          }
+          
+          // Redirigir al login con mensaje informativo
+          navigate('/login', { 
+            state: { message: 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.' }
+          });
+          return;
+        }
+        
+        // Para otros tipos de errores, mostrar el error genérico
         setInitError(error instanceof Error ? error : new Error('Error de conexión con el servidor'));
       }
     };
     
     init();
-  }, []);
+  }, [navigate, signOut]);
 
   // Show loading state while initializing
   if (!isInitialized && !initError) {
@@ -88,153 +114,160 @@ function App() {
   }
 
   return (
+    <ThemeProvider>
+      <SelectedPatientProvider>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/logout-test" element={<LogoutTestPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="*" element={<Navigate to="/" replace />} />              
+             <Route path="/" element={
+              <PrivateRoute>
+                <Layout>
+                  <Dashboard/>
+                </Layout>
+              </PrivateRoute>
+             } />
+           
+            <Route path="/patients" element={
+              <PrivateRoute>
+                <Layout>
+                  <Patients />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+           <Route path="/appointments" element={
+              <PrivateRoute>
+                <Layout>
+                  <Appointments/>
+                </Layout>
+              </PrivateRoute>
+            } />
+ 
+            
+            <Route path="/cie10" element={
+              <PrivateRoute>
+                <Layout>
+                  <CIE10 />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/citas" element={
+              <PrivateRoute>
+                <Layout>
+                  <CitasPage />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/calendar" element={
+              <PrivateRoute>
+                <Layout>
+                  <Calendar />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/agenda/agenda" element={
+              <PrivateRoute>
+                <Layout>
+                  <Agenda />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/clinical-history" element={
+              <PrivateRoute>
+                <Layout>
+                  <ClinicalHistory />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/clinical-evolution" element={
+              <PrivateRoute>
+                <Layout>
+                  <ClinicalEvolution />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/prescriptions" element={
+              <PrivateRoute>
+                <Layout>
+                  <Prescriptions />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/somatometry" element={
+              <PrivateRoute>
+                <Layout>
+                  <Somatometry />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/patient-files" element={
+              <PrivateRoute>
+                <Layout>
+                  <PatientFilesPage />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/clinica" element={
+              <PrivateRoute>
+                <Layout>
+                  <BusinessUnits />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/users" element={
+              <PrivateRoute>
+                <Layout>
+                  <Users />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/insurance" element={
+              <PrivateRoute>
+                <Layout>
+                  <InsuranceManagement />
+                </Layout>
+              </PrivateRoute>
+            } />
+            
+            <Route path="/settings" element={
+              <PrivateRoute>
+                <Layout>
+                  <Settings />
+                </Layout>
+              </PrivateRoute>
+            } />  
+
+          </Routes>
+        </Suspense>
+      </SelectedPatientProvider>
+    </ThemeProvider>
+  );
+}
+
+function App() {
+  //console.log('App component started rendering');
+
+  return (
     <Router>
-
       <AuthProvider>
-        <ThemeProvider>
-          <SelectedPatientProvider>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/logout-test" element={<LogoutTestPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="*" element={<Navigate to="/" replace />} />              
-                 <Route path="/" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Dashboard/>
-                    </Layout>
-                  </PrivateRoute>
-                 } />
-               
-                <Route path="/patients" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Patients />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-               <Route path="/appointments" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Appointments/>
-                    </Layout>
-                  </PrivateRoute>
-                } />
-     
-                
-                <Route path="/cie10" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <CIE10 />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/citas" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <CitasPage />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/calendar" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Calendar />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/agenda/agenda" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Agenda />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/clinical-history" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <ClinicalHistory />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/clinical-evolution" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <ClinicalEvolution />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/prescriptions" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Prescriptions />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/somatometry" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Somatometry />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/patient-files" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <PatientFilesPage />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/clinica" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <BusinessUnits />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/users" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Users />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/insurance" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <InsuranceManagement />
-                    </Layout>
-                  </PrivateRoute>
-                } />
-                
-                <Route path="/settings" element={
-                  <PrivateRoute>
-                    <Layout>
-                      <Settings />
-                    </Layout>
-                  </PrivateRoute>
-                } />  
-
-              </Routes>
-            </Suspense>
-          </SelectedPatientProvider>
-        </ThemeProvider>
+        <AppContent />
       </AuthProvider>
     </Router>
   );
