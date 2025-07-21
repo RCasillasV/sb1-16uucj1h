@@ -13,6 +13,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Cache para el rol del usuario
+let cachedUserRole: { userId: string; role: string | null; timestamp: number } | null = null;
+const ROLE_CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   //console.log('AuthProvider component rendering'); // Añadir esta línea
   const [user, setUser] = useState<UserWithRole | null>(null);
@@ -21,6 +25,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to fetch user role from tcUsuarios
   const fetchUserRole = async (userId: string): Promise<string | null> => {
+    // Verificar caché primero
+    if (cachedUserRole && 
+        cachedUserRole.userId === userId && 
+        Date.now() - cachedUserRole.timestamp < ROLE_CACHE_DURATION) {
+      console.log('AuthContext: Using cached user role:', cachedUserRole.role);
+      return cachedUserRole.role;
+    }
+
     try {
       const { data, error } = await supabase
         .from('tcUsuarios')
@@ -34,7 +46,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         // console.log('Rol del usuario:', data.rol); // Añadir esta línea
       }
-      return data?.rol || null;
+      
+      const role = data?.rol || null;
+      
+      // Guardar en caché
+      cachedUserRole = {
+        userId,
+        role,
+        timestamp: Date.now()
+      };
+      
+      console.log('AuthContext: Fetched and cached user role:', role);
+      return role;
     } catch (error) {
       console.error('Unexpected error fetching user role:', error);
       return null;
