@@ -1,4 +1,3 @@
-```tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User } from 'lucide-react';
@@ -53,7 +52,7 @@ export function MainHeader({
 
   const getInitials = (patient: typeof selectedPatient) => {
     if (!patient) return '';
-    return \`${patient.Nombre.charAt(0)}${patient.Paterno.charAt(0)}`.toUpperCase();
+    return `${patient.Nombre.charAt(0)}${patient.Paterno.charAt(0)}`.toUpperCase();
   };
 
   const formatPatientInfo = () => {
