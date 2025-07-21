@@ -39,6 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     business_unit: { Nombre: string } | null 
   }>({ 
     authId: '', 
+    nombre: '',
     idbu: null,
     business_unit: null
   });
@@ -75,7 +76,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           console.error('Error fetching user data:', rpcError);          
           setUserInfo({
             authId: session.user.id,
-            nombre:null,
+            nombre: '',
             idbu: null,
             business_unit: null
           });
@@ -92,6 +93,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         console.error('Error in fetchUserInfo:', error);
         setUserInfo({
           authId: '',
+          nombre: '',
           idbu: null,
           business_unit: null
         });
