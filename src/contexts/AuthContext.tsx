@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Crea una promesa que se rechaza después de un tiempo de espera
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Supabase query timed out')), 10000) // 10 segundos de tiempo de espera
+        setTimeout(() => reject(new Error('Supabase query timed out')), 30000) // 30 segundos de tiempo de espera
       );
 
       // Compite la consulta de Supabase contra el tiempo de espera
