@@ -36,20 +36,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       console.log('Attempting to fetch role from tcUsuarios table for userId:', userId);
-      const { data, error } = await supabase
-        .from('tcUsuarios')
-        .select('rol')
-        .eq('idusuario', userId)
-        .limit(1);
+
+      // Crea una promesa que se rechaza después de un tiempo de espera
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Supabase query timed out')), 5000) // 5 segundos de tiempo de espera
+      );
+
+      // Compite la consulta de Supabase contra el tiempo de espera
+      const { data, error } = await Promise.race([
+        supabase.from('tcUsuarios').select('rol').eq('idusuario', userId).limit(1),
+        timeoutPromise
+      ]);
+
+      console.log('Supabase query for user role completed.'); // Este log debería aparecer si la promesa se resuelve
 
       if (error) {
         console.error('Error fetching user role from tcUsuarios:', error);
+        if (error.details) console.error('Error details:', error.details);
+        if (error.hint) console.error('Error hint:', error.hint);
+        if (error.code) console.error('Error code:', error.code);
         return null;
-      } else {
-        console.log('Rol del usuario fetched successfully:', data.rol);
       }
       
-      const role = data?.rol || null;
+      // Si no se encontraron datos (ej. por RLS o usuario no existente)
+      if (!data || data.length === 0) {
+        console.warn('No user role found for userId:', userId, 'or RLS prevented access.');
+        return null;
+      }
+
+      const role = data[0].rol || null; // Accede al primer elemento del array
+      console.log('Rol del usuario fetched successfully:', role);
       
       // Guardar en caché
       cachedUserRole = {
@@ -61,7 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthContext: Fetched and cached user role:', role);
       return role;
     } catch (error) {
-      console.error('Unexpected error in fetchUserRole:', error);
+      console.error('Unexpected error in fetchUserRole catch block:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
       return null;
     }
   };
@@ -101,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error during supabase.auth.getSession() in checkSessionAndSetUser:', error);
         setUser(null);
       } finally {
+        console.log('checkSessionAndSetUser finally block entered.');
         console.log('setLoading(false) executed in checkSessionAndSetUser finally block.');
         setLoading(false);
       }
@@ -129,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Auth state change: Error in auth state change handler:', error);
         setUser(null);
       } finally {
+        console.log('onAuthStateChange finally block entered.');
         console.log('Auth state change: setLoading(false) executed in finally block.');
         setLoading(false);
       }
