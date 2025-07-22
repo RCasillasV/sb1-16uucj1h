@@ -18,7 +18,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
-/*
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
@@ -85,7 +85,6 @@ export async function initializeSupabase(retries = 3, delay = 1000) {
   // Throw an error after all retries fail to ensure proper error handling
   throw new Error(`Failed to initialize Supabase after ${retries} attempts. Please check your connection and credentials.`);
 }
-*/
 // ... (después de las comprobaciones de variables de entorno: if (!supabaseUrl || !supabaseKey) { ... })
 
 // Implementación del patrón Singleton para el cliente Supabase
