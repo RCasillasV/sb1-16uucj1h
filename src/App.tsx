@@ -6,8 +6,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
-import { supabase } from './lib/supabase';
-import { AuthApiError } from '@supabase/supabase-js';
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
@@ -46,59 +44,22 @@ const PageLoader = () => {
 // Componente interno que tiene acceso a useNavigate y useAuth
 function AppContent() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, loading: authLoading, user } = useAuth();
   const [initError, setInitError] = useState<Error | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
   
+  // El AuthProvider se encarga de toda la lógica de inicialización
+  // Solo mantenemos este useEffect para logging opcional
   useEffect(() => {
-    const init = async () => {
-      try {
-        // Verificación directa de la sesión de Supabase
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Si no hay error, la inicialización es exitosa (incluso si no hay sesión activa)
-        console.log('✅ Supabase session check successful:', session);
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Failed to get Supabase session:', error);
-        
-        // Verificar si es un error de refresh token inválido
-        if (error instanceof AuthApiError && 
-            (error.message.includes('Invalid Refresh Token') || 
-             error.message.includes('Refresh Token Not Found'))) {
-          console.log('Invalid refresh token detected, clearing session and redirecting to login');
-          
-          try {
-            // Limpiar la sesión inválida
-            await signOut();
-          } catch (signOutError) {
-            console.warn('Error during signOut, proceeding with redirect:', signOutError);
-          }
-          
-          // Redirigir al login con mensaje informativo
-          navigate('/login', { 
-            state: { message: 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.' }
-          });
-          return;
-        }
-        
-        // Para otros tipos de errores, mostrar el error genérico
-        setInitError(error instanceof Error ? error : new Error('Error de conexión con el servidor'));
-      }
-    };
-    
-    init();
-  }, [navigate, signOut]);
+    console.log('AppContent: authLoading =', authLoading, ', user =', user ? 'exists' : 'null');
+  }, [authLoading, user]);
 
-  // Show loading state while initializing
-  if (!isInitialized && !initError) {
+  // Muestra el cargador mientras AuthProvider está inicializando
+  if (authLoading) {
+    console.log('AppContent: Showing PageLoader because authLoading =', authLoading);
     return <PageLoader />;
   }
 
+  // Si hay un error de inicialización
   if (initError) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
@@ -121,6 +82,7 @@ function AppContent() {
     );
   }
 
+  console.log('AppContent: Rendering main application content');
   return (
     <ThemeProvider>
       <SelectedPatientProvider>
