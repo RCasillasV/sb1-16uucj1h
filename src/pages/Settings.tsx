@@ -78,11 +78,11 @@ export function Settings() {
   const settingsCards = [
     {
       icon: Palette,
-      title: 'Personalización',
+      title: 'Apariencia',
       description: 'Seleccionar el tema, colores, tamaño de letra y estilo de botones',
       onClick: () => {
-        setActivePath(['Configuración', 'Personalización']);
-        setActiveSection('personalization');
+        setActivePath(['Configuración', 'Apariencia']);
+        setActiveSection('apariencia');
       }
     },
     {
