@@ -18,7 +18,7 @@ let cachedUserRole: { userId: string; role: string | null; timestamp: number } |
 const ROLE_CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  //console.log('AuthProvider component rendering'); // Añadir esta línea
+  console.log('AuthProvider component rendering'); // Añadir esta línea
   const [user, setUser] = useState<UserWithRole | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching user role:', error);
         return null;
       } else {
-        // console.log('Rol del usuario:', data.rol); // Añadir esta línea
+         console.log('Rol del usuario:', data.rol); // Añadir esta línea
       }
       
       const role = data?.rol || null;
@@ -67,9 +67,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active sessions and set the user with role
     const checkSessionAndSetUser = async () => {
-      //console.log('checkSessionAndSetUser called');
+      console.log('checkSessionAndSetUser called');
       try {
-        //console.log('Calling supabase.auth.getSession()');
+        console.log('Calling supabase.auth.getSession()');
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error getting session:', error);
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         //console.log('Session data received:', session);
         
         if (session?.user) {
-          // console.log('Session user exists:', session.user);
+          console.log('Session user exists:', session.user);
           try {
             const userRole = await fetchUserRole(session.user.id);
             //console.log('User role fetched:', userRole);
@@ -100,14 +100,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       } finally {
         setLoading(false);
-        //console.log('setLoading(false) executed in checkSessionAndSetUser finally block.');
+        console.log('setLoading(false) executed in checkSessionAndSetUser finally block.');
       }
     };
     checkSessionAndSetUser();
 
     // Listen for changes on auth state (sign in, sign out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      //console.log('Auth state changed:', _event, 'Session:', session);
+      console.log('Auth state changed:', _event, 'Session:', session);
       try {
         if (session?.user) {
           try {
