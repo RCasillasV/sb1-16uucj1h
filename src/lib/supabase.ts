@@ -77,7 +77,7 @@ export async function initializeSupabase(retries = 3, delay = 1000) {
       await new Promise(resolve => setTimeout(resolve, delay));
     } catch (error) {
       console.error(`❌ Initialization attempt ${i + 1}/${retries} failed:`, error);
-      if (i === retries - 1) return false;
+      if (i === retries - 1) throw error;
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
