@@ -6,7 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
-import { initializeSupabase } from './lib/supabase';
+import { supabase } from './lib/supabase';
 import { AuthApiError } from '@supabase/supabase-js';
 
 // Lazy load pages
@@ -53,10 +53,18 @@ function AppContent() {
   useEffect(() => {
     const init = async () => {
       try {
-        await initializeSupabase();
+        // Verificación directa de la sesión de Supabase
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Si no hay error, la inicialización es exitosa (incluso si no hay sesión activa)
+        console.log('✅ Supabase session check successful:', session);
         setIsInitialized(true);
       } catch (error) {
-        console.error('Failed to initialize Supabase:', error);
+        console.error('Failed to get Supabase session:', error);
         
         // Verificar si es un error de refresh token inválido
         if (error instanceof AuthApiError && 

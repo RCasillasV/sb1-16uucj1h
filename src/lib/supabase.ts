@@ -60,31 +60,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   },
 });
 */
-// Initialize the connection and verify access with retry mechanism
-export async function initializeSupabase(retries = 3, delay = 1000) {
-  console.log(`Initializing Supabase connection to ${supabaseUrl}...`);
-  for (let i = 0; i < retries; i++) {
-    try {
-      //Simple health check to verify connection
-      const { data, error } = await supabase.auth.getSession();
- 
-      if (!error) {
-        console.log('✅ Supabase initialized successfully', data);
-        return true;
-      }
-
-      console.warn(`⚠️ Initialization attempt ${i + 1}/${retries} failed:`, error.message);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    } catch (error) {
-      console.error(`❌ Initialization attempt ${i + 1}/${retries} failed:`, error);
-      if (i === retries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-  
-  // Throw an error after all retries fail to ensure proper error handling
-  throw new Error(`Failed to initialize Supabase after ${retries} attempts. Please check your connection and credentials.`);
-}
 // ... (después de las comprobaciones de variables de entorno: if (!supabaseUrl || !supabaseKey) { ... })
 
 // Implementación del patrón Singleton para el cliente Supabase
