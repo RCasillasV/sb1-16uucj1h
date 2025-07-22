@@ -88,7 +88,7 @@ export function Settings() {
     {
       icon: Building2,
       title: 'Cuenta y Organización',
-      description: 'Datos de la clinica, usuarios, roles y subscripción a DoctorSoft',
+      description: 'Gestiona lod datos de la clinica, usuarios, roles y subscripción a DoctorSoft',
       onClick: () => {
         setActivePath(['Configuración', 'Cuenta y Organización']);
         navigate('/clinica');
@@ -135,8 +135,8 @@ export function Settings() {
     },
     {
       icon: Calendar,
-      title: 'Agenda y Módulos',
-      description: 'Configuración general de la agenda y los módulos de DoctorSoft.',
+      title: 'Agenda y Consultorios',
+      description: 'Configuración general de la agenda y los consultorios de DoctorSoft.',
       onClick: () => setActivePath(['Configuración', 'Sistema'])
     },
     {
