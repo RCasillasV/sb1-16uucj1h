@@ -25,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to fetch user role from tcUsuarios
   const fetchUserRole = async (userId: string): Promise<string | null> => {
+    console.log('fetchUserRole called for userId:', userId);
     // Verificar caché primero
     if (cachedUserRole && 
         cachedUserRole.userId === userId && 
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      console.log('Attempting to fetch role from tcUsuarios table for userId:', userId);
       const { data, error } = await supabase
         .from('tcUsuarios')
         .select('rol')
@@ -41,10 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error fetching user role:', error);
+        console.error('Error fetching user role from tcUsuarios:', error);
         return null;
       } else {
-         console.log('Rol del usuario:', data.rol); // Añadir esta línea
+        console.log('Rol del usuario fetched successfully:', data.rol);
       }
       
       const role = data?.rol || null;
@@ -59,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthContext: Fetched and cached user role:', role);
       return role;
     } catch (error) {
-      console.error('Unexpected error fetching user role:', error);
+      console.error('Unexpected error in fetchUserRole:', error);
       return null;
     }
   };
@@ -82,25 +84,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         //console.log('Session data received:', session);
         
         if (session?.user) {
-          console.log('Session user exists:', session.user);
+          console.log('Session user exists:', session.user.id);
           try {
             const userRole = await fetchUserRole(session.user.id);
-            //console.log('User role fetched:', userRole);
+            console.log('User role obtained from checkSessionAndSetUser:', userRole);
             setUser({ ...session.user, userRole });
           } catch (roleError) {
-            console.error('Error fetching user role:', roleError);
+            console.error('Error fetching user role in checkSessionAndSetUser:', roleError);
             setUser(session.user);
           }
         } else {
-          console.log('No session user found.');
+          console.log('No session user found in checkSessionAndSetUser.');
           setUser(null);
         }
       } catch (error) {
-        console.error('Error during supabase.auth.getSession():', error); 
+        console.error('Error during supabase.auth.getSession() in checkSessionAndSetUser:', error);
         setUser(null);
       } finally {
-        setLoading(false);
         console.log('setLoading(false) executed in checkSessionAndSetUser finally block.');
+        setLoading(false);
       }
     };
     checkSessionAndSetUser();
@@ -110,20 +112,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Auth state changed:', _event, 'Session:', session);
       try {
         if (session?.user) {
+          console.log('Auth state change: Session user exists:', session.user.id);
           try {
             const userRole = await fetchUserRole(session.user.id);
+            console.log('Auth state change: User role obtained:', userRole);
             setUser({ ...session.user, userRole });
           } catch (roleError) {
-            console.error('Error fetching user role on auth change:', roleError);
+            console.error('Auth state change: Error fetching user role:', roleError);
             setUser(session.user);
           }
         } else {
+          console.log('Auth state change: No session user found.');
           setUser(null);
         }
       } catch (error) {
-        console.error('Error in auth state change:', error);
+        console.error('Auth state change: Error in auth state change handler:', error);
         setUser(null);
       } finally {
+        console.log('Auth state change: setLoading(false) executed in finally block.');
         setLoading(false);
       }
     });
