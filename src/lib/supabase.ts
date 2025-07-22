@@ -57,14 +57,14 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
 
 // Initialize the connection and verify access with retry mechanism
 export async function initializeSupabase(retries = 3, delay = 1000) {
-  //console.log(`Initializing Supabase connection to ${supabaseUrl}...`);
+  console.log(`Initializing Supabase connection to ${supabaseUrl}...`);
   for (let i = 0; i < retries; i++) {
     try {
-      // Simple health check to verify connection
+      //Simple health check to verify connection
       const { data, error } = await supabase.auth.getSession();
  
       if (!error) {
-        //console.log('✅ Supabase initialized successfully', data);
+        console.log('✅ Supabase initialized successfully', data);
         return true;
       }
 
