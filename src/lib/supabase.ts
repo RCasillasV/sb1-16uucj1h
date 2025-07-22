@@ -85,3 +85,65 @@ export async function initializeSupabase(retries = 3, delay = 1000) {
   // Throw an error after all retries fail to ensure proper error handling
   throw new Error(`Failed to initialize Supabase after ${retries} attempts. Please check your connection and credentials.`);
 }
+*/
+// ... (después de las comprobaciones de variables de entorno: if (!supabaseUrl || !supabaseKey) { ... })
+
+// Implementación del patrón Singleton para el cliente Supabase
+let supabaseClient: ReturnType<typeof createClient>;
+
+// Comprueba si estamos en modo de desarrollo (import.meta.env.DEV)
+// Y si ya existe una instancia del cliente Supabase en el objeto 'window'
+if (import.meta.env.DEV && window._supabaseClient) {
+  // Si es así, reutiliza esa instancia existente
+  supabaseClient = window._supabaseClient;
+} else {
+  // Si no estamos en desarrollo o no hay una instancia existente, crea un nuevo cliente
+  supabaseClient = createClient<Database>(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: {
+        getItem: (key) => {
+          try {
+            return localStorage.getItem(key);
+          } catch (error) {
+            console.error('Error accessing localStorage:', error);
+            return null;
+          }
+        },
+        setItem: (key, value) => {
+          try {
+            localStorage.setItem(key, value);
+          } catch (error) {
+            console.error('Error setting localStorage:', error);
+          }
+        },
+        removeItem: (key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch (error) {
+            console.error('Error removing from localStorage:', error);
+          }
+        }
+      },
+      storageKey: 'supabase.auth.session',
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 2,
+      },
+    },
+    global: {
+      headers: { 'x-application-name': 'doctorsoft' },
+    },
+  });
+
+  // Si estamos en desarrollo, guarda la nueva instancia del cliente en el objeto 'window'
+  if (import.meta.env.DEV) {
+    window._supabaseClient = supabaseClient;
+  }
+}
+
+// Exporta la instancia del cliente Supabase (ya sea la nueva o la reutilizada)
+export const supabase = supabaseClient;
