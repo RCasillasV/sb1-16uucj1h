@@ -222,7 +222,7 @@ export function Settings() {
         </div>
       </div>
 
-      {activeSection === 'personalization' ? (
+      {activeSection === 'apariencia' ? (
         <div className="space-y-8">
           {/* Themes */}
           <div 
