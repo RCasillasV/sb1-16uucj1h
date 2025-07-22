@@ -95,6 +95,12 @@ export function Settings() {
       }
     },
     {
+      icon:Users, 
+      title: 'Usuarios',
+      description: 'Administra los usuarios, roles y permisos del sistema',
+      onClick: () => navigate('/users')
+    },
+    {
       icon: NotebookTabs,
       title: 'Catálogos Medicos',
       description: 'Personaliza los diagnósticos frecuentes, tratamientos, medicamentos y aseguradoras',
@@ -103,7 +109,7 @@ export function Settings() {
     {
       icon: Folders,
       title: 'Catálogos Generales',
-      description: 'Configura los catálogos comunes, CIE-10 y NOM 0024',
+      description: 'Configura los catálogos de diagnósticos (CIE-10) y sintomas recurrentes ',
       onClick: () => {
         setActivePath(['Configuración', 'Catálogos Generales']);
         navigate('/cie10');
@@ -120,12 +126,6 @@ export function Settings() {
       title: 'Expediente Clinico',
       description: 'Configuración según NOM-004 de las historías clinica',
       onClick: () => setActivePath(['Configuración', 'Expediente Clinico'])
-    },
-    {
-      icon:Users, 
-      title: 'Usuarios',
-      description: 'Administra usuarios y permisos del sistema',
-      onClick: () => navigate('/users')
     },
     {
       icon: Building2,
