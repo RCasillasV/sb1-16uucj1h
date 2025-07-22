@@ -18,7 +18,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
-
+/*
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
@@ -59,7 +59,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
     headers: { 'x-application-name': 'doctorsoft' },
   },
 });
-
+*/
 // Initialize the connection and verify access with retry mechanism
 export async function initializeSupabase(retries = 3, delay = 1000) {
   console.log(`Initializing Supabase connection to ${supabaseUrl}...`);
