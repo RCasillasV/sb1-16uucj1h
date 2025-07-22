@@ -37,31 +37,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Attempting to fetch role from tcUsuarios table for userId:', userId);
 
-      // Crea una promesa que se rechaza después de un tiempo de espera
+      // Crear una promesa que se rechaza después de un tiempo de espera más razonable
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Supabase query timed out')), 30000) // 30 segundos de tiempo de espera
+        setTimeout(() => reject(new Error('Query timeout after 5 seconds')), 5000) // 5 segundos
       );
 
-      // Compite la consulta de Supabase contra el tiempo de espera
+      // Ejecutar la consulta con timeout
       const { data, error } = await Promise.race([
         supabase.from('tcUsuarios').select('rol').eq('idusuario', userId).limit(1),
         timeoutPromise
       ]);
 
-      console.log('Supabase query for user role completed.'); // Este log debería aparecer si la promesa se resuelve
+      console.log('Supabase query for user role completed.');
 
       if (error) {
         console.error('Error fetching user role from tcUsuarios:', error);
         if (error.details) console.error('Error details:', error.details);
         if (error.hint) console.error('Error hint:', error.hint);
         if (error.code) console.error('Error code:', error.code);
-        return null;
+        
+        // Usar rol por defecto en caso de error
+        const defaultRole = 'Medico';
+        console.warn(`Using default role '${defaultRole}' due to query error`);
+        
+        // Guardar rol por defecto en caché temporalmente
+        cachedUserRole = {
+          userId,
+          role: defaultRole,
+          timestamp: Date.now()
+        };
+        
+        return defaultRole;
       }
       
       // Si no se encontraron datos (ej. por RLS o usuario no existente)
       if (!data || data.length === 0) {
         console.warn('No user role found for userId:', userId, 'or RLS prevented access.');
-        return null;
+        
+        // Usar rol por defecto cuando no se encuentran datos
+        const defaultRole = 'Medico';
+        console.warn(`Using default role '${defaultRole}' as no role found`);
+        
+        // Guardar rol por defecto en caché
+        cachedUserRole = {
+          userId,
+          role: defaultRole,
+          timestamp: Date.now()
+        };
+        
+        return defaultRole;
       }
 
       const role = data[0].rol || null; // Accede al primer elemento del array
@@ -70,19 +94,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Guardar en caché
       cachedUserRole = {
         userId,
-        role,
+        role: role || 'Medico', // Usar rol por defecto si es null
         timestamp: Date.now()
       };
       
-      console.log('AuthContext: Fetched and cached user role:', role);
-      return role;
+      console.log('AuthContext: Fetched and cached user role:', role || 'Medico');
+      return role || 'Medico';
     } catch (error) {
       console.error('Unexpected error in fetchUserRole catch block:', error);
       if (error instanceof Error) {
         console.error('Error message:', error.message);
         console.error('Error stack:', error.stack);
       }
-      return null;
+      
+      // En caso de cualquier error inesperado, usar rol por defecto
+      const defaultRole = 'Medico';
+      console.warn(`Using default role '${defaultRole}' due to unexpected error`);
+      
+      // Guardar rol por defecto en caché para evitar reintentos constantes
+      cachedUserRole = {
+        userId,
+        role: defaultRole,
+        timestamp: Date.now()
+      };
+      
+      return defaultRole;
     }
   };
 
