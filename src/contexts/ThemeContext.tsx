@@ -51,7 +51,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Apply font size
-    root.style.setProperty('--app-font-size', `${fontSize}%`);
+    root.style.setProperty('--user-font-size-percentage', String(fontSize));
   }, [currentTheme, fontSize]);
 
   const setTheme = (themeId: ThemeType) => {
