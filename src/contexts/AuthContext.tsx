@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('tcUsuarios')
         .select('rol')
         .eq('idusuario', userId)
-        .single();
+        .limit(1);
 
       if (error) {
         console.error('Error fetching user role from tcUsuarios:', error);
