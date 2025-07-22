@@ -79,7 +79,7 @@ export function Settings() {
     {
       icon: Palette,
       title: 'Apariencia',
-      description: 'Seleccionar el tema, colores, tamaño de letra y estilo de botones',
+      description: 'Personaliza tema, colores, tipografía y estilos visuales del sistema.',
       onClick: () => {
         setActivePath(['Configuración', 'Apariencia']);
         setActiveSection('apariencia');
