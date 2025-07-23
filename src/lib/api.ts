@@ -1086,18 +1086,10 @@ export const api = {
         if (error) {
           console.error('Error fetching user attributes via RPC:', error);
           throw new Error('Could not fetch user attributes.');
-        } else { // Added opening brace for else block
-          const userAttributes = data && data.length > 0 ? data[0] : null;
-          if (userAttributes) {
-            console.log('Nombre del usuario:', userAttributes.nombre); // Corrected variable name
-            console.log('Rol del usuario:', userAttributes.rol); // Corrected variable name
-            cacheUtils.set(cacheKey, userAttributes);
-          }
-          return userAttributes; // Return the fetched attributes
-        }
+        } else {
       } catch (error) {
         console.error('Error in getCurrentUserAttributes:', error);
-        return null; // Return null on error, AuthContext will handle defaults
+        return null;
       }
     }
   }
