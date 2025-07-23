@@ -27,7 +27,7 @@ export function RoleBasedRoute({ children, allowedRoles }: RoleBasedRouteProps) 
   }
 
   if (!user.userRole || !allowedRoles.includes(user.userRole)) {
-      //console.log(`Rol del Usuario ${user.userRole }`);
+      console.log(`Rol del Usuario ${user.userRole }`);
     // User is authenticated but does not have an allowed role, redirect to dashboard
     return <Navigate to="/" replace />;
   }
