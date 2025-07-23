@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { format, startOfDay, subDays } from 'date-fns'; // Import subDays
+import { format, startOfDay, subDays } from 'date-fns';
 import type { Database } from '../types/database.types';
 
 type Tables = Database['public']['Tables'];
@@ -11,7 +11,6 @@ type ClinicalEvolution = Tables['clinical_evolution']['Row'];
 type Prescription = Tables['prescriptions']['Row'];
 type PrescriptionMedication = Tables['prescription_medications']['Row'];
 type Medication = Tables['medications']['Row'];
-
 
 // Cache configuration
 const CACHE_DURATION = 20 * 60 * 1000; // 20 minutos de cache
@@ -119,6 +118,7 @@ const cacheUtils = {
     }
   }
 };
+
 // Performance metrics
 const metrics = {
   appointmentFetchTime: 0,
@@ -135,7 +135,6 @@ let batchUpdateTimeout: NodeJS.Timeout | null = null;
 
 // Validation helpers
 const validateAppointmentDateTime = (dateString: string, timeString: string): boolean => {
-  // Combine date and time to create a complete DateTime
   const appointmentDateTime = new Date(`${dateString}T${timeString}:00`);
   const now = new Date();
   return appointmentDateTime >= now;
@@ -152,11 +151,6 @@ const validateAppointmentOverlap = (appointments: Appointment[], newAppointment:
   });
 };
 
-/*const logValidationError = (error: string) => {
-  metrics.validationErrors.push(`${new Date().toISOString()}: ${error}`);
-  console.error('Validation Error:', error);
-};*/
-
 // Batch processing function
 const processBatchUpdates = async () => {
   if (updateQueue.length === 0) return;
@@ -167,7 +161,7 @@ const processBatchUpdates = async () => {
   try {
     await Promise.all(batch.map(async ({ id, data }) => {
       const { error } = await supabase
-        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+        .from('tcCitas')
         .update(data)
         .eq('id', id);
 
@@ -177,7 +171,6 @@ const processBatchUpdates = async () => {
     metrics.appointmentUpdateTime = performance.now() - startTime;
   } catch (error) {
     console.error('Batch update error:', error);
-    // Re-queue failed updates
     updateQueue.push(...batch);
   }
 
@@ -185,19 +178,6 @@ const processBatchUpdates = async () => {
     batchUpdateTimeout = setTimeout(processBatchUpdates, 1000);
   }
 };
-
-// Get user's business unit ID
-const getUserBusinessUnit = (() => {
-  let cachedIdbu: string | null = null;
-  let cacheTimestamp: number = 0;
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-  
-  // This function is now replaced by api.users.getCurrentUserAttributes
-  // and its usage will be refactored in AuthContext and other components.
-  // Keeping it here for now to avoid breaking existing code until refactor is complete.
-  // It will be removed in a later step.
-  return async (): Promise<string> => { return ''; };
-})(); // This IIFE is now effectively a placeholder
 
 type UserAttributes = {
   idbu: string | null;
@@ -230,9 +210,6 @@ export const api = {
           return [];
         }
 
-        // Filter files that might be related to the patient
-        // Since we don't have a direct patient-file relationship in storage,
-        // we'll return all user files for now
         const files = (data || []).map(file => {
           const { data: { publicUrl } } = supabase.storage
             .from('00000000-default-bucket')
@@ -368,7 +345,7 @@ export const api = {
           deleted_at,
           user_id,
           idbu
-      `)
+        `)
         .eq('id', id)
         .single();
 
@@ -382,20 +359,16 @@ export const api = {
     },
 
     async create(patient: Tables['tcPacientes']['Insert']) {
-      // Get current user session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {
         throw new Error('No authenticated user found');
       }
 
-      // Use the new centralized user attributes function
       const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
       if (!currentUserAttributes?.idbu) {
         throw new Error('User has no assigned business unit (idbu).');
       }
 
-
-      // Ensure user_id is set
       const patientWithUser = {
         ...patient,
         user_id: session.user.id,
@@ -415,26 +388,21 @@ export const api = {
         throw error;
       }
 
-      // Invalidate cache
       cacheUtils.delete('patients:all');
       return data;
     },
 
     async update(id: string, patient: Tables['tcPacientes']['Update']) {
-      // Get current user session to verify ownership
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (!session?.user) {
         throw new Error('No authenticated user found');
       }
 
-      // Use the new centralized user attributes function
       const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
       if (!currentUserAttributes?.idbu) {
         throw new Error('User has no assigned business unit (idbu).');
       }
 
-
-      // Ensure user_id and idbu are set
       const patientWithUser = {
         ...patient,
         user_id: session.user.id,
@@ -453,7 +421,6 @@ export const api = {
         throw error;
       }
 
-      // Invalidate cache
       cacheUtils.invalidatePattern('patients');
       return data;
     },
@@ -469,11 +436,10 @@ export const api = {
         return cached;
       }
 
-      // Calculate date 7 days ago from the start of today
-      const sevenDaysAgo = subDays(startOfDay(new Date()), 7); 
+      const sevenDaysAgo = subDays(startOfDay(new Date()), 7);
 
       const { data, error } = await supabase
-        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+        .from('tcCitas')
         .select(`
           id,
           created_at,
@@ -507,7 +473,7 @@ export const api = {
             Telefono
           )
         `)
-        .gte('fecha_cita', format(sevenDaysAgo, 'yyyy-MM-dd')) // Filter from 7 days ago
+        .gte('fecha_cita', format(sevenDaysAgo, 'yyyy-MM-dd'))
         .order('fecha_cita', { ascending: true })
         .order('hora_cita', { ascending: true });
 
@@ -524,7 +490,7 @@ export const api = {
 
     async getByPatientId(patientId: string) {
       const { data, error } = await supabase
-        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+        .from('tcCitas')
         .select(`
           id,
           created_at,
@@ -558,8 +524,8 @@ export const api = {
             Telefono
           )
         `)
-        .eq('id_paciente', patientId) // Changed from 'patient_id' to 'id_paciente'
-        .order('fecha_cita', { ascending: false }) // Changed from 'appointment_date' to 'fecha_cita'
+        .eq('id_paciente', patientId)
+        .order('fecha_cita', { ascending: false })
         .order('hora_cita', { ascending: false });
 
       if (error) {
@@ -569,9 +535,10 @@ export const api = {
 
       return data || [];
     },
+
     async getUpcoming() {
       const { data, error } = await supabase
-        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+        .from('tcCitas')
         .select(`
           id,
           created_at,
@@ -605,8 +572,8 @@ export const api = {
             Telefono
           )
         `)
-        .gte('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd')) // Filter by date only
-        .eq('estado', 'programada') // Changed from 'status' to 'estado' and 'scheduled' to 'programada'
+        .gte('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd'))
+        .eq('estado', 'programada')
         .order('fecha_cita', { ascending: true })
         .order('hora_cita', { ascending: true });
 
@@ -660,7 +627,6 @@ export const api = {
 
       if (error) {
         console.error('api.appointments.getById: Error fetching appointment by ID:', error);
-        console.error('Error fetching appointment by ID:', error);
         throw error;
       }
 
@@ -693,19 +659,19 @@ export const api = {
       return data || [];
     },
 
-    async create(appointment: Tables['tcCitas']['Insert']) { // Changed from 'appointments' to 'tcCitas'
+    async create(appointment: Tables['tcCitas']['Insert']) {
       if (!validateAppointmentDateTime(appointment.fecha_cita as string, appointment.hora_cita as string)) {
         throw new Error('Cannot create appointments in the past');
       }
 
       const existingAppointments = await this.getAll();
-      if (!validateAppointmentOverlap(existingAppointments, { fecha_cita: appointment.fecha_cita as string, hora_cita: appointment.hora_cita as string })) { // Changed to use fecha_cita and hora_cita
+      if (!validateAppointmentOverlap(existingAppointments, { fecha_cita: appointment.fecha_cita as string, hora_cita: appointment.hora_cita as string })) {
         throw new Error('Appointment time slot is already taken');
       }
 
       const startTime = performance.now();
       const { data, error } = await supabase
-        .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+        .from('tcCitas')
         .insert(appointment)
         .select()
         .single();
@@ -717,28 +683,23 @@ export const api = {
         throw error;
       }
 
-      // Invalidate cache
       cacheUtils.delete('appointments:all');
       return data;
     },
 
-    async update(id: string, appointment: Tables['tcCitas']['Update']) { // Changed from 'appointments' to 'tcCitas'
+    async update(id: string, appointment: Tables['tcCitas']['Update']) {
       if (appointment.fecha_cita && appointment.hora_cita && !validateAppointmentDateTime(appointment.fecha_cita as string, appointment.hora_cita as string)) {
         throw new Error('Cannot update to a past date');
       }
 
-      // Add to batch update queue
       updateQueue.push({ id, data: appointment });
 
-      // Start batch processing if not already started
       if (!batchUpdateTimeout) {
         batchUpdateTimeout = setTimeout(processBatchUpdates, 1000);
       }
 
-      // Invalidate cache
       cacheUtils.delete('appointments:all');
       
-      // Return immediately for better UI responsiveness
       return { id, ...appointment };
     },
 
@@ -777,20 +738,16 @@ export const api = {
     },
 
     async create(clinicalHistory: Tables['clinical_histories']['Insert']) {
-      // Get current user session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {
         throw new Error('No authenticated user found');
       }
 
-      // Use the new centralized user attributes function
       const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
       if (!currentUserAttributes?.idbu) {
         throw new Error('User has no assigned business unit (idbu).');
       }
 
-
-      // Ensure user_id and idbu are set
       const historyWithUser = {
         ...clinicalHistory,
         user_id: session.user.id
@@ -828,20 +785,16 @@ export const api = {
     },
 
     async create(clinicalEvolution: Tables['clinical_evolution']['Insert']) {
-      // Get current user session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {
         throw new Error('No authenticated user found');
       }
 
-      // Use the new centralized user attributes function
       const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
       if (!currentUserAttributes?.idbu) {
         throw new Error('User has no assigned business unit (idbu).');
       }
 
-
-      // Ensure user_id and idbu are set
       const evolutionWithUser = {
         ...clinicalEvolution,
         user_id: session.user.id
@@ -883,15 +836,15 @@ export const api = {
             .from('tcPacientes')
             .select('id', { count: 'exact', head: true }),
           supabase
-            .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+            .from('tcCitas')
             .select('id')
-            .gte('fecha_cita', today.toISOString().split('T')[0]) // Changed from 'appointment_date' to 'fecha_cita'
-            .lt('fecha_cita', new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]), // Changed from 'appointment_date' to 'fecha_cita'
+            .gte('fecha_cita', today.toISOString().split('T')[0])
+            .lt('fecha_cita', new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
           supabase
-            .from('tcCitas') // Changed from 'appointments' to 'tcCitas'
+            .from('tcCitas')
             .select('id')
-            .gt('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd')) // Changed from 'appointment_date' to 'fecha_cita'
-            .eq('estado', 'programada') // Changed from 'status' to 'estado' and 'scheduled' to 'programada'
+            .gt('fecha_cita', format(startOfDay(new Date()), 'yyyy-MM-dd'))
+            .eq('estado', 'programada')
         ]);
 
         const stats = {
@@ -976,12 +929,10 @@ export const api = {
         instructions?: string;
       }>;
     }) {
-      // Get current user session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw new Error('Error al obtener la sesión del usuario');
       if (!session) throw new Error('Debe iniciar sesión para crear recetas');
 
-      // Start a transaction
       const { data: prescriptionData, error: prescriptionError } = await supabase
         .from('prescriptions')
         .insert({
@@ -1000,16 +951,14 @@ export const api = {
         throw prescriptionError;
       }
 
-      // Create medications and prescription medications
       for (const med of prescription.medications) {
-        // First create or find the medication
         const { data: medicationData, error: medicationError } = await supabase
           .from('medications')
           .insert({
             name: med.name,
             presentation: med.presentation,
             concentration: med.concentration,
-            active_compound: med.name, // Simplified for now
+            active_compound: med.name,
             user_id: session.user.id
           })
           .select()
@@ -1020,7 +969,6 @@ export const api = {
           throw medicationError;
         }
 
-        // Create prescription medication entry
         const { error: prescMedError } = await supabase
           .from('prescription_medications')
           .insert({
@@ -1030,7 +978,7 @@ export const api = {
             frequency: med.frequency,
             duration: med.duration,
             total_quantity: med.quantity,
-            administration_route: 'Oral', // Default for now
+            administration_route: 'Oral',
             special_instructions: med.instructions,
             user_id: session.user.id
           });
@@ -1044,6 +992,7 @@ export const api = {
       return prescriptionData;
     }
   },
+
   businessUnits: {
     async getById(idBu: string) {
       try {
@@ -1066,12 +1015,6 @@ export const api = {
   },
 
   users: {
-    /**
-     * Obtiene todos los atributos relevantes del usuario actual.
-     * Utiliza una función RPC de Supabase para mayor seguridad y eficiencia.
-     * @param userId El ID del usuario autenticado.
-     * @returns Un objeto con idbu, nombre, rol, estado y deleted_at del usuario.
-     */
     async getCurrentUserAttributes(userId: string): Promise<UserAttributes | null> {
       const cacheKey = `user_attributes:${userId}`;
       const cached = cacheUtils.get(cacheKey);
@@ -1082,7 +1025,8 @@ export const api = {
 
       try {
         const { data, error } = await supabase.rpc('get_userdata', {});
-        console.log('Atributos de usuario vía RPC:', data); 
+        console.log('Atributos de usuario vía RPC:', data);
+        
         if (error) {
           console.error('Error fetching user attributes via RPC:', error);
           throw new Error('Could not fetch user attributes.');
@@ -1090,15 +1034,19 @@ export const api = {
         
         console.log('Datos de usuario recibidos:', data);
         const userAttributes = data && data.length > 0 ? data[0] : null;
+        
         if (userAttributes) {
+          console.log('Nombre del usuario:', userAttributes.nombre);
+          console.log('Rol del usuario:', userAttributes.rol);
           cacheUtils.set(cacheKey, userAttributes);
           return userAttributes;
         }
+        
         return null;
       } catch (error) {
         console.error('Error in getCurrentUserAttributes:', error);
         return null;
       }
     }
-  };
-}
+  }
+};
