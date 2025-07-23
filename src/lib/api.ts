@@ -1086,12 +1086,19 @@ export const api = {
         if (error) {
           console.error('Error fetching user attributes via RPC:', error);
           throw new Error('Could not fetch user attributes.');
-        } else {
-              } catch (error) {
+        }
+        
+        console.log('Datos de usuario recibidos:', data);
+        const userAttributes = data && data.length > 0 ? data[0] : null;
+        if (userAttributes) {
+          cacheUtils.set(cacheKey, userAttributes);
+          return userAttributes;
+        }
+        return null;
+      } catch (error) {
         console.error('Error in getCurrentUserAttributes:', error);
         return null;
       }
-          }
-      } 
+    }
   };
 }
