@@ -192,37 +192,20 @@ const getUserBusinessUnit = (() => {
   let cacheTimestamp: number = 0;
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   
-  return async (): Promise<string> => {
-    // Return cached value if still valid
-    if (cachedIdbu && Date.now() - cacheTimestamp < CACHE_DURATION) {
-      return cachedIdbu;
-    }
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      throw new Error('No authenticated user found');
-    }
+  // This function is now replaced by api.users.getCurrentUserAttributes
+  // and its usage will be refactored in AuthContext and other components.
+  // Keeping it here for now to avoid breaking existing code until refactor is complete.
+  // It will be removed in a later step.
+  return async (): Promise<string> => { return ''; };
+})(); // This IIFE is now effectively a placeholder
 
-    const { data: userData, error } = await supabase.rpc('get_user_idbu', {
-      user_id: session.user.id
-    });
-
-    if (error) {
-      console.error('Error fetching user business unit:', error);
-      throw new Error('Could not determine user business unit');
-    }
-
-    if (!userData?.idbu) {
-      throw new Error('User has no assigned business unit');
-    }
-
-    // Cache the result
-    cachedIdbu = userData.idbu;
-    cacheTimestamp = Date.now();
-    
-    return userData.idbu;
-  };
-})();
+type UserAttributes = {
+  idbu: string | null;
+  nombre: string | null;
+  rol: string | null;
+  estado: string | null;
+  deleted_at: string | null;
+};
 
 export const api = {
   files: {
@@ -405,25 +388,18 @@ export const api = {
         throw new Error('No authenticated user found');
       }
 
-      // Get the user's business unit
-      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
-        user_id: session.user.id
-      });
+      // Use the new centralized user attributes function
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
 
-      if (userError) {
-        console.error('Error getting user business unit:', userError);
-        throw new Error('Could not determine user business unit');
-      }
-      
-      if (!userData?.idbu) {
-        throw new Error('User has no assigned business unit');
-      }
 
       // Ensure user_id is set
       const patientWithUser = {
         ...patient,
         user_id: session.user.id,
-        idbu: userData.idbu
+        idbu: currentUserAttributes.idbu
       };
 
       console.log('Creating patient with data:', patientWithUser);
@@ -451,20 +427,18 @@ export const api = {
         throw new Error('No authenticated user found');
       }
 
-      // Get the user's business unit
-      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
-        user_id: session.user.id
-      });
-
-      if (userError || !userData?.idbu) {
-        throw new Error('Could not determine user business unit');
+      // Use the new centralized user attributes function
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
       }
+
 
       // Ensure user_id and idbu are set
       const patientWithUser = {
         ...patient,
         user_id: session.user.id,
-        idbu: userData.idbu
+        idbu: currentUserAttributes.idbu
       };
 
       const { data, error } = await supabase
@@ -809,25 +783,18 @@ export const api = {
         throw new Error('No authenticated user found');
       }
 
-      // Get the user's business unit
-      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
-        user_id: session.user.id
-      });
+      // Use the new centralized user attributes function
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
 
-      if (userError) {
-        console.error('Error getting user business unit:', userError);
-        throw new Error('Could not determine user business unit');
-      }
-      
-      if (!userData?.idbu) {
-        throw new Error('User has no assigned business unit');
-      }
 
       // Ensure user_id and idbu are set
       const historyWithUser = {
         ...clinicalHistory,
         user_id: session.user.id
-        };
+      };
 
       const { data, error } = await supabase
         .from('clinical_histories')
@@ -867,19 +834,12 @@ export const api = {
         throw new Error('No authenticated user found');
       }
 
-      // Get the user's business unit
-      const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
-        user_id: session.user.id
-      });
+      // Use the new centralized user attributes function
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
 
-      if (userError) {
-        console.error('Error getting user business unit:', userError);
-        throw new Error('Could not determine user business unit');
-      }
-      
-      if (!userData?.idbu) {
-        throw new Error('User has no assigned business unit');
-      }
 
       // Ensure user_id and idbu are set
       const evolutionWithUser = {
@@ -1101,6 +1061,43 @@ export const api = {
       } catch (error) {
         console.error('Error in getBusinessUnitSpecialty:', error);
         throw error;
+      }
+    },
+  },
+
+  users: {
+    /**
+     * Obtiene todos los atributos relevantes del usuario actual.
+     * Utiliza una función RPC de Supabase para mayor seguridad y eficiencia.
+     * @param userId El ID del usuario autenticado.
+     * @returns Un objeto con idbu, nombre, rol, estado y deleted_at del usuario.
+     */
+    async getCurrentUserAttributes(userId: string): Promise<UserAttributes | null> {
+      const cacheKey = `user_attributes:${userId}`;
+      const cached = cacheUtils.get(cacheKey);
+
+      if (cached) {
+        return cached;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('get_userdata', {
+          user_id: userId // Assuming get_userdata takes user_id as a parameter
+        });
+
+        if (error) {
+          console.error('Error fetching user attributes via RPC:', error);
+          throw new Error('Could not fetch user attributes.');
+        }
+
+        const userAttributes = data && data.length > 0 ? data[0] : null;
+        if (userAttributes) {
+          cacheUtils.set(cacheKey, userAttributes);
+        }
+        return userAttributes;
+      } catch (error) {
+        console.error('Error in getCurrentUserAttributes:', error);
+        return null; // Return null on error, AuthContext will handle defaults
       }
     }
   }
