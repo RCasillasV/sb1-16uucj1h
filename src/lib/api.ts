@@ -1024,10 +1024,12 @@ export const api = {
       }
 
       try {
+        console.log('API: Calling supabase.rpc("get_userdata", {})');
         const { data, error } = await supabase.rpc('get_userdata', {});
         
         if (error) {
           console.error('Error fetching user attributes via RPC:', error);
+          console.log('API: RPC call returned an error.');
           throw new Error('Could not fetch user attributes.');
         }
         
@@ -1041,6 +1043,7 @@ export const api = {
           return userAttributes;
         }
         
+        console.log('API: No user attributes found or data is empty.');
         return null;
       } catch (error) {
         console.error('Error in getCurrentUserAttributes:', error);
