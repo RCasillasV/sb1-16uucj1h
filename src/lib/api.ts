@@ -1025,7 +1025,6 @@ export const api = {
 
       try {
         const { data, error } = await supabase.rpc('get_userdata', {});
-        console.log('Atributos de usuario vía RPC:', data);
         
         if (error) {
           console.error('Error fetching user attributes via RPC:', error);
