@@ -1082,7 +1082,7 @@ export const api = {
 
       try {
         const { data, error } = await supabase.rpc('get_userdata', {
-          user_id: userId // Assuming get_userdata takes user_id as a parameter
+          // No se requieren parámetros para get_userdata
         });
 
         if (error) {
