@@ -1086,8 +1086,10 @@ export const api = {
         if (error) {
           console.error('Error fetching user attributes via RPC:', error);
           throw new Error('Could not fetch user attributes.');
-        }
-
+        } else
+         console.log('Nombre del usuario:', userData.nombre);
+         console.log('Rol del usuario:', userData.rol); 
+      }
         const userAttributes = data && data.length > 0 ? data[0] : null;
         if (userAttributes) {
           cacheUtils.set(cacheKey, userAttributes);
