@@ -1,124 +1,69 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 import type { User, AuthError } from '@supabase/supabase-js';
 
-type UserWithRole = User & { userRole?: string | null };
+type UserWithAttributes = User & {
+  userRole?: string | null;
+  idbu?: string | null;
+  nombre?: string | null;
+  estado?: string | null;
+  deleted_at?: string | null;
+};
 
 interface AuthContextType {
-  user: UserWithRole | null;
+  user: UserWithAttributes | null;
   loading: boolean;
   signOut: () => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Cache para el rol del usuario
-let cachedUserRole: { userId: string; role: string | null; timestamp: number } | null = null;
-const ROLE_CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   console.log('AuthProvider component rendering'); // Añadir esta línea
-  const [user, setUser] = useState<UserWithRole | null>(null);
+  const [user, setUser] = useState<UserWithAttributes | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Function to fetch user role from tcUsuarios
-  const fetchUserRole = async (userId: string): Promise<string | null> => {
-    console.log('fetchUserRole called for userId:', userId);
-    // Verificar caché primero
-    if (cachedUserRole && 
-        cachedUserRole.userId === userId && 
-        Date.now() - cachedUserRole.timestamp < ROLE_CACHE_DURATION) {
-      console.log('AuthContext: Using cached user role:', cachedUserRole.role);
-      return cachedUserRole.role;
-    }
-
+  // Function to fetch user attributes using centralized API
+  const fetchUserAttributes = async (userId: string): Promise<Partial<UserWithAttributes>> => {
+    console.log('fetchUserAttributes called for userId:', userId);
+    
     try {
-      console.log('Attempting to fetch role from tcUsuarios table for userId:', userId);
-
-      // Crear una promesa que se rechaza después de un tiempo de espera más razonable
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Query timeout after 5 seconds')), 5000) // 5 segundos
-      );
-
-      // Ejecutar la consulta con timeout
-      const { data, error } = await Promise.race([
-        supabase.from('tcUsuarios').select('rol').eq('idusuario', userId).limit(1),
-        timeoutPromise
-      ]);
-
-      console.log('Supabase query for user role completed.');
-
-      if (error) {
-        console.error('Error fetching user role from tcUsuarios:', error);
-        if (error.details) console.error('Error details:', error.details);
-        if (error.hint) console.error('Error hint:', error.hint);
-        if (error.code) console.error('Error code:', error.code);
-        
-        // Usar rol por defecto en caso de error
-        const defaultRole = 'Medico';
-        console.warn(`Using default role '${defaultRole}' due to query error`);
-        
-        // Guardar rol por defecto en caché temporalmente
-        cachedUserRole = {
-          userId,
-          role: defaultRole,
-          timestamp: Date.now()
+      // Use centralized API function
+      const userAttributes = await api.users.getCurrentUserAttributes(userId);
+      
+      if (userAttributes) {
+        console.log('AuthContext: Fetched user attributes successfully:', userAttributes);
+        return {
+          idbu: userAttributes.idbu,
+          nombre: userAttributes.nombre,
+          userRole: userAttributes.rol,
+          estado: userAttributes.estado,
+          deleted_at: userAttributes.deleted_at
         };
-        
-        return defaultRole;
       }
       
-      // Si no se encontraron datos (ej. por RLS o usuario no existente)
-      if (!data || data.length === 0) {
-        console.warn('No user role found for userId:', userId, 'or RLS prevented access.');
-        
-        // Usar rol por defecto cuando no se encuentran datos
-        const defaultRole = 'Medico';
-        console.warn(`Using default role '${defaultRole}' as no role found`);
-        
-        // Guardar rol por defecto en caché
-        cachedUserRole = {
-          userId,
-          role: defaultRole,
-          timestamp: Date.now()
-        };
-        
-        return defaultRole;
-      }
-
-      const role = data[0].rol || null; // Accede al primer elemento del array
-      console.log('Rol del usuario fetched successfully:', role);
-      
-      // Guardar en caché
-      cachedUserRole = {
-        userId,
-        role: role || 'Medico', // Usar rol por defecto si es null
-        timestamp: Date.now()
+      // No user attributes found, use defaults
+      console.warn('AuthContext: No user attributes found, using defaults');
+      return {
+        idbu: null,
+        nombre: null,
+        userRole: 'Medico',
+        estado: 'Activo',
+        deleted_at: null
       };
-      
-      console.log('AuthContext: Fetched and cached user role:', role || 'Medico');
-      return role || 'Medico';
     } catch (error) {
-      console.error('Unexpected error in fetchUserRole catch block:', error);
-      if (error instanceof Error) {
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-      }
-      
-      // En caso de cualquier error inesperado, usar rol por defecto
-      const defaultRole = 'Medico';
-      console.warn(`Using default role '${defaultRole}' due to unexpected error`);
-      
-      // Guardar rol por defecto en caché para evitar reintentos constantes
-      cachedUserRole = {
-        userId,
-        role: defaultRole,
-        timestamp: Date.now()
+      console.error('AuthContext: Error in fetchUserAttributes:', error);
+      // Return defaults on error
+      return {
+        idbu: null,
+        nombre: null,
+        userRole: 'Medico',
+        estado: 'Activo',
+        deleted_at: null
       };
-      
-      return defaultRole;
     }
   };
 
@@ -142,11 +87,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           console.log('Session user exists:', session.user.id);
           try {
-            const userRole = await fetchUserRole(session.user.id);
-            console.log('User role obtained from checkSessionAndSetUser:', userRole);
-            setUser({ ...session.user, userRole });
-          } catch (roleError) {
-            console.error('Error fetching user role in checkSessionAndSetUser:', roleError);
+            const userAttributes = await fetchUserAttributes(session.user.id);
+            console.log('User attributes obtained from checkSessionAndSetUser:', userAttributes);
+            setUser({ ...session.user, ...userAttributes });
+          } catch (attrError) {
+            console.error('Error fetching user attributes in checkSessionAndSetUser:', attrError);
             setUser(session.user);
           }
         } else {
@@ -171,11 +116,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           console.log('Auth state change: Session user exists:', session.user.id);
           try {
-            const userRole = await fetchUserRole(session.user.id);
-            console.log('Auth state change: User role obtained:', userRole);
-            setUser({ ...session.user, userRole });
-          } catch (roleError) {
-            console.error('Auth state change: Error fetching user role:', roleError);
+            const userAttributes = await fetchUserAttributes(session.user.id);
+            console.log('Auth state change: User attributes obtained:', userAttributes);
+            setUser({ ...session.user, ...userAttributes });
+          } catch (attrError) {
+            console.error('Auth state change: Error fetching user attributes:', attrError);
             setUser(session.user);
           }
         } else {
