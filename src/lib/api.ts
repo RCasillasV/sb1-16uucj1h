@@ -1087,10 +1087,11 @@ export const api = {
           console.error('Error fetching user attributes via RPC:', error);
           throw new Error('Could not fetch user attributes.');
         } else {
-      } catch (error) {
+              } catch (error) {
         console.error('Error in getCurrentUserAttributes:', error);
         return null;
       }
-    }
-  }
-};
+          }
+      }
+  };
+}
