@@ -90,7 +90,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           authId: session.user.id,
           idbu: userData?.idbu || null,
           nombre: userData?.nombre || null,
-          business_unit: userData?.business_unit || null
+          business_unit: userData?.business_unit || null,
+          rol: null
         });
       } catch (error) {
         console.error('Error in fetchUserInfo:', error);
@@ -98,7 +99,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           authId: '',
           nombre: '',
           idbu: null,
-          business_unit: null
+          business_unit: null,
+          rol: null
         });
       }
     };
