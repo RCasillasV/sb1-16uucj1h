@@ -319,6 +319,9 @@ export function MainHeader({
             Unidad de Negocio:
           </span>
           <span className="font-medium" style={{ color: currentTheme.colors.text }}>
+            {userInfo?.estado || 'No estado'}
+          </span>
+          <span className="font-medium" style={{ color: currentTheme.colors.text }}>
             {userInfo?.idbu || 'No asignada'}
           </span>
         </div>
