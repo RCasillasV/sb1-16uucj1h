@@ -316,10 +316,10 @@ export function MainHeader({
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-            Rol:
+            Estado:
           </span>
           <span className="font-medium" style={{ color: currentTheme.colors.text }}>
-            {userInfo?.rol || 'No identificado'}
+            {userInfo?.estado || 'No estado'}
           </span>
         </div>     
         <div className="flex flex-col gap-1">
