@@ -49,7 +49,7 @@ export function Agenda() {
 
   // Configurar el timer de inactividad
   const handleAppReload = () => {
-    console.log('Recargando aplicación por inactividad...',new date());
+    console.log('Recargando aplicación por inactividad...');
     window.location.reload();
   };
 
