@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return {
         idbu: null,
         nombre: null,
-        userRole: 'Medico',
+        userRole: 'Recepcionista',
         estado: 'Activo',
         deleted_at: null
       };
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return {
         idbu: null,
         nombre: null,
-        userRole: 'Medico',
+        userRole: 'Recepcionista',
         estado: 'Activo',
         deleted_at: null
       };
