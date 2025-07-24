@@ -301,7 +301,7 @@ export function MainHeader({
             Bienvenido : 
           </span>
           <span className="font-mono" style={{ color: currentTheme.colors.text }}>
-            {userinfo.rol|| 'No identificado'}
+            {user.userRol|| 'No identificado'}
           </span>
         </div>
         <div className="flex flex-col gap-1">
