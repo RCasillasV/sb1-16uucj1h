@@ -15,7 +15,7 @@ export function useIdleTimer({
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const clearAllTimers = useCallback(() => {
-    console.log('clearAllTimers: Clearing all timers.'); // Added log
+    console.log('clearAllTimers: Clearing all timers.', new Date()); // Added log
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
       idleTimerRef.current = null;
