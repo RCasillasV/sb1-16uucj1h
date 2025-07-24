@@ -37,6 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     nombre: string;
     idbu: string | null;
     business_unit: { Nombre: string } | null 
+    rol: string | null;
   }>({ 
     authId: '', 
     nombre: '',
