@@ -57,7 +57,7 @@ export function useIdleTimer({
   }, [countdownDurationMs, onTimeout, clearAllTimers]);
 
   const resetTimer = useCallback(() => {
-    console.log('resetTimer: Resetting idle timer.'); // Added log
+    console.log('resetTimer: Resetting idle timer.', new Date()); // Added log
     clearAllTimers();
     setIsCountingDown(false);
     setRemainingTime(0);
