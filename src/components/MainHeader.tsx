@@ -316,10 +316,15 @@ export function MainHeader({
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-            Unidad de Negocio:
+            Rol:
           </span>
           <span className="font-medium" style={{ color: currentTheme.colors.text }}>
-            {userInfo?.estado || 'No estado'}
+            {userInfo?.rol || 'No identificado'}
+          </span>
+        </div>     
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+            Unidad de Negocio:
           </span>
           <span className="font-medium" style={{ color: currentTheme.colors.text }}>
             {userInfo?.idbu || 'No asignada'}
