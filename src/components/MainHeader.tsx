@@ -319,7 +319,7 @@ export function MainHeader({
             Unidad de Negocio:
           </span>
           <span className="font-medium" style={{ color: currentTheme.colors.text }}>
-            {userInfo?.idbu?.Nombre || 'No asignada'}
+            {userInfo?.idbu || 'No asignada'}
           </span>
         </div>
       </div>
