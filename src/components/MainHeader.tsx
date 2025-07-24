@@ -13,8 +13,10 @@ interface MainHeaderProps {
   selectedPatient: Patient | null;
   userInfo: { 
     authId: string; 
+    nombre: string | null;
     idbu: string | null;
-    business_unit: { Nombre: string } | null 
+    business_unit: { Nombre: string } | null;
+    rol: string | null;
   };
   clinicalHistoryCount: number;
   clinicalEvolutionCount: number;
@@ -297,11 +299,19 @@ export function MainHeader({
     return (
       <div className="flex items-center gap-4">
         <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium\" style={{ color: currentTheme.colors.textSecondary }}>
-            Bienvenido : 
+          <span className="text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+            Bienvenido:
           </span>
           <span className="font-mono" style={{ color: currentTheme.colors.text }}>
-            {userInfo?.rol|| 'No identificado'}
+            {userInfo?.nombre || 'No identificado'}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+            Rol:
+          </span>
+          <span className="font-medium" style={{ color: currentTheme.colors.text }}>
+            {userInfo?.rol || 'No identificado'}
           </span>
         </div>
         <div className="flex flex-col gap-1">
@@ -309,7 +319,7 @@ export function MainHeader({
             Unidad de Negocio:
           </span>
           <span className="font-medium" style={{ color: currentTheme.colors.text }}>
-            {userInfo?.idbu || 'No asignada'}
+            {userInfo?.business_unit?.Nombre || 'No asignada'}
           </span>
         </div>
       </div>

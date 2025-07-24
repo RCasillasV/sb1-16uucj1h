@@ -34,15 +34,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [showForm, setShowForm] = useState(false);
   const [userInfo, setUserInfo] = useState<{ 
     authId: string; 
-    nombre: string;
+    nombre: string | null;
     idbu: string | null;
-    business_unit: { Nombre: string } | null; 
+    business_unit: { Nombre: string } | null;
     rol: string | null;
   }>({ 
     authId: '', 
-    nombre: '',
+    nombre: null,
     idbu: null,
     business_unit: null
+    rol: null
   });
 
   useEffect(() => {
@@ -56,57 +57,57 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
+      // Use user data from AuthContext for rol and nombre
+      if (!user?.id) {
+        setUserInfo({
+          authId: '',
+          nombre: null,
+          idbu: null,
+          business_unit: null,
+          rol: null
+        });
+        return;
+      }
+
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          setUserInfo({
-            authId: '',
-            nombre:'',
-            idbu: null,
-            business_unit: null,
-            rol: userData?.rol || null
-          });
-          return;
-        }
-        
+        // Get business unit information from get_user_idbu
         const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu', {
-          user_id: session.user.id
+          user_id: user.id
         });
 
-        // Check for errors from the RPC call
         if (rpcError) {
-          console.error('Error fetching user data:', rpcError);          
+          console.error('Error fetching user business unit:', rpcError);
           setUserInfo({
-            authId: session.user.id,
-            nombre: '',
-            idbu: null,
+            authId: user.id,
+            nombre: user.nombre,
+            idbu: user.idbu,
             business_unit: null,
-            rol: null
+            rol: user.userRole
           });
           return;
         }
 
         setUserInfo({
-          authId: session.user.id,
-          idbu: userData?.idbu || null,
-          nombre: userData?.nombre || null,
+          authId: user.id,
+          nombre: user.nombre,
+          idbu: user.idbu,
           business_unit: userData?.business_unit || null,
-          rol: null
+          rol: user.userRole
         });
       } catch (error) {
         console.error('Error in fetchUserInfo:', error);
         setUserInfo({
-          authId: '',
-          nombre: '',
-          idbu: null,
+          authId: user?.id || '',
+          nombre: user?.nombre || null,
+          idbu: user?.idbu || null,
           business_unit: null,
-          rol: null
+          rol: user?.userRole || null
         });
       }
     };
     
     fetchUserInfo();
-  }, []);
+  }, [user]); // Depend on user from AuthContext
 
   useEffect(() => {
     if (selectedPatient) {
