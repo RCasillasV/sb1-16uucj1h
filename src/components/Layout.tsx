@@ -80,7 +80,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             authId: session.user.id,
             nombre: '',
             idbu: null,
-            business_unit: null
+            business_unit: null,
+            rol: null
           });
           return;
         }
