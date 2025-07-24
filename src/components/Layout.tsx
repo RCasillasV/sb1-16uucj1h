@@ -33,7 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showForm, setShowForm] = useState(false);
   const [userInfo, setUserInfo] = useState<{ 
-    authId: string; 
+    authId: string,
     nombre: string | null;
     idbu: string | null;
     business_unit: { Nombre: string } | null;
