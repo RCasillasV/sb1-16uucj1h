@@ -1,5 +1,3 @@
-// src/modules/agenda/Agenda.tsx
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -56,7 +54,7 @@ export function Agenda() {
   };
 
   const { remainingTime, isCountingDown, resetTimer } = useIdleTimer({
-    idleTimeoutMs: 2 * 60 * 1000, // 14 minutos
+    idleTimeoutMs: 14 * 60 * 1000, // 14 minutos
     countdownDurationMs: 60 * 1000, // 60 segundos
     onTimeout: handleAppReload
   });
