@@ -42,7 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     authId: '', 
     nombre: null,
     idbu: null,
-    business_unit: null
+    business_unit: null,
     rol: null
   });
 
