@@ -63,7 +63,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             authId: '',
             nombre:'',
             idbu: null,
-            business_unit: null
+            business_unit: null,
+            rol: userData?.rol || null
           });
           return;
         }
