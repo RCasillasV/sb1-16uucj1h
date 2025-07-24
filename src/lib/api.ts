@@ -1025,8 +1025,13 @@ export const api = {
 
       try {
         console.log('API: Calling supabase.rpc("get_userdata", {})');
-        const { data, error } = await supabase.rpc('get_userdata', {});
-        
+        const rpcPromise = supabase.rpc('get_userdata', {});
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('RPC call timed out')), 10000) 
+        );
+
+        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]);
+       
         if (error) {
           console.error('Error fetching user attributes via RPC:', error);
           console.log('API: RPC call returned an error.');
