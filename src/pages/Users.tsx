@@ -144,9 +144,9 @@ export function Users() {
   };
 
   const filteredUsers = users.filter(user => 
-    (user.Nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     user.Email.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (!selectedBu || user.idBu === selectedBu)
+    ((user.Nombre ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+     (user.Email ?? '').toLowerCase().includes(searchTerm.toLowerCase())) && // Aunque Email no debería ser nulo, es buena práctica
+      (!selectedBu || user.idBu === selectedBu)
   );
 
   const paginatedUsers = filteredUsers.slice(
