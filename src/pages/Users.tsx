@@ -1,19 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Users as UsersIcon, Search, UserPlus, Edit, Trash2, Check, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { supabase } from '../lib/supabase';
+import { useUserManagement } from '../contexts/UserManagementContext';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
-
-interface User {
-  id: string;
-  nombre: string;
-  email: string;
-  telefono: string | null;
-  estado: 'Activo' | 'Inactivo';
-  rol: 'Administrador' | 'Medico' | 'Recepcionista';
-  fechaultimoacceso: string | null;
-}
 
 interface FormData {
   nombre: string;
@@ -27,11 +17,17 @@ const ITEMS_PER_PAGE = 12;
 
 export function Users() {
   const { currentTheme } = useTheme();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { 
+    users, 
+    loading, 
+    error, 
+    fetchUsers, 
+    toggleUserStatus, 
+    createUser, 
+    updateUser,
+    setError 
+  } = useUserManagement();
   const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,66 +43,23 @@ export function Users() {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('tcUsuarios')
-        .select('id, nombre, email, telefono, estado, rol, fechaultimoacceso');
-
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (err) {
-      console.error('Error fetching users:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar usuarios');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggleStatus = async (user: User) => {
-    try {
-      const newStatus = user.estado === 'Activo' ? 'Inactivo' : 'Activo';
-      const { error } = await supabase
-        .from('tcUsuarios')
-        .update({ estado: newStatus })
-        .eq('id', user.id);
-
-      if (error) throw error;
-      await fetchUsers();
-    } catch (err) {
-      console.error('Error updating user status:', err);
-      setError(err instanceof Error ? err.message : 'Error al actualizar el estado del usuario');
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
       if (selectedUser) {
-        const { error } = await supabase
-          .from('tcUsuarios')
-          .update({
-            nombre: formData.nombre,
-            email: formData.email,
-            telefono: formData.telefono,
-            rol: formData.rol,
-            estado: formData.estado,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', selectedUser.id);
-
-        if (error) throw error;
+        await updateUser(selectedUser.id, {
+          nombre: formData.nombre,
+          email: formData.email,
+          telefono: formData.telefono,
+          rol: formData.rol,
+          estado: formData.estado,
+        });
       } else {
-        const { error } = await supabase
-          .from('tcUsuarios')
-          .insert([formData]);
-
-        if (error) throw error;
+        await createUser(formData);
       }
 
-      await fetchUsers();
       setShowModal(false);
       setSelectedUser(null);
       setFormData({
@@ -292,7 +245,7 @@ export function Users() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => handleToggleStatus(user)}
+                        onClick={() => toggleUserStatus(user)}
                         className={clsx(
                           'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                           user.estado === 'Activo' ? 'bg-green-500' : 'bg-gray-200'
