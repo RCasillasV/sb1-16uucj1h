@@ -7,25 +7,23 @@ import clsx from 'clsx';
 
 interface User {
   id: string;
-  Nombre: string;
-  Email: string;
-  Estado: 'Activo' | 'Inactivo';
-  Rol: 'Administrador' | 'Medico' | 'Recepcionista';
-  idBu: string;
-  businessUnit?: {
-    Nombre: string;
-  };
+  nombre: string;
+  email: string;
+  telefono: string | null;
+  estado: 'Activo' | 'Inactivo';
+  rol: 'Administrador' | 'Medico' | 'Recepcionista';
+  fechaultimoacceso: string | null;
 }
 
 interface FormData {
-  Nombre: string;
-  Email: string;
-  Rol: 'Administrador' | 'Medico' | 'Recepcionista';
-  idBu: string;
-  Estado: 'Activo' | 'Inactivo';
+  nombre: string;
+  email: string;
+  telefono: string;
+  rol: 'Administrador' | 'Medico' | 'Recepcionista';
+  estado: 'Activo' | 'Inactivo';
 }
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 12;
 
 export function Users() {
   const { currentTheme } = useTheme();
@@ -37,26 +35,23 @@ export function Users() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [businessUnits, setBusinessUnits] = useState<{ id: string; Nombre: string; }[]>([]);
-  const [selectedBu, setSelectedBu] = useState<string>('');
   const [formData, setFormData] = useState<FormData>({
-    Nombre: '',
-    Email: '',
-    Rol: 'Recepcionista',
-    idBu: '',
-    Estado: 'Activo',
+    nombre: '',
+    email: '',
+    telefono: '',
+    rol: 'Recepcionista',
+    estado: 'Activo',
   });
 
   useEffect(() => {
     fetchUsers();
-    fetchBusinessUnits();
   }, []);
 
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase
         .from('tcUsuarios')
-        .select('*, businessUnit:tcBu!inner(Nombre)');
+        .select('id, nombre, email, telefono, estado, rol, fechaultimoacceso');
 
       if (error) throw error;
       setUsers(data || []);
@@ -68,16 +63,19 @@ export function Users() {
     }
   };
 
-  const fetchBusinessUnits = async () => {
+  const handleToggleStatus = async (user: User) => {
     try {
-      const { data, error } = await supabase
-        .from('tcBu')
-        .select('id, Nombre');
+      const newStatus = user.estado === 'Activo' ? 'Inactivo' : 'Activo';
+      const { error } = await supabase
+        .from('tcUsuarios')
+        .update({ estado: newStatus })
+        .eq('id', user.id);
 
       if (error) throw error;
-      setBusinessUnits(data || []);
+      await fetchUsers();
     } catch (err) {
-      console.error('Error fetching business units:', err);
+      console.error('Error updating user status:', err);
+      setError(err instanceof Error ? err.message : 'Error al actualizar el estado del usuario');
     }
   };
 
@@ -90,7 +88,11 @@ export function Users() {
         const { error } = await supabase
           .from('tcUsuarios')
           .update({
-            ...formData,
+            nombre: formData.nombre,
+            email: formData.email,
+            telefono: formData.telefono,
+            rol: formData.rol,
+            estado: formData.estado,
             updated_at: new Date().toISOString()
           })
           .eq('id', selectedUser.id);
@@ -99,10 +101,7 @@ export function Users() {
       } else {
         const { error } = await supabase
           .from('tcUsuarios')
-          .insert([{
-            ...formData,
-            idUsuario: (await supabase.auth.getUser()).data.user?.id
-          }]);
+          .insert([formData]);
 
         if (error) throw error;
       }
@@ -111,11 +110,11 @@ export function Users() {
       setShowModal(false);
       setSelectedUser(null);
       setFormData({
-        Nombre: '',
-        Email: '',
-        Rol: 'Recepcionista',
-        idBu: '',
-        Estado: 'Activo',
+        nombre: '',
+        email: '',
+        telefono: '',
+        rol: 'Recepcionista',
+        estado: 'Activo',
       });
     } catch (err) {
       console.error('Error saving user:', err);
@@ -123,30 +122,10 @@ export function Users() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedUser) return;
-
-    try {
-      const { error } = await supabase
-        .from('tcUsuarios')
-        .delete()
-        .eq('id', selectedUser.id);
-
-      if (error) throw error;
-
-      await fetchUsers();
-      setShowDeleteModal(false);
-      setSelectedUser(null);
-    } catch (err) {
-      console.error('Error deleting user:', err);
-      setError(err instanceof Error ? err.message : 'Error al eliminar usuario');
-    }
-  };
-
   const filteredUsers = users.filter(user => 
-    ((user.Nombre ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-     (user.Email ?? '').toLowerCase().includes(searchTerm.toLowerCase())) && // Aunque Email no debería ser nulo, es buena práctica
-      (!selectedBu || user.idBu === selectedBu)
+    (user.nombre ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.email ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.telefono ?? '').includes(searchTerm)
   );
 
   const paginatedUsers = filteredUsers.slice(
@@ -202,7 +181,7 @@ export function Users() {
         </button>
       </div>
 
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="mb-6">
         <div className="flex-1 relative">
           <Search 
             className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" 
@@ -212,30 +191,15 @@ export function Users() {
             type="text"
             placeholder="Buscar usuarios..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-md border"
-            style={{
-              background: currentTheme.colors.surface,
-              borderColor: currentTheme.colors.border,
+                nombre: '',
+                email: '',
+                telefono: '',
+                rol: 'Recepcionista',
+                estado: 'Activo',
               color: currentTheme.colors.text,
             }}
           />
         </div>
-        <select
-          value={selectedBu}
-          onChange={(e) => setSelectedBu(e.target.value)}
-          className="rounded-md border px-4 py-2"
-          style={{
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-            color: currentTheme.colors.text,
-          }}
-        >
-          <option value="">Todas las unidades</option>
-          {businessUnits.map(bu => (
-            <option key={bu.id} value={bu.id}>{bu.Nombre}</option>
-          ))}
-        </select>
       </div>
 
       <div 
@@ -265,7 +229,7 @@ export function Users() {
                   className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
-                  Unidad de Negocio
+                  Teléfono
                 </th>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
@@ -280,10 +244,16 @@ export function Users() {
                   Estado
                 </th>
                 <th 
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                >
+                  Último Acceso
+                </th>
+                <th 
                   className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
-                  Acciones
+                  Acción
                 </th>
               </tr>
             </thead>
@@ -291,7 +261,7 @@ export function Users() {
               {loading ? (
                 <tr>
                   <td 
-                    colSpan={6} 
+                    colSpan={7} 
                     className="px-6 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
@@ -301,7 +271,7 @@ export function Users() {
               ) : paginatedUsers.length === 0 ? (
                 <tr>
                   <td 
-                    colSpan={6} 
+                    colSpan={7} 
                     className="px-6 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
@@ -315,55 +285,60 @@ export function Users() {
                     style={{ color: currentTheme.colors.text }}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {user.Nombre}
+                      {user.nombre}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {user.Email}
+                      {user.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {user.businessUnit?.Nombre || '-'}
+                      {user.telefono || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {user.Rol}
+                      {user.rol}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
+                      <button
+                        onClick={() => handleToggleStatus(user)}
                         className={clsx(
-                          'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                          user.Estado === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                          user.estado === 'Activo' ? 'bg-green-500' : 'bg-gray-200'
                         )}
                       >
-                        {user.Estado === 'Activo' ? 'Activo' : 'Inactivo'}
-                      </span>
+                        <span
+                          className={clsx(
+                            'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                            user.estado === 'Activo' ? 'translate-x-5' : 'translate-x-0'
+                          )}
+                        />
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {user.fechaultimoacceso ? 
+                        new Date(user.fechaultimoacceso).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setFormData({
-                              Nombre: user.Nombre,
-                              Email: user.Email,
-                              Rol: user.Rol,
-                              idBu: user.idBu,
-                              Estado: user.Estado,
-                            });
-                            setShowModal(true);
-                          }}
-                          className="p-2 rounded-full hover:bg-black/5 transition-colors"
-                        >
-                          <Edit className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setShowDeleteModal(true);
-                          }}
-                          className="p-2 rounded-full hover:bg-black/5 transition-colors"
-                        >
-                          <Trash2 className="h-5 w-5" style={{ color: '#EF4444' }} />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setFormData({
+                            nombre: user.nombre,
+                            email: user.email,
+                            telefono: user.telefono || '',
+                            rol: user.rol,
+                            estado: user.estado,
+                          });
+                          setShowModal(true);
+                        }}
+                        className="p-2 rounded-full hover:bg-black/5 transition-colors"
+                      >
+                        <Edit className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -444,11 +419,11 @@ export function Users() {
                 setShowModal(false);
                 setSelectedUser(null);
                 setFormData({
-                  Nombre: '',
-                  Email: '',
-                  Rol: 'Recepcionista',
-                  idBu: '',
-                  Estado: 'Activo',
+                  nombre: '',
+                  email: '',
+                  telefono: '',
+                  rol: 'Recepcionista',
+                  estado: 'Activo',
                 });
               }}
               className={clsx(buttonStyle.base, 'border')}
@@ -482,8 +457,8 @@ export function Users() {
             <input
               type="text"
               id="nombre"
-              value={formData.Nombre}
-              onChange={(e) => setFormData({ ...formData, Nombre: e.target.value })}
+              value={formData.nombre}
+              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
               required
               className="w-full rounded-md shadow-sm"
               style={{
@@ -505,9 +480,31 @@ export function Users() {
             <input
               type="email"
               id="email"
-              value={formData.Email}
-              onChange={(e) => setFormData({ ...formData, Email: e.target.value })}
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
+              className="w-full rounded-md shadow-sm"
+              style={{
+                background: currentTheme.colors.surface,
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
+            />
+          </div>
+
+          <div>
+            <label 
+              htmlFor="telefono" 
+              className="block text-sm font-medium mb-1"
+              style={{ color: currentTheme.colors.text }}
+            >
+              Teléfono
+            </label>
+            <input
+              type="tel"
+              id="telefono"
+              value={formData.telefono}
+              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
               className="w-full rounded-md shadow-sm"
               style={{
                 background: currentTheme.colors.surface,
@@ -527,8 +524,8 @@ export function Users() {
             </label>
             <select
               id="rol"
-              value={formData.Rol}
-              onChange={(e) => setFormData({ ...formData, Rol: e.target.value as 'Administrador' | 'Medico' | 'Recepcionista' })}
+              value={formData.rol}
+              onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'Administrador' | 'Medico' | 'Recepcionista' })}
               required
               className="w-full rounded-md shadow-sm"
               style={{
@@ -545,33 +542,6 @@ export function Users() {
 
           <div>
             <label 
-              htmlFor="idBu" 
-              className="block text-sm font-medium mb-1"
-              style={{ color: currentTheme.colors.text }}
-            >
-              Unidad de Negocio
-            </label>
-            <select
-              id="idBu"
-              value={formData.idBu}
-              onChange={(e) => setFormData({ ...formData, idBu: e.target.value })}
-              required
-              className="w-full rounded-md shadow-sm"
-              style={{
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text,
-              }}
-            >
-              <option value="">Seleccionar...</option>
-              {businessUnits.map(bu => (
-                <option key={bu.id} value={bu.id}>{bu.Nombre}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label 
               htmlFor="estado" 
               className="block text-sm font-medium mb-1"
               style={{ color: currentTheme.colors.text }}
@@ -580,8 +550,8 @@ export function Users() {
             </label>
             <select
               id="estado"
-              value={formData.Estado}
-              onChange={(e) => setFormData({ ...formData, Estado: e.target.value as 'Activo' | 'Inactivo' })}
+              value={formData.estado}
+              onChange={(e) => setFormData({ ...formData, estado: e.target.value as 'Activo' | 'Inactivo' })}
               required
               className="w-full rounded-md shadow-sm"
               style={{
@@ -595,46 +565,6 @@ export function Users() {
             </select>
           </div>
         </form>
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setSelectedUser(null);
-        }}
-        title="Confirmar Eliminación"
-        actions={
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setSelectedUser(null);
-              }}
-              className={clsx(buttonStyle.base, 'border')}
-              style={{
-                background: 'transparent',
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text,
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleDelete}
-              className={buttonStyle.base}
-              style={{
-                background: '#EF4444',
-                color: '#FFFFFF',
-              }}
-            >
-              Eliminar
-            </button>
-          </div>
-        }
-      >
-        <p>¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.</p>
       </Modal>
     </div>
   );
