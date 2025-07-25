@@ -277,66 +277,7 @@ export function Settings() {
               ))}
             </div>
           </div>
-
-          {/* Font Size */}
-        
-          <div 
-            className="rounded-lg shadow-lg p-6"
-            style={{ 
-              background: currentTheme.colors.surface,
-              borderColor: currentTheme.colors.border,
-            }}
-          >
-            <h2 
-              className="text-lg font-medium mb-4"
-              style={{ 
-                color: currentTheme.colors.text,
-                fontFamily: currentTheme.typography.fontFamily,
-              }}
-            >
-              Tamaño de Letra
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="80"
-                  max="120"
-                  value={fontSize}
-                  onChange={(e) => setFontSize(Number(e.target.value))}
-                  className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                  style={{
-                    backgroundColor: currentTheme.colors.border,
-                    backgroundImage: `linear-gradient(${currentTheme.colors.primary}, ${currentTheme.colors.primary})`,
-                    backgroundSize: `${(fontSize - 80) * 100 / 40}% 100%`,
-                    backgroundRepeat: 'no-repeat'
-                  }}
-                />
-                <span 
-                  className="text-sm font-medium w-12"
-                  style={{ 
-                    color: currentTheme.colors.text,
-                    fontFamily: currentTheme.typography.fontFamily,
-                  }}
-                >
-                  {fontSize}%
-                </span>
-              </div>
-              <div 
-                className="p-4 rounded-lg"
-                style={{ background: currentTheme.colors.background }}
-              >
-                <p style={{ 
-                  fontSize: `${fontSize}%`,
-                  color: currentTheme.colors.text,
-                  fontFamily: currentTheme.typography.fontFamily,
-                }}>
-                  Texto de ejemplo - Más vale una onza de salud que una libra de oro. 
-                </p>
-              </div>
-            </div>
-          </div>
-          */
+ 
           {/* Button Styles */}
           <div 
             className="rounded-lg shadow-lg p-6"
@@ -407,6 +348,65 @@ export function Settings() {
               ))}
             </div>
           </div>
+
+          {/* Font Size */}   
+          <div 
+            className="rounded-lg shadow-lg p-6"
+            style={{ 
+              background: currentTheme.colors.surface,
+              borderColor: currentTheme.colors.border,
+            }}
+          >
+            <h2 
+              className="text-lg font-medium mb-4"
+              style={{ 
+                color: currentTheme.colors.text,
+                fontFamily: currentTheme.typography.fontFamily,
+              }}
+            >
+              Tamaño de Letra
+            </h2>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <input
+                  type="range"
+                  min="80"
+                  max="120"
+                  value={fontSize}
+                  onChange={(e) => setFontSize(Number(e.target.value))}
+                  className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                  style={{
+                    backgroundColor: currentTheme.colors.border,
+                    backgroundImage: `linear-gradient(${currentTheme.colors.primary}, ${currentTheme.colors.primary})`,
+                    backgroundSize: `${(fontSize - 80) * 100 / 40}% 100%`,
+                    backgroundRepeat: 'no-repeat'
+                  }}
+                />
+                <span 
+                  className="text-sm font-medium w-12"
+                  style={{ 
+                    color: currentTheme.colors.text,
+                    fontFamily: currentTheme.typography.fontFamily,
+                  }}
+                >
+                  {fontSize}%
+                </span>
+              </div>
+              <div 
+                className="p-4 rounded-lg"
+                style={{ background: currentTheme.colors.background }}
+              >
+                <p style={{ 
+                  fontSize: `${fontSize}%`,
+                  color: currentTheme.colors.text,
+                  fontFamily: currentTheme.typography.fontFamily,
+                }}>
+                  Texto de ejemplo - Más vale una onza de salud que una libra de oro. 
+                </p>
+              </div>
+            </div>
+          </div>
+      //------      
         </div>
       ) : (
         /* Settings Grid */
