@@ -159,7 +159,7 @@ export function BusinessUnits() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-3">
           <Building2 className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
           <h1 
