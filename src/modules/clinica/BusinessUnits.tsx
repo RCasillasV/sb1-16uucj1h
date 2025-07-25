@@ -169,7 +169,7 @@ export function BusinessUnits() {
               fontFamily: currentTheme.typography.fontFamily,
             }}
           >
-            Unidades de Negocio
+            Unidad de Negocio
           </h1>
         </div>
         <button
@@ -248,7 +248,7 @@ export function BusinessUnits() {
                     className="px-6 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
-                    Cargando unidades de negocio...
+                    Cargando unidad de negocio...
                   </td>
                 </tr>
               ) : businessUnits.length === 0 ? (
@@ -258,7 +258,7 @@ export function BusinessUnits() {
                     className="px-6 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
-                    No hay unidades de negocio registradas
+                    No hay unidad de negocio registradas
                   </td>
                 </tr>
               ) : (
