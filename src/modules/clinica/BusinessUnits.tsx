@@ -172,17 +172,6 @@ export function BusinessUnits() {
             Unidad de Negocio
           </h1>
         </div>
-        <button
-          onClick={() => {
-            setSelectedUnit(null);
-            setFormData(initialFormData);
-            setShowModal(true);
-          }}
-          className={buttonStyle.base}
-          style={buttonStyle.primary}
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Nueva        </button>
       </div>
 
       {error && (
