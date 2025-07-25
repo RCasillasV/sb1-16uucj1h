@@ -288,10 +288,10 @@ export function Agenda() {
               </h2>
               <Link
                 to="/citas"
-                className={clsx(buttonClasses.base, buttonClasses.primary)}
+                className={clsx(buttonClasses.base, buttonClasses.primary, 'px-4 py-2')}
               >
-                <CalendarPlus className="h-4 w-4 mr-0" />
-                Agregar Cita
+                <CalendarPlus className="h-5 w-5 mr-5" />
+                Agregar
               </Link>
             </div>
             <div className="flex-1">
