@@ -176,7 +176,7 @@ export function Users() {
           className={buttonStyle.base}
           style={buttonStyle.primary}
         >
-          <UserPlus className="h-5 w-5 mr-5" />
+          <UserPlus className="h-5 w-5 mr-2" />
           Agregar
         </button>
       </div>
