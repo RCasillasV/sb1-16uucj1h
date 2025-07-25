@@ -2,6 +2,9 @@ import { supabase } from './supabase';
 import { format, startOfDay, subDays } from 'date-fns';
 import type { Database } from '../types/database.types';
 
+// Add a sleep utility function
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 type Tables = Database['public']['Tables'];
 type Appointment = Tables['tcCitas']['Row'];
 type Patient = Tables['tcPacientes']['Row'];
@@ -1023,37 +1026,65 @@ export const api = {
         return cached;
       }
 
-      try {
-        console.log('API: Calling supabase.rpc("get_userdata", {})');
-        const rpcPromise = supabase.rpc('get_userdata', {});
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('RPC call timed out')), 10000) 
-        );
+      const maxRetries = 3; // Número de intentos de reintento
+      const initialDelay = 500; // Retraso inicial en ms (0.5 segundos)
 
-        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]);
-       
-        if (error) {
-          console.error('Error fetching user attributes via RPC:', error);
-          console.log('API: RPC call returned an error.');
-          throw new Error('Could not fetch user attributes.');
+      for (let i = 0; i <= maxRetries; i++) {
+        try {
+          console.log(`API: Calling supabase.rpc("get_userdata", {}). Attempt ${i + 1}/${maxRetries + 1}`);
+          const rpcPromise = supabase.rpc('get_userdata', {});
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('RPC call timed out')), 10000) // Mantener el timeout original de 10 segundos
+          );
+
+          // Usar Promise.race para manejar tanto la respuesta RPC como el timeout del lado del cliente
+          const { data, error } = await Promise.race([rpcPromise, timeoutPromise]);
+
+          if (error) {
+            console.error('Error fetching user attributes via RPC:', error);
+            console.log('API: RPC call returned an error.');
+            throw new Error(`Supabase RPC error: ${error.message || 'Unknown RPC error'}`);
+          }
+
+          console.log('Datos de usuario recibidos:', data);
+          const userAttributes = data && data.length > 0 ? data[0] : null;
+
+          if (userAttributes) {
+            console.log('Nombre del usuario:', userAttributes.nombre);
+            console.log('Rol del usuario:', userAttributes.rol);
+            cacheUtils.set(cacheKey, userAttributes);
+            return userAttributes;
+          }
+
+          console.log('API: No user attributes found or data is empty.');
+          return null; // No se encontraron atributos de usuario, no es necesario reintentar
+        } catch (error: any) {
+          const errorMessage = error.message || 'Unknown error';
+          console.error(`Attempt ${i + 1} failed: ${errorMessage}`);
+
+          // Verificar si es un error reintentable (timeout, error de red o error de RPC)
+          const isRetryable = errorMessage.includes('RPC call timed out') || 
+                              errorMessage.includes('Failed to fetch') || 
+                              errorMessage.includes('NetworkError') ||
+                              errorMessage.includes('fetch') ||
+                              errorMessage.includes('network') ||
+                              errorMessage.includes('timeout');
+
+          if (isRetryable && i < maxRetries) {
+            const delay = initialDelay * (2 ** i); // Retraso exponencial: 500ms, 1s, 2s
+            console.log(`Retrying in ${delay}ms...`);
+            await sleep(delay);
+          } else {
+            // Si no es reintentable, o se alcanzó el número máximo de reintentos, relanzar el error
+            console.error(`Max retries reached or non-retryable error. Throwing error.`);
+            if (i === maxRetries) {
+              console.error(`Error in getCurrentUserAttributes after ${i + 1} attempts:`, error);
+            }
+            return null; // Devolver null en lugar de lanzar el error para evitar crashes
+          }
         }
-        
-        console.log('Datos de usuario recibidos:', data);
-        const userAttributes = data && data.length > 0 ? data[0] : null;
-        
-        if (userAttributes) {
-          console.log('Nombre del usuario:', userAttributes.nombre);
-          console.log('Rol del usuario:', userAttributes.rol);
-          cacheUtils.set(cacheKey, userAttributes);
-          return userAttributes;
-        }
-        
-        console.log('API: No user attributes found or data is empty.');
-        return null;
-      } catch (error) {
-        console.error('Error in getCurrentUserAttributes:', error);
-        return null;
       }
+      return null; // Esto no debería ser alcanzado en un flujo normal
     }
   }
 };
