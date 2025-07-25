@@ -165,11 +165,11 @@ export function Users() {
           onClick={() => {
             setSelectedUser(null);
             setFormData({
-              Nombre: '',
-              Email: '',
-              Rol: 'Recepcionista',
-              idBu: '',
-              Estado: 'Activo',
+              nombre: '',
+              email: '',
+              telefono: '',
+              rol: 'Recepcionista',
+              estado: 'Activo',
             });
             setShowModal(true);
           }}
@@ -191,11 +191,11 @@ export function Users() {
             type="text"
             placeholder="Buscar usuarios..."
             value={searchTerm}
-                nombre: '',
-                email: '',
-                telefono: '',
-                rol: 'Recepcionista',
-                estado: 'Activo',
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border rounded-lg"
+            style={{
+              background: currentTheme.colors.surface,
+              borderColor: currentTheme.colors.border,
               color: currentTheme.colors.text,
             }}
           />
@@ -404,11 +404,11 @@ export function Users() {
           setShowModal(false);
           setSelectedUser(null);
           setFormData({
-            Nombre: '',
-            Email: '',
-            Rol: 'Recepcionista',
-            idBu: '',
-            Estado: 'Activo',
+            nombre: '',
+            email: '',
+            telefono: '',
+            rol: 'Recepcionista',
+            estado: 'Activo',
           });
         }}
         title={selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
