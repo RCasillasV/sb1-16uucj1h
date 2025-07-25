@@ -289,6 +289,7 @@ export function Agenda() {
               <Link
                 to="/citas"
                 className={clsx(buttonClasses.base, buttonClasses.primary, 'px-4 py-2')}
+                style={{ background: currentTheme.colors.buttonPrimary, color: currentTheme.colors.buttonText,}}
               >
                 <CalendarPlus className="h-5 w-5 mr-5" />
                 Agregar 
