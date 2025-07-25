@@ -244,12 +244,6 @@ export function Users() {
                   Estado
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Último Acceso
-                </th>
-                <th 
                   className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
@@ -311,16 +305,6 @@ export function Users() {
                           )}
                         />
                       </button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.fechaultimoacceso ? 
-                        new Date(user.fechaultimoacceso).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        }) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
