@@ -405,8 +405,7 @@ export function Settings() {
                 </p>
               </div>
             </div>
-          </div>
-      //------      
+          </div>     
         </div>
       ) : (
         /* Settings Grid */
