@@ -4,6 +4,7 @@ import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, Fi
 import { useTheme } from '../contexts/ThemeContext';
 import { format, parseISO, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { calculateAge } from '../utils/dateUtils';
 import clsx from 'clsx';
 import type { Database } from '../types/database.types';
 
@@ -349,30 +350,4 @@ export function MainHeader({
       {renderPatientNavigation()}
     </div>
   );
-}
-
-// Helper function to calculate age
-function calculateAge(birthDate: string) {
-  const today = new Date();
-  const birth = new Date(birthDate);
-  
-  let years = today.getFullYear() - birth.getFullYear();
-  const months = today.getMonth() - birth.getMonth();
-  
-  if (months < 0 || (months === 0 && today.getDate() < birth.getDate())) {
-    years--;
-  }
-  
-  let formatted = '';
-  if (years < 1) {
-    const monthsAge = months + 12;
-    formatted = `${monthsAge} ${monthsAge === 1 ? 'mes' : 'meses'}`;
-  } else {
-    formatted = `${years} ${years === 1 ? 'año' : 'años'}`;
-  }
-  
-  return {
-    years,
-    formatted
-  };
 }
