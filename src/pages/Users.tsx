@@ -173,7 +173,7 @@ export function Users() {
             });
             setShowModal(true);
           }}
-          className={buttonStyle.base,'flex items-center', 'px-4 py-2',}
+          className={buttonStyle.base,'flex items-center', 'px-4 py-2'}
           style={buttonStyle.primary}
         >
           <UserPlus className="h-5 w-5 mr-2" />
