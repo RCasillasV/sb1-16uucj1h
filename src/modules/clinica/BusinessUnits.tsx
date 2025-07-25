@@ -288,16 +288,6 @@ export function BusinessUnits() {
                         >
                           <Pencil className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
                         </button>
-                        <button
-                          onClick={() => {
-                            setSelectedUnit(unit);
-                            setShowDeleteModal(true);
-                          }}
-                          className="p-2 rounded-full hover:bg-black/5 transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-5 w-5" style={{ color: '#EF4444' }} />
-                        </button>
                       </div>
                     </td>
                   </tr>
