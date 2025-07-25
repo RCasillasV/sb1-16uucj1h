@@ -20,6 +20,9 @@
 .fc-timegrid-slot {
   cursor: pointer;
 }
+.fc-header-toolbar {
+  margin-bottom: 0.5em; /* Puedes ajustar este valor (ej. 0em, 0.25em) según tu preferencia */
+}
 
 /* Tema claro */
 :root[data-theme="light"] .fc-event {
