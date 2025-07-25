@@ -279,7 +279,7 @@ export function Settings() {
           </div>
 
           {/* Font Size */}
-        /*
+        
           <div 
             className="rounded-lg shadow-lg p-6"
             style={{ 
