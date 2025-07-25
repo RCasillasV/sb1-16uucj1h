@@ -288,7 +288,7 @@ export function Agenda() {
               </h2>
               <Link
                 to="/citas"
-                className={clsx(buttonClasses.base, buttonClasses.primary, 'px-4 py-2',
+                className={clsx(buttonClasses.base, 'flex items-center', 'px-4 py-2',
                   currentTheme.buttons.style === 'rounded' && 'rounded-lg', // Aplica redondeo estánda
                   currentTheme.buttons.style === 'pill' && 'rounded-full',   // Aplica forma de píldora
                   currentTheme.buttons.style === 'square' && 'rounded-none'  // Elimina cualquier redondeo                          
