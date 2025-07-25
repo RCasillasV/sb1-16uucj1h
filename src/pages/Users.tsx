@@ -244,21 +244,8 @@ export function Users() {
                       {user.rol}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => toggleUserStatus(user)}
-                        className={clsx(
-                          'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                          user.estado === 'Activo' ? 'bg-green-500' : 'bg-gray-200'
-                        )}
-                      >
-                        <span
-                          className={clsx(
-                            'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                            user.estado === 'Activo' ? 'translate-x-5' : 'translate-x-0'
-                          )}
-                        />
-                      </button>
-                    </td>
+                      <span>{user.estado}</span>
+                    </td>            
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
                         onClick={() => {
