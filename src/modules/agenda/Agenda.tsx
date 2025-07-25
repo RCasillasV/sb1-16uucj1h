@@ -292,6 +292,7 @@ export function Agenda() {
               >
                 <CalendarPlus className="h-5 w-5 mr-5" />
                 Agregar 
+             </Link>
             </div>
             <div className="flex-1">
               <FullCalendar
