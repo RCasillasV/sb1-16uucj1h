@@ -300,7 +300,7 @@ export function InsuranceManagement() {
                       </button>
                     </td>
                     <td className="px-3 py-1  text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1">
                         <button
                           onClick={() => {
                             setSelectedInsurance(insurance);
