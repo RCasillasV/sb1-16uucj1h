@@ -183,7 +183,7 @@ export function InsuranceManagement() {
       <div className="mb-6">
         <div className="relative">
           <Search 
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" 
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-2" 
             style={{ color: currentTheme.colors.textSecondary }}
           />
           <input
