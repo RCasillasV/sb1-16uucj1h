@@ -213,25 +213,25 @@ export function InsuranceManagement() {
             <thead>
               <tr style={{ background: currentTheme.colors.background }}>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Aseguradora
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Contacto
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Estado
                 </th>
                 <th 
-                  className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Acciones
