@@ -97,8 +97,8 @@ export function Settings() {
     },
     {
       icon: NotebookTabs,
-      title: 'Catálogos Medicos',
-      description: 'Personaliza los diagnósticos frecuentes, tratamientos, medicamentos y aseguradoras',
+      title: 'Aseguradoras',
+      description: 'Personaliza las aseguradoras que los pacientes, el contacto y las condiciones que se podrán registrar',
       onClick: () => navigate('/insurance')
     },
     {
