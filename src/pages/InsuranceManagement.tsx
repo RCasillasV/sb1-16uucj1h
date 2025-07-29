@@ -299,7 +299,7 @@ export function InsuranceManagement() {
                         />
                       </button>
                     </td>
-                    <td className="px-3 py-3  text-right">
+                    <td className="px-3 py-2  text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => {
