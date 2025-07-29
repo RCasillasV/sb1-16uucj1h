@@ -198,31 +198,31 @@ export function BusinessUnits() {
             <thead>
               <tr style={{ background: currentTheme.colors.background }}>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Nombre
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Dirección
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Ciudad
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   RFC
                 </th>
                 <th 
-                  className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Acciones
