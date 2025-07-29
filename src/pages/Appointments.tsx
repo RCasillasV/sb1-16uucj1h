@@ -6,7 +6,7 @@ import { api } from '../lib/api';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
-import { AppointmentForm } from '../components/AppointmentForm';
+import { useNavigate } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 
@@ -33,12 +33,12 @@ export function Appointments() {
   const { currentTheme } = useTheme();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'today' | 'upcoming'>('all');
-  const [showForm, setShowForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithPatient | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -108,8 +108,13 @@ export function Appointments() {
         setSelectedPatient(appointment.patients);
       }
       
-      setSelectedAppointment(appointment);
-      setShowForm(true);
+      navigate('/citas', {
+        state: {
+          editMode: true,
+          appointmentId: appointment.id,
+          selectedPatient: appointment.patients
+        }
+      });
     }
   };
 
@@ -127,17 +132,6 @@ export function Appointments() {
       console.error('Error deleting appointment:', err);
       setError('Error al eliminar la cita');
     }
-  };
-
-  const handleFormSuccess = () => {
-    setShowForm(false);
-    setSelectedAppointment(null);
-    fetchAppointments();
-  };
-
-  const handleFormCancel = () => {
-    setShowForm(false);
-    setSelectedAppointment(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -199,16 +193,6 @@ export function Appointments() {
     },
   };
 
-  if (showForm) {
-    return (
-      <AppointmentForm
-        onSuccess={handleFormSuccess}
-        onCancel={handleFormCancel}
-        appointment={selectedAppointment}
-      />
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-6">
@@ -222,7 +206,7 @@ export function Appointments() {
           </h1>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => navigate('/citas')}
           className={buttonStyle.base}
           style={buttonStyle.primary}
         >
@@ -400,8 +384,17 @@ export function Appointments() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setSelectedAppointment(appointment);
-                                  setShowForm(true);
+                                  // Seleccionar el paciente asociado a la cita
+                                  if (appointment.patients) {
+                                    setSelectedPatient(appointment.patients);
+                                  }
+                                  navigate('/citas', {
+                                    state: {
+                                      editMode: true,
+                                      appointmentId: appointment.id,
+                                      selectedPatient: appointment.patients
+                                    }
+                                  });
                                 }}
                                 className="p-2 rounded-full hover:bg-black/5 transition-colors"
                               >
