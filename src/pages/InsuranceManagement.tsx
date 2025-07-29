@@ -213,7 +213,7 @@ export function InsuranceManagement() {
             <thead>
               <tr style={{ background: currentTheme.colors.background }}>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-medium   tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-large   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Aseguradora
