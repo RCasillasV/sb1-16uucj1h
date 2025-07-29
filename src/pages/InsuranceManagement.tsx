@@ -243,7 +243,7 @@ export function InsuranceManagement() {
                 <tr>
                   <td 
                     colSpan={4} 
-                    className="px-3 py-4 text-center"
+                    className="px-3 py-3 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     Cargando aseguradoras...
