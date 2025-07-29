@@ -104,7 +104,7 @@ export function Settings() {
     {
       icon: Folders,
       title: 'Catálogo de Diagnósticos',
-      description: 'Configura el catálogos de diagnósticos (CIE-10) y sintomas recurrentes ',
+      description: 'Configura el catálogos de diagnósticos (CIE-10) y sintomas recurrentes',
       onClick: () => {
         setActivePath(['Configuración', 'Catálogos Generales']);
         navigate('/cie10');
