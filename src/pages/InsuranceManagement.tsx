@@ -265,13 +265,13 @@ export function InsuranceManagement() {
                     key={insurance.idAs}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="  px-3 py-2 ">
+                    <td className= "px-3 py-1 ">
                       {insurance.Aseguradora}
                     </td>
-                    <td className="  px-3 py-2 ">
+                    <td className= "px-3 py-1 ">
                       {insurance.Contacto || '-'}
                     </td>
-                    <td className="  px-3 py-2 ">
+                    <td className= "px-3 py-1 ">
                       <button
                         onClick={async () => {
                           try {
