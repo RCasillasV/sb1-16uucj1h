@@ -265,7 +265,7 @@ export function InsuranceManagement() {
                     key={insurance.idAs}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-3 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 ">
                       {insurance.Aseguradora}
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
