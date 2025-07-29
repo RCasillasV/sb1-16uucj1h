@@ -213,25 +213,25 @@ export function InsuranceManagement() {
             <thead>
               <tr style={{ background: currentTheme.colors.background }}>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Aseguradora
                 </th>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium  tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Contacto
                 </th>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-medium   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Estado
                 </th>
                 <th 
-                  className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider"
+                  className="px-3 py-3 text-right text-xs font-medium   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Acciones
@@ -265,7 +265,7 @@ export function InsuranceManagement() {
                     key={insurance.idAs}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-3 py-4 whitespace-nowrap">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       {insurance.Aseguradora}
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap">
