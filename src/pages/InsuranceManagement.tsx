@@ -149,7 +149,7 @@ export function InsuranceManagement() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-3 lg:px-8">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <Building2 className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
@@ -243,7 +243,7 @@ export function InsuranceManagement() {
                 <tr>
                   <td 
                     colSpan={4} 
-                    className="px-6 py-4 text-center"
+                    className="px-3 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     Cargando aseguradoras...
@@ -253,7 +253,7 @@ export function InsuranceManagement() {
                 <tr>
                   <td 
                     colSpan={4} 
-                    className="px-6 py-4 text-center"
+                    className="px-3 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     No hay aseguradoras registradas
@@ -265,13 +265,13 @@ export function InsuranceManagement() {
                     key={insurance.idAs}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       {insurance.Aseguradora}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       {insurance.Contacto || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       <button
                         onClick={async () => {
                           try {
@@ -299,7 +299,7 @@ export function InsuranceManagement() {
                         />
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 py-4 whitespace-nowrap text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => {
@@ -338,7 +338,7 @@ export function InsuranceManagement() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div 
-            className="px-6 py-3 flex items-center justify-between border-t"
+            className="px-3 py-3 flex items-center justify-between border-t"
             style={{ borderColor: currentTheme.colors.border }}
           >
             <div>
