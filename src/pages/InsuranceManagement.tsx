@@ -265,13 +265,13 @@ export function InsuranceManagement() {
                     key={insurance.idAs}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="  px-3 py-2 whitespace-nowrap">
+                    <td className="  px-3 py-2 ">
                       {insurance.Aseguradora}
                     </td>
-                    <td className="  px-3 py-2 whitespace-nowrap">
+                    <td className="  px-3 py-2 ">
                       {insurance.Contacto || '-'}
                     </td>
-                    <td className="  px-3 py-2 whitespace-nowrap">
+                    <td className="  px-3 py-2 ">
                       <button
                         onClick={async () => {
                           try {
@@ -299,7 +299,7 @@ export function InsuranceManagement() {
                         />
                       </button>
                     </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 py-4  text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => {
