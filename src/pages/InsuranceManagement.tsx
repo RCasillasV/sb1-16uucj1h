@@ -213,25 +213,25 @@ export function InsuranceManagement() {
             <thead>
               <tr style={{ background: currentTheme.colors.background }}>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-large  tracking-wider"
+                  className=" px-3 py-2 text-left text-xs font-large  tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Aseguradora
                 </th>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-large  tracking-wider"
+                  className=" px-3 py-2 text-left text-xs font-large  tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Contacto
                 </th>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-large   tracking-wider"
+                  className=" px-3 py-2 text-left text-xs font-large   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Estado
                 </th>
                 <th 
-                  className="px-3 py-3 text-right text-xs font-large   tracking-wider"
+                  className=" px-3 py-2 text-right text-xs font-large   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Acciones
@@ -243,7 +243,7 @@ export function InsuranceManagement() {
                 <tr>
                   <td 
                     colSpan={4} 
-                    className="px-3 py-3 text-center"
+                    className=" px-3 py-2 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     Cargando aseguradoras...
@@ -253,7 +253,7 @@ export function InsuranceManagement() {
                 <tr>
                   <td 
                     colSpan={4} 
-                    className="px-3 py-3 text-center"
+                    className=" px-3 py-2 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     No hay aseguradoras registradas
@@ -265,13 +265,13 @@ export function InsuranceManagement() {
                     key={insurance.idAs}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className=" px-3 py-3 whitespace-nowrap">
+                    <td className="  px-3 py-2 whitespace-nowrap">
                       {insurance.Aseguradora}
                     </td>
-                    <td className=" px-3 py-3 whitespace-nowrap">
+                    <td className="  px-3 py-2 whitespace-nowrap">
                       {insurance.Contacto || '-'}
                     </td>
-                    <td className=" px-3 py-3 whitespace-nowrap">
+                    <td className="  px-3 py-2 whitespace-nowrap">
                       <button
                         onClick={async () => {
                           try {
@@ -338,7 +338,7 @@ export function InsuranceManagement() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div 
-            className="px-3 py-3 flex items-center justify-between border-t"
+            className=" px-3 py-2 flex items-center justify-between border-t"
             style={{ borderColor: currentTheme.colors.border }}
           >
             <div>
