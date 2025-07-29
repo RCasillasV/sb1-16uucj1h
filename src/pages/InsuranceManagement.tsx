@@ -253,7 +253,7 @@ export function InsuranceManagement() {
                 <tr>
                   <td 
                     colSpan={4} 
-                    className="px-3 py-4 text-center"
+                    className="px-3 py-3 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     No hay aseguradoras registradas
@@ -265,13 +265,13 @@ export function InsuranceManagement() {
                     key={insurance.idAs}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className=" px-3 py-3 whitespace-nowrap">
                       {insurance.Aseguradora}
                     </td>
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className=" px-3 py-3 whitespace-nowrap">
                       {insurance.Contacto || '-'}
                     </td>
-                    <td className="px-2 py-2 whitespace-nowrap">
+                    <td className=" px-3 py-3 whitespace-nowrap">
                       <button
                         onClick={async () => {
                           try {
