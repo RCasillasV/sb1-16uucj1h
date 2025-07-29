@@ -158,7 +158,7 @@ export function BusinessUnits() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-3 lg:px-8">
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-3">
           <Building2 className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
@@ -234,7 +234,7 @@ export function BusinessUnits() {
                 <tr>
                   <td 
                     colSpan={5} 
-                    className="px-6 py-4 text-center"
+                    className="px-3 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     Cargando unidad de negocio...
@@ -244,7 +244,7 @@ export function BusinessUnits() {
                 <tr>
                   <td 
                     colSpan={5} 
-                    className="px-6 py-4 text-center"
+                    className="px-3 py-4 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     No hay unidad de negocio registradas
@@ -256,19 +256,19 @@ export function BusinessUnits() {
                     key={unit.idBu}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       {unit.Nombre}
                     </td> 
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       {unit.Calle && unit.Colonia ? `${unit.Calle}, ${unit.Colonia}` : unit.Calle || unit.Colonia || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       {unit.Ciudad && unit.Estado ? `${unit.Ciudad}, ${unit.Estado}` : unit.Ciudad || unit.Estado || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       {unit.RFC || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 py-4 whitespace-nowrap text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleEdit(unit)}
