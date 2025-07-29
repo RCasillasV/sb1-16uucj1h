@@ -213,6 +213,15 @@ export function MainHeader({
 
   const renderPatientNavigation = () => {
     if (!selectedPatient) return null;
+
+    // Verificar el rol del usuario
+    const userRole = userInfo.rol;
+    const allowedRoles = ['Medico', 'Administrador'];
+    
+    // Si el usuario no tiene un rol permitido, no renderizar la navegación
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      return null;
+    }
   
     return (
       <div 
