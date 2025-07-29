@@ -219,19 +219,19 @@ export function InsuranceManagement() {
                   Aseguradora
                 </th>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-medium  tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-large  tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Contacto
                 </th>
                 <th 
-                  className="px-3 py-3 text-left text-xs font-medium   tracking-wider"
+                  className="px-3 py-3 text-left text-xs font-large   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Estado
                 </th>
                 <th 
-                  className="px-3 py-3 text-right text-xs font-medium   tracking-wider"
+                  className="px-3 py-3 text-right text-xs font-large   tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Acciones
