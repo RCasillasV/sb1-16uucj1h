@@ -402,6 +402,12 @@ export function Prescriptions() {
               >
                 Diagnóstico Principal (CIE-10) *
               </label>
+                           <DiagnosisSearch
+                selectedDiagnoses={diagnosticoPrincipal ? [diagnosticoPrincipal] : []}
+                onSelect={handleDiagnosisSelect}
+                onRemove={handleDiagnosisRemove}
+              />
+
            </div>
           {/* Información básica de la receta */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
