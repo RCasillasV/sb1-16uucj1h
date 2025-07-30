@@ -412,7 +412,7 @@ export function Prescriptions() {
               />
             </div>
 
-            <div md:col-span-1>
+            <div className="md:col-span-1">
               <label 
                 htmlFor="numeroReceta" 
                 className="block text-sm font-medium mb-1"
