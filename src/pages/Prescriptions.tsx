@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Plus, X, Search } from 'lucide-react';
 import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
-import { RichTextEditor } from '../components/RichTextEditor';
 import { CollapsibleRecord } from '../components/CollapsibleRecord';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
@@ -15,8 +13,45 @@ import clsx from 'clsx';
 interface Prescription {
   id: string;
   created_at: string;
-  prescription_text: string;
+  numeroReceta: string;
+  diagnosticoPrincipal: string;
+  instruccionesGenerales: string | null;
+  medications: Array<{
+    nombreComercial: string;
+    concentracion: string;
+    presentacion: string;
+    dosis: string;
+    frecuencia: string;
+    duracion: string;
+    cantidadTotal: string;
+    viaAdministracion: string;
+    instruccionesAdicionales: string | null;
+  }>;
 }
+
+interface MedicationFormData {
+  nombreComercial: string;
+  concentracion: string;
+  presentacion: string;
+  dosis: string;
+  frecuencia: string;
+  duracion: string;
+  cantidadTotal: string;
+  viaAdministracion: string;
+  instruccionesAdicionales: string;
+}
+
+const initialMedicationData: MedicationFormData = {
+  nombreComercial: '',
+  concentracion: '',
+  presentacion: '',
+  dosis: '',
+  frecuencia: '',
+  duracion: '',
+  cantidadTotal: '',
+  viaAdministracion: 'Oral',
+  instruccionesAdicionales: '',
+};
 
 export function Prescriptions() {
   const { currentTheme } = useTheme();
@@ -27,8 +62,23 @@ export function Prescriptions() {
   const [saving, setSaving] = useState(false);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [newEntry, setNewEntry] = useState('');
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
+
+  // Formulario de receta
+  const [numeroReceta, setNumeroReceta] = useState('');
+  const [diagnosticoPrincipal, setDiagnosticoPrincipal] = useState('');
+  const [instruccionesGenerales, setInstruccionesGenerales] = useState('');
+  const [medications, setMedications] = useState<MedicationFormData[]>([]);
+  const [currentMedication, setCurrentMedication] = useState<MedicationFormData>(initialMedicationData);
+
+  // Autocompletado de medicamentos
+  const [medicationSuggestions, setMedicationSuggestions] = useState<Array<{
+    id: string;
+    nombreComercial: string;
+    concentracion: string;
+    presentacion: string;
+  }>>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     if (!selectedPatient) {
@@ -37,8 +87,35 @@ export function Prescriptions() {
     }
     if (!authLoading && user) {
       fetchPrescriptions();
+      generatePrescriptionNumber();
     }
   }, [selectedPatient, user, authLoading]);
+
+  useEffect(() => {
+    if (currentMedication.nombreComercial.length > 2) {
+      searchMedications(currentMedication.nombreComercial);
+    } else {
+      setMedicationSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [currentMedication.nombreComercial]);
+
+  const generatePrescriptionNumber = () => {
+    const now = new Date();
+    const timestamp = now.getTime().toString().slice(-8);
+    setNumeroReceta(`RX-${timestamp}`);
+  };
+
+  const searchMedications = async (searchTerm: string) => {
+    try {
+      const results = await api.medications.search(searchTerm);
+      setMedicationSuggestions(results);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error('Error searching medications:', error);
+      setMedicationSuggestions([]);
+    }
+  };
 
   const fetchPrescriptions = async () => {
     if (!selectedPatient) return;
@@ -52,15 +129,26 @@ export function Prescriptions() {
     setError(null);
     try {
       const data = await api.prescriptions.getByPatientId(selectedPatient.id);
-      const sortedPrescriptions = data
-        .map(prescription => ({
-          id: prescription.id,
-          created_at: prescription.created_at,
-          prescription_text: prescription.diagnosis || prescription.special_instructions || ''
-        }))
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      const formattedPrescriptions = data.map(prescription => ({
+        id: prescription.id,
+        created_at: prescription.created_at,
+        numeroReceta: prescription.prescription_number,
+        diagnosticoPrincipal: prescription.diagnosis || '',
+        instruccionesGenerales: prescription.special_instructions,
+        medications: prescription.prescription_medications?.map(pm => ({
+          nombreComercial: pm.medications?.name || '',
+          concentracion: pm.medications?.concentration || '',
+          presentacion: pm.medications?.presentation || '',
+          dosis: pm.dosage,
+          frecuencia: pm.frequency,
+          duracion: pm.duration,
+          cantidadTotal: pm.total_quantity,
+          viaAdministracion: pm.administration_route,
+          instruccionesAdicionales: pm.special_instructions,
+        })) || []
+      }));
       
-      setPrescriptions(sortedPrescriptions);
+      setPrescriptions(formattedPrescriptions);
     } catch (err) {
       console.error('Error fetching prescriptions:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar las recetas. Por favor, intente nuevamente.');
@@ -69,29 +157,128 @@ export function Prescriptions() {
     }
   };
 
+  const handleAddMedication = () => {
+    if (!currentMedication.nombreComercial.trim() || !currentMedication.dosis.trim()) {
+      setError('Nombre del medicamento y dosis son obligatorios');
+      return;
+    }
+
+    setMedications(prev => [...prev, { ...currentMedication }]);
+    setCurrentMedication(initialMedicationData);
+    setShowSuggestions(false);
+    setError(null);
+  };
+
+  const handleRemoveMedication = (index: number) => {
+    setMedications(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleMedicationSuggestionSelect = (suggestion: any) => {
+    setCurrentMedication(prev => ({
+      ...prev,
+      nombreComercial: suggestion.nombreComercial,
+      concentracion: suggestion.concentracion,
+      presentacion: suggestion.presentacion,
+    }));
+    setShowSuggestions(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedPatient || !newEntry.trim()) return;
+    if (!selectedPatient || !diagnosticoPrincipal.trim() || medications.length === 0) {
+      setError('Diagnóstico principal y al menos un medicamento son obligatorios');
+      return;
+    }
 
     setSaving(true);
     setError(null);
 
     try {
       await api.prescriptions.create({
-        prescription_number: `RX-${Date.now()}`,
+        prescription_number: numeroReceta,
         patient_id: selectedPatient.id,
-        diagnosis: newEntry.trim(),
-        medications: [],
-        special_instructions: ''
+        diagnosis: diagnosticoPrincipal,
+        special_instructions: instruccionesGenerales || null,
+        medications: medications.map(med => ({
+          name: med.nombreComercial,
+          concentration: med.concentracion,
+          presentation: med.presentacion,
+          dosage: med.dosis,
+          frequency: med.frecuencia,
+          duration: med.duracion,
+          quantity: med.cantidadTotal,
+          administration_route: med.viaAdministracion,
+          instructions: med.instruccionesAdicionales,
+        }))
       });
       
       await fetchPrescriptions();
-      setNewEntry('');
+      
+      // Limpiar formulario
+      generatePrescriptionNumber();
+      setDiagnosticoPrincipal('');
+      setInstruccionesGenerales('');
+      setMedications([]);
+      setCurrentMedication(initialMedicationData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar la receta');
     } finally {
       setSaving(false);
     }
+  };
+
+  const formatPrescriptionContent = (prescription: Prescription) => {
+    let content = `<div class="prescription-content">`;
+    
+    // Diagnóstico principal
+    content += `<div class="diagnosis-section">
+      <h4 style="font-weight: bold; margin-bottom: 8px; color: ${currentTheme.colors.primary};">Diagnóstico:</h4>
+      <p style="margin-bottom: 16px;">${prescription.diagnosticoPrincipal}</p>
+    </div>`;
+
+    // Medicamentos
+    if (prescription.medications.length > 0) {
+      content += `<div class="medications-section">
+        <h4 style="font-weight: bold; margin-bottom: 8px; color: ${currentTheme.colors.primary};">Medicamentos Recetados:</h4>
+        <div style="margin-bottom: 16px;">`;
+      
+      prescription.medications.forEach((med, index) => {
+        content += `<div style="border: 1px solid ${currentTheme.colors.border}; padding: 12px; margin-bottom: 8px; border-radius: 6px; background: ${currentTheme.colors.background};">
+          <div style="font-weight: bold; margin-bottom: 4px;">${index + 1}. ${med.nombreComercial}</div>
+          <div style="font-size: 14px; color: ${currentTheme.colors.textSecondary}; margin-bottom: 4px;">
+            <strong>Concentración:</strong> ${med.concentracion} | 
+            <strong>Presentación:</strong> ${med.presentacion}
+          </div>
+          <div style="margin-bottom: 4px;">
+            <strong>Dosis:</strong> ${med.dosis} | 
+            <strong>Frecuencia:</strong> ${med.frecuencia}
+          </div>
+          <div style="margin-bottom: 4px;">
+            <strong>Duración:</strong> ${med.duracion} | 
+            <strong>Cantidad Total:</strong> ${med.cantidadTotal}
+          </div>
+          <div style="margin-bottom: 4px;">
+            <strong>Vía de Administración:</strong> ${med.viaAdministracion}
+          </div>
+          ${med.instruccionesAdicionales ? `<div style="font-style: italic; color: ${currentTheme.colors.textSecondary};">
+            <strong>Instrucciones adicionales:</strong> ${med.instruccionesAdicionales}
+          </div>` : ''}
+        </div>`;
+      });
+      
+      content += `</div></div>`;
+    }
+
+    // Instrucciones generales
+    if (prescription.instruccionesGenerales) {
+      content += `<div class="instructions-section">
+        <h4 style="font-weight: bold; margin-bottom: 8px; color: ${currentTheme.colors.primary};">Instrucciones Generales:</h4>
+        <p style="font-style: italic;">${prescription.instruccionesGenerales}</p>
+      </div>`;
+    }
+
+    content += `</div>`;
+    return content;
   };
 
   const buttonStyle = {
@@ -144,7 +331,7 @@ export function Prescriptions() {
             fontFamily: currentTheme.typography.fontFamily,
           }}
         >
-          Recetas
+          Recetas Médicas
         </h1>
       </div>
 
@@ -175,20 +362,364 @@ export function Prescriptions() {
           </div>
         )}
 
-        {/* Active Prescription Area */}
-        <form onSubmit={handleSubmit} className="mb-4">
-          <div className="mb-2">
-            <RichTextEditor
-              value={newEntry}
-              onChange={setNewEntry}
-              placeholder="Escriba el contenido de la receta médica..."
+        {/* Formulario de Nueva Receta */}
+        <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+          <h2 
+            className="text-lg font-medium mb-4"
+            style={{ 
+              color: currentTheme.colors.text,
+              fontFamily: currentTheme.typography.fontFamily,
+            }}
+          >
+            Nueva Receta Médica
+          </h2>
+
+          {/* Información básica de la receta */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label 
+                htmlFor="numeroReceta" 
+                className="block text-sm font-medium mb-1"
+                style={{ color: currentTheme.colors.text }}
+              >
+                Número de Receta
+              </label>
+              <input
+                type="text"
+                id="numeroReceta"
+                value={numeroReceta}
+                onChange={(e) => setNumeroReceta(e.target.value)}
+                required
+                className="w-full p-2 rounded-md border"
+                style={{
+                  background: currentTheme.colors.surface,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
+                }}
+              />
+            </div>
+
+            <div>
+              <label 
+                htmlFor="diagnosticoPrincipal" 
+                className="block text-sm font-medium mb-1"
+                style={{ color: currentTheme.colors.text }}
+              >
+                Diagnóstico Principal *
+              </label>
+              <input
+                type="text"
+                id="diagnosticoPrincipal"
+                value={diagnosticoPrincipal}
+                onChange={(e) => setDiagnosticoPrincipal(e.target.value)}
+                required
+                className="w-full p-2 rounded-md border"
+                style={{
+                  background: currentTheme.colors.surface,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label 
+              htmlFor="instruccionesGenerales" 
+              className="block text-sm font-medium mb-1"
+              style={{ color: currentTheme.colors.text }}
+            >
+              Instrucciones Generales
+            </label>
+            <textarea
+              id="instruccionesGenerales"
+              value={instruccionesGenerales}
+              onChange={(e) => setInstruccionesGenerales(e.target.value)}
+              rows={3}
+              className="w-full p-2 rounded-md border"
+              style={{
+                background: currentTheme.colors.surface,
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
             />
+          </div>
+
+          {/* Sección de Medicamentos */}
+          <div>
+            <h3 
+              className="text-md font-medium mb-4"
+              style={{ color: currentTheme.colors.text }}
+            >
+              Medicamentos Recetados
+            </h3>
+
+            {/* Lista de medicamentos agregados */}
+            {medications.length > 0 && (
+              <div className="mb-4 space-y-2">
+                {medications.map((med, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center justify-between p-3 rounded-md border"
+                    style={{
+                      background: currentTheme.colors.background,
+                      borderColor: currentTheme.colors.border,
+                    }}
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium" style={{ color: currentTheme.colors.text }}>
+                        {med.nombreComercial} - {med.concentracion}
+                      </div>
+                      <div className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                        {med.dosis} | {med.frecuencia} | {med.duracion}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMedication(index)}
+                      className="p-1 rounded-full hover:bg-red-100 transition-colors"
+                    >
+                      <X className="h-4 w-4 text-red-500" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Formulario para agregar medicamento */}
+            <div 
+              className="p-4 rounded-md border-2 border-dashed space-y-3"
+              style={{ borderColor: currentTheme.colors.border }}
+            >
+              <h4 className="text-sm font-medium" style={{ color: currentTheme.colors.text }}>
+                Agregar Medicamento
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="relative">
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Nombre del Medicamento *
+                  </label>
+                  <input
+                    type="text"
+                    value={currentMedication.nombreComercial}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, nombreComercial: e.target.value }))}
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                  {showSuggestions && medicationSuggestions.length > 0 && (
+                    <div 
+                      className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-40 overflow-y-auto"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                      }}
+                    >
+                      {medicationSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleMedicationSuggestionSelect(suggestion)}
+                          className="w-full text-left p-2 hover:bg-gray-100 text-sm"
+                        >
+                          <div className="font-medium">{suggestion.nombreComercial}</div>
+                          <div className="text-xs text-gray-500">
+                            {suggestion.concentracion} - {suggestion.presentacion}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Concentración
+                  </label>
+                  <input
+                    type="text"
+                    value={currentMedication.concentracion}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, concentracion: e.target.value }))}
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Presentación
+                  </label>
+                  <select
+                    value={currentMedication.presentacion}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, presentacion: e.target.value }))}
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  >
+                    <option value="">Seleccionar...</option>
+                    <option value="Tableta">Tableta</option>
+                    <option value="Cápsula">Cápsula</option>
+                    <option value="Jarabe">Jarabe</option>
+                    <option value="Suspensión">Suspensión</option>
+                    <option value="Inyectable">Inyectable</option>
+                    <option value="Crema">Crema</option>
+                    <option value="Pomada">Pomada</option>
+                    <option value="Gotas">Gotas</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Dosis *
+                  </label>
+                  <input
+                    type="text"
+                    value={currentMedication.dosis}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, dosis: e.target.value }))}
+                    placeholder="ej: 1 tableta, 5ml"
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Frecuencia
+                  </label>
+                  <input
+                    type="text"
+                    value={currentMedication.frecuencia}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, frecuencia: e.target.value }))}
+                    placeholder="ej: Cada 8 horas"
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Duración
+                  </label>
+                  <input
+                    type="text"
+                    value={currentMedication.duracion}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, duracion: e.target.value }))}
+                    placeholder="ej: 7 días"
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Cantidad Total
+                  </label>
+                  <input
+                    type="text"
+                    value={currentMedication.cantidadTotal}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, cantidadTotal: e.target.value }))}
+                    placeholder="ej: 30 tabletas"
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Vía de Administración
+                  </label>
+                  <select
+                    value={currentMedication.viaAdministracion}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, viaAdministracion: e.target.value }))}
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  >
+                    <option value="Oral">Oral</option>
+                    <option value="Intravenosa">Intravenosa</option>
+                    <option value="Intramuscular">Intramuscular</option>
+                    <option value="Subcutánea">Subcutánea</option>
+                    <option value="Tópica">Tópica</option>
+                    <option value="Oftálmica">Oftálmica</option>
+                    <option value="Ótica">Ótica</option>
+                    <option value="Nasal">Nasal</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-3">
+                  <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                    Instrucciones Adicionales
+                  </label>
+                  <textarea
+                    value={currentMedication.instruccionesAdicionales}
+                    onChange={(e) => setCurrentMedication(prev => ({ ...prev, instruccionesAdicionales: e.target.value }))}
+                    rows={2}
+                    placeholder="Instrucciones específicas para este medicamento"
+                    className="w-full p-2 text-sm rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleAddMedication}
+                  disabled={!currentMedication.nombreComercial.trim() || !currentMedication.dosis.trim()}
+                  className={clsx(
+                    'flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors',
+                    'disabled:opacity-50 disabled:cursor-not-allowed'
+                  )}
+                  style={{
+                    background: currentTheme.colors.primary,
+                    color: currentTheme.colors.buttonText,
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar Medicamento
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
             <button
               type="submit"
-              disabled={saving || loading || !newEntry.trim()}
+              disabled={saving || loading || !diagnosticoPrincipal.trim() || medications.length === 0}
               className={clsx(buttonStyle.base, 'disabled:opacity-50')}
               style={buttonStyle.primary}
             >
@@ -197,7 +728,7 @@ export function Prescriptions() {
           </div>
         </form>
 
-        {/* Prescription History */}
+        {/* Historial de Recetas */}
         {prescriptions.length > 0 && (
           <div>
             <h2 
@@ -223,8 +754,8 @@ export function Prescriptions() {
               {prescriptions.map((prescription, index) => (
                 <CollapsibleRecord
                   key={prescription.id}
-                  date={format(new Date(prescription.created_at), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}
-                  content={prescription.prescription_text}
+                  date={`${format(new Date(prescription.created_at), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: require('date-fns/locale/es') })} - ${prescription.numeroReceta}`}
+                  content={formatPrescriptionContent(prescription)}
                   index={index}
                 />
               ))}
