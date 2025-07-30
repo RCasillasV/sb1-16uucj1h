@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, X, Search } from 'lucide-react';
 import { api } from '../lib/api';
+import { DiagnosisSearch } from '../components/DiagnosisSearch';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +10,12 @@ import { useTheme } from '../contexts/ThemeContext';
 import { CollapsibleRecord } from '../components/CollapsibleRecord';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
+
+interface Diagnosis {
+  Consecutivo: number;
+  Catalog_Key: string;
+  Nombre: string;
+}
 
 interface Prescription {
   id: string;
@@ -66,7 +73,7 @@ export function Prescriptions() {
 
   // Formulario de receta
   const [numeroReceta, setNumeroReceta] = useState('');
-  const [diagnosticoPrincipal, setDiagnosticoPrincipal] = useState('');
+  const [diagnosticoPrincipal, setDiagnosticoPrincipal] = useState<Diagnosis | null>(null);
   const [instruccionesGenerales, setInstruccionesGenerales] = useState('');
   const [medications, setMedications] = useState<MedicationFormData[]>([]);
   const [currentMedication, setCurrentMedication] = useState<MedicationFormData>(initialMedicationData);
@@ -104,6 +111,20 @@ export function Prescriptions() {
     const now = new Date();
     const timestamp = now.getTime().toString().slice(-8);
     setNumeroReceta(`RX-${timestamp}`);
+  };
+
+  const handleDiagnosisSelect = (diagnosisOrArray: Diagnosis | Diagnosis[]) => {
+    if (Array.isArray(diagnosisOrArray)) {
+      // Si es un array (caso de reordenamiento), tomar el primero
+      setDiagnosticoPrincipal(diagnosisOrArray[0] || null);
+    } else {
+      // Si es un objeto Diagnosis individual
+      setDiagnosticoPrincipal(diagnosisOrArray);
+    }
+  };
+
+  const handleDiagnosisRemove = (diagnosis: Diagnosis) => {
+    setDiagnosticoPrincipal(null);
   };
 
   const searchMedications = async (searchTerm: string) => {
@@ -185,8 +206,8 @@ export function Prescriptions() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedPatient || !diagnosticoPrincipal.trim() || medications.length === 0) {
-      setError('Diagnóstico principal y al menos un medicamento son obligatorios');
+    if (!selectedPatient || !diagnosticoPrincipal || medications.length === 0) {
+      setError('Diagnóstico principal (CIE-10) y al menos un medicamento son obligatorios');
       return;
     }
 
@@ -197,7 +218,7 @@ export function Prescriptions() {
       await api.prescriptions.create({
         prescription_number: numeroReceta,
         patient_id: selectedPatient.id,
-        diagnosis: diagnosticoPrincipal,
+        diagnosis: `${diagnosticoPrincipal.Catalog_Key} - ${diagnosticoPrincipal.Nombre}`,
         special_instructions: instruccionesGenerales || null,
         medications: medications.map(med => ({
           name: med.nombreComercial,
@@ -216,7 +237,7 @@ export function Prescriptions() {
       
       // Limpiar formulario
       generatePrescriptionNumber();
-      setDiagnosticoPrincipal('');
+      setDiagnosticoPrincipal(null);
       setInstruccionesGenerales('');
       setMedications([]);
       setCurrentMedication(initialMedicationData);
@@ -401,24 +422,16 @@ export function Prescriptions() {
 
             <div>
               <label 
-                htmlFor="diagnosticoPrincipal" 
+                htmlFor="diagnosis-search" 
                 className="block text-sm font-medium mb-1"
                 style={{ color: currentTheme.colors.text }}
               >
-                Diagnóstico Principal *
+                Diagnóstico Principal (CIE-10) *
               </label>
-              <input
-                type="text"
-                id="diagnosticoPrincipal"
-                value={diagnosticoPrincipal}
-                onChange={(e) => setDiagnosticoPrincipal(e.target.value)}
-                required
-                className="w-full p-2 rounded-md border"
-                style={{
-                  background: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                  color: currentTheme.colors.text,
-                }}
+              <DiagnosisSearch
+                selectedDiagnoses={diagnosticoPrincipal ? [diagnosticoPrincipal] : []}
+                onSelect={handleDiagnosisSelect}
+                onRemove={handleDiagnosisRemove}
               />
             </div>
           </div>
@@ -719,7 +732,7 @@ export function Prescriptions() {
           <div className="flex justify-end gap-2">
             <button
               type="submit"
-              disabled={saving || loading || !diagnosticoPrincipal.trim() || medications.length === 0}
+              disabled={saving || loading || !diagnosticoPrincipal || medications.length === 0}
               className={clsx(buttonStyle.base, 'disabled:opacity-50')}
               style={buttonStyle.primary}
             >
