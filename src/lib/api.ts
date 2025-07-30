@@ -919,8 +919,8 @@ export const api = {
     async create(prescription: {
       prescription_number: string;
       patient_id: string;
-      special_instructions?: string;
-      diagnosis?: string;
+      diagnosis: string;
+      special_instructions?: string | null;
       medications: Array<{
         name: string;
         concentration: string;
@@ -929,6 +929,7 @@ export const api = {
         frequency: string;
         duration: string;
         quantity: string;
+        administration_route: string;
         instructions?: string;
       }>;
     }) {
@@ -955,33 +956,50 @@ export const api = {
       }
 
       for (const med of prescription.medications) {
-        const { data: medicationData, error: medicationError } = await supabase
+        // Buscar medicamento existente
+        let medicationId: string;
+        const { data: existingMedication } = await supabase
           .from('medications')
-          .insert({
-            name: med.name,
-            presentation: med.presentation,
-            concentration: med.concentration,
-            active_compound: med.name,
-            user_id: session.user.id
-          })
-          .select()
+          .select('id')
+          .eq('name', med.name)
+          .eq('concentration', med.concentration)
+          .eq('presentation', med.presentation)
           .single();
 
-        if (medicationError) {
-          console.error('Error creating medication:', medicationError);
-          throw medicationError;
+        if (existingMedication) {
+          medicationId = existingMedication.id;
+        } else {
+          // Crear nuevo medicamento
+          const { data: medicationData, error: medicationError } = await supabase
+            .from('medications')
+            .insert({
+              name: med.name,
+              presentation: med.presentation,
+              concentration: med.concentration,
+              active_compound: med.name,
+              user_id: session.user.id
+            })
+            .select('id')
+            .single();
+
+          if (medicationError) {
+            console.error('Error creating medication:', medicationError);
+            throw medicationError;
+          }
+
+          medicationId = medicationData.id;
         }
 
         const { error: prescMedError } = await supabase
           .from('prescription_medications')
           .insert({
             prescription_id: prescriptionData.id,
-            medication_id: medicationData.id,
+            medication_id: medicationId,
             dosage: med.dosage,
             frequency: med.frequency,
             duration: med.duration,
             total_quantity: med.quantity,
-            administration_route: 'Oral',
+            administration_route: med.administration_route,
             special_instructions: med.instructions,
             user_id: session.user.id
           });
@@ -993,6 +1011,33 @@ export const api = {
       }
 
       return prescriptionData;
+    }
+  },
+
+  medications: {
+    async search(searchTerm: string) {
+      if (!searchTerm || searchTerm.length < 2) {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('medications')
+        .select('id, name, concentration, presentation')
+        .ilike('name', `%${searchTerm}%`)
+        .limit(10);
+
+      if (error) {
+        console.error('Error searching medications:', error);
+        return [];
+      }
+
+      // Mapear a los nombres en español para el frontend
+      return (data || []).map(med => ({
+        id: med.id,
+        nombreComercial: med.name,
+        concentracion: med.concentration,
+        presentacion: med.presentation,
+      }));
     }
   },
 
