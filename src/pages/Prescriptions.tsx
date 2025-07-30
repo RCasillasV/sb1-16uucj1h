@@ -399,6 +399,21 @@ export function Prescriptions() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label 
+                htmlFor="diagnosis-search" 
+                className="block text-sm font-medium mb-1"
+                style={{ color: currentTheme.colors.text }}
+              >
+                Diagnóstico Principal (CIE-10) *
+              </label>
+              <DiagnosisSearch
+                selectedDiagnoses={diagnosticoPrincipal ? [diagnosticoPrincipal] : []}
+                onSelect={handleDiagnosisSelect}
+                onRemove={handleDiagnosisRemove}
+              />
+            </div>
+
+            <div>
+              <label 
                 htmlFor="numeroReceta" 
                 className="block text-sm font-medium mb-1"
                 style={{ color: currentTheme.colors.text }}
@@ -417,21 +432,6 @@ export function Prescriptions() {
                   borderColor: currentTheme.colors.border,
                   color: currentTheme.colors.text,
                 }}
-              />
-            </div>
-
-            <div>
-              <label 
-                htmlFor="diagnosis-search" 
-                className="block text-sm font-medium mb-1"
-                style={{ color: currentTheme.colors.text }}
-              >
-                Diagnóstico Principal (CIE-10) *
-              </label>
-              <DiagnosisSearch
-                selectedDiagnoses={diagnosticoPrincipal ? [diagnosticoPrincipal] : []}
-                onSelect={handleDiagnosisSelect}
-                onRemove={handleDiagnosisRemove}
               />
             </div>
           </div>
