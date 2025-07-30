@@ -395,6 +395,13 @@ export function Prescriptions() {
           >
             Nueva Receta Médica
              </h2>
+             <label 
+                htmlFor="diagnosis-search" 
+                className="block text-sm font-medium mb-1"
+                style={{ color: currentTheme.colors.text }}
+              >
+                Diagnóstico Principal (CIE-10) *
+              </label>
            </div>
           {/* Información básica de la receta */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
