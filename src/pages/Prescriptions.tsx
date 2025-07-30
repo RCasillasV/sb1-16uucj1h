@@ -385,8 +385,7 @@ export function Prescriptions() {
 
         {/* Formulario de Nueva Receta */}
         <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <h2 
+           <h2 
             className="text-lg font-medium mb-4"
             style={{ 
               color: currentTheme.colors.text,
@@ -395,20 +394,7 @@ export function Prescriptions() {
           >
             Nueva Receta Médica
              </h2>
-             <label 
-                htmlFor="diagnosis-search" 
-                className="block text-sm font-medium mb-1"
-                style={{ color: currentTheme.colors.text }}
-              >
-                Diagnóstico Principal (CIE-10) *
-              </label>
-                           <DiagnosisSearch
-                selectedDiagnoses={diagnosticoPrincipal ? [diagnosticoPrincipal] : []}
-                onSelect={handleDiagnosisSelect}
-                onRemove={handleDiagnosisRemove}
-              />
-
-           </div>
+  
           {/* Información básica de la receta */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
