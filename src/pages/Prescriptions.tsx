@@ -508,8 +508,8 @@ export function Prescriptions() {
                 Agregar Medicamento
               </h4>
 
-              <div className="grid grid-cols-3 md:grid-cols-8 gap-3">
-                <div className="relative">
+              <div className="grid grid-cols-1 md:grid-cols-8 gap-3">
+                <div className="relative md:col-span-3">
                   <label className="block text-xs font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                     Nombre del Medicamento *
                   </label>
