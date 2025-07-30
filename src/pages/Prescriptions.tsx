@@ -396,7 +396,7 @@ export function Prescriptions() {
              </h2>
   
           {/* Información básica de la receta */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
             <div className="md:col-span-2">
               <label 
                 htmlFor="diagnosis-search" 
