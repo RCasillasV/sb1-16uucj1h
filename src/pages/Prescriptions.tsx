@@ -5,6 +5,7 @@ import { DiagnosisSearch } from '../components/DiagnosisSearch';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { useTheme } from '../contexts/ThemeContext';
 import { CollapsibleRecord } from '../components/CollapsibleRecord';
