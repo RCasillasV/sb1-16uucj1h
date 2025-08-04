@@ -344,26 +344,7 @@ export function ClinicalHistory() {
           {/* Antecedentes Heredo-Familiares */}
           <CollapsibleSection title="1. Antecedentes Heredo-Familiares">
             <div>
-              <div 
-                className="p-3 rounded-md mb-4"
-                style={{ 
-                  background: `${currentTheme.colors.primary}20`,
-                  borderLeft: `4px solid ${currentTheme.colors.primary}`,
-                }}
-              >
-                <p 
-                  className="text-sm font-medium"
-                  style={{ color: currentTheme.colors.text }}
-                >
-                  ANTECEDENTES FAMILIARES Y HEREDITARIOS
-                </p>
-                <p 
-                  className="text-xs mt-1"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Aquí se registrarán los antecedentes familiares del paciente
-                </p>
-              </div>
+
 
               <div className="form-group table-container overflow-x-auto">
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
