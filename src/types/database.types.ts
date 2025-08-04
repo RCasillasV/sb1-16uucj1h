@@ -520,6 +520,103 @@ export interface Database {
           user_id?: string | null
         }
       }
+      tcPatologias: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          nombre: string
+          codcie10: string | null
+          especialidad: string | null
+          sexo: string | null
+          activo: boolean
+          idUsuario: string | null
+          idbu: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          nombre: string
+          codcie10?: string | null
+          especialidad?: string | null
+          sexo?: string | null
+          activo?: boolean
+          idUsuario?: string | null
+          idbu?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          nombre?: string
+          codcie10?: string | null
+          especialidad?: string | null
+          sexo?: string | null
+          activo?: boolean
+          idUsuario?: string | null
+          idbu?: string | null
+        }
+      }
+      tpPacienteHistPatologica: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          id_paciente: string
+          id_usuario: string
+          enfermedades_cronicas: Json
+          otras_enfermedades_cronicas: string | null
+          cirugias: Json
+          hospitalizaciones: Json
+          alergias: string | null
+          transfusiones: string | null
+          estado_inmunizacion: string | null
+          detalles_inmunizacion: string | null
+          medicamentos_actuales: string | null
+          habitos_toxicos: Json
+          otros_habitos_toxicos: string | null
+          notas_generales: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          id_paciente: string
+          id_usuario: string
+          enfermedades_cronicas?: Json
+          otras_enfermedades_cronicas?: string | null
+          cirugias?: Json
+          hospitalizaciones?: Json
+          alergias?: string | null
+          transfusiones?: string | null
+          estado_inmunizacion?: string | null
+          detalles_inmunizacion?: string | null
+          medicamentos_actuales?: string | null
+          habitos_toxicos?: Json
+          otros_habitos_toxicos?: string | null
+          notas_generales?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          id_paciente?: string
+          id_usuario?: string
+          enfermedades_cronicas?: Json
+          otras_enfermedades_cronicas?: string | null
+          cirugias?: Json
+          hospitalizaciones?: Json
+          alergias?: string | null
+          transfusiones?: string | null
+          estado_inmunizacion?: string | null
+          detalles_inmunizacion?: string | null
+          medicamentos_actuales?: string | null
+          habitos_toxicos?: Json
+          otros_habitos_toxicos?: string | null
+          notas_generales?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
