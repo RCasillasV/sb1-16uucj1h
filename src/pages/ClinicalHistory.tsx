@@ -17,6 +17,21 @@ interface FamilyMember {
   type: 'fixed' | 'dynamic';
 }
 
+interface PathologicalHistory {
+  chronicDiseases: string[];
+  otherChronicDiseases: string;
+  surgeries: Array<{ id: string; type: string; date: string; notes: string }>;
+  hospitalizations: Array<{ id: string; reason: string; date: string; duration: string; notes: string }>;
+  allergies: string;
+  transfusions: string;
+  immunizationStatus: 'complete' | 'incomplete' | 'unknown' | '';
+  immunizationDetails: string;
+  currentMedications: string;
+  toxicHabits: string[];
+  otherToxicHabits: string;
+  generalNotes: string;
+}
+
 interface CollapsibleSectionProps {
   title: string;
   children: React.ReactNode;
@@ -97,6 +112,24 @@ export function ClinicalHistory() {
   const [showExtraRelatives, setShowExtraRelatives] = useState(false);
   const [nextDynamicId, setNextDynamicId] = useState(1);
 
+  // Pathological history state
+  const [pathologicalHistoryData, setPathologicalHistoryData] = useState<PathologicalHistory>({
+    chronicDiseases: [],
+    otherChronicDiseases: '',
+    surgeries: [],
+    hospitalizations: [],
+    allergies: '',
+    transfusions: '',
+    immunizationStatus: '',
+    immunizationDetails: '',
+    currentMedications: '',
+    toxicHabits: [],
+    otherToxicHabits: '',
+    generalNotes: '',
+  });
+  const [nextSurgeryId, setNextSurgeryId] = useState(1);
+  const [nextHospitalizationId, setNextHospitalizationId] = useState(1);
+
   useEffect(() => {
     if (!selectedPatient) {
       setShowWarningModal(true);
@@ -147,6 +180,90 @@ export function ClinicalHistory() {
     // TODO: Implement save functionality
     console.log('Family history data:', familyHistoryData);
     alert('Antecedentes familiares guardados (funcionalidad en desarrollo)');
+  };
+
+  // Pathological history handlers
+  const handlePathologicalInputChange = (field: keyof PathologicalHistory, value: string | string[]) => {
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handlePathologicalCheckboxChange = (field: 'chronicDiseases' | 'toxicHabits', value: string, isChecked: boolean) => {
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      [field]: isChecked 
+        ? [...prev[field], value]
+        : prev[field].filter(item => item !== value)
+    }));
+  };
+
+  const handleAddSurgery = () => {
+    const newSurgery = {
+      id: `surgery_${nextSurgeryId}`,
+      type: '',
+      date: '',
+      notes: ''
+    };
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      surgeries: [...prev.surgeries, newSurgery]
+    }));
+    setNextSurgeryId(prev => prev + 1);
+  };
+
+  const handleUpdateSurgery = (index: number, field: keyof PathologicalHistory['surgeries'][0], value: string) => {
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      surgeries: prev.surgeries.map((surgery, i) => 
+        i === index ? { ...surgery, [field]: value } : surgery
+      )
+    }));
+  };
+
+  const handleRemoveSurgery = (index: number) => {
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      surgeries: prev.surgeries.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleAddHospitalization = () => {
+    const newHospitalization = {
+      id: `hospitalization_${nextHospitalizationId}`,
+      reason: '',
+      date: '',
+      duration: '',
+      notes: ''
+    };
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      hospitalizations: [...prev.hospitalizations, newHospitalization]
+    }));
+    setNextHospitalizationId(prev => prev + 1);
+  };
+
+  const handleUpdateHospitalization = (index: number, field: keyof PathologicalHistory['hospitalizations'][0], value: string) => {
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      hospitalizations: prev.hospitalizations.map((hosp, i) => 
+        i === index ? { ...hosp, [field]: value } : hosp
+      )
+    }));
+  };
+
+  const handleRemoveHospitalization = (index: number) => {
+    setPathologicalHistoryData(prev => ({
+      ...prev,
+      hospitalizations: prev.hospitalizations.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmitPathologicalHistory = () => {
+    // TODO: Implement save functionality
+    console.log('Pathological history data:', pathologicalHistoryData);
+    alert('Antecedentes patológicos guardados (funcionalidad en desarrollo)');
   };
 
   const getBackgroundColor = (parentesco: string) => {
@@ -726,6 +843,544 @@ export function ClinicalHistory() {
 
           {/* Antecedentes Patológicos */}
           <CollapsibleSection title="2. Antecedentes Patológicos">
+            <div>
+              <div 
+                className="p-3 rounded-md mb-4"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  borderLeft: `4px solid ${currentTheme.colors.primary}`,
+                }}
+              >
+                <p 
+                  className="text-sm font-medium"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  ANTECEDENTES PATOLÓGICOS PERSONALES
+                </p>
+                <p 
+                  className="text-xs mt-1"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                >
+                  Registre el historial médico personal del paciente
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Enfermedades Crónicas */}
+                <div>
+                  <h4 
+                    className="text-md font-medium mb-3"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Enfermedades Crónicas
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-3">
+                    {[
+                      'Diabetes Tipo 1', 'Diabetes Tipo 2', 'Hipertensión Arterial', 'Asma',
+                      'EPOC', 'Epilepsia', 'Cardiopatías', 'Artritis Reumatoide',
+                      'Osteoartritis', 'Osteoporosis', 'Hipotiroidismo', 'Hipertiroidismo',
+                      'Enfermedad Renal Crónica', 'Hepatitis B', 'Hepatitis C', 'VIH/SIDA'
+                    ].map(disease => (
+                      <label key={disease} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={pathologicalHistoryData.chronicDiseases.includes(disease)}
+                          onChange={(e) => handlePathologicalCheckboxChange('chronicDiseases', disease, e.target.checked)}
+                          className="rounded border-gray-300"
+                        />
+                        <span style={{ color: currentTheme.colors.text }}>{disease}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Otras enfermedades crónicas
+                    </label>
+                    <textarea
+                      value={pathologicalHistoryData.otherChronicDiseases}
+                      onChange={(e) => handlePathologicalInputChange('otherChronicDiseases', e.target.value)}
+                      rows={2}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                      placeholder="Especifique otras enfermedades crónicas no listadas..."
+                    />
+                  </div>
+                </div>
+
+                {/* Cirugías Previas */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 
+                      className="text-md font-medium"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Cirugías Previas
+                    </h4>
+                    <button
+                      onClick={handleAddSurgery}
+                      className={clsx(buttonStyle.base, 'flex items-center gap-2 text-sm')}
+                      style={{ 
+                        background: '#4CAF50',
+                        color: 'white'
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Agregar Cirugía
+                    </button>
+                  </div>
+                  {pathologicalHistoryData.surgeries.length === 0 ? (
+                    <div 
+                      className="p-3 rounded-md text-center text-sm"
+                      style={{ 
+                        background: currentTheme.colors.background,
+                        color: currentTheme.colors.textSecondary 
+                      }}
+                    >
+                      No hay cirugías registradas
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {pathologicalHistoryData.surgeries.map((surgery, index) => (
+                        <div 
+                          key={surgery.id}
+                          className="p-3 rounded-md border"
+                          style={{
+                            background: currentTheme.colors.background,
+                            borderColor: currentTheme.colors.border,
+                          }}
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label 
+                                className="block text-xs font-medium mb-1"
+                                style={{ color: currentTheme.colors.text }}
+                              >
+                                Tipo de Cirugía
+                              </label>
+                              <input
+                                type="text"
+                                value={surgery.type}
+                                onChange={(e) => handleUpdateSurgery(index, 'type', e.target.value)}
+                                className="w-full p-2 text-sm rounded-md border"
+                                style={{
+                                  background: currentTheme.colors.surface,
+                                  borderColor: currentTheme.colors.border,
+                                  color: currentTheme.colors.text,
+                                }}
+                                placeholder="Ej: Apendicectomía, Cesárea..."
+                              />
+                            </div>
+                            <div>
+                              <label 
+                                className="block text-xs font-medium mb-1"
+                                style={{ color: currentTheme.colors.text }}
+                              >
+                                Fecha
+                              </label>
+                              <input
+                                type="date"
+                                value={surgery.date}
+                                onChange={(e) => handleUpdateSurgery(index, 'date', e.target.value)}
+                                className="w-full p-2 text-sm rounded-md border"
+                                style={{
+                                  background: currentTheme.colors.surface,
+                                  borderColor: currentTheme.colors.border,
+                                  color: currentTheme.colors.text,
+                                }}
+                              />
+                            </div>
+                            <div className="flex items-end">
+                              <button
+                                onClick={() => handleRemoveSurgery(index)}
+                                className="p-2 rounded-md text-sm"
+                                style={{
+                                  background: '#EF4444',
+                                  color: 'white'
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <label 
+                              className="block text-xs font-medium mb-1"
+                              style={{ color: currentTheme.colors.text }}
+                            >
+                              Notas/Complicaciones
+                            </label>
+                            <textarea
+                              value={surgery.notes}
+                              onChange={(e) => handleUpdateSurgery(index, 'notes', e.target.value)}
+                              rows={2}
+                              className="w-full p-2 text-sm rounded-md border"
+                              style={{
+                                background: currentTheme.colors.surface,
+                                borderColor: currentTheme.colors.border,
+                                color: currentTheme.colors.text,
+                              }}
+                              placeholder="Notas adicionales sobre la cirugía..."
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Hospitalizaciones */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 
+                      className="text-md font-medium"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Hospitalizaciones
+                    </h4>
+                    <button
+                      onClick={handleAddHospitalization}
+                      className={clsx(buttonStyle.base, 'flex items-center gap-2 text-sm')}
+                      style={{ 
+                        background: '#4CAF50',
+                        color: 'white'
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Agregar Hospitalización
+                    </button>
+                  </div>
+                  {pathologicalHistoryData.hospitalizations.length === 0 ? (
+                    <div 
+                      className="p-3 rounded-md text-center text-sm"
+                      style={{ 
+                        background: currentTheme.colors.background,
+                        color: currentTheme.colors.textSecondary 
+                      }}
+                    >
+                      No hay hospitalizaciones registradas
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {pathologicalHistoryData.hospitalizations.map((hosp, index) => (
+                        <div 
+                          key={hosp.id}
+                          className="p-3 rounded-md border"
+                          style={{
+                            background: currentTheme.colors.background,
+                            borderColor: currentTheme.colors.border,
+                          }}
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div>
+                              <label 
+                                className="block text-xs font-medium mb-1"
+                                style={{ color: currentTheme.colors.text }}
+                              >
+                                Motivo
+                              </label>
+                              <input
+                                type="text"
+                                value={hosp.reason}
+                                onChange={(e) => handleUpdateHospitalization(index, 'reason', e.target.value)}
+                                className="w-full p-2 text-sm rounded-md border"
+                                style={{
+                                  background: currentTheme.colors.surface,
+                                  borderColor: currentTheme.colors.border,
+                                  color: currentTheme.colors.text,
+                                }}
+                                placeholder="Motivo de hospitalización..."
+                              />
+                            </div>
+                            <div>
+                              <label 
+                                className="block text-xs font-medium mb-1"
+                                style={{ color: currentTheme.colors.text }}
+                              >
+                                Fecha
+                              </label>
+                              <input
+                                type="date"
+                                value={hosp.date}
+                                onChange={(e) => handleUpdateHospitalization(index, 'date', e.target.value)}
+                                className="w-full p-2 text-sm rounded-md border"
+                                style={{
+                                  background: currentTheme.colors.surface,
+                                  borderColor: currentTheme.colors.border,
+                                  color: currentTheme.colors.text,
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label 
+                                className="block text-xs font-medium mb-1"
+                                style={{ color: currentTheme.colors.text }}
+                              >
+                                Duración
+                              </label>
+                              <input
+                                type="text"
+                                value={hosp.duration}
+                                onChange={(e) => handleUpdateHospitalization(index, 'duration', e.target.value)}
+                                className="w-full p-2 text-sm rounded-md border"
+                                style={{
+                                  background: currentTheme.colors.surface,
+                                  borderColor: currentTheme.colors.border,
+                                  color: currentTheme.colors.text,
+                                }}
+                                placeholder="Ej: 3 días, 1 semana..."
+                              />
+                            </div>
+                            <div className="flex items-end">
+                              <button
+                                onClick={() => handleRemoveHospitalization(index)}
+                                className="p-2 rounded-md text-sm"
+                                style={{
+                                  background: '#EF4444',
+                                  color: 'white'
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <label 
+                              className="block text-xs font-medium mb-1"
+                              style={{ color: currentTheme.colors.text }}
+                            >
+                              Notas
+                            </label>
+                            <textarea
+                              value={hosp.notes}
+                              onChange={(e) => handleUpdateHospitalization(index, 'notes', e.target.value)}
+                              rows={2}
+                              className="w-full p-2 text-sm rounded-md border"
+                              style={{
+                                background: currentTheme.colors.surface,
+                                borderColor: currentTheme.colors.border,
+                                color: currentTheme.colors.text,
+                              }}
+                              placeholder="Notas adicionales sobre la hospitalización..."
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Alergias */}
+                <div>
+                  <h4 
+                    className="text-md font-medium mb-3"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Alergias
+                  </h4>
+                  <textarea
+                    value={pathologicalHistoryData.allergies}
+                    onChange={(e) => handlePathologicalInputChange('allergies', e.target.value)}
+                    rows={3}
+                    className="w-full p-3 rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                    placeholder="Registre alergias medicamentosas, alimentarias, ambientales, etc..."
+                  />
+                </div>
+
+                {/* Transfusiones */}
+                <div>
+                  <h4 
+                    className="text-md font-medium mb-3"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Transfusiones Sanguíneas
+                  </h4>
+                  <textarea
+                    value={pathologicalHistoryData.transfusions}
+                    onChange={(e) => handlePathologicalInputChange('transfusions', e.target.value)}
+                    rows={2}
+                    className="w-full p-3 rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                    placeholder="Registre transfusiones previas, fechas y posibles reacciones..."
+                  />
+                </div>
+
+                {/* Inmunizaciones */}
+                <div>
+                  <h4 
+                    className="text-md font-medium mb-3"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Estado de Inmunizaciones (Vacunación)
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: currentTheme.colors.text }}
+                      >
+                        Estado del Esquema de Vacunación
+                      </label>
+                      <select
+                        value={pathologicalHistoryData.immunizationStatus}
+                        onChange={(e) => handlePathologicalInputChange('immunizationStatus', e.target.value)}
+                        className="w-full p-2 rounded-md border"
+                        style={{
+                          background: currentTheme.colors.surface,
+                          borderColor: currentTheme.colors.border,
+                          color: currentTheme.colors.text,
+                        }}
+                      >
+                        <option value="">Seleccione...</option>
+                        <option value="complete">Completo</option>
+                        <option value="incomplete">Incompleto</option>
+                        <option value="unknown">Desconocido</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label 
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: currentTheme.colors.text }}
+                      >
+                        Detalles de Vacunación
+                      </label>
+                      <textarea
+                        value={pathologicalHistoryData.immunizationDetails}
+                        onChange={(e) => handlePathologicalInputChange('immunizationDetails', e.target.value)}
+                        rows={3}
+                        className="w-full p-2 rounded-md border"
+                        style={{
+                          background: currentTheme.colors.surface,
+                          borderColor: currentTheme.colors.border,
+                          color: currentTheme.colors.text,
+                        }}
+                        placeholder="Especifique vacunas aplicadas, fechas, refuerzos pendientes..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Medicamentos Actuales */}
+                <div>
+                  <h4 
+                    className="text-md font-medium mb-3"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Medicamentos Actuales
+                  </h4>
+                  <textarea
+                    value={pathologicalHistoryData.currentMedications}
+                    onChange={(e) => handlePathologicalInputChange('currentMedications', e.target.value)}
+                    rows={4}
+                    className="w-full p-3 rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                    placeholder="Liste los medicamentos que toma actualmente: nombre, dosis, frecuencia..."
+                  />
+                </div>
+
+                {/* Hábitos Tóxicos */}
+                <div>
+                  <h4 
+                    className="text-md font-medium mb-3"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Hábitos Tóxicos
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                    {[
+                      'Tabaquismo',
+                      'Alcoholismo',
+                      'Drogadicción'
+                    ].map(habit => (
+                      <label key={habit} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={pathologicalHistoryData.toxicHabits.includes(habit)}
+                          onChange={(e) => handlePathologicalCheckboxChange('toxicHabits', habit, e.target.checked)}
+                          className="rounded border-gray-300"
+                        />
+                        <span style={{ color: currentTheme.colors.text }}>{habit}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Otros hábitos tóxicos / Detalles
+                    </label>
+                    <textarea
+                      value={pathologicalHistoryData.otherToxicHabits}
+                      onChange={(e) => handlePathologicalInputChange('otherToxicHabits', e.target.value)}
+                      rows={3}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                      placeholder="Especifique otros hábitos, frecuencia, cantidad, tiempo de consumo..."
+                    />
+                  </div>
+                </div>
+
+                {/* Notas Generales */}
+                <div>
+                  <h4 
+                    className="text-md font-medium mb-3"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Notas Generales
+                  </h4>
+                  <textarea
+                    value={pathologicalHistoryData.generalNotes}
+                    onChange={(e) => handlePathologicalInputChange('generalNotes', e.target.value)}
+                    rows={3}
+                    className="w-full p-3 rounded-md border"
+                    style={{
+                      background: currentTheme.colors.surface,
+                      borderColor: currentTheme.colors.border,
+                      color: currentTheme.colors.text,
+                    }}
+                    placeholder="Cualquier otra información médica relevante no mencionada anteriormente..."
+                  />
+                </div>
+              </div>
+
+              <div className="form-group mt-6 flex justify-end">
+                <button
+                  onClick={handleSubmitPathologicalHistory}
+                  className={buttonStyle.base}
+                  style={buttonStyle.primary}
+                >
+                  Guardar Antecedentes Patológicos
+                </button>
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* Antecedentes No Patológicos */}
+          <CollapsibleSection title="3. Antecedentes No Patológicos">
             <div 
               className="p-4 rounded-md text-center"
               style={{ 
@@ -733,8 +1388,8 @@ export function ClinicalHistory() {
                 color: currentTheme.colors.textSecondary 
               }}
             >
-              <p>Sección en desarrollo - Antecedentes Patológicos</p>
-              <p className="text-sm mt-2">Aquí se registrarán los antecedentes patológicos del paciente</p>
+              <p>Sección en desarrollo - Antecedentes No Patológicos</p>
+              <p className="text-sm mt-2">Aquí se registrarán los antecedentes no patológicos del paciente</p>
             </div>
           </CollapsibleSection>
 
