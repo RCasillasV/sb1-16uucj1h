@@ -115,9 +115,10 @@ interface SidebarProps {
   packageVersion: string;
   handleLogout: () => void;
   isMobile: boolean;
+  clinicalEvolutionCount: number;
 }
 
-export function Sidebar({ isExpanded, setIsExpanded, userRole, packageVersion, handleLogout, isMobile }: SidebarProps) {
+export function Sidebar({ isExpanded, setIsExpanded, userRole, packageVersion, handleLogout, isMobile, clinicalEvolutionCount }: SidebarProps) {
   const { currentTheme } = useTheme();
   const location = useLocation();
 
@@ -130,9 +131,17 @@ export function Sidebar({ isExpanded, setIsExpanded, userRole, packageVersion, h
 
   const navigation = useMemo(() => {
     // Filter navigation items based on user role
-    const filteredBaseNavigation = RoleBasedNavigation({
+    let filteredBaseNavigation = RoleBasedNavigation({
       navigationItems: baseNavigation,
       userRole
+    });
+    
+    // Add count to Clinical Evolution item
+    filteredBaseNavigation = filteredBaseNavigation.map(item => {
+      if (item.href === '/clinical-evolution') {
+        return { ...item, count: clinicalEvolutionCount };
+      }
+      return item;
     });
     
     // Filter bottom navigation items based on user role
@@ -150,7 +159,7 @@ export function Sidebar({ isExpanded, setIsExpanded, userRole, packageVersion, h
       { type: 'divider' as const },
       ...filteredBottomNavigation
     ];
-  }, [handleLogout, userRole]);
+  }, [handleLogout, userRole, clinicalEvolutionCount]);
 
   return (
     <div

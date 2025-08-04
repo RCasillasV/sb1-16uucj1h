@@ -243,6 +243,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         packageVersion={packageJson.version}
         handleLogout={handleLogout}
         isMobile={isMobile}
+        clinicalEvolutionCount={clinicalEvolutionCount}
       />
 
       <div 
