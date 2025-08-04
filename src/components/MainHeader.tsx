@@ -239,19 +239,23 @@ export function MainHeader({
         <Link
           to="/clinical-history"
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors relative"
+          style={{ position: 'relative' }}
         >
-          <FileText className="h-4 w-4" />
-          <span className="relative">
-            Historia Clínica
+          <div className="relative">
+            <FileText className="h-4 w-4" />
             {clinicalHistoryCount > 0 && (
               <span 
-                className="absolute -top-2 -right-3 text-[0.65rem] font-bold"
-                style={{ color: currentTheme.colors.primary }}
+                className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
+                style={{
+                  background: currentTheme.colors.primary,
+                  color: currentTheme.colors.buttonText
+                }}
               >
                 {clinicalHistoryCount}
               </span>
             )}
-          </span>
+          </div>
+          Historia Clínica
         </Link>
         <Link
           to="/clinical-evolution"
