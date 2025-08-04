@@ -825,28 +825,7 @@ export function ClinicalHistory() {
           {/* Antecedentes Patológicos */}
           <CollapsibleSection title="2. Antecedentes Patológicos">
             <div>
-              <div 
-                className="p-3 rounded-md mb-4"
-                style={{ 
-                  background: `${currentTheme.colors.primary}20`,
-                  borderLeft: `4px solid ${currentTheme.colors.primary}`,
-                }}
-              >
-                <p 
-                  className="text-sm font-medium"
-                  style={{ color: currentTheme.colors.text }}
-                >
-                  ANTECEDENTES PATOLÓGICOS PERSONALES
-                </p>
-                <p 
-                  className="text-xs mt-1"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Registre el historial médico personal del paciente
-                </p>
-              </div>
-
-              <div className="space-y-6">
+               <div className="space-y-6">
                 {/* Enfermedades Crónicas */}
                 <div>
                   <h4 
