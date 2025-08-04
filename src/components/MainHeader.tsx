@@ -1,6 +1,6 @@
 import React from 'react';  
 import { Link } from 'react-router-dom';
-import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User } from 'lucide-react';
+import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { format, parseISO, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -190,6 +190,14 @@ export function MainHeader({
                 border: `1px solid ${currentTheme.colors.border}`,
               }}
             >
+              <Link
+                to={`/patients/${selectedPatient.id}/report`}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
+                style={{ color: currentTheme.colors.text }}
+              >
+                <Printer className="h-4 w-4" />
+                Informe
+              </Link>
               <button
                 onClick={handleDeselectPatient}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors"
