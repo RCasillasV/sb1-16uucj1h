@@ -241,8 +241,9 @@ export function MainHeader({
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors relative"
           style={{ position: 'relative' }}
         >
-          <div className="relative">
-            <FileText className="h-4 w-4" />
+          <FileText className="h-4 w-4" />
+          <span className="relative">
+            Historia Clínica
             {clinicalHistoryCount > 0 && (
               <span 
                 className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
@@ -254,8 +255,7 @@ export function MainHeader({
                 {clinicalHistoryCount}
               </span>
             )}
-          </div>
-          Historia Clínica
+          </span>
         </Link>
         <Link
           to="/clinical-evolution"
