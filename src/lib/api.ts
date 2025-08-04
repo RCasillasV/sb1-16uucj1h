@@ -1133,7 +1133,7 @@ export const api = {
       }
       return null; // Esto no debería ser alcanzado en un flujo normal
     }
-  }
+  },
 
   patologias: {
     async getAll() {
