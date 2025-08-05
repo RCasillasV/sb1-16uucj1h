@@ -66,7 +66,7 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
 
         {/* Content */}
         <div 
-          className="px-6 py-4 print:p-0"
+          className="px-6 py-4 print:p-0 overflow-y-auto y max-h-[90vh]"
           style={{ color: currentTheme.colors.text }}
         >
           {children}
