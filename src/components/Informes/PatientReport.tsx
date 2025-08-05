@@ -75,7 +75,7 @@ export function PatientReport() {
       >
         {title}
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 print:grid print:grid-cols-3 print:gap-4">
         {children}
       </div>
     </div>
@@ -86,7 +86,7 @@ export function PatientReport() {
     value: string | null | undefined; 
     fullWidth?: boolean;
   }) => (
-    <div className={clsx('space-y-1', fullWidth && 'md:col-span-2 lg:col-span-3')}>
+    <div className={clsx('space-y-1', fullWidth && 'md:col-span-2 lg:col-span-3 print:col-span-2')}>
       <dt 
         className="text-xs font-normal print:text-black"
         style={{ color: currentTheme.colors.textSecondary }}
