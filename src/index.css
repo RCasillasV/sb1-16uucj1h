@@ -117,13 +117,35 @@
     display: none !important;
   /* Estrategia refinada para impresión desde modal */
   body.is-printing-modal {
-    /* Ocultar elementos principales de la aplicación, no todo */
-    > div:not(.fixed) {
+    /* Ocultar todos los hijos directos del body */
+    > * {
       display: none !important;
     }
     
-    /* Asegurar que la modal sea visible y ocupe toda la página */
+    /* Hacer visible solo el overlay de la modal */
+    #modal-overlay-print-target {
+      display: block !important;
+      position: static !important;
+      z-index: auto !important;
+      background: white !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: auto !important;
+      max-width: none !important;
+      max-height: none !important;
+      overflow: visible !important;
+      transform: none !important;
+      inset: auto !important;
+      flex: none !important;
+      align-items: stretch !important;
+      justify-content: stretch !important;
+    }
+    
+    /* Asegurar que el contenido de la modal sea visible y ocupe toda la página */
     #modal-print-target {
+      display: block !important;
       position: static !important;
       width: 100% !important;
       height: auto !important;
@@ -141,90 +163,96 @@
       z-index: auto !important;
     }
     
-    /* Asegurar que el contenido de la modal conserve su estructura */
+    /* Asegurar que todo el contenido interno de la modal sea visible */
     #modal-print-target * {
-      visibility: visible !important;
+      display: block !important;
+      visibility: visible !important; 
       color: black !important;
       background: transparent !important;
     }
     
+    /* Ocultar el backdrop durante la impresión */
+    #modal-overlay-print-target > div:first-child {
+      display: none !important;
+    }
+    
     /* Preservar tipos de display específicos */
-    #modal-print-target .grid {
+    #modal-overlay-print-target .grid {
       display: grid !important;
     }
     
-    #modal-print-target table {
+    #modal-overlay-print-target table {
       display: table !important;
       width: 100% !important;
     }
     
-    #modal-print-target thead {
+    #modal-overlay-print-target thead {
       display: table-header-group !important;
     }
     
-    #modal-print-target tbody {
+    #modal-overlay-print-target tbody {
       display: table-row-group !important;
     }
     
-    #modal-print-target tr {
+    #modal-overlay-print-target tr {
       display: table-row !important;
     }
     
-    #modal-print-target th,
-    #modal-print-target td {
+    #modal-overlay-print-target th,
+    #modal-overlay-print-target td {
       display: table-cell !important;
       border: 1px solid black !important;
       padding: 8px !important;
     }
     
-    #modal-print-target h1,
-    #modal-print-target h2,
-    #modal-print-target h3,
-    #modal-print-target h4,
-    #modal-print-target h5,
-    #modal-print-target h6 {
+    #modal-overlay-print-target h1,
+    #modal-overlay-print-target h2,
+    #modal-overlay-print-target h3,
+    #modal-overlay-print-target h4,
+    #modal-overlay-print-target h5,
+    #modal-overlay-print-target h6 {
       display: block !important;
       font-weight: bold !important;
       margin-bottom: 0.5rem !important;
     }
     
-    #modal-print-target p,
-    #modal-print-target div,
-    #modal-print-target span {
+    #modal-overlay-print-target p,
+    #modal-overlay-print-target div,
+    #modal-overlay-print-target span {
       display: block !important;
     }
     
     /* Asegurar que las clases de Tailwind para impresión funcionen */
-    #modal-print-target .print\\:grid {
+    #modal-overlay-print-target .print\\:grid {
       display: grid !important;
     }
     
-    #modal-print-target .print\\:grid-cols-2 {
+    #modal-overlay-print-target .print\\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
     
-    #modal-print-target .print\\:grid-cols-3 {
+    #modal-overlay-print-target .print\\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     }
     
-    #modal-print-target .print\\:gap-4 {
+    #modal-overlay-print-target .print\\:gap-4 {
       gap: 1rem !important;
     }
     
-    #modal-print-target .print\\:col-span-2 {
+    #modal-overlay-print-target .print\\:col-span-2 {
       grid-column: span 2 / span 2 !important;
     }
     
-    #modal-print-target .print\\:col-span-3 {
+    #modal-overlay-print-target .print\\:col-span-3 {
       grid-column: span 3 / span 3 !important;
     }
     
-    #modal-print-target .print\\:mb-6 {
+    #modal-overlay-print-target .print\\:mb-6 {
       margin-bottom: 1.5rem !important;
     }
     
     /* Ocultar elementos específicos que no deben imprimirse */
-    #modal-print-target .print\\:hidden {
+    #modal-overlay-print-target .print\\:hidden {
       display: none !important;
       visibility: hidden !important;
     }
