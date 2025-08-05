@@ -45,6 +45,33 @@ export function PatientReport({
     }
   }, [user, authLoading, patientId, patientData]);
 
+  // Manejar eventos de impresión para aplicar estilos solo cuando sea necesario
+  useEffect(() => {
+    if (!isModalView) return;
+
+    const handleBeforePrint = () => {
+      console.log('Before print: añadiendo clase is-printing-modal');
+      document.body.classList.add('is-printing-modal');
+    };
+
+    const handleAfterPrint = () => {
+      console.log('After print: eliminando clase is-printing-modal');
+      document.body.classList.remove('is-printing-modal');
+    };
+
+    // Registrar event listeners
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+      // Asegurar que la clase se elimine si el componente se desmonta
+      document.body.classList.remove('is-printing-modal');
+    };
+  }, [isModalView]);
+
   const fetchPatient = async () => {
     if (!patientId) return;
     
@@ -67,17 +94,8 @@ export function PatientReport({
   };
 
   const handlePrint = () => {
-    if (isModalView) {
-      // Añadir clase temporal al body para imprimir desde modal
-      document.body.classList.add('is-printing-modal');
-      window.print();
-      // Remover la clase después de un breve retraso
-      setTimeout(() => {
-        document.body.classList.remove('is-printing-modal');
-      }, 100);
-    } else {
-      window.print();
-    }
+    // Los eventos beforeprint/afterprint manejarán automáticamente la aplicación de estilos
+    window.print();
   };
 
   const formatDate = (dateString: string) => {
