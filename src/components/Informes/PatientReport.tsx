@@ -404,9 +404,9 @@ export function PatientReport({
         <div className="hidden print:block mt-12 pt-6 border-t border-gray-300">
           <div className="text-center text-sm text-gray-600">
             <p>DoctorSoft+ - Sistema de Gestión Médica</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 print:!grid print:!grid-cols-2 print:!gap-4">
           </div>
         </div>
       </div>
     </div>
   );
+}
