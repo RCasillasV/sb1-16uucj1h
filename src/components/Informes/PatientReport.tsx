@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Printer, ArrowLeft, FileText, User } from 'lucide-react';
+import { Printer, ArrowLeft, FileText, User, X } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
@@ -12,25 +11,44 @@ import type { Database } from '../../types/database.types';
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
-export function PatientReport() {
+interface PatientReportProps {
+  patientId: string;
+  isModalView?: boolean;
+  onClose?: () => void;
+  patientData?: Patient | null;
+}
+
+export function PatientReport({ 
+  patientId, 
+  isModalView = false, 
+  onClose, 
+  patientData 
+}: PatientReportProps) {
   const { currentTheme } = useTheme();
   const { user, loading: authLoading } = useAuth();
-  const { patientId } = useParams<{ patientId: string }>();
-  const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Si se proporciona patientData, usarlo directamente
+    if (patientData) {
+      setPatient(patientData);
+      setLoading(false);
+      return;
+    }
+    
+    // Si no hay patientData, cargar desde la API
     if (!authLoading && user && patientId) {
       fetchPatient();
     }
-  }, [user, authLoading, patientId]);
+  }, [user, authLoading, patientId, patientData]);
 
   const fetchPatient = async () => {
     if (!patientId) return;
     
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     try {
       const data = await api.patients.getById(patientId);
@@ -43,11 +61,24 @@ export function PatientReport() {
       console.error('Error fetching patient:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar los datos del paciente');
     } finally {
+      setIsLoading(false);
       setLoading(false);
     }
   };
 
   const handlePrint = () => {
+    // En modal, asegurar que solo se imprima el contenido del informe
+    if (isModalView) {
+      // Añadir una clase temporal al body para ocultar todo excepto el contenido del informe
+      document.body.classList.add('printing-modal');
+      window.print();
+      // Remover la clase después de imprimir
+      setTimeout(() => {
+        document.body.classList.remove('printing-modal');
+      }, 100);
+    } else {
+      window.print();
+    }
     window.print();
   };
 
@@ -121,12 +152,16 @@ export function PatientReport() {
     },
   };
 
-  if (loading || authLoading) {
+  // Mostrar carga si estamos cargando inicialmente o si hay una carga específica en progreso
+  if (loading || authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className={clsx(
+        "flex items-center justify-center",
+        isModalView ? "min-h-[400px]" : "min-h-screen"
+      )}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
         <span className="ml-3" style={{ color: currentTheme.colors.text }}>
-          {authLoading ? 'Autenticando...' : 'Cargando datos del paciente...'}
+          {authLoading ? 'Autenticando...' : isLoading ? 'Cargando datos del paciente...' : 'Cargando...'}
         </span>
       </div>
     );
@@ -134,7 +169,9 @@ export function PatientReport() {
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className={clsx(
+        isModalView ? "p-4" : "max-w-4xl mx-auto p-6"
+      )}>
         <div 
           className="p-4 rounded-md border-l-4"
           style={{
@@ -145,30 +182,36 @@ export function PatientReport() {
         >
           <p className="font-medium">{error}</p>
         </div>
-        <button
-          onClick={() => navigate('/patients')}
-          className={clsx(buttonStyle.base, 'mt-4')}
-          style={buttonStyle.secondary}
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Volver a Pacientes
-        </button>
+        {!isModalView && (
+          <button
+            onClick={() => window.history.back()}
+            className={clsx(buttonStyle.base, 'mt-4')}
+            style={buttonStyle.secondary}
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Volver
+          </button>
+        )}
       </div>
     );
   }
 
   if (!patient) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className={clsx(
+        isModalView ? "p-4 text-center" : "max-w-4xl mx-auto p-6"
+      )}>
         <p style={{ color: currentTheme.colors.text }}>Paciente no encontrado</p>
-        <button
-          onClick={() => navigate('/patients')}
-          className={clsx(buttonStyle.base, 'mt-4')}
-          style={buttonStyle.secondary}
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Volver a Pacientes
-        </button>
+        {!isModalView && (
+          <button
+            onClick={() => window.history.back()}
+            className={clsx(buttonStyle.base, 'mt-4')}
+            style={buttonStyle.secondary}
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Volver
+          </button>
+        )}
       </div>
     );
   }
@@ -176,41 +219,80 @@ export function PatientReport() {
   const age = patient.FechaNacimiento ? calculateAge(patient.FechaNacimiento) : null;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 print:p-0 print:max-w-none">
+    <div className={clsx(
+      isModalView 
+        ? "w-full print:p-0 print:max-w-none" 
+        : "max-w-4xl mx-auto p-6 print:p-0 print:max-w-none"
+    )}>
       {/* Header with actions - hidden in print */}
-      <div className="flex items-center justify-between mb-6 print:hidden">
-        <div className="flex items-center gap-3">
-          <FileText className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
-          <h1 
-            className="text-2xl font-bold"
+      {!isModalView && (
+        <div className="flex items-center justify-between mb-6 print:hidden">
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+            <h1 
+              className="text-2xl font-bold"
+              style={{ color: currentTheme.colors.text }}
+            >
+              Informe del Paciente
+            </h1>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.history.back()}
+              className={buttonStyle.base}
+              style={buttonStyle.secondary}
+            >
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Volver
+            </button>
+            <button
+              onClick={handlePrint}
+              className={buttonStyle.base}
+              style={buttonStyle.primary}
+            >
+              <Printer className="h-5 w-5 mr-2" />
+              Imprimir
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Acciones para vista modal */}
+      {isModalView && (
+        <div className="flex items-center justify-between mb-4 print:hidden">
+          <h2 
+            className="text-lg font-bold"
             style={{ color: currentTheme.colors.text }}
           >
-            Informe del Paciente
-          </h1>
+            Informe Completo
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrint}
+              className={buttonStyle.base}
+              style={buttonStyle.primary}
+            >
+              <Printer className="h-5 w-5 mr-2" />
+              Imprimir
+            </button>
+            <button
+              onClick={onClose}
+              className={buttonStyle.base}
+              style={buttonStyle.secondary}
+            >
+              <X className="h-5 w-5 mr-2" />
+              Cerrar
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate('/patients')}
-            className={buttonStyle.base}
-            style={buttonStyle.secondary}
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Volver
-          </button>
-          <button
-            onClick={handlePrint}
-            className={buttonStyle.base}
-            style={buttonStyle.primary}
-          >
-            <Printer className="h-5 w-5 mr-2" />
-            Imprimir
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Report content */}
       <div 
-        className="rounded-lg shadow-lg p-8 print:shadow-none print:rounded-none"
+        className={clsx(
+          "rounded-lg shadow-lg p-8 print:shadow-none print:rounded-none print:p-0",
+          isModalView && "shadow-none p-4 print:p-0"
+        )}
         style={{ 
           background: currentTheme.colors.surface,
           borderColor: currentTheme.colors.border,
@@ -251,7 +333,11 @@ export function PatientReport() {
 
         {/* Personal Information */}
         <InfoSection title="Información Personal">
-          <InfoField label="Nombre completo" value={`${patient.Nombre} ${patient.Paterno} ${patient.Materno || ''}`.trim()} fullWidth />
+          <InfoField 
+            label="Nombre completo" 
+            value={`${patient.Nombre} ${patient.Paterno} ${patient.Materno || ''}`.trim()} 
+            fullWidth 
+          />
           <InfoField label="Fecha de nacimiento" value={patient.FechaNacimiento ? formatDate(patient.FechaNacimiento) : null} />
           <InfoField label="Edad" value={age?.formatted} />
           <InfoField label="Sexo" value={patient.Sexo} />
@@ -318,10 +404,9 @@ export function PatientReport() {
         <div className="hidden print:block mt-12 pt-6 border-t border-gray-300">
           <div className="text-center text-sm text-gray-600">
             <p>DoctorSoft+ - Sistema de Gestión Médica</p>
-            <p>Este informe fue generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 print:!grid print:!grid-cols-2 print:!gap-4">
           </div>
         </div>
       </div>
     </div>
   );
-}

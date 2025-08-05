@@ -26,7 +26,6 @@ const ClinicalEvolution = lazy(() => import('./pages/ClinicalEvolution').then(mo
 const Prescriptions = lazy(() => import('./pages/Prescriptions').then(module => ({ default: module.Prescriptions })));
 const Somatometry = lazy(() => import('./pages/Somatometry').then(module => ({ default: module.Somatometry })));
 const PatientFilesPage = lazy(() => import('./pages/PatientFilesPage').then(module => ({ default: module.PatientFilesPage })));
-const PatientReport = lazy(() => import('./components/Informes/PatientReport').then(module => ({ default: module.PatientReport })));
 const Users = lazy(() => import('./pages/Users').then(module => ({ default: module.Users })));
 const BusinessUnits = lazy(() => import('./modules/clinica/BusinessUnits').then(module => ({ default: module.BusinessUnits })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
@@ -105,12 +104,6 @@ function AppContent() {
               </PrivateRoute>
              } />
            
-            <Route path="/patients/:patientId/report" element={
-              <PrivateRoute>
-                <PatientReport />
-              </PrivateRoute>
-            } />
-            
             <Route path="/patients" element={
               <PrivateRoute>
                 <Layout>

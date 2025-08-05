@@ -1,7 +1,10 @@
 import React from 'react';  
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { Modal } from './Modal';
+import { PatientReport } from './Informes/PatientReport';
 import { format, parseISO, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { calculateAge } from '../utils/dateUtils';
@@ -49,6 +52,20 @@ export function MainHeader({
   handleEditPatient
 }: MainHeaderProps) {
   const { currentTheme } = useTheme();
+  const [showReportModal, setShowReportModal] = useState(false);
+
+  const handleShowReport = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowReportModal(true);
+    // Cerrar el menú contextual si está abierto
+    if (showContextMenu) {
+      handleContextMenuClick(e);
+    }
+  };
+
+  const handleCloseReport = () => {
+    setShowReportModal(false);
+  };
 
   const getInitials = (patient: typeof selectedPatient) => {
     if (!patient) return '';
@@ -190,14 +207,14 @@ export function MainHeader({
                 border: `1px solid ${currentTheme.colors.border}`,
               }}
             >
-              <Link
-                to={`/patients/${selectedPatient.id}/report`}
+              <button
+                onClick={handleShowReport}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
                 style={{ color: currentTheme.colors.text }}
               >
                 <Printer className="h-4 w-4" />
                 Informe
-              </Link>
+              </button>
               <button
                 onClick={handleDeselectPatient}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors"
@@ -368,6 +385,23 @@ export function MainHeader({
         {selectedPatient ? formatPatientInfo() : renderUserInfo()}
       </div>
       {renderPatientNavigation()}
+
+      {/* Modal del Informe */}
+      {selectedPatient && (
+        <Modal
+          isOpen={showReportModal}
+          onClose={handleCloseReport}
+          title="Informe del Paciente"
+          className="max-w-6xl w-full"
+        >
+          <PatientReport
+            patientId={selectedPatient.id}
+            isModalView={true}
+            onClose={handleCloseReport}
+            patientData={selectedPatient}
+          />
+        </Modal>
+      )}
     </div>
   );
 }

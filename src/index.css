@@ -110,4 +110,47 @@
     max-width: 100% !important;
     height: auto !important;
   }
+
+  /* Estilos específicos para impresión desde modal */
+  body.printing-modal * {
+    visibility: hidden !important;
+  }
+
+  body.printing-modal .modal-content,
+  body.printing-modal .modal-content * {
+    visibility: visible !important;
+  }
+
+  body.printing-modal .print\\:hidden,
+  body.printing-modal .print\\:hidden * {
+    visibility: hidden !important;
+    display: none !important;
+  }
+
+  /* Asegurar que las cuadrículas se mantengan en impresión */
+  @media print {
+    .print\\:grid {
+      display: grid !important;
+    }
+    
+    .print\\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    
+    .print\\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+    
+    .print\\:gap-4 {
+      gap: 1rem !important;
+    }
+    
+    .print\\:col-span-2 {
+      grid-column: span 2 / span 2 !important;
+    }
+    
+    .print\\:col-span-3 {
+      grid-column: span 3 / span 3 !important;
+    }
+  }
 }

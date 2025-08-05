@@ -8,9 +8,10 @@ interface ModalProps {
   title?: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
+  className?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children, actions }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, actions, className }: ModalProps) {
   const { currentTheme } = useTheme();
 
   if (!isOpen) return null;
@@ -33,13 +34,16 @@ export function Modal({ isOpen, onClose, title, children, actions }: ModalProps)
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50"
+        className="fixed inset-0 bg-black bg-opacity-50 print:hidden"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div 
-        className="relative rounded-lg shadow-xl max-w-md w-full"
+        className={clsx(
+          "relative rounded-lg shadow-xl w-full print:shadow-none print:rounded-none print:max-w-none print:p-0",
+          className || "max-w-md"
+        )}
         style={{ 
           background: currentTheme.colors.surface,
           borderColor: currentTheme.colors.border,
@@ -48,7 +52,7 @@ export function Modal({ isOpen, onClose, title, children, actions }: ModalProps)
         {/* Header */}
         {title && (
           <div 
-            className="px-6 py-4 border-b"
+            className="px-6 py-4 border-b print:hidden"
             style={{ borderColor: currentTheme.colors.border }}
           >
             <h3 
@@ -62,7 +66,7 @@ export function Modal({ isOpen, onClose, title, children, actions }: ModalProps)
 
         {/* Content */}
         <div 
-          className="px-6 py-4"
+          className="px-6 py-4 print:p-0"
           style={{ color: currentTheme.colors.text }}
         >
           {children}
@@ -71,7 +75,7 @@ export function Modal({ isOpen, onClose, title, children, actions }: ModalProps)
         {/* Actions */}
         {actions && (
           <div 
-            className="px-6 py-4 border-t flex justify-end"
+            className="px-6 py-4 border-t flex justify-end print:hidden"
             style={{ borderColor: currentTheme.colors.border }}
           >
             {actions}
