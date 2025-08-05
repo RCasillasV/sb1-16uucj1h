@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Print Styles */
+@media print {
+  @page {
+    margin: 1in;
+    size: letter;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    font-size: 12pt !important;
+    line-height: 1.4 !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  .print\\:block {
+    display: block !important;
+  }
+
+  .print\\:text-black {
+    color: black !important;
+  }
+
+  .print\\:bg-gray-50 {
+    background-color: #f9fafb !important;
+  }
+
+  .print\\:bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+
+  .print\\:border-black {
+    border-color: black !important;
+  }
+
+  .print\\:rounded-none {
+    border-radius: 0 !important;
+  }
+
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\\:p-0 {
+    padding: 0 !important;
+  }
+
+  .print\\:max-w-none {
+    max-width: none !important;
+  }
+
+  .print\\:mb-6 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .print\\:text-white {
+    color: white !important;
+  }
+
+  /* Hide navigation and other UI elements */
+  nav,
+  .sidebar,
+  .header-actions,
+  button:not(.print-button),
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  .page-break-inside {
+    page-break-inside: avoid;
+  }
+
+  /* Table styles for print */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f0f0f0 !important;
+    font-weight: bold;
+  }
+
+  /* Ensure images fit properly */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Estilos específicos para impresión desde modal */
+  body.is-printing-modal * {
+    visibility: hidden !important;
+    display: none !important;
+  /* Estrategia refinada para impresión desde modal */
+  body.is-printing-modal {
+    /* Ocultar elementos principales de la aplicación, no todo */
+    > div:not(.fixed) {
+      display: none !important;
+    }
+    
+    /* Asegurar que la modal sea visible y ocupe toda la página */
+    #modal-print-target {
+      position: static !important;
+      width: 100% !important;
+      height: auto !important;
+      max-width: none !important;
+      max-height: none !important;
+      margin: 0 !important;
+      padding: 0.5in !important;
+      background: white !important;
+      color: black !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      transform: none !important;
+      z-index: auto !important;
+    }
+    
+    /* Asegurar que el contenido de la modal conserve su estructura */
+    #modal-print-target * {
+      visibility: visible !important;
+      color: black !important;
+      background: transparent !important;
+    }
+    
+    /* Preservar tipos de display específicos */
+    #modal-print-target .grid {
+      display: grid !important;
+    }
+    
+    #modal-print-target table {
+      display: table !important;
+      width: 100% !important;
+    }
+    
+    #modal-print-target thead {
+      display: table-header-group !important;
+    }
+    
+    #modal-print-target tbody {
+      display: table-row-group !important;
+    }
+    
+    #modal-print-target tr {
+      display: table-row !important;
+    }
+    
+    #modal-print-target th,
+    #modal-print-target td {
+      display: table-cell !important;
+      border: 1px solid black !important;
+      padding: 8px !important;
+    }
+    
+    #modal-print-target h1,
+    #modal-print-target h2,
+    #modal-print-target h3,
+    #modal-print-target h4,
+    #modal-print-target h5,
+    #modal-print-target h6 {
+      display: block !important;
+      font-weight: bold !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    #modal-print-target p,
+    #modal-print-target div,
+    #modal-print-target span {
+      display: block !important;
+    }
+    
+    /* Asegurar que las clases de Tailwind para impresión funcionen */
+    #modal-print-target .print\\:grid {
+      display: grid !important;
+    }
+    
+    #modal-print-target .print\\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    
+    #modal-print-target .print\\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+    
+    #modal-print-target .print\\:gap-4 {
+      gap: 1rem !important;
+    }
+    
+    #modal-print-target .print\\:col-span-2 {
+      grid-column: span 2 / span 2 !important;
+    }
+    
+    #modal-print-target .print\\:col-span-3 {
+      grid-column: span 3 / span 3 !important;
+    }
+    
+    #modal-print-target .print\\:mb-6 {
+      margin-bottom: 1.5rem !important;
+    }
+    
+    /* Ocultar elementos específicos que no deben imprimirse */
+    #modal-print-target .print\\:hidden {
+      display: none !important;
+      visibility: hidden !important;
+    }
+  }
+
+}
