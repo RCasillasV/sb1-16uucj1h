@@ -77,8 +77,6 @@ export function PatientReport({
       }, 100);
     } else {
       window.print();
-    } else {
-      window.print();
     }
   };
 
