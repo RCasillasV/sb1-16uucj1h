@@ -32,6 +32,7 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+     id="modal-overlay-print-target"
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 print:hidden"
