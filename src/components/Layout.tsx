@@ -20,10 +20,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const { currentTheme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [clinicalHistoryCount, setClinicalHistoryCount] = useState(0);
-  const [clinicalEvolutionCount, setClinicalEvolutionCount] = useState(0);
-  const [prescriptionsCount, setPrescriptionsCount] = useState(0);
-  const [patientFilesCount, setPatientFilesCount] = useState(0);
+  const [clinicalHistoryCount, setClinicalHistoryCount] = useState<number | null>(null);
+  const [clinicalEvolutionCount, setClinicalEvolutionCount] = useState<number | null>(null);
+  const [prescriptionsCount, setPrescriptionsCount] = useState<number | null>(null);
+  const [patientFilesCount, setPatientFilesCount] = useState<number | null>(null);
   const [lastAppointment, setLastAppointment] = useState<{
     date: Date;
     status: string;
