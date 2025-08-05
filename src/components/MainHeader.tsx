@@ -243,13 +243,17 @@ export function MainHeader({
         >
           <FileText className="h-4 w-4" />
           Historia Clínica
-          {clinicalHistoryCount === null
-            ? <span className="animate-pulse bg-gray-200 w-4 h-4 rounded-full" />
-            : clinicalHistoryCount > 0 && (
-                <span className="...">{clinicalHistoryCount}</span>
-               )
-          }
-
+         {clinicalHistoryCount > 0 && (
+         <span 
+              className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
+              style={{
+                background: currentTheme.colors.primary,
+                color: currentTheme.colors.buttonText
+              }}
+            >
+              {clinicalHistoryCount}
+            </span>
+          )}
         </Link>
         <Link
           to="/clinical-evolution"
