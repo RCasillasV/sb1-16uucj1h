@@ -26,6 +26,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Function to introduce a small delay
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
   // Function to fetch user attributes using centralized API
   const fetchUserAttributes = async (userId: string): Promise<Partial<UserWithAttributes>> => {
     console.log('fetchUserAttributes called for userId:', userId);
@@ -71,6 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check active sessions and set the user with role
     const checkSessionAndSetUser = async () => {
       console.log('checkSessionAndSetUser called');
+      setLoading(true); // Ensure loading is true at the very start
+
+      // Introduce a small delay to allow localStorage to synchronize in new tabs
+      await sleep(100); // Wait for 100ms
       try {
         console.log('Calling supabase.auth.getSession()');
         const { data, error } = await supabase.auth.getSession();
