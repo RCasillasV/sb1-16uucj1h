@@ -67,19 +67,19 @@ export function PatientReport({
   };
 
   const handlePrint = () => {
-    // En modal, asegurar que solo se imprima el contenido del informe
     if (isModalView) {
-      // Añadir una clase temporal al body para ocultar todo excepto el contenido del informe
-      document.body.classList.add('printing-modal');
+      // Añadir clase temporal al body para imprimir desde modal
+      document.body.classList.add('is-printing-modal');
       window.print();
-      // Remover la clase después de imprimir
+      // Remover la clase después de un breve retraso
       setTimeout(() => {
-        document.body.classList.remove('printing-modal');
+        document.body.classList.remove('is-printing-modal');
       }, 100);
     } else {
       window.print();
+    } else {
+      window.print();
     }
-    window.print();
   };
 
   const formatDate = (dateString: string) => {
