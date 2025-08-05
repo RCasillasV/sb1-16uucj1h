@@ -236,27 +236,25 @@ export function MainHeader({
         className="flex items-center gap-2 px-6 py-2 border-t overflow-x-auto relative"
         style={{ borderColor: currentTheme.colors.border }}
       >
-        <Link
-          to="/clinical-history"
-          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors relative"
-          style={{ position: 'relative' }}
-        >
-          <FileText className="h-4 w-4" />
-          <span className="relative">
-            Historia Clínica
-            {clinicalHistoryCount > 0 && (
-              <span 
-                className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
-                style={{
-                  background: currentTheme.colors.primary,
-                  color: currentTheme.colors.buttonText
-                }}
-              >
-                {clinicalHistoryCount}
-              </span>
-            )}
-          </span>
-        </Link>
+       <Link
+  to="/clinical-history"
+  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors relative"
+  style={{ position: 'relative' }}
+>
+  <FileText className="h-4 w-4" />
+  Historia Clínica
+  {clinicalHistoryCount > 0 && (
+    <span 
+      className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
+      style={{
+        background: currentTheme.colors.primary,
+        color: currentTheme.colors.buttonText
+      }}
+    >
+      {clinicalHistoryCount}
+    </span>
+  )}
+</Link>
         <Link
           to="/clinical-evolution"
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
