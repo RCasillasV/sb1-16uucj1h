@@ -31,6 +31,7 @@ const BusinessUnits = lazy(() => import('./modules/clinica/BusinessUnits').then(
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').then(module => ({ default: module.InsuranceManagement })));
 const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
+const PatientReportPage = lazy(() => import('./pages/PatientReportPage').then(module => ({ default: module.PatientReportPage })));
 
 // Loading fallback
 const PageLoader = () => {
@@ -95,6 +96,11 @@ function AppContent() {
             <Route path="/register" element={<Register />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/patient-report/:id" element={
+              <PrivateRoute>
+                <PatientReportPage />
+              </PrivateRoute>
+            } />
             <Route path="*" element={<Navigate to="/" replace />} />              
              <Route path="/" element={
               <PrivateRoute>

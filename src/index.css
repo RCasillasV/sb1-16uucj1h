@@ -111,6 +111,78 @@
     height: auto !important;
   }
 
+  /* Dedicated print page styles */
+  .print-page {
+    background: white !important;
+    color: black !important;
+  }
+
+  .print-page * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  /* Alternative Modal Print Solution */
+  .print-report-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+    background: white !important;
+    color: black !important;
+    padding: 1in !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+  }
+
+  .print-report-modal * {
+    background: transparent !important;
+    color: black !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide everything except the print modal */
+  body:has(.print-report-modal) * {
+    display: none !important;
+  }
+
+  body:has(.print-report-modal) .print-report-modal,
+  body:has(.print-report-modal) .print-report-modal * {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Preserve specific displays */
+  body:has(.print-report-modal) .print-report-modal .grid {
+    display: grid !important;
+  }
+
+  body:has(.print-report-modal) .print-report-modal table {
+    display: table !important;
+  }
+
+  body:has(.print-report-modal) .print-report-modal thead {
+    display: table-header-group !important;
+  }
+
+  body:has(.print-report-modal) .print-report-modal tbody {
+    display: table-row-group !important;
+  }
+
+  body:has(.print-report-modal) .print-report-modal tr {
+    display: table-row !important;
+  }
+
+  body:has(.print-report-modal) .print-report-modal th,
+  body:has(.print-report-modal) .print-report-modal td {
+    display: table-cell !important;
+  }
   /* Estilos específicos para impresión desde modal */
   body.is-printing-modal * {
     visibility: hidden !important;

@@ -56,7 +56,10 @@ export function MainHeader({
 
   const handleShowReport = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowReportModal(true);
+    // Open report in new tab for better printing
+    const reportUrl = `/patient-report/${selectedPatient.id}?print=true`;
+    window.open(reportUrl, '_blank', 'noopener,noreferrer');
+    
     // Cerrar el menú contextual si está abierto
     if (showContextMenu) {
       handleContextMenuClick(e);
