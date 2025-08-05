@@ -111,6 +111,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (selectedPatient) {
+      setClinicalHistoryCount(null);
+      setClinicalEvolutionCount(null);
+      setPrescriptionsCount(null);
+      setPatientFilesCount(null);
       fetchCounts();
       fetchAppointments();
     } else {
