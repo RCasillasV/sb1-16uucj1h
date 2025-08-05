@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Printer, ArrowLeft, FileText, User } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
-import { api } from '../lib/api';
-import { calculateAge } from '../utils/dateUtils';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { api } from '../../lib/api';
+import { calculateAge } from '../../utils/dateUtils';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
-import type { Database } from '../types/database.types';
+import type { Database } from '../../types/database.types';
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
@@ -88,13 +88,13 @@ export function PatientReport() {
   }) => (
     <div className={clsx('space-y-1', fullWidth && 'md:col-span-2 lg:col-span-3')}>
       <dt 
-        className="text-sm font-medium print:text-black"
+        className="text-xs font-normal print:text-black"
         style={{ color: currentTheme.colors.textSecondary }}
       >
         {label}
       </dt>
       <dd 
-        className="text-base print:text-black"
+        className="text-lg font-semibold print:text-black"
         style={{ color: currentTheme.colors.text }}
       >
         {value || 'No especificado'}
