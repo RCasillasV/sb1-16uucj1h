@@ -86,7 +86,7 @@ export function PatientReport() {
     value: string | null | undefined; 
     fullWidth?: boolean;
   }) => (
-    <div className={clsx('space-y-1', fullWidth && 'md:col-span-2 lg:col-span-3 print:col-span-2')}>
+    <div className={clsx('space-y-1', fullWidth && 'md:col-span-2 lg:col-span-3 print:!col-span-2')}>
       <dt 
         className="text-xs font-normal print:text-black"
         style={{ color: currentTheme.colors.textSecondary }}
