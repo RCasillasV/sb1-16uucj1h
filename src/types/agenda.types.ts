@@ -6,8 +6,8 @@
 // type ServiceInsert = Database['public']['Tables']['services']['Insert'];
 // type AgendaSettingInsert = Database['public']['Tables']['agenda_settings']['Insert'];
 // Para este ejemplo, los definimos manualmente:
-
-export interface AgendaSettingDB {
+ 
+export interface TcAgendaSettingDB {
     id: string;
     created_at: string;
     updated_at: string;

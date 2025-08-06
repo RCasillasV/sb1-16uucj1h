@@ -21,7 +21,7 @@ interface BloqueoFecha {
   block_type: 'vacation' | 'congress' | 'legal' | 'other';
 }
 
-interface AgendaSettings {
+interface TcAgendaSettings {
   start_time: string;
   end_time: string;
   consultation_days: string[];
@@ -135,7 +135,7 @@ export function ScheduleConfiguration() {
         .filter(([_, enabled]) => enabled)
         .map(([day, _]) => day);
 
-      const agendaSettings: AgendaSettings = {
+      const agendaSettings: TcAgendaSettings = {
         start_time: startTime + ':00',
         end_time: endTime + ':00',
         consultation_days: selectedDays,
@@ -568,7 +568,7 @@ export function ScheduleConfiguration() {
             </p>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label 
                     className="block text-sm font-medium"
@@ -598,11 +598,7 @@ export function ScheduleConfiguration() {
                     className="w-full p-2 rounded-md border"
                     style={inputStyle}
                   />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label 
+                  <label 
                   className="block text-sm font-medium"
                   style={{ color: currentTheme.colors.text }}
                 >
@@ -619,7 +615,8 @@ export function ScheduleConfiguration() {
                       {type.label}
                     </option>
                   ))}
-                </select>
+                </select>     
+                </div>
               </div>
               
               <div className="space-y-2">

@@ -208,7 +208,7 @@ export function Agenda() {
   const handleCloseDetailsModal = () => {
     setShowAppointmentDetailsModal(false);
   };
-
+ 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
 

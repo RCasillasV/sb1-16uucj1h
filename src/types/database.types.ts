@@ -315,7 +315,7 @@ export interface Database {
           user_id?: string 
         }
       }
-      agenda_settings: {
+      tcAgendaSettings: {
         Row: {
           id: string
           created_at: string
@@ -350,7 +350,7 @@ export interface Database {
           user_id?: string | null
         }
       }
-      blocked_dates: {
+      tcAgendaBloqueada: {
         Row: {
           id: string
           created_at: string

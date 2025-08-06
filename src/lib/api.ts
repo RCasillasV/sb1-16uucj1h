@@ -1301,7 +1301,7 @@ export const api = {
       }
 
       const { data, error } = await supabase
-        .from('agenda_settings')
+        .from('tcAgendaSettings')
         .select('*')
         .eq('idbu', currentUserAttributes.idbu)
         .single();
@@ -1346,7 +1346,7 @@ export const api = {
 
       if (existingSettings) {
         const { data, error } = await supabase
-          .from('agenda_settings')
+          .from('tcAgendaSettings')
           .update(settingsData)
           .eq('idbu', currentUserAttributes.idbu)
           .select()
@@ -1356,7 +1356,7 @@ export const api = {
         return data;
       } else {
         const { data, error } = await supabase
-          .from('agenda_settings')
+          .from('tcAgendaSettings')
           .insert(settingsData)
           .select()
           .single();
@@ -1442,7 +1442,7 @@ export const api = {
       }
 
       const { data, error } = await supabase
-        .from('blocked_dates')
+        .from('tcAgendaBloqueada')
         .select('*')
         .eq('idbu', currentUserAttributes.idbu)
         .order('start_date', { ascending: true });
@@ -1472,7 +1472,7 @@ export const api = {
       }
 
       const { data, error } = await supabase
-        .from('blocked_dates')
+        .from('tcAgendaBloqueada')
         .insert({
           ...blockData,
           idbu: currentUserAttributes.idbu,
@@ -1491,7 +1491,7 @@ export const api = {
 
     async delete(id: string) {
       const { error } = await supabase
-        .from('blocked_dates')
+        .from('tcAgendaBloqueada')
         .delete()
         .eq('id', id);
 
