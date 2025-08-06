@@ -43,7 +43,7 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
       <div 
         id="modal-print-target"
         className={clsx(
-          "relative rounded-lg shadow-xl w-full print:shadow-none print:rounded-none print:max-w-none print:p-0",
+          "relative rounded-lg shadow-xl w-full print:shadow-none print:rounded-none print:max-w-none print:p-0 modal-content",
           className || "max-w-md"
         )}
         style={{ 
