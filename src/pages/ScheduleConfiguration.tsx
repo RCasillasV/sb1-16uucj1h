@@ -269,7 +269,7 @@ export function ScheduleConfiguration() {
           style={buttonStyle.primary}
         >
           <Save className="mr-2 h-4 w-4" />
-          {saving ? 'Guardando...' : 'Guardar Configuración'}
+          {saving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
 
