@@ -183,153 +183,99 @@
   body:has(.print-report-modal) .print-report-modal td {
     display: table-cell !important;
   }
-  /* Estilos específicos para impresión desde modal */
-  body.is-printing-modal * {
-    visibility: hidden !important;
-    display: none !important;
-  /* Estrategia refinada para impresión desde modal */
-  body.is-printing-modal {
-    /* Ocultar todos los hijos directos del body */
-    > * {
-      display: none !important;
-    }
-    
-    /* Hacer visible solo el overlay de la modal */
-    #modal-overlay-print-target {
-      display: block !important;
-      position: static !important;
-      z-index: auto !important;
-      background: white !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      width: 100% !important;
-      height: auto !important;
-      min-height: auto !important;
-      max-width: none !important;
-      max-height: none !important;
-      overflow: visible !important;
-      transform: none !important;
-      inset: auto !important;
-      flex: none !important;
-      align-items: stretch !important;
-      justify-content: stretch !important;
-    }
-    
-    /* Asegurar que el contenido de la modal sea visible y ocupe toda la página */
-    #modal-print-target {
-      display: block !important;
-      position: static !important;
-      width: 100% !important;
-      height: auto !important;
-      max-width: none !important;
-      max-height: none !important;
-      margin: 0 !important;
-      padding: 0.5in !important;
-      background: white !important;
-      color: black !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-      transform: none !important;
-      z-index: auto !important;
-    }
-    
-    /* Asegurar que todo el contenido interno de la modal sea visible */
-    #modal-print-target * {
-      display: block !important;
-      visibility: visible !important; 
-      color: black !important;
-      background: transparent !important;
-    }
-    
-    /* Ocultar el backdrop durante la impresión */
-    #modal-overlay-print-target > div:first-child {
-      display: none !important;
-    }
-    
-    /* Preservar tipos de display específicos */
-    #modal-overlay-print-target .grid {
-      display: grid !important;
-    }
-    
-    #modal-overlay-print-target table {
-      display: table !important;
-      width: 100% !important;
-    }
-    
-    #modal-overlay-print-target thead {
-      display: table-header-group !important;
-    }
-    
-    #modal-overlay-print-target tbody {
-      display: table-row-group !important;
-    }
-    
-    #modal-overlay-print-target tr {
-      display: table-row !important;
-    }
-    
-    #modal-overlay-print-target th,
-    #modal-overlay-print-target td {
-      display: table-cell !important;
-      border: 1px solid black !important;
-      padding: 8px !important;
-    }
-    
-    #modal-overlay-print-target h1,
-    #modal-overlay-print-target h2,
-    #modal-overlay-print-target h3,
-    #modal-overlay-print-target h4,
-    #modal-overlay-print-target h5,
-    #modal-overlay-print-target h6 {
-      display: block !important;
-      font-weight: bold !important;
-      margin-bottom: 0.5rem !important;
-    }
-    
-    #modal-overlay-print-target p,
-    #modal-overlay-print-target div,
-    #modal-overlay-print-target span {
-      display: block !important;
-    }
-    
-    /* Asegurar que las clases de Tailwind para impresión funcionen */
-    #modal-overlay-print-target .print\\:grid {
-      display: grid !important;
-    }
-    
-    #modal-overlay-print-target .print\\:grid-cols-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-    
-    #modal-overlay-print-target .print\\:grid-cols-3 {
-      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    }
-    
-    #modal-overlay-print-target .print\\:gap-4 {
-      gap: 1rem !important;
-    }
-    
-    #modal-overlay-print-target .print\\:col-span-2 {
-      grid-column: span 2 / span 2 !important;
-    }
-    
-    #modal-overlay-print-target .print\\:col-span-3 {
-      grid-column: span 3 / span 3 !important;
-    }
-    
-    #modal-overlay-print-target .print\\:mb-6 {
-      margin-bottom: 1.5rem !important;
-    }
-    
-    /* Ocultar elementos específicos que no deben imprimirse */
-    #modal-overlay-print-target .print\\:hidden {
-      display: none !important;
-      visibility: hidden !important;
-    }
+
+  /* Estilos específicos para páginas de informe */
+  .report-page {
+    background: white !important;
+    color: black !important;
   }
 
-}
+  .report-content {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.5in !important;
+  }
+
+  /* Asegurar que todo el texto dentro del informe sea negro y visible */
+  .report-content *,
+  .report-content h1,
+  .report-content h2,
+  .report-content h3,
+  .report-content h4,
+  .report-content h5,
+  .report-content h6,
+  .report-content p,
+  .report-content span,
+  .report-content div,
+  .report-content dt,
+  .report-content dd {
+    color: black !important;
+    background: transparent !important;
+  }
+
+  /* Sobrescribir colores de texto específicos */
+  .report-content .text-sm,
+  .report-content .text-xs,
+  .report-content .text-lg,
+  .report-content .text-xl,
+  .report-content .text-2xl,
+  .report-content .text-3xl {
+    color: black !important;
+  }
+
+  /* Asegurar visibilidad de elementos estructurales */
+  .report-content .grid {
+    display: grid !important;
+  }
+
+  .report-content .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  .report-content .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .report-content .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  /* Asegurar que los fondos de identificación sean visibles */
+  .report-content .print\:bg-gray-100 {
+    background-color: #f3f4f6 !important;
+  }
+
+  .report-content .print\:bg-gray-50 {
+    background-color: #f9fafb !important;
+  }
+
+  /* Márgenes y espaciado apropiados */
+  .report-content .mb-8 {
+    margin-bottom: 2rem !important;
+  }
+
+  .report-content .mb-6 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .report-content .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .report-content .gap-4 {
+    gap: 1rem !important;
+  }
+
+  .report-content .p-6 {
+    padding: 1.5rem !important;
+  }
+
+  .report-content .p-4 {
+    padding: 1rem !important;
+  }
 
 }

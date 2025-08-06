@@ -12,6 +12,58 @@ import type { Database } from '../types/database.types';
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
+// Componente InfoSection
+const InfoSection = ({ title, children, className = '' }: { 
+  title: string; 
+  children: React.ReactNode; 
+  className?: string;
+}) => {
+  const { currentTheme } = useTheme();
+  
+  return (
+    <div className={clsx('mb-6', className)}>
+      <h3 
+        className="text-lg font-semibold mb-3 pb-2 border-b-2 print:text-black print:border-black"
+        style={{ 
+          color: currentTheme.colors.primary,
+          borderColor: currentTheme.colors.primary,
+        }}
+      >
+        {title}
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 print:!grid print:!grid-cols-2 print:!gap-4">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+// Componente InfoField
+const InfoField = ({ label, value, fullWidth = false }: { 
+  label: string; 
+  value: string | null | undefined; 
+  fullWidth?: boolean;
+}) => {
+  const { currentTheme } = useTheme();
+  
+  return (
+    <div className={clsx('space-y-1', fullWidth && 'md:col-span-2 lg:col-span-3 print:!col-span-2')}>
+      <dt 
+        className="text-xs font-normal print:text-black"
+        style={{ color: currentTheme.colors.textSecondary }}
+      >
+        {label}
+      </dt>
+      <dd 
+        className="text-lg font-semibold print:text-black"
+        style={{ color: currentTheme.colors.text }}
+      >
+        {value || 'No especificado'}
+      </dd>
+    </div>
+  );
+};
+
 export function PatientReportPage() {
   const { currentTheme } = useTheme();
   const { user, loading: authLoading } = useAuth();
@@ -63,7 +115,7 @@ export function PatientReportPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.patients.getById(id as string); // Aseguramos que 'id' es string
+      const data = await api.patients.getById(id as string);
       console.log('PatientReportPage: Datos del paciente recibidos:', data);
       if (!data) {
         setError('Paciente no encontrado');
@@ -78,6 +130,38 @@ export function PatientReportPage() {
       setLoading(false);
       console.log('PatientReportPage: fetchPatient() finalizado. loading (interno) = false.');
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = parseISO(dateString);
+      return format(date, "d 'de' MMMM 'de' yyyy", { locale: es });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const buttonStyle = {
+    base: clsx(
+      'px-4 py-2 transition-colors',
+      currentTheme.buttons.style === 'pill' && 'rounded-full',
+      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
+      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
+      currentTheme.buttons.animation && 'hover:scale-105'
+    ),
+    primary: {
+      background: currentTheme.colors.buttonPrimary,
+      color: currentTheme.colors.buttonText,
+    },
+    secondary: {
+      background: 'transparent',
+      border: `1px solid ${currentTheme.colors.border}`,
+      color: currentTheme.colors.text,
+    },
   };
 
   console.log('PatientReportPage: Renderizando. loading (interno) =', loading, 'authLoading =', authLoading, 'error =', error, 'patient =', patient ? 'presente' : 'nulo');
@@ -137,12 +221,10 @@ export function PatientReportPage() {
     );
   }
 
-  // ... (resto del componente PatientReportPage)
-
   const age = patient.FechaNacimiento ? calculateAge(patient.FechaNacimiento) : null;
 
   return (
-    <div className="min-h-screen print:min-h-0" style={{ background: currentTheme.colors.background }}>
+    <div className="min-h-screen print:min-h-0 report-page" style={{ background: currentTheme.colors.background }}>
       {/* Header with actions - hidden in print */}
       <div className="bg-white shadow-sm border-b p-4 print:hidden" style={{ background: currentTheme.colors.surface, borderColor: currentTheme.colors.border }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -177,7 +259,7 @@ export function PatientReportPage() {
       </div>
 
       {/* Report content */}
-      <div className="max-w-6xl mx-auto p-6 print:p-8 print:max-w-none">
+      <div className="max-w-6xl mx-auto p-6 print:p-8 print:max-w-none report-content">
         <div 
           className="rounded-lg shadow-lg p-8 print:shadow-none print:rounded-none print:p-0"
           style={{ 
