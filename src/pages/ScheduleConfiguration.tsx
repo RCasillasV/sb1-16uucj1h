@@ -476,7 +476,7 @@ export function ScheduleConfiguration() {
                     className="text-sm"
                     style={{ color: currentTheme.colors.text }}
                   >
-                    {day.label}
+                    {day.label} 
                   </label>
                 </div>
               ))}
@@ -598,24 +598,26 @@ export function ScheduleConfiguration() {
                     className="w-full p-2 rounded-md border"
                     style={inputStyle}
                   />
+                </div>
+                <div className="space-y-2">
                   <label 
-                  className="block text-sm font-medium"
-                  style={{ color: currentTheme.colors.text }}
-                >
-                  Tipo de bloqueo
-                </label>
-                <select
-                  value={newBloqueo.block_type}
-                  onChange={(e) => setNewBloqueo(prev => ({ ...prev, block_type: e.target.value as any }))}
-                  className="w-full p-2 rounded-md border"
-                  style={inputStyle}
-                >
-                  {BLOCK_TYPES.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>     
+                    className="block text-sm font-medium"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Tipo de bloqueo
+                  </label>
+                  <select
+                    value={newBloqueo.block_type}
+                    onChange={(e) => setNewBloqueo(prev => ({ ...prev, block_type: e.target.value as any }))}
+                    className="w-full p-2 rounded-md border"
+                    style={inputStyle}
+                  >
+                    {BLOCK_TYPES.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               
