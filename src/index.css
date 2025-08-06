@@ -76,7 +76,7 @@
   }
   
   body.is-printing-modal #modal-print-target,
-  body.is-printing-modal .modal-content {
+  body.is-printing-modal .modal-content { /* Keep this for general modal content targeting */
     display: block !important;
     visibility: visible !important;
     position: static !important;
@@ -95,10 +95,10 @@
     overflow: visible !important;
   }
   
-  body.is-printing-modal #modal-print-target *,
-  body.is-printing-modal .modal-content *,
-  body.is-printing-modal .modal-content h1,
-  body.is-printing-modal .modal-content h2,
+  /* Ensure all content inside the modal is visible and print-friendly */
+  body.is-printing-modal #modal-print-target *, /* Target all elements within the modal container */
+  body.is-printing-modal .modal-content *, /* Target all elements within the modal content area */
+  body.is-printing-modal .modal-content h1, /* Specific elements that might have conflicting styles */
   body.is-printing-modal .modal-content h3,
   body.is-printing-modal .modal-content p,
   body.is-printing-modal .modal-content span,
@@ -106,7 +106,14 @@
   body.is-printing-modal .modal-content dt,
   body.is-printing-modal .modal-content dd {
     color: black !important;
-    background: transparent !important;
+    background: transparent !important; /* No background on inner elements */
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important; /* Ensure block display for flow */
+    position: static !important; /* Remove any absolute/fixed positioning */
   }
   
   /* Preserve layout structures */
@@ -139,16 +146,18 @@
     display: none !important;
   }
 
-  /* Override specific color utilities */
-  .print\\:text-black,
-  body.is-printing-modal .text-xl,
-  body.is-printing-modal .text-lg,
-  body.is-printing-modal .text-2xl,
-  body.is-printing-modal .text-3xl,
-  body.is-printing-modal .font-bold,
-  body.is-printing-modal .font-semibold,
-  body.is-printing-modal .font-medium {
-    color: black !important;
+  /* Hide elements that should never be printed (e.g., close buttons, action buttons) */
+  body.is-printing-modal .print\\:hidden,
+  body.is-printing-modal .modal-content .print\\:hidden,
+  body.is-printing-modal .modal-content .flex.justify-end.gap-2 { /* Target action buttons specifically */
+    display: none !important;
+  }
+
+  /* Ensure images are visible */
+  body.is-printing-modal .modal-content img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
   }
 
   /* Spacing utilities */

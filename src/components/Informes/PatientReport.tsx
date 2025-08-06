@@ -106,8 +106,10 @@ export function PatientReport({
   };
 
   const handlePrint = () => {
-    // Los eventos beforeprint/afterprint manejarán automáticamente la aplicación de estilos
-    window.print();
+    // Add a small delay to ensure DOM is ready for print
+    setTimeout(() => {
+      window.print();
+    }, 100); // 100ms delay
   };
 
   const formatDate = (dateString: string) => {
