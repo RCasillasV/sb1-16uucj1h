@@ -715,7 +715,7 @@ export const api = {
       }
 
       // Llamar a la función RPC que realizará todas las validaciones
-      const { data, error } = await supabase.rpc('agendar_cita_segura', {
+      const { data, error } = await supabase.rpc('agendar_cita', {
         p_id_paciente: appointmentData.id_paciente,
         p_fecha_cita: appointmentData.fecha_cita,
         p_hora_cita: appointmentData.hora_cita,
@@ -756,7 +756,7 @@ export const api = {
       }
 
       // Usar RPC para verificar disponibilidad (función más liviana que solo valida)
-      const { data, error } = await supabase.rpc('verificar_disponibilidad_slot', {
+      const { data, error } = await supabase.rpc('verificar_slot', {
         p_fecha: fecha,
         p_hora_inicio: hora_inicio,
         p_duracion_minutos: duracion_minutos,
