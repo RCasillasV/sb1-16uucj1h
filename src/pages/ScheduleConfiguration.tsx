@@ -248,7 +248,7 @@ export function ScheduleConfiguration() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
           <Calendar className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
           <h1 
             className="text-2xl font-bold"
@@ -256,12 +256,6 @@ export function ScheduleConfiguration() {
           >
             Configuración de Agenda
           </h1>
-          <p 
-            className="text-sm"
-            style={{ color: currentTheme.colors.textSecondary }}
-          >
-            Configure los parámetros básicos de su agenda médica
-          </p>
         </div>
         <button
           onClick={handleSaveConfiguration}
@@ -273,6 +267,13 @@ export function ScheduleConfiguration() {
           {saving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
+
+      <p 
+        className="text-sm -mt-4"
+        style={{ color: currentTheme.colors.textSecondary }}
+      >
+        Configure los parámetros básicos de su agenda médica
+      </p>
 
       {error && (
         <div 
