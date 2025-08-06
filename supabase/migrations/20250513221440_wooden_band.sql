@@ -25,7 +25,7 @@ CREATE TABLE "tcUsuarios" (
   Nombre text NOT NULL,
   Email text NOT NULL UNIQUE,
   Estado text NOT NULL DEFAULT 'activo' CHECK (Estado IN ('activo', 'inactivo')),
-  Rol text NOT NULL DEFAULT 'asistente' CHECK (Rol IN ('admin', 'medico', 'asistente')),
+  Rol text NOT NULL DEFAULT 'asistente' CHECK (Rol IN ('administrador', 'medico', 'recepcionista')),
   Telefono text,
   FechaUltimoAcceso timestamptz,
   Configuracion jsonb DEFAULT '{}'::jsonb

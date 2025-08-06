@@ -210,26 +210,28 @@ export function MainHeader({
               }}
             >
               <button
-                onClick={handleShowReport}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
-                style={{ color: currentTheme.colors.text }}
-              >
-                <Printer className="h-4 w-4" />
-                Informe
-              </button>
-              <button
                 onClick={handleDeselectPatient}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors"
                 style={{ color: currentTheme.colors.text }}
               >
                 Deseleccionar
               </button>
+              
               <button
                 onClick={handleEditPatient}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors"
                 style={{ color: currentTheme.colors.text }}
               >
                 Editar
+              </button>
+              
+              <button
+                onClick={handleShowReport}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
+                style={{ color: currentTheme.colors.text }}
+              >
+                <Printer className="h-4 w-4" />
+                Informe
               </button>
             </div>
           )}
@@ -261,7 +263,7 @@ export function MainHeader({
           style={{ position: 'relative' }}
         >
           <FileText className="h-4 w-4" />
-          Historia Clínica
+          Ficha Clínica
          {clinicalHistoryCount > 0 && (
          <span 
               className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"

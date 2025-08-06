@@ -460,7 +460,7 @@ export function Users() {
             >
               <option value="Administrador">Administrador</option>
               <option value="Medico">Médico</option>
-              <option value="Recepcionista">Asistente</option>
+              <option value="Recepcionista">Recepcionista</option>
             </select>
           </div>
 

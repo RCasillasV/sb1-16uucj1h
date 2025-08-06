@@ -352,6 +352,7 @@ export function ClinicalHistory() {
                     <tr style={{ background: currentTheme.colors.background }}>
                       <th 
                         style={{ 
+                          width: '15%',
                           border: `1px solid ${currentTheme.colors.border}`, 
                           padding: '8px', 
                           textAlign: 'center',
@@ -364,6 +365,7 @@ export function ClinicalHistory() {
                       </th>
                       <th 
                         style={{ 
+                          width: '12%',
                           border: `1px solid ${currentTheme.colors.border}`, 
                           padding: '8px', 
                           textAlign: 'center',
@@ -376,6 +378,7 @@ export function ClinicalHistory() {
                       </th>
                       <th 
                         style={{ 
+                          width: '5%',
                           border: `1px solid ${currentTheme.colors.border}`, 
                           padding: '8px', 
                           textAlign: 'center',
@@ -388,6 +391,7 @@ export function ClinicalHistory() {
                       </th>
                       <th 
                         style={{ 
+                          width: '25%',
                           border: `1px solid ${currentTheme.colors.border}`, 
                           padding: '8px', 
                           textAlign: 'center',
@@ -400,6 +404,7 @@ export function ClinicalHistory() {
                       </th>
                       <th 
                         style={{ 
+                          width: '34%',
                           border: `1px solid ${currentTheme.colors.border}`, 
                           padding: '8px', 
                           textAlign: 'center',
@@ -473,7 +478,7 @@ export function ClinicalHistory() {
                             type="text"
                             value={member.edad}
                             onChange={(e) => handleInputChange(member.id, 'edad', e.target.value)}
-                            disabled={member.estadoVital === '' || member.estadoVital.includes('Fallecid')}
+                            disabled={member.estadoVital === ''}
                             placeholder="Edad"
                             style={{ 
                               padding: '6px', 
@@ -482,7 +487,7 @@ export function ClinicalHistory() {
                               borderRadius: '4px',
                               background: currentTheme.colors.surface, 
                               color: currentTheme.colors.text,
-                              opacity: member.estadoVital === '' || member.estadoVital.includes('Fallecid') ? 0.5 : 1
+                              opacity: member.estadoVital === ''? 0.5 : 1
                             }}
                           />
                         </td>
@@ -508,9 +513,6 @@ export function ClinicalHistory() {
                             }}
                           >
                             <option value="Diabetes">Diabetes</option>
-                            <option value="Diabetes Tipo 1">Diabetes Tipo 1</option>
-                            <option value="Diabetes Tipo 2">Diabetes Tipo 2</option>
-                            <option value="Hipertensión">Hipertensión</option>
                             <option value="Hipertensión Arterial">Hipertensión Arterial</option>
                             <option value="Cáncer">Cáncer</option>
                             <option value="Cáncer de Mama">Cáncer de Mama</option>
@@ -574,8 +576,8 @@ export function ClinicalHistory() {
                             textAlign: 'center'
                           }}
                         >
-                          <input
-                            type="text"
+                          <textarea
+                            rows={3}
                             value={member.observaciones}
                             onChange={(e) => handleInputChange(member.id, 'observaciones', e.target.value)}
                             placeholder="Observaciones"
@@ -673,16 +675,16 @@ export function ClinicalHistory() {
                                 type="text"
                                 value={member.edad}
                                 onChange={(e) => handleInputChange(member.id, 'edad', e.target.value)}
-                                disabled={member.estadoVital === '' || member.estadoVital.includes('Fallecid')}
+                                disabled={member.estadoVital === '' }
                                 placeholder="Edad"
                                 style={{ 
-                                  padding: '6px', 
-                                  width: '100%',
+                                  padding: '4px', 
+                                  width: '80%',
                                   border: `1px solid ${currentTheme.colors.border}`,
                                   borderRadius: '4px',
                                   background: currentTheme.colors.surface, 
                                   color: currentTheme.colors.text,
-                                  opacity: member.estadoVital === '' || member.estadoVital.includes('Fallecid') ? 0.5 : 1
+                                  opacity: member.estadoVital === '' || member.estadoVital.includes('Selecci') ? 0.5 : 1
                                 }}
                               />
                             </td>
@@ -708,9 +710,6 @@ export function ClinicalHistory() {
                                 }}
                               >
                                 <option value="Diabetes">Diabetes</option>
-                                <option value="Diabetes Tipo 1">Diabetes Tipo 1</option>
-                                <option value="Diabetes Tipo 2">Diabetes Tipo 2</option>
-                                <option value="Hipertensión">Hipertensión</option>
                                 <option value="Hipertensión Arterial">Hipertensión Arterial</option>
                                 <option value="Cáncer">Cáncer</option>
                                 <option value="Cáncer de Mama">Cáncer de Mama</option>
