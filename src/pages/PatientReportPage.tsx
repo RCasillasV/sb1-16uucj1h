@@ -1,3 +1,5 @@
+// src/pages/PatientReportPage.tsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Printer, ArrowLeft, FileText, User } from 'lucide-react';
@@ -22,9 +24,21 @@ export function PatientReportPage() {
   const [error, setError] = useState<string | null>(null);
   const [autoPrintTriggered, setAutoPrintTriggered] = useState(false);
 
+  console.log('PatientReportPage: Componente montado.'); // Log al montar
+
   useEffect(() => {
+    console.log('PatientReportPage: useEffect disparado.');
+    console.log('PatientReportPage: authLoading =', authLoading, 'user =', user ? 'presente' : 'nulo', 'id =', id);
     if (!authLoading && user && id) {
       fetchPatient();
+    } else if (!authLoading && !user) {
+      console.log('PatientReportPage: Usuario no autenticado después de cargar auth.');
+      setError('Usuario no autenticado para ver el informe.');
+      setLoading(false);
+    } else if (!id) {
+      console.log('PatientReportPage: ID de paciente no proporcionado.');
+      setError('ID de paciente no proporcionado.');
+      setLoading(false);
     }
   }, [user, authLoading, id]);
 
@@ -33,110 +47,45 @@ export function PatientReportPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const shouldAutoPrint = urlParams.get('print') === 'true';
     
+    console.log('PatientReportPage: useEffect auto-print disparado.');
+    console.log('PatientReportPage: shouldAutoPrint =', shouldAutoPrint, 'patient =', patient ? 'presente' : 'nulo', 'loading (interno) =', loading, 'autoPrintTriggered =', autoPrintTriggered);
+
     if (shouldAutoPrint && patient && !loading && !autoPrintTriggered) {
       setAutoPrintTriggered(true);
       // Small delay to ensure content is fully rendered
       setTimeout(() => {
+        console.log('PatientReportPage: Disparando window.print()');
         window.print();
       }, 500);
     }
   }, [patient, loading, autoPrintTriggered]);
 
   const fetchPatient = async () => {
-    if (!id) return;
-    
+    console.log('PatientReportPage: fetchPatient() llamado.');
     setLoading(true);
     setError(null);
     try {
-      const data = await api.patients.getById(id);
+      const data = await api.patients.getById(id as string); // Aseguramos que 'id' es string
+      console.log('PatientReportPage: Datos del paciente recibidos:', data);
       if (!data) {
         setError('Paciente no encontrado');
+        console.log('PatientReportPage: Error - Paciente no encontrado.');
         return;
       }
       setPatient(data);
     } catch (err) {
-      console.error('Error fetching patient:', err);
+      console.error('PatientReportPage: Error al cargar paciente:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar los datos del paciente');
     } finally {
       setLoading(false);
+      console.log('PatientReportPage: fetchPatient() finalizado. loading (interno) = false.');
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = parseISO(dateString);
-      return format(date, "d 'de' MMMM 'de' yyyy", { locale: es });
-    } catch {
-      return dateString;
-    }
-  };
-
-  const InfoSection = ({ title, children, className = '' }: { 
-    title: string; 
-    children: React.ReactNode; 
-    className?: string;
-  }) => (
-    <div className={clsx('mb-6 page-break-inside', className)}>
-      <h3 
-        className="text-lg font-semibold mb-3 pb-2 border-b-2 print:text-black print:border-black"
-        style={{ 
-          color: currentTheme.colors.primary,
-          borderColor: currentTheme.colors.primary,
-        }}
-      >
-        {title}
-      </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 print:grid print:grid-cols-2 print:gap-4">
-        {children}
-      </div>
-    </div>
-  );
-
-  const InfoField = ({ label, value, fullWidth = false }: { 
-    label: string; 
-    value: string | null | undefined; 
-    fullWidth?: boolean;
-  }) => (
-    <div className={clsx('space-y-1', fullWidth && 'md:col-span-2 lg:col-span-3 print:col-span-2')}>
-      <dt 
-        className="text-xs font-medium print:text-black"
-        style={{ color: currentTheme.colors.textSecondary }}
-      >
-        {label}
-      </dt>
-      <dd 
-        className="text-sm font-semibold print:text-black"
-        style={{ color: currentTheme.colors.text }}
-      >
-        {value || 'No especificado'}
-      </dd>
-    </div>
-  );
-
-  const buttonStyle = {
-    base: clsx(
-      'flex items-center px-4 py-2 transition-colors print:hidden',
-      currentTheme.buttons.style === 'pill' && 'rounded-full',
-      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
-      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
-      currentTheme.buttons.animation && 'hover:scale-105'
-    ),
-    primary: {
-      background: currentTheme.colors.buttonPrimary,
-      color: currentTheme.colors.buttonText,
-    },
-    secondary: {
-      background: 'transparent',
-      border: `1px solid ${currentTheme.colors.border}`,
-      color: currentTheme.colors.text,
-    },
-  };
+  console.log('PatientReportPage: Renderizando. loading (interno) =', loading, 'authLoading =', authLoading, 'error =', error, 'patient =', patient ? 'presente' : 'nulo');
 
   if (loading || authLoading) {
+    console.log('PatientReportPage: Mostrando cargador.');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
@@ -148,6 +97,7 @@ export function PatientReportPage() {
   }
 
   if (error) {
+    console.log('PatientReportPage: Mostrando mensaje de error:', error);
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div 
@@ -173,6 +123,7 @@ export function PatientReportPage() {
   }
 
   if (!patient) {
+    console.log('PatientReportPage: Mostrando "Paciente no encontrado".');
     return (
       <div className="max-w-4xl mx-auto p-6">
         <p style={{ color: currentTheme.colors.text }}>Paciente no encontrado</p>
@@ -187,6 +138,8 @@ export function PatientReportPage() {
       </div>
     );
   }
+
+  // ... (resto del componente PatientReportPage)
 
   const age = patient.FechaNacimiento ? calculateAge(patient.FechaNacimiento) : null;
 
