@@ -4,9 +4,11 @@
 
 /* Print Styles */
 @media print {
+/*
   @page {
     margin: 1in;
     size: letter;
+ */   
   }
 
   * {
