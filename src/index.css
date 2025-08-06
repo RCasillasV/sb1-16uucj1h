@@ -144,6 +144,7 @@
   
   body.is-printing-modal #modal-print-target .grid-cols-1 {
     grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }  
   /* Force all content inside the modal to be visible and black */
   body.is-printing-modal #modal-print-target * {
     visibility: visible !important;
