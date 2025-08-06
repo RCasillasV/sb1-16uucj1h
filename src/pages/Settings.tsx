@@ -96,6 +96,12 @@ export function Settings() {
       onClick: () => navigate('/users')
     },
     {
+      icon: Calendar,
+      title: 'Configuración de Agenda',
+      description: 'Configure horarios, consultorios y días de atención médica.',
+      onClick: () => navigate('/settings/schedule')
+    },
+    {
       icon: NotebookTabs,
       title: 'Aseguradoras',
       description: 'Personaliza las aseguradoras que los pacientes, el contacto y las condiciones que se podrán registrar',
@@ -128,12 +134,7 @@ export function Settings() {
       description: 'Información de PAC y CFDI para facturación',
       onClick: () => setActivePath(['Configuración', 'Facturas']),
     },
-    {
-      icon: Calendar,
-      title: 'Configuración de Agenda',
-      description: 'Configure horarios, consultorios y días de atención médica.',
-      onClick: () => navigate('/settings/schedule')
-    },
+
     {
       icon: Info,
       title: 'Acerca de',
