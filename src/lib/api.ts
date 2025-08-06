@@ -1612,7 +1612,7 @@ export const api = {
       const { data, error } = await supabase
         .from('tcConsultorios')
         .select('id, consultorio as nombre, activo')
-        .eq('idBu', currentUserAttributes.idbu)
+        .eq('idbu', currentUserAttributes.idbu)
         .order('id');
 
       if (error) {

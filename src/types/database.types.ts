@@ -770,7 +770,7 @@ export interface Database {
           user_id?: string | null
         }
       }
-      tcConsultorios: {
+      tcConsultorios: { 
         Row: {
           id: number
           created_at: string
