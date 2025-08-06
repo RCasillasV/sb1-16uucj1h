@@ -4,12 +4,12 @@
 
 /* Print Styles */
 @media print {
-  @page {
+  @page { 
     margin: 1in;
     size: letter;
   }
 
-   {
+  * {
     -webkit-print-color-adjust: exact !important;
     color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -329,5 +329,7 @@
       visibility: hidden !important;
     }
   }
+
+}
 
 }
