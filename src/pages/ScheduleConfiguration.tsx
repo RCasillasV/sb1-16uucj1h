@@ -386,7 +386,7 @@ export function ScheduleConfiguration() {
               Configure sus consultorios disponibles
             </p>
             
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {consultorios.map((consultorio) => (
                 <div 
                   key={consultorio.id} 
