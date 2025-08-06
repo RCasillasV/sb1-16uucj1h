@@ -101,7 +101,6 @@ function AppContent() {
                 <PatientReportPage />
               </PrivateRoute>
             } />
-            <Route path="*" element={<Navigate to="/" replace />} />              
              <Route path="/" element={
               <PrivateRoute>
                 <Layout>
@@ -230,6 +229,8 @@ function AppContent() {
                 </Layout>
               </PrivateRoute>
             } />  
+            
+            <Route path="*" element={<Navigate to="/" replace />} />
 
           </Routes>
         </Suspense>
