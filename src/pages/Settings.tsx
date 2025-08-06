@@ -130,9 +130,9 @@ export function Settings() {
     },
     {
       icon: Calendar,
-      title: 'Agenda y Consultorios',
-      description: 'Configuración general de la agenda y los consultorios de DoctorSoft.',
-      onClick: () => setActivePath(['Configuración', 'Sistema'])
+      title: 'Configuración de Agenda',
+      description: 'Configure horarios, consultorios y días de atención médica.',
+      onClick: () => navigate('/settings/schedule')
     },
     {
       icon: Info,

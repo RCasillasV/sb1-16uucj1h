@@ -32,6 +32,7 @@ const Settings = lazy(() => import('./pages/Settings').then(module => ({ default
 const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').then(module => ({ default: module.InsuranceManagement })));
 const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
 const PatientReportPage = lazy(() => import('./pages/PatientReportPage').then(module => ({ default: module.PatientReportPage })));
+const ScheduleConfiguration = lazy(() => import('./pages/ScheduleConfiguration').then(module => ({ default: module.ScheduleConfiguration })));
 
 // Loading fallback
 const PageLoader = () => {
@@ -229,6 +230,14 @@ function AppContent() {
                 </Layout>
               </PrivateRoute>
             } />  
+            
+            <Route path="/settings/schedule" element={
+              <PrivateRoute>
+                <Layout>
+                  <ScheduleConfiguration />
+                </Layout>
+              </PrivateRoute>
+            } />
             
             <Route path="*" element={<Navigate to="/" replace />} />
 

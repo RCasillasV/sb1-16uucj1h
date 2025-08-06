@@ -1288,6 +1288,222 @@ export const api = {
     }
   },
 
+  agendaSettings: {
+    async get() {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const { data, error } = await supabase
+        .from('agenda_settings')
+        .select('*')
+        .eq('idbu', currentUserAttributes.idbu)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        console.error('Error fetching agenda settings:', error);
+        throw error;
+      }
+
+      return data;
+    },
+
+    async update(settings: {
+      start_time: string;
+      end_time: string;
+      consultation_days: string[];
+      slot_interval_minutes: number;
+    }) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      // Try to update first, if no record exists, insert
+      const { data: existingSettings } = await supabase
+        .from('agenda_settings')
+        .select('id')
+        .eq('idbu', currentUserAttributes.idbu)
+        .single();
+
+      const settingsData = {
+        ...settings,
+        idbu: currentUserAttributes.idbu,
+        user_id: session.user.id,
+        updated_at: new Date().toISOString()
+      };
+
+      if (existingSettings) {
+        const { data, error } = await supabase
+          .from('agenda_settings')
+          .update(settingsData)
+          .eq('idbu', currentUserAttributes.idbu)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from('agenda_settings')
+          .insert(settingsData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
+    }
+  },
+
+  consultorios: {
+    async getAll() {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const { data, error } = await supabase
+        .from('tcConsultorios')
+        .select('id, consultorio as nombre, activo')
+        .eq('idBu', currentUserAttributes.idbu)
+        .order('id');
+
+      if (error) {
+        console.error('Error fetching consultorios:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+
+    async updateBatch(consultorios: Array<{ id: number; nombre: string; activo: boolean }>) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const updates = consultorios.map(consultorio => 
+        supabase
+          .from('tcConsultorios')
+          .update({
+            consultorio: consultorio.nombre,
+            activo: consultorio.activo,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', consultorio.id)
+          .eq('idBu', currentUserAttributes.idbu)
+      );
+
+      const results = await Promise.all(updates);
+      
+      for (const result of results) {
+        if (result.error) {
+          console.error('Error updating consultorio:', result.error);
+          throw result.error;
+        }
+      }
+
+      return true;
+    }
+  },
+
+  blockedDates: {
+    async getAll() {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const { data, error } = await supabase
+        .from('blocked_dates')
+        .select('*')
+        .eq('idbu', currentUserAttributes.idbu)
+        .order('start_date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching blocked dates:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+
+    async create(blockData: {
+      start_date: string;
+      end_date: string;
+      reason: string;
+      block_type: string;
+    }) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const { data, error } = await supabase
+        .from('blocked_dates')
+        .insert({
+          ...blockData,
+          idbu: currentUserAttributes.idbu,
+          user_id: session.user.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating blocked date:', error);
+        throw error;
+      }
+
+      return data;
+    },
+
+    async delete(id: string) {
+      const { error } = await supabase
+        .from('blocked_dates')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting blocked date:', error);
+        throw error;
+      }
+
+      return true;
+    }
+  },
+
   pathologicalHistory: {
     async getByPatientId(patientId: string) {
       const { data, error } = await supabase

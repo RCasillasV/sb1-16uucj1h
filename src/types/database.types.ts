@@ -315,6 +315,76 @@ export interface Database {
           user_id?: string 
         }
       }
+      agenda_settings: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          idbu: string
+          start_time: string
+          end_time: string
+          consultation_days: string[]
+          slot_interval_minutes: number
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          idbu: string
+          start_time: string
+          end_time: string
+          consultation_days: string[]
+          slot_interval_minutes: number
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          idbu?: string
+          start_time?: string
+          end_time?: string
+          consultation_days?: string[]
+          slot_interval_minutes?: number
+          user_id?: string | null
+        }
+      }
+      blocked_dates: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          idbu: string
+          start_date: string
+          end_date: string
+          reason: string
+          block_type: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          idbu: string
+          start_date: string
+          end_date: string
+          reason: string
+          block_type: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          idbu?: string
+          start_date?: string
+          end_date?: string
+          reason?: string
+          block_type?: string
+          user_id?: string | null
+        }
+      }
       medical_records: {
         Row: {
           id: string
