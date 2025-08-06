@@ -185,7 +185,7 @@
   body.is-printing-modal #modal-print-target .grid-cols-2 {
 
   /* Page break rules */
-  body.is-printing-modal #modal-print-target .space-y-6 > * {
+  body.is-printing-modal #modal-print-target .space-y-6 > * {page-break-inside: avoid !important;}
   body.is-printing-modal #modal-print-target .grid-cols-3 {
 
   /* Images */
