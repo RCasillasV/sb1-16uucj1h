@@ -671,15 +671,6 @@ export const api = {
     },
 
     async create(appointment: Tables['tcCitas']['Insert']) {
-      if (!validateAppointmentDateTime(appointment.fecha_cita as string, appointment.hora_cita as string)) {
-        throw new Error('Cannot create appointments in the past');
-      }
-
-      const existingAppointments = await this.getAll();
-      if (!validateAppointmentOverlap(existingAppointments, { fecha_cita: appointment.fecha_cita as string, hora_cita: appointment.hora_cita as string })) {
-        throw new Error('Appointment time slot is already taken');
-      }
-
       const startTime = performance.now();
       const { data, error } = await supabase
         .from('tcCitas')
@@ -695,6 +686,89 @@ export const api = {
       }
 
       cacheUtils.delete('appointments:all');
+      return data;
+    },
+
+    // Nueva función para agendar citas con validación completa en el backend
+    async createSecure(appointmentData: {
+      id_paciente: string;
+      fecha_cita: string;
+      hora_cita: string;
+      motivo: string;
+      consultorio: number;
+      duracion_minutos: number;
+      tipo_consulta: string;
+      tiempo_evolucion?: number | null;
+      unidad_tiempo?: string | null;
+      sintomas_asociados?: string[] | null;
+      urgente?: boolean;
+      notas?: string | null;
+    }) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      // Llamar a la función RPC que realizará todas las validaciones
+      const { data, error } = await supabase.rpc('agendar_cita_segura', {
+        p_id_paciente: appointmentData.id_paciente,
+        p_fecha_cita: appointmentData.fecha_cita,
+        p_hora_cita: appointmentData.hora_cita,
+        p_motivo: appointmentData.motivo,
+        p_consultorio: appointmentData.consultorio,
+        p_duracion_minutos: appointmentData.duracion_minutos,
+        p_tipo_consulta: appointmentData.tipo_consulta,
+        p_tiempo_evolucion: appointmentData.tiempo_evolucion,
+        p_unidad_tiempo: appointmentData.unidad_tiempo,
+        p_sintomas_asociados: appointmentData.sintomas_asociados,
+        p_urgente: appointmentData.urgente || false,
+        p_notas: appointmentData.notas,
+        p_id_user: session.user.id,
+        p_idbu: currentUserAttributes.idbu
+      });
+
+      if (error) {
+        console.error('Error creating secure appointment:', error);
+        throw new Error(error.message || 'Error al agendar la cita');
+      }
+
+      // Invalidar cache de citas
+      cacheUtils.delete('appointments:all');
+      
+      return data;
+    },
+
+    // Función para verificar disponibilidad de slots sin crear la cita
+    async checkSlotAvailability(fecha: string, hora_inicio: string, duracion_minutos: number, consultorio: number) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      // Usar RPC para verificar disponibilidad (función más liviana que solo valida)
+      const { data, error } = await supabase.rpc('verificar_disponibilidad_slot', {
+        p_fecha: fecha,
+        p_hora_inicio: hora_inicio,
+        p_duracion_minutos: duracion_minutos,
+        p_consultorio: consultorio,
+        p_idbu: currentUserAttributes.idbu
+      });
+
+      if (error) {
+        console.error('Error checking slot availability:', error);
+        return { available: false, reason: 'Error al verificar disponibilidad' };
+      }
+
       return data;
     },
 
@@ -1364,6 +1438,162 @@ export const api = {
         if (error) throw error;
         return data;
       }
+    }
+  },
+
+  // Configuración de agenda
+  agendaSettings: {
+    async get() {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const { data, error } = await supabase
+        .from('tcAgendaSettings')
+        .select('*')
+        .eq('idbu', currentUserAttributes.idbu)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        console.error('Error fetching agenda settings:', error);
+        throw error;
+      }
+
+      return data;
+    },
+
+    async update(settings: {
+      start_time: string;
+      end_time: string;
+      consultation_days: string[];
+      slot_interval_minutes: number;
+    }) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      // Try to update first, if no record exists, insert
+      const { data: existingSettings } = await supabase
+        .from('tcAgendaSettings')
+        .select('id')
+        .eq('idbu', currentUserAttributes.idbu)
+        .single();
+
+      const settingsData = {
+        ...settings,
+        idbu: currentUserAttributes.idbu,
+        user_id: session.user.id,
+        updated_at: new Date().toISOString()
+      };
+
+      if (existingSettings) {
+        const { data, error } = await supabase
+          .from('tcAgendaSettings')
+          .update(settingsData)
+          .eq('idbu', currentUserAttributes.idbu)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from('tcAgendaSettings')
+          .insert(settingsData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
+    }
+  },
+
+  // Fechas bloqueadas
+  blockedDates: {
+    async getAll() {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const { data, error } = await supabase
+        .from('tcAgendaBloqueada')
+        .select('*')
+        .eq('idbu', currentUserAttributes.idbu)
+        .order('start_date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching blocked dates:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+
+    async create(blockData: {
+      start_date: string;
+      end_date: string;
+      reason: string;
+      block_type: string;
+    }) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
+      if (!currentUserAttributes?.idbu) {
+        throw new Error('User has no assigned business unit (idbu).');
+      }
+
+      const { data, error } = await supabase
+        .from('tcAgendaBloqueada')
+        .insert({
+          ...blockData,
+          idbu: currentUserAttributes.idbu,
+          user_id: session.user.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating blocked date:', error);
+        throw error;
+      }
+
+      return data;
+    },
+
+    async delete(id: string) {
+      const { error } = await supabase
+        .from('tcAgendaBloqueada')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting blocked date:', error);
+        throw error;
+      }
+
+      return true;
     }
   },
 
