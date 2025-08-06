@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, Calendar, MapPin, X, Plus, Save, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useAgenda } from '../contexts/AgendaContext';
 import { api } from '../lib/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -48,15 +49,16 @@ const BLOCK_TYPES = [
 export function ScheduleConfiguration() {
   const { currentTheme } = useTheme();
   const { user } = useAuth();
+  const { agendaSettings, blockedDates, loadConfiguration } = useAgenda();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'general' | 'horarios' | 'bloqueos'>('general');
 
   // Agenda settings state
-  const [slotDuration, setSlotDuration] = useState('30');
+  const [slotDuration, setSlotDuration] = useState('15');
   const [startTime, setStartTime] = useState('08:00');
-  const [endTime, setEndTime] = useState('18:00');
+  const [endTime, setEndTime] = useState('20:00');
   const [workDays, setWorkDays] = useState<Record<string, boolean>>({
     Lunes: true,
     Martes: true,
@@ -75,7 +77,7 @@ export function ScheduleConfiguration() {
   ]);
 
   // Blocked dates state
-  const [bloqueos, setBloqueos] = useState<BloqueoFecha[]>([]);
+  const [bloqueos, setBloqueos] = useState<BloqueoFecha[]>(blockedDates || []);
   const [newBloqueo, setNewBloqueo] = useState({
     start_date: '',
     end_date: '',
@@ -87,44 +89,47 @@ export function ScheduleConfiguration() {
     if (user) {
       loadConfiguration();
     }
-  }, [user]);
+  }, [user, loadConfiguration]);
 
-  const loadConfiguration = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [agendaSettings, consultoriosData, blockedDates] = await Promise.all([
-        api.agendaSettings.get(),
-        api.consultorios.getAll(),
-        api.blockedDates.getAll()
-      ]);
-
-      if (agendaSettings) {
-        setSlotDuration(agendaSettings.slot_interval_minutes.toString());
-        setStartTime(agendaSettings.start_time.substring(0, 5)); // Remove seconds
-        setEndTime(agendaSettings.end_time.substring(0, 5));
-        
-        const days: Record<string, boolean> = {};
-        WORK_DAYS.forEach(day => {
-          days[day.key] = agendaSettings.consultation_days.includes(day.key);
-        });
-        setWorkDays(days);
-      }
-
-      if (consultoriosData) {
-        setConsultorios(consultoriosData);
-      }
-
-      if (blockedDates) {
-        setBloqueos(blockedDates);
-      }
-    } catch (err) {
-      console.error('Error loading configuration:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar la configuración');
-    } finally {
-      setLoading(false);
+  // Sincronizar con el contexto de agenda
+  useEffect(() => {
+    if (agendaSettings) {
+      setSlotDuration(agendaSettings.slot_interval_minutes.toString());
+      setStartTime(agendaSettings.start_time.substring(0, 5));
+      setEndTime(agendaSettings.end_time.substring(0, 5));
+      
+      const days: Record<string, boolean> = {};
+      WORK_DAYS.forEach(day => {
+        days[day.key] = agendaSettings.consultation_days.includes(day.key);
+      });
+      setWorkDays(days);
     }
-  };
+    
+    if (blockedDates) {
+      setBloqueos(blockedDates);
+    }
+    
+    setLoading(false);
+  }, [agendaSettings, blockedDates]);
+
+  // Cargar consultorios separadamente ya que no están en el contexto
+  useEffect(() => {
+    const loadConsultorios = async () => {
+      try {
+        const consultoriosData = await api.consultorios.getAll();
+        if (consultoriosData) {
+          setConsultorios(consultoriosData);
+        }
+      } catch (err) {
+        console.error('Error loading consultorios:', err);
+        setError(err instanceof Error ? err.message : 'Error al cargar consultorios');
+      }
+    };
+    
+    if (user) {
+      loadConsultorios();
+    }
+  }, [user]);
 
   const handleSaveConfiguration = async () => {
     setSaving(true);
@@ -135,7 +140,7 @@ export function ScheduleConfiguration() {
         .filter(([_, enabled]) => enabled)
         .map(([day, _]) => day);
 
-      const agendaSettings: TcAgendaSettings = {
+      const agendaSettingsToSave: TcAgendaSettings = {
         start_time: startTime + ':00',
         end_time: endTime + ':00',
         consultation_days: selectedDays,
@@ -143,10 +148,13 @@ export function ScheduleConfiguration() {
       };
 
       await Promise.all([
-        api.agendaSettings.update(agendaSettings),
+        api.agendaSettings.update(agendaSettingsToSave),
         api.consultorios.updateBatch(consultorios)
       ]);
 
+      // Recargar configuración en el contexto
+      await loadConfiguration();
+      
       setError(null);
     } catch (err) {
       console.error('Error saving configuration:', err);

@@ -7,6 +7,7 @@ import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
 import { UserManagementProvider } from './contexts/UserManagementContext';
+import { AgendaProvider } from './contexts/AgendaContext';
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
@@ -87,164 +88,160 @@ function AppContent() {
 
   console.log('AppContent: Rendering main application content');
   return (
-    <ThemeProvider>
-      <SelectedPatientProvider>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/logout-test" element={<LogoutTestPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/patient-report/:id" element={
-              <PrivateRoute>
-                <PatientReportPage />
-              </PrivateRoute>
-            } />
-             <Route path="/" element={
-              <PrivateRoute>
-                <Layout>
-                  <Dashboard/>
-                </Layout>
-              </PrivateRoute>
-             } />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/logout-test" element={<LogoutTestPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/patient-report/:id" element={
+          <PrivateRoute>
+            <PatientReportPage />
+          </PrivateRoute>
+        } />
+         <Route path="/" element={
+          <PrivateRoute>
+            <Layout>
+              <Dashboard/>
+            </Layout>
+          </PrivateRoute>
+         } />
            
-            <Route path="/patients" element={
-              <PrivateRoute>
-                <Layout>
-                  <Patients />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/patients" element={
+          <PrivateRoute>
+            <Layout>
+              <Patients />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-           <Route path="/appointments" element={
-              <PrivateRoute>
-                <Layout>
-                  <Appointments/>
-                </Layout>
-              </PrivateRoute>
-            } />
+       <Route path="/appointments" element={
+          <PrivateRoute>
+            <Layout>
+              <Appointments/>
+            </Layout>
+          </PrivateRoute>
+        } />
  
             
-            <Route path="/cie10" element={
-              <PrivateRoute>
-                <Layout>
-                  <CIE10 />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/cie10" element={
+          <PrivateRoute>
+            <Layout>
+              <CIE10 />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/citas" element={
-              <PrivateRoute>
-                <Layout>
-                  <CitasPage />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/citas" element={
+          <PrivateRoute>
+            <Layout>
+              <CitasPage />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/calendar" element={
-              <PrivateRoute>
-                <Layout>
-                  <Calendar />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/calendar" element={
+          <PrivateRoute>
+            <Layout>
+              <Calendar />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/agenda/agenda" element={
-              <PrivateRoute>
-                <Layout>
-                  <Agenda />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/agenda/agenda" element={
+          <PrivateRoute>
+            <Layout>
+              <Agenda />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/clinical-history" element={
-              <PrivateRoute>
-                <Layout>
-                  <ClinicalHistory />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/clinical-history" element={
+          <PrivateRoute>
+            <Layout>
+              <ClinicalHistory />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/clinical-evolution" element={
-              <PrivateRoute>
-                <Layout>
-                  <ClinicalEvolution />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/clinical-evolution" element={
+          <PrivateRoute>
+            <Layout>
+              <ClinicalEvolution />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/prescriptions" element={
-              <PrivateRoute>
-                <Layout>
-                  <Prescriptions />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/prescriptions" element={
+          <PrivateRoute>
+            <Layout>
+              <Prescriptions />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/somatometry" element={
-              <PrivateRoute>
-                <Layout>
-                  <Somatometry />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/somatometry" element={
+          <PrivateRoute>
+            <Layout>
+              <Somatometry />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/patient-files" element={
-              <PrivateRoute>
-                <Layout>
-                  <PatientFilesPage />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/patient-files" element={
+          <PrivateRoute>
+            <Layout>
+              <PatientFilesPage />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/clinica" element={
-              <PrivateRoute>
-                <Layout>
-                  <BusinessUnits />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/clinica" element={
+          <PrivateRoute>
+            <Layout>
+              <BusinessUnits />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/users" element={
-              <PrivateRoute>
-                <Layout>
-                  <Users />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/users" element={
+          <PrivateRoute>
+            <Layout>
+              <Users />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/insurance" element={
-              <PrivateRoute>
-                <Layout>
-                  <InsuranceManagement />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/insurance" element={
+          <PrivateRoute>
+            <Layout>
+              <InsuranceManagement />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="/settings" element={
-              <PrivateRoute>
-                <Layout>
-                  <Settings />
-                </Layout>
-              </PrivateRoute>
-            } />  
+        <Route path="/settings" element={
+          <PrivateRoute>
+            <Layout>
+              <Settings />
+            </Layout>
+          </PrivateRoute>
+        } />  
             
-            <Route path="/settings/schedule" element={
-              <PrivateRoute>
-                <Layout>
-                  <ScheduleConfiguration />
-                </Layout>
-              </PrivateRoute>
-            } />
+        <Route path="/settings/schedule" element={
+          <PrivateRoute>
+            <Layout>
+              <ScheduleConfiguration />
+            </Layout>
+          </PrivateRoute>
+        } />
             
-            <Route path="*" element={<Navigate to="/" replace />} />
 
-          </Routes>
-        </Suspense>
-      </SelectedPatientProvider>
-    </ThemeProvider>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -254,9 +251,15 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <UserManagementProvider>
-          <AppContent />
-        </UserManagementProvider>
+        <ThemeProvider>
+          <SelectedPatientProvider>
+            <UserManagementProvider>
+              <AgendaProvider>
+                <AppContent />
+              </AgendaProvider>
+            </UserManagementProvider>
+          </SelectedPatientProvider>
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );

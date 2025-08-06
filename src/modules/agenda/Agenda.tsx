@@ -3,32 +3,58 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { format, startOfMonth, endOfMonth, parseISO, addMinutes, isBefore, startOfWeek } from 'date-fns';
+import { format, startOfMonth, endOfMonth, parseISO, addMinutes, isBefore, startOfWeek, isWithinInterval } from 'date-fns';
 import esLocale from '@fullcalendar/core/locales/es';
 import { api } from '../../lib/api';
 import { useSelectedPatient } from '../../contexts/SelectedPatientContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAgenda } from '../../contexts/AgendaContext';
 import { Modal } from '../../components/Modal';
 import { PatientListSelector } from '../../components/PatientListSelector';
 import { AlertModal } from '../../components/AlertModal';
 import { useNavigate, Link } from 'react-router-dom';
-import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin, X } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
 import { useIdleTimer } from '../../hooks/useIdleTimer';
 
+interface AppointmentFormData {
+  fecha_cita: string;
+  hora_cita: string;
+  motivo: string;
+  consultorio: number;
+  duracion_minutos: number;
+  tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control';
+  tiempo_evolucion?: number | null;
+  unidad_tiempo?: 'horas' | 'dias' | 'semanas' | 'meses' | null;
+  sintomas_asociados?: string[];
+  urgente?: boolean;
+  notas?: string;
+}
 
 export function Agenda() {
   const { currentTheme } = useTheme();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
+  const { 
+    agendaSettings, 
+    blockedDates, 
+    loading: agendaLoading, 
+    error: agendaError,
+    loadConfiguration,
+    isDateBlocked,
+    isWorkDay,
+    createSecureAppointment,
+    checkSlotAvailability 
+  } = useAgenda();
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventInput[]>([]);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showPatientSelectionModal, setShowPatientSelectionModal] = useState(false);
+  const [showQuickAppointmentModal, setShowQuickAppointmentModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventInput | null>(null);
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -46,6 +72,25 @@ export function Agenda() {
 
   // Nuevo estado para el modal de advertencia de slot pasado
   const [showPastSlotWarningModal, setShowPastSlotWarningModal] = useState(false);
+  const [showConfigurationErrorModal, setShowConfigurationErrorModal] = useState(false);
+  const [configurationErrorMessage, setConfigurationErrorMessage] = useState('');
+
+  // Estados para el formulario rápido de citas
+  const [appointmentForm, setAppointmentForm] = useState<AppointmentFormData>({
+    fecha_cita: '',
+    hora_cita: '',
+    motivo: '',
+    consultorio: 1,
+    duracion_minutos: 30,
+    tipo_consulta: 'primera',
+    tiempo_evolucion: null,
+    unidad_tiempo: null,
+    sintomas_asociados: [],
+    urgente: false,
+    notas: ''
+  });
+  const [submittingAppointment, setSubmittingAppointment] = useState(false);
+  const [appointmentError, setAppointmentError] = useState<string | null>(null);
 
   // Configurar el timer de inactividad
   const handleAppReload = () => {
@@ -99,8 +144,17 @@ export function Agenda() {
   useEffect(() => {
     if (!authLoading && user) {
       fetchAppointments();
+      loadConfiguration();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, loadConfiguration]);
+
+  // Verificar configuración al cargar
+  useEffect(() => {
+    if (agendaError) {
+      setConfigurationErrorMessage(agendaError);
+      setShowConfigurationErrorModal(true);
+    }
+  }, [agendaError]);
 
   const handleMonthChange = (date: Date) => {
     if (calendarRef.current) {
@@ -168,28 +222,134 @@ export function Agenda() {
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    if (!selectedPatient) {
-      setShowPatientSelectionModal(true);
-      setTempSelectedDate(selectInfo.start);
+    const selectedDateTime = new Date(selectInfo.start);
+    const selectedDateString = format(selectedDateTime, 'yyyy-MM-dd');
+    const selectedTimeString = format(selectedDateTime, 'HH:mm');
+
+    // Verificar si hay configuración cargada
+    if (!agendaSettings) {
+      setConfigurationErrorMessage('No se ha configurado la agenda. Por favor, configure primero los horarios de atención.');
+      setShowConfigurationErrorModal(true);
       return;
     }
 
-    // NUEVA LÓGICA: Verificar si el slot seleccionado está en el pasado
-    const selectedSlotDateTime = new Date(selectInfo.start);
-    const now = new Date();
-
-    if (selectedSlotDateTime < now) {
-      // Si el slot seleccionado está en el pasado, mostrar un modal de advertencia
-      setShowPastSlotWarningModal(true);
-      return; // No navegar
+    // Verificar si es día de trabajo
+    if (!isWorkDay(selectedDateString)) {
+      setConfigurationErrorMessage('El día seleccionado no está configurado como día de atención médica.');
+      setShowConfigurationErrorModal(true);
+      return;
     }
 
-    navigate('/citas', {
-      state: {
-        selectedDate: selectInfo.start,
-        selectedPatient: selectedPatient
-      }
-    });
+    // Verificar si la fecha está bloqueada
+    if (isDateBlocked(selectedDateString)) {
+      setConfigurationErrorMessage('La fecha seleccionada está bloqueada. No se pueden agendar citas en esta fecha.');
+      setShowConfigurationErrorModal(true);
+      return;
+    }
+
+    if (!selectedPatient) {
+      setShowPatientSelectionModal(true);
+      setTempSelectedDate(selectedDateTime);
+      return;
+    }
+
+    // Verificar si el slot seleccionado está en el pasado
+    const now = new Date();
+    if (selectedDateTime < now) {
+      setShowPastSlotWarningModal(true);
+      return;
+    }
+
+    // Verificar si está dentro del horario de trabajo
+    const startTime = agendaSettings.start_time.substring(0, 5);
+    const endTime = agendaSettings.end_time.substring(0, 5);
+    
+    if (selectedTimeString < startTime || selectedTimeString >= endTime) {
+      setConfigurationErrorMessage(`El horario seleccionado está fuera del horario de atención (${startTime} - ${endTime}).`);
+      setShowConfigurationErrorModal(true);
+      return;
+    }
+
+    // Inicializar formulario con datos de selección
+    setAppointmentForm(prev => ({
+      ...prev,
+      fecha_cita: selectedDateString,
+      hora_cita: selectedTimeString,
+      duracion_minutos: agendaSettings.slot_interval_minutes
+    }));
+    
+    setShowQuickAppointmentModal(true);
+  };
+
+  const handleQuickAppointmentSubmit = async () => {
+    if (!selectedPatient) return;
+    
+    setSubmittingAppointment(true);
+    setAppointmentError(null);
+    
+    try {
+      await createSecureAppointment({
+        id_paciente: selectedPatient.id,
+        ...appointmentForm
+      });
+      
+      setShowQuickAppointmentModal(false);
+      await fetchAppointments(); // Recargar eventos
+      
+      // Limpiar formulario
+      setAppointmentForm({
+        fecha_cita: '',
+        hora_cita: '',
+        motivo: '',
+        consultorio: 1,
+        duracion_minutos: 30,
+        tipo_consulta: 'primera',
+        tiempo_evolucion: null,
+        unidad_tiempo: null,
+        sintomas_asociados: [],
+        urgente: false,
+        notas: ''
+      });
+    } catch (err) {
+      setAppointmentError(err instanceof Error ? err.message : 'Error al agendar la cita');
+    } finally {
+      setSubmittingAppointment(false);
+    }
+  };
+
+  // Mejorar el renderizado de eventos basado en configuración
+  const enhanceEventRendering = (event: EventInput) => {
+    const eventDate = format(new Date(event.start as string), 'yyyy-MM-dd');
+    
+    // Marcar eventos en fechas bloqueadas
+    if (isDateBlocked(eventDate)) {
+      return {
+        ...event,
+        backgroundColor: '#9CA3AF', // Gris para fechas bloqueadas
+        borderColor: '#6B7280'
+      };
+    }
+    
+    // Mantener colores originales para fechas normales
+    return event;
+  };
+
+  // Validar disponibilidad antes de mostrar el formulario
+  const validateSlotBeforeForm = async (fecha: string, hora: string, consultorio: number, duracion: number) => {
+    try {
+      const availability = await checkSlotAvailability(fecha, hora, duracion, consultorio);
+      return availability;
+    } catch (err) {
+      return { 
+        available: false, 
+        reason: 'Error al verificar disponibilidad' 
+      };
+    }
+  };
+
+  // Verificar configuración antes de permitir acciones
+  const canPerformAgendaActions = () => {
+    return agendaSettings && !agendaLoading && !agendaError;
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -286,19 +446,67 @@ export function Agenda() {
               <h2 className="text-lg font-semibold" style={{ color: currentTheme.colors.text }}>
                 Citas Programadas
               </h2>
-              <Link
-                to="/citas"
-                className={clsx(buttonClasses.base, 'flex items-center', 'px-4 py-2',
-                  currentTheme.buttons.style === 'rounded' && 'rounded-lg', // Aplica redondeo estánda
-                  currentTheme.buttons.style === 'pill' && 'rounded-full',   // Aplica forma de píldora
-                  currentTheme.buttons.style === 'square' && 'rounded-none'  // Elimina cualquier redondeo                          
-                )}
-                style={{ background: currentTheme.colors.buttonPrimary, color: currentTheme.colors.buttonText,}}
-              >
-                <CalendarPlus className="h-5 w-5 mr-5" />
-                Agregar 
-             </Link>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => navigate('/settings/schedule')}
+                  disabled={!canPerformAgendaActions()}
+                  className={clsx(
+                    buttonClasses.base, 
+                    'flex items-center px-3 py-2 text-sm',
+                    !canPerformAgendaActions() && 'opacity-50 cursor-not-allowed'
+                  )}
+                  style={{ 
+                    background: 'transparent',
+                    border: `1px solid ${currentTheme.colors.border}`,
+                    color: currentTheme.colors.text
+                  }}
+                >
+                  Configurar
+                </button>
+                <Link
+                  to="/citas"
+                  className={clsx(buttonClasses.base, 'flex items-center', 'px-4 py-2',
+                    currentTheme.buttons.style === 'rounded' && 'rounded-lg',
+                    currentTheme.buttons.style === 'pill' && 'rounded-full',
+                    currentTheme.buttons.style === 'square' && 'rounded-none'
+                  )}
+                  style={{ background: currentTheme.colors.buttonPrimary, color: currentTheme.colors.buttonText }}
+                >
+                  <CalendarPlus className="h-5 w-5 mr-2" />
+                  Nueva Cita
+                </Link>
+              </div>
             </div>
+            
+            {/* Mostrar estado de configuración */}
+            {agendaLoading && (
+              <div 
+                className="p-4 border-b flex items-center gap-2"
+                style={{ borderColor: currentTheme.colors.border }}
+              >
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
+                <span className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                  Cargando configuración de agenda...
+                </span>
+              </div>
+            )}
+            
+            {agendaSettings && (
+              <div 
+                className="p-2 border-b text-xs"
+                style={{ 
+                  borderColor: currentTheme.colors.border,
+                  background: `${currentTheme.colors.primary}05`,
+                  color: currentTheme.colors.textSecondary 
+                }}
+              >
+                Horario: {agendaSettings.start_time.substring(0, 5)} - {agendaSettings.end_time.substring(0, 5)} | 
+                Slots: {agendaSettings.slot_interval_minutes} min | 
+                Días: {agendaSettings.consultation_days.join(', ')} | 
+                Bloqueos: {blockedDates.length}
+              </div>
+            )}
+            
             <div className="flex-1">
               <FullCalendar
                 ref={calendarRef}
@@ -328,11 +536,11 @@ export function Agenda() {
                 select={handleDateSelect}
                 eventClick={handleEventClick}
                 datesSet={handleDatesSet}
-                slotDuration="00:15:00"
+                slotDuration={agendaSettings ? `00:${agendaSettings.slot_interval_minutes.toString().padStart(2, '0')}:00` : "00:15:00"}
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
                 eventDidMount={handleEventDidMount}
-                slotLabelInterval="00:15:00"
+                slotLabelInterval={agendaSettings ? `00:${agendaSettings.slot_interval_minutes.toString().padStart(2, '0')}:00` : "00:15:00"}
                 allDaySlot={false}
                 eventTimeFormat={{
                   hour: '2-digit',
@@ -590,6 +798,234 @@ export function Agenda() {
           </div>
         )}
       </Modal>
+
+      {/* Modal de cita rápida */}
+      <Modal
+        isOpen={showQuickAppointmentModal}
+        onClose={() => {
+          setShowQuickAppointmentModal(false);
+          setAppointmentError(null);
+        }}
+        title="Agendar Cita Rápida"
+        className="max-w-2xl"
+        actions={
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => {
+                setShowQuickAppointmentModal(false);
+                setAppointmentError(null);
+              }}
+              className={clsx(buttonClasses.base, 'border')}
+              style={{
+                background: 'transparent',
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => navigate('/citas', {
+                state: {
+                  selectedDate: new Date(`${appointmentForm.fecha_cita}T${appointmentForm.hora_cita}`),
+                  selectedPatient: selectedPatient
+                }
+              })}
+              className={clsx(buttonClasses.base)}
+              style={{
+                background: 'transparent',
+                border: `1px solid ${currentTheme.colors.primary}`,
+                color: currentTheme.colors.primary,
+              }}
+            >
+              Formulario Completo
+            </button>
+            <button
+              onClick={handleQuickAppointmentSubmit}
+              disabled={submittingAppointment || !appointmentForm.motivo.trim()}
+              className={clsx(buttonClasses.base, buttonClasses.primary, 'disabled:opacity-50')}
+            >
+              {submittingAppointment ? 'Agendando...' : 'Agendar'}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {appointmentError && (
+            <div 
+              className="p-3 rounded-md text-sm border-l-4"
+              style={{
+                background: '#FEE2E2',
+                borderLeftColor: '#DC2626',
+                color: '#DC2626',
+              }}
+            >
+              {appointmentError}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              Paciente
+            </label>
+            <div 
+              className="p-3 rounded-md font-medium"
+              style={{
+                background: currentTheme.colors.background,
+                color: currentTheme.colors.text,
+              }}
+            >
+              {selectedPatient?.Nombre} {selectedPatient?.Paterno} {selectedPatient?.Materno}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Fecha
+              </label>
+              <input
+                type="date"
+                value={appointmentForm.fecha_cita}
+                onChange={(e) => setAppointmentForm(prev => ({ ...prev, fecha_cita: e.target.value }))}
+                className="w-full p-2 rounded-md border"
+                style={{
+                  background: currentTheme.colors.surface,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Hora
+              </label>
+              <input
+                type="time"
+                value={appointmentForm.hora_cita}
+                onChange={(e) => setAppointmentForm(prev => ({ ...prev, hora_cita: e.target.value }))}
+                className="w-full p-2 rounded-md border"
+                style={{
+                  background: currentTheme.colors.surface,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Consultorio
+              </label>
+              <select
+                value={appointmentForm.consultorio}
+                onChange={(e) => setAppointmentForm(prev => ({ ...prev, consultorio: Number(e.target.value) }))}
+                className="w-full p-2 rounded-md border"
+                style={{
+                  background: currentTheme.colors.surface,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
+                }}
+              >
+                <option value={1}>Consultorio 1</option>
+                <option value={2}>Consultorio 2</option>
+                <option value={3}>Consultorio 3</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Duración (minutos)
+              </label>
+              <select
+                value={appointmentForm.duracion_minutos}
+                onChange={(e) => setAppointmentForm(prev => ({ ...prev, duracion_minutos: Number(e.target.value) }))}
+                className="w-full p-2 rounded-md border"
+                style={{
+                  background: currentTheme.colors.surface,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
+                }}
+              >
+                <option value={15}>15 minutos</option>
+                <option value={20}>20 minutos</option>
+                <option value={30}>30 minutos</option>
+                <option value={45}>45 minutos</option>
+                <option value={60}>60 minutos</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              Tipo de Consulta
+            </label>
+            <select
+              value={appointmentForm.tipo_consulta}
+              onChange={(e) => setAppointmentForm(prev => ({ ...prev, tipo_consulta: e.target.value as any }))}
+              className="w-full p-2 rounded-md border"
+              style={{
+                background: currentTheme.colors.surface,
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
+            >
+              <option value="primera">Primera vez</option>
+              <option value="seguimiento">Seguimiento</option>
+              <option value="control">Control</option>
+              <option value="revision">Revisión</option>
+              <option value="urgencia">Urgencia</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              Motivo de la Consulta *
+            </label>
+            <input
+              type="text"
+              value={appointmentForm.motivo}
+              onChange={(e) => setAppointmentForm(prev => ({ ...prev, motivo: e.target.value }))}
+              placeholder="Ej: Dolor de cabeza, control de presión..."
+              className="w-full p-2 rounded-md border"
+              style={{
+                background: currentTheme.colors.surface,
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              Notas (opcional)
+            </label>
+            <textarea
+              value={appointmentForm.notas || ''}
+              onChange={(e) => setAppointmentForm(prev => ({ ...prev, notas: e.target.value }))}
+              rows={2}
+              className="w-full p-2 rounded-md border"
+              style={{
+                background: currentTheme.colors.surface,
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de error de configuración */}
+      <AlertModal
+        isOpen={showConfigurationErrorModal}
+        onClose={() => setShowConfigurationErrorModal(false)}
+        type="warning"
+        title="Configuración de Agenda"
+        message={configurationErrorMessage}
+      />
 
       {/* Nuevo Modal para advertencia de slot pasado */}
       <AlertModal

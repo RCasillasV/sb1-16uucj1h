@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAgenda } from '../contexts/AgendaContext';
 import clsx from 'clsx';
 import type { EventInput } from '@fullcalendar/core';
 import type { DatesSetArg } from '@fullcalendar/core';
@@ -20,6 +21,7 @@ interface MiniCalendarProps {
 
 export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDates, onMonthChange }: MiniCalendarProps) {
   const { currentTheme } = useTheme();
+  const { blockedDates, isDateBlocked, isWorkDay } = useAgenda();
   const [currentMonth, setCurrentMonth] = React.useState(startOfMonth(selectedDate));
   const localNavigation = useRef(false); // New ref to track local navigation
 
@@ -152,6 +154,9 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
           {calendarDays.map((day) => {
             const isSelected = isSameDay(day, selectedDate);
             const isCurrentMonth = isSameMonth(day, currentMonth);
+            const dayString = format(day, 'yyyy-MM-dd');
+            const isDayBlocked = isDateBlocked(dayString);
+            const isDayWorkDay = isWorkDay(dayString);
             const hasEvents = events.some(event => 
               isSameDay(new Date(event.start as string), day)
             );
@@ -160,22 +165,40 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
               <button
                 key={day.toString()}
                 onClick={() => onDateSelect(day)}
+                disabled={isDayBlocked || !isDayWorkDay}
                 className={clsx(
-                  'w-7 h-7 text-[10px] rounded-full flex items-center justify-center relative transition-colors',
+                  'w-7 h-7 text-[10px] rounded-full flex items-center justify-center relative transition-colors disabled:cursor-not-allowed',
                   !isCurrentMonth && 'opacity-30',
-                  isSelected && 'text-white'
+                  isSelected && 'text-white',
+                  isDayBlocked && 'opacity-40',
+                  !isDayWorkDay && 'opacity-40'
                 )}
                 style={{
-                  background: isSelected ? currentTheme.colors.primary : 'transparent',
+                  background: isSelected 
+                    ? currentTheme.colors.primary 
+                    : isDayBlocked 
+                      ? '#EF4444' 
+                      : !isDayWorkDay 
+                        ? '#9CA3AF' 
+                        : 'transparent',
                   color: isSelected 
                     ? currentTheme.colors.buttonText 
+                    : (isDayBlocked || !isDayWorkDay)
+                      ? '#FFFFFF'
                     : isCurrentMonth 
                       ? currentTheme.colors.text 
                       : currentTheme.colors.textSecondary,
                 }}
+                title={
+                  isDayBlocked 
+                    ? 'Fecha bloqueada'
+                    : !isDayWorkDay 
+                      ? 'No es día de consulta' 
+                      : undefined
+                }
               >
                 <span className="leading-none">{format(day, 'd')}</span>
-                {hasEvents && !isSelected && (
+                {hasEvents && !isSelected && isDayWorkDay && !isDayBlocked && (
                   <span 
                     className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full"
                     style={{ 
@@ -197,6 +220,26 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
         style={{ borderColor: currentTheme.colors.border }}
       >
         <div className="p-3">
+          {/* Indicador de estado del día */}
+          <div className="mb-2">
+            {isDateBlocked(format(selectedDate, 'yyyy-MM-dd')) && (
+              <div 
+                className="text-[9px] px-2 py-1 rounded text-center font-medium"
+                style={{ background: '#FEE2E2', color: '#DC2626' }}
+              >
+                Fecha Bloqueada
+              </div>
+            )}
+            {!isWorkDay(format(selectedDate, 'yyyy-MM-dd')) && !isDateBlocked(format(selectedDate, 'yyyy-MM-dd')) && (
+              <div 
+                className="text-[9px] px-2 py-1 rounded text-center font-medium"
+                style={{ background: '#F3F4F6', color: '#6B7280' }}
+              >
+                No es día de consulta
+              </div>
+            )}
+          </div>
+
           <h3 
             className="text-[10px] font-medium mb-2 leading-tight"
             style={{ color: currentTheme.colors.text }}
@@ -209,7 +252,12 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
                 className="text-[9px] text-center py-1.5 leading-tight"
                 style={{ color: currentTheme.colors.textSecondary }}
               >
-                No hay citas programadas
+                {isDateBlocked(format(selectedDate, 'yyyy-MM-dd')) 
+                  ? 'Fecha bloqueada'
+                  : !isWorkDay(format(selectedDate, 'yyyy-MM-dd'))
+                    ? 'No es día de consulta'
+                    : 'No hay citas programadas'
+                }
               </p>
             ) : (
               selectedDateEvents.map((event) => (
