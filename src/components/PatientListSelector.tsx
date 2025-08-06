@@ -219,7 +219,7 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
                   {getSortIcon('name')}
                 </button>
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
+              <th className="px-6 py-2 text-center text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
                 <button className="whitespace-nowrap text-center"
                   onClick={() => handleSort('age')}
                   className={sortButtonStyle.base}
