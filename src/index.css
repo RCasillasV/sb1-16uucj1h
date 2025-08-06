@@ -190,6 +190,12 @@
 
   /* Images */
   body.is-printing-modal #modal-print-target img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+  }
+
   /* Hide buttons and UI elements within modal */
   body.is-printing-modal #modal-print-target button,
   body.is-printing-modal #modal-print-target .print\\:hidden {
