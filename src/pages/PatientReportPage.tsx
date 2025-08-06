@@ -1,5 +1,3 @@
-// src/pages/PatientReportPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Printer, ArrowLeft, FileText, User } from 'lucide-react';
