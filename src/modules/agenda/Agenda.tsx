@@ -590,8 +590,8 @@ export function Agenda() {
                   eventClick={handleEventClick}
                   datesSet={handleDatesSet}
                   slotDuration={`00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00`}
-                  slotMinTime="08:00:00"
-                  slotMaxTime="22:00:00"
+                  slotMinTime={agendaSettings.start_time} 
+                  slotMaxTime={agendaSettings.end_time} 
                   eventDidMount={handleEventDidMount}
                   dayCellDidMount={handleDayCellDidMount}
                   slotLabelInterval={`00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00`}
