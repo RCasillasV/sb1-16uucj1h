@@ -182,6 +182,8 @@ const processBatchUpdates = async () => {
   if (updateQueue.length > 0) {
     batchUpdateTimeout = setTimeout(processBatchUpdates, 1000);
   }
+
+  cacheUtils.delete('appointments:all');
 };
 
 type UserAttributes = {
@@ -1362,92 +1364,12 @@ export const api = {
     }
   },
 
- 
-
-      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
-      if (!currentUserAttributes?.idbu) {
-        throw new Error('User has no assigned business unit (idbu).');
-      }
-
-      const { data, error } = await supabase
-        .from('tcAgendaSettings')
-        .select('*')
-        .eq('idbu', currentUserAttributes.idbu)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-        console.error('Error fetching agenda settings:', error);
-        throw error;
-      }
-
-      return data;
-    },
-
-    async update(settings: {
-      start_time: string;
-      end_time: string;
-      consultation_days: string[];
-      slot_interval: number;
-    }) {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.user) {
-        throw new Error('No authenticated user found');
-      }
-
-      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
-      if (!currentUserAttributes?.idbu) {
-        throw new Error('User has no assigned business unit (idbu).');
-      }
-
-      // Try to update first, if no record exists, insert
-      const { data: existingSettings } = await supabase
-        .from('agenda_settings')
-        .select('id')
-        .eq('idbu', currentUserAttributes.idbu)
-        .single();
-
-      const settingsData = {
-        ...settings,
-        idbu: currentUserAttributes.idbu,
-        user_id: session.user.id,
-        updated_at: new Date().toISOString()
-      };
-
-      if (existingSettings) {
-        const { data, error } = await supabase
-          .from('tcAgendaSettings')
-          .update(settingsData)
-          .eq('idbu', currentUserAttributes.idbu)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await supabase
-          .from('tcAgendaSettings')
-          .insert(settingsData)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      }
-    }
-  },
-
-  // Configuración de agenda
   agendaSettings: {
     async get() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {
         throw new Error('No authenticated user found');
       }
-    async get() {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.user) {
-        throw new Error('No authenticated user found');
-      }
 
       const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
       if (!currentUserAttributes?.idbu) {
@@ -1521,7 +1443,6 @@ export const api = {
     }
   },
 
-  // Fechas bloqueadas
   blockedDates: {
     async getAll() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -1653,81 +1574,6 @@ export const api = {
           console.error('Error updating consultorio:', result.error);
           throw result.error;
         }
-      }
-
-      return true;
-    }
-  },
-
-  blockedDates: {
-    async getAll() {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.user) {
-        throw new Error('No authenticated user found');
-      }
-
-      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
-      if (!currentUserAttributes?.idbu) {
-        throw new Error('User has no assigned business unit (idbu).');
-      }
-
-      const { data, error } = await supabase
-        .from('tcAgendaBloqueada')
-        .select('*')
-        .eq('idbu', currentUserAttributes.idbu)
-        .order('start_date', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching blocked dates:', error);
-        throw error;
-      }
-
-      return data || [];
-    },
-
-    async create(blockData: {
-      start_date: string;
-      end_date: string;
-      reason: string;
-      block_type: string;
-    }) {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.user) {
-        throw new Error('No authenticated user found');
-      }
-
-      const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
-      if (!currentUserAttributes?.idbu) {
-        throw new Error('User has no assigned business unit (idbu).');
-      }
-
-      const { data, error } = await supabase
-        .from('tcAgendaBloqueada')
-        .insert({
-          ...blockData,
-          idbu: currentUserAttributes.idbu,
-          user_id: session.user.id
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating blocked date:', error);
-        throw error;
-      }
-
-      return data;
-    },
-
-    async delete(id: string) {
-      const { error } = await supabase
-        .from('tcAgendaBloqueada')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting blocked date:', error);
-        throw error;
       }
 
       return true;
