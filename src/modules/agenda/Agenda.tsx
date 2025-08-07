@@ -237,9 +237,14 @@ export function Agenda() {
   // Función para atenuar días bloqueados o no laborables
   const handleDayCellDidMount = (info: DayCellMountArg) => {
     const formattedDate = format(info.date, 'yyyy-MM-dd');
+    const dayName = arg.date.toLocaleDateString('es-ES', { weekday: 'long', timeZone: 'UTC' });
+    const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+    
     const isBlocked = isDateBlocked(formattedDate);
     const isNonWorkDay = !isWorkDay(formattedDate);
 
+    // Log para el calendario principal
+    console.log(`Main Calendar Day: ${formattedDate} (${capitalizedDayName}) - isWorkDay: ${!isNonWorkDay}, isBlocked: ${isBlocked}`);
     if (isBlocked || isNonWorkDay) {
       // Aplica un color de fondo atenuado y un color de texto secundario
       info.el.style.backgroundColor = currentTheme.id.includes('dark') ? '#2A2A2A' : '#F5F5F5';

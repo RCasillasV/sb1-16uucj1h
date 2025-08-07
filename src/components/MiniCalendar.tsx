@@ -136,12 +136,17 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
             const isSelected = isSameDay(day, selectedDate);
             const isCurrentMonth = isSameMonth(day, displayedMonth);
             const dayString = format(day, 'yyyy-MM-dd');
+            const dayName = day.toLocaleDateString('es-ES', { weekday: 'long', timeZone: 'UTC' });
+            const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+            
             const isDayBlocked = isDateBlocked(dayString);
             const isDayWorkDay = isWorkDay(dayString);
             const hasEvents = events.some(event => 
               isSameDay(new Date(event.start as string), day)
             );
 
+            // Log para el mini-calendario
+            console.log(`Mini Calendar Day: ${dayString} (${capitalizedDayName}) - isWorkDay: ${isDayWorkDay}, isBlocked: ${isDayBlocked}`);
             return (
               <button
                 key={day.toString()}
