@@ -48,21 +48,9 @@ const PageLoader = () => {
 // Componente interno que tiene acceso a useNavigate y useAuth
 function AppContent() {
   const navigate = useNavigate();
-  const { signOut, loading: authLoading, user } = useAuth();
+  const { signOut, user } = useAuth();
   const [initError, setInitError] = useState<Error | null>(null);
   
-  // El AuthProvider se encarga de toda la lógica de inicialización
-  // Solo mantenemos este useEffect para logging opcional
-  useEffect(() => {
-    console.log('AppContent: authLoading =', authLoading, ', user =', user ? 'exists' : 'null');
-  }, [authLoading, user]);
-
-  // Muestra el cargador mientras AuthProvider está inicializando
-  if (authLoading) {
-    console.log('AppContent: Showing PageLoader because authLoading =', authLoading);
-    return <PageLoader />;
-  }
-
   // Si hay un error de inicialización
   if (initError) {
     return (
