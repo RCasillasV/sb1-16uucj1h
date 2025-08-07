@@ -197,14 +197,6 @@ export function AntecedentesNoPatologicos() {
     }
   };
 
-  const handleArrayChange = (field: string, value: string, checked: boolean) => {
-    const currentArray = watch(field as any) as string[] || [];
-    const newArray = checked 
-      ? [...currentArray, value]
-      : currentArray.filter(item => item !== value);
-    setValue(field as any, newArray);
-  };
-
   const buttonStyle = {
     base: clsx(
       'px-4 py-2 transition-colors',
