@@ -26,7 +26,7 @@ interface TcAgendaSettings {
   start_time: string;
   end_time: string;
   consultation_days: string[];
-  slot_interval_minutes: number;
+  slot_interval: number;
 }
 
 const WORK_DAYS = [
@@ -94,7 +94,7 @@ export function ScheduleConfiguration() {
   // Sincronizar con el contexto de agenda
   useEffect(() => {
     if (agendaSettings) {
-      setSlotDuration((agendaSettings.slot_interval_minutes ?? 15).toString());
+      setSlotDuration((agendaSettings.slot_interval ?? 15).toString());
       setStartTime((agendaSettings.start_time ?? '08:00').substring(0, 5));
       setEndTime((agendaSettings.end_time ?? '20:00').substring(0, 5));
       
@@ -144,7 +144,7 @@ export function ScheduleConfiguration() {
         start_time: startTime + ':00',
         end_time: endTime + ':00',
         consultation_days: selectedDays,
-        slot_interval_minutes: parseInt(slotDuration)
+        slot_interval: parseInt(slotDuration)
       };
 
       await Promise.all([

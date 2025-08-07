@@ -324,7 +324,7 @@ export interface Database {
           start_time: string
           end_time: string
           consultation_days: string[]
-          slot_interval_minutes: number
+          slot_interval: number
           user_id: string | null
         }
         Insert: {
@@ -335,7 +335,7 @@ export interface Database {
           start_time: string
           end_time: string
           consultation_days: string[]
-          slot_interval_minutes: number
+          slot_interval: number
           user_id?: string | null
         }
         Update: {
@@ -346,7 +346,7 @@ export interface Database {
           start_time?: string
           end_time?: string
           consultation_days?: string[]
-          slot_interval_minutes?: number
+          slot_interval?: number
           user_id?: string | null
         }
       }
@@ -720,7 +720,7 @@ export interface Database {
           start_time: string
           end_time: string
           consultation_days: string[]
-          slot_interval_minutes: number
+          slot_interval: number
           user_id?: string | null
         }
         Update: {
@@ -731,7 +731,7 @@ export interface Database {
           start_time?: string
           end_time?: string
           consultation_days?: string[]
-          slot_interval_minutes?: number
+          slot_interval?: number
           user_id?: string | null
         }
       }
