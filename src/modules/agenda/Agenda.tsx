@@ -234,39 +234,40 @@ export function Agenda() {
     });
   };
 
-  // Función para atenuar días bloqueados o no laborables
-  const handleDayCellDidMount = (info: DayCellMountArg) => {
-    const formattedDate = format(info.date, 'yyyy-MM-dd');
+  // Función corregida para atenuar días bloqueados o no laborables
+  const handleDayCellDidMount = (arg: DayCellMountArg) => {
+    const formattedDate = format(arg.date, 'yyyy-MM-dd');
     const dayName = arg.date.toLocaleDateString('es-ES', { weekday: 'long', timeZone: 'UTC' });
     const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
     
     const isBlocked = isDateBlocked(formattedDate);
-    const isNonWorkDay = !isWorkDay(formattedDate);
+    const isWork = isWorkDay(formattedDate);
+    const isNonWorkDay = !isWork;
 
     // Log para el calendario principal
-    console.log(`Main Calendar Day: ${formattedDate} (${capitalizedDayName}) - isWorkDay: ${!isNonWorkDay}, isBlocked: ${isBlocked}`);
+    console.log(`Main Calendar Day: ${formattedDate} (${capitalizedDayName}) - isWorkDay: ${isWork}, isBlocked: ${isBlocked}`);
     if (isBlocked || isNonWorkDay) {
       // Aplica un color de fondo atenuado y un color de texto secundario
-      info.el.style.backgroundColor = currentTheme.id.includes('dark') ? '#2A2A2A' : '#F5F5F5';
-      info.el.style.color = currentTheme.colors.textSecondary;
-      info.el.style.opacity = '0.6';
+      arg.el.style.backgroundColor = currentTheme.id.includes('dark') ? '#2A2A2A' : '#F5F5F5';
+      arg.el.style.color = currentTheme.colors.textSecondary;
+      arg.el.style.opacity = '0.6';
       
       // Añadir una clase CSS para identificar estos días
-      info.el.classList.add('fc-day-blocked');
+      arg.el.classList.add('fc-day-blocked');
       
       // Opcional: agregar un título tooltip
       if (isBlocked) {
-        info.el.title = 'Fecha bloqueada - No disponible para citas';
+        arg.el.title = 'Fecha bloqueada - No disponible para citas';
       } else if (isNonWorkDay) {
-        info.el.title = 'No es día de consulta';
+        arg.el.title = 'No es día de consulta';
       }
     } else {
       // Asegura que los días activos tengan el color de fondo predeterminado del tema
-      info.el.style.backgroundColor = '';
-      info.el.style.color = '';
-      info.el.style.opacity = '';
-      info.el.classList.remove('fc-day-blocked');
-      info.el.title = '';
+      arg.el.style.backgroundColor = '';
+      arg.el.style.color = '';
+      arg.el.style.opacity = '';
+      arg.el.classList.remove('fc-day-blocked');
+      arg.el.title = '';
     }
   };
   const handleDateSelect = (selectInfo: DateSelectArg) => {
