@@ -165,7 +165,7 @@ export function Agenda() {
       console.log('consultation_days:', agendaSettings.consultation_days);
       console.log('start_time:', agendaSettings.start_time);
       console.log('end_time:', agendaSettings.end_time);
-      console.log('slot_interval_minutes:', agendaSettings.slot_interval_minutes);
+      console.log('slot_interval:', agendaSettings.slot_interval);
       console.log('==============================');
     }
   }, [agendaSettings]);
@@ -324,7 +324,7 @@ export function Agenda() {
       ...prev,
       fecha_cita: selectedDateString,
       hora_cita: selectedTimeString,
-      duracion_minutos: agendaSettings.slot_interval_minutes
+      duracion_minutos: agendaSettings.slot_interval
     }));
     
     setShowQuickAppointmentModal(true);
@@ -549,7 +549,7 @@ export function Agenda() {
                 }}
               >
                 Horario: {agendaSettings.start_time.substring(0, 5)} - {agendaSettings.end_time.substring(0, 5)} | 
-                Slots: {agendaSettings.slot_interval_minutes} min | 
+                Slots: {agendaSettings.slot_interval} min | 
                 Días: {agendaSettings.consultation_days.join(', ')} | 
                 Bloqueos: {blockedDates.length}
               </div>
@@ -584,12 +584,12 @@ export function Agenda() {
                 select={handleDateSelect}
                 eventClick={handleEventClick}
                 datesSet={handleDatesSet}
-                slotDuration={agendaSettings ? `00:${(agendaSettings.slot_interval_minutes ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
+                slotDuration={agendaSettings ? `00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
                 eventDidMount={handleEventDidMount}
                 dayCellDidMount={handleDayCellDidMount}
-                slotLabelInterval={agendaSettings ? `00:${(agendaSettings.slot_interval_minutes ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
+                slotLabelInterval={agendaSettings ? `00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
                 allDaySlot={false}
                 eventTimeFormat={{
                   hour: '2-digit',

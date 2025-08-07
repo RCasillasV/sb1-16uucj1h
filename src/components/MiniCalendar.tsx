@@ -141,6 +141,9 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
             
             const isDayBlocked = isDateBlocked(dayString);
             const isDayWorkDay = isWorkDay(dayString);
+
+            // Log para el mini-calendario
+            console.log(`Mini Calendar Day: ${dayString} (${capitalizedDayName}) - isWorkDay: ${isDayWorkDay}, isBlocked: ${isDayBlocked}`);
             const hasEvents = events.some(event => 
               isSameDay(new Date(event.start as string), day)
             );
