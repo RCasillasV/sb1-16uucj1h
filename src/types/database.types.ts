@@ -361,6 +361,7 @@ export interface Database {
           reason: string
           block_type: string
           user_id: string | null
+          deleted_at: string | null 
         }
         Insert: {
           id?: string
@@ -372,6 +373,7 @@ export interface Database {
           reason: string
           block_type: string
           user_id?: string | null
+          deleted_at?: string | null 
         }
         Update: {
           id?: string
@@ -383,6 +385,7 @@ export interface Database {
           reason?: string
           block_type?: string
           user_id?: string | null
+          deleted_at?: string | null 
         }
       }
       medical_records: {

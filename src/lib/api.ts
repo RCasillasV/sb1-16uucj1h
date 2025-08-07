@@ -1459,6 +1459,7 @@ export const api = {
         .from('tcAgendaBloqueada')
         .select('*')
         .eq('idbu', currentUserAttributes.idbu)
+        .is('deleted_at', null)
         .order('start_date', { ascending: true });
 
       if (error) {
@@ -1506,7 +1507,7 @@ export const api = {
     async delete(id: string) {
       const { error } = await supabase
         .from('tcAgendaBloqueada')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) {
