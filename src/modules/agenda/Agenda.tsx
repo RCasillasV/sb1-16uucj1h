@@ -161,6 +161,7 @@ export function Agenda() {
     if (agendaSettings) {
       console.log('=== Agenda Settings Loaded ===');
       console.log('agendaSettings:', agendaSettings);
+      console.log('agendaSettings:', agendaSettings);
       console.log('consultation_days:', agendaSettings.consultation_days);
       console.log('start_time:', agendaSettings.start_time);
       console.log('end_time:', agendaSettings.end_time);
@@ -558,62 +559,71 @@ export function Agenda() {
             )}
             
             <div className="flex-1">
-              <FullCalendar
-                ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView="timeGridWeek"
-                scrollTime={initialScrollTime}
-                headerToolbar={{
-                  left: 'prev,next today',
-                  center: 'title',
-                  right: 'dayGridMonth,timeGridWeek'
-                }}
-                buttonText={{
-                  today: 'Hoy',
-                  month: 'Mes',
-                  week: 'Semana',
-                }}
-                viewDidMount={(info) => {
-                  setCalendarView(info.view.type as 'dayGridMonth' | 'timeGridWeek');
-                }}
-                locale={esLocale}
-                firstDay={1}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                weekends={true}
-                events={events}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                datesSet={handleDatesSet}
-                slotDuration={agendaSettings ? `00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
-                slotMinTime="08:00:00"
-                slotMaxTime="22:00:00"
-                eventDidMount={handleEventDidMount}
-                dayCellDidMount={handleDayCellDidMount}
-                slotLabelInterval={agendaSettings ? `00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
-                allDaySlot={false}
-                eventTimeFormat={{
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: false
-                }}
-                views={{
-                  timeGridWeek: {
-                    dayHeaderFormat: { weekday: 'short', day: 'numeric' },
-                    slotLabelFormat: {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false
+              {agendaSettings ? (
+                <FullCalendar
+                  ref={calendarRef}
+                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                  initialView="timeGridWeek"
+                  scrollTime={initialScrollTime}
+                  headerToolbar={{
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                  }}
+                  buttonText={{
+                    today: 'Hoy',
+                    month: 'Mes',
+                    week: 'Semana',
+                  }}
+                  viewDidMount={(info) => {
+                    setCalendarView(info.view.type as 'dayGridMonth' | 'timeGridWeek');
+                  }}
+                  locale={esLocale}
+                  firstDay={1}
+                  selectable={true}
+                  selectMirror={true}
+                  dayMaxEvents={true}
+                  weekends={true}
+                  events={events}
+                  select={handleDateSelect}
+                  eventClick={handleEventClick}
+                  datesSet={handleDatesSet}
+                  slotDuration={`00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00`}
+                  slotMinTime="08:00:00"
+                  slotMaxTime="22:00:00"
+                  eventDidMount={handleEventDidMount}
+                  dayCellDidMount={handleDayCellDidMount}
+                  slotLabelInterval={`00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00`}
+                  allDaySlot={false}
+                  eventTimeFormat={{
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                  }}
+                  views={{
+                    timeGridWeek: {
+                      dayHeaderFormat: { weekday: 'short', day: 'numeric' },
+                      slotLabelFormat: {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                      }
                     }
-                  }
-                }}
-                height="100%"
-                aspectRatio={2}
-                handleWindowResize={true}
-                stickyHeaderDates={true}
-                expandRows={true}
-              />
+                  }}
+                  height="100%"
+                  aspectRatio={2}
+                  handleWindowResize={true}
+                  stickyHeaderDates={true}
+                  expandRows={true}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-96">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
+                  <span className="ml-3" style={{ color: currentTheme.colors.text }}>
+                    Cargando configuración de agenda...
+                  </span>
+                </div>
+              )}
 
               {/* Custom styles for time slots */}
               <style>
