@@ -14,7 +14,7 @@ import { Modal } from '../../components/Modal';
 import { PatientListSelector } from '../../components/PatientListSelector';
 import { AlertModal } from '../../components/AlertModal';
 import { useNavigate, Link } from 'react-router-dom';
-import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin, X } from 'lucide-react';
+import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin, X, Settings } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg, DayCellMountArg } from '@fullcalendar/core';
@@ -501,9 +501,10 @@ export function Agenda() {
                 <button
                   onClick={() => navigate('/settings/schedule')}
                   disabled={!canPerformAgendaActions()}
+                  title="Configurar"
                   className={clsx(
                     buttonClasses.base, 
-                    'flex items-center px-3 py-2 text-sm',
+                    'flex items-center p-2 text-sm',
                     !canPerformAgendaActions() && 'opacity-50 cursor-not-allowed'
                   )}
                   style={{ 
@@ -512,7 +513,7 @@ export function Agenda() {
                     color: currentTheme.colors.text
                   }}
                 >
-                  Configurar
+                  <Settings className="h-5 w-5" />
                 </button>
                 <Link
                   to="/citas"
