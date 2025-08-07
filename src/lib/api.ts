@@ -1392,7 +1392,7 @@ export const api = {
       start_time: string;
       end_time: string;
       consultation_days: string[];
-      slot_interval_minutes: number;
+      slot_interval: number;
     }) {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {
@@ -1472,7 +1472,7 @@ export const api = {
       start_time: string;
       end_time: string;
       consultation_days: string[];
-      slot_interval_minutes: number;
+      slot_interval: number;
     }) {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {

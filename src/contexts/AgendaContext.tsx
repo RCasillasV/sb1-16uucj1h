@@ -8,7 +8,7 @@ interface AgendaSettings {
   start_time: string;
   end_time: string;
   consultation_days: string[];
-  slot_interval_minutes: number;
+  slot_interval: number;
 }
 
 interface BlockedDate {
@@ -114,7 +114,7 @@ export function AgendaProvider({ children }: { children: React.ReactNode }) {
     const slots: TimeSlot[] = [];
     const startTime = agendaSettings.start_time.substring(0, 5); // HH:MM
     const endTime = agendaSettings.end_time.substring(0, 5);     // HH:MM
-    const intervalMinutes = agendaSettings.slot_interval_minutes;
+    const intervalMinutes = agendaSettings.slot_interval;
 
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [endHour, endMinute] = endTime.split(':').map(Number);
