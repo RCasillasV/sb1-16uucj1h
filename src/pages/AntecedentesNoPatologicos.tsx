@@ -85,6 +85,8 @@ function Switch({ checked, onCheckedChange, disabled = false }: SwitchProps) {
 export function AntecedentesNoPatologicos() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
+  
+  console.log('AntecedentesNoPatologicos: user:', user, 'authLoading:', authLoading); // <-- Añade esta línea
 
   const {
     control,

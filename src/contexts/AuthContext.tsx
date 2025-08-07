@@ -26,6 +26,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  console.log('AuthProvider: current user state:', user, 'loading state:', loading); // <-- Añade esta línea 
+
   // Function to introduce a small delay
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -244,6 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  console.log('useAuth: context value:', context); 
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
