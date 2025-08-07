@@ -774,7 +774,8 @@ export function ScheduleConfiguration() {
           </div>
         }
       >
-        <p>¿Está seguro de que desea eliminar este bloqueo de fecha? Esta acción no se puede deshacer.</p>
+        <p>¿Está seguro de eliminar bloqueo de fecha?</p>
+        <p>Esta acción no se puede deshacer.</p>
       </Modal>
     </div>
   );
