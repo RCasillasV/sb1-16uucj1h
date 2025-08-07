@@ -157,6 +157,18 @@ export function Agenda() {
     }
   }, [agendaError]);
 
+  // Log para depurar configuración de agenda
+  useEffect(() => {
+    if (agendaSettings) {
+      console.log('=== Agenda Settings Loaded ===');
+      console.log('agendaSettings:', agendaSettings);
+      console.log('consultation_days:', agendaSettings.consultation_days);
+      console.log('start_time:', agendaSettings.start_time);
+      console.log('end_time:', agendaSettings.end_time);
+      console.log('slot_interval_minutes:', agendaSettings.slot_interval_minutes);
+      console.log('==============================');
+    }
+  }, [agendaSettings]);
   const handleMonthChange = (date: Date) => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
