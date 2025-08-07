@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Calendar, MapPin, X, Plus, Save, AlertCircle } from 'lucide-react';
+import { Clock, Calendar, MapPin, X, Plus, Save, AlertCircle, Trash2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useAgenda } from '../contexts/AgendaContext';
@@ -84,6 +85,10 @@ export function ScheduleConfiguration() {
     reason: '',
     block_type: 'vacation' as const
   });
+
+  // Estados para el modal de confirmación de eliminación
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [bloqueoToDeleteId, setBloqueoToDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -206,11 +211,23 @@ export function ScheduleConfiguration() {
   const removeBloqueo = async (id: string) => {
     try {
       await api.blockedDates.delete(id);
-      setBloqueos(prev => prev.filter(b => b.id !== id));
+      await loadConfiguration(); // Recargar los datos para reflejar el cambio
+      setShowDeleteConfirmModal(false); // Cerrar el modal después de la eliminación
+      setBloqueoToDeleteId(null); // Limpiar el ID del bloqueo a eliminar
     } catch (err) {
       console.error('Error removing blocked date:', err);
       setError(err instanceof Error ? err.message : 'Error al eliminar bloqueo');
     }
+  };
+
+  const handleOpenDeleteConfirmModal = (id: string) => {
+    setBloqueoToDeleteId(id);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleCloseDeleteConfirmModal = () => {
+    setShowDeleteConfirmModal(false);
+    setBloqueoToDeleteId(null);
   };
 
   const getBloqueoTypeData = (type: string) => {
@@ -711,10 +728,11 @@ export function ScheduleConfiguration() {
                         </p>
                       </div>
                       <button
-                        onClick={() => removeBloqueo(bloqueo.id)}
+                        onClick={() => handleOpenDeleteConfirmModal(bloqueo.id)}
                         className="p-2 rounded-full hover:bg-black/5 transition-colors"
+                        title="Eliminar bloqueo"
                       >
-                        <X className="h-4 w-4" style={{ color: currentTheme.colors.textSecondary }} />
+                        <Trash2 className="h-4 w-4" style={{ color: '#EF4444' }} />
                       </button>
                     </div>
                   );
@@ -724,6 +742,40 @@ export function ScheduleConfiguration() {
           )}
         </div>
       )}
+
+      {/* Modal de Confirmación de Eliminación */}
+      <Modal
+        isOpen={showDeleteConfirmModal}
+        onClose={handleCloseDeleteConfirmModal}
+        title="Confirmar Eliminación"
+        actions={
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleCloseDeleteConfirmModal}
+              className={clsx(buttonStyle.base, 'border')}
+              style={{
+                background: 'transparent',
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => bloqueoToDeleteId && removeBloqueo(bloqueoToDeleteId)}
+              className={buttonStyle.base}
+              style={{
+                background: '#EF4444',
+                color: '#FFFFFF',
+              }}
+            >
+              Eliminar
+            </button>
+          </div>
+        }
+      >
+        <p>¿Está seguro de que desea eliminar este bloqueo de fecha? Esta acción no se puede deshacer.</p>
+      </Modal>
     </div>
   );
 }
