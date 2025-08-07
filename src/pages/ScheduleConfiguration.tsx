@@ -94,13 +94,13 @@ export function ScheduleConfiguration() {
   // Sincronizar con el contexto de agenda
   useEffect(() => {
     if (agendaSettings) {
-      setSlotDuration(agendaSettings.slot_interval_minutes.toString());
-      setStartTime(agendaSettings.start_time.substring(0, 5));
-      setEndTime(agendaSettings.end_time.substring(0, 5));
+      setSlotDuration((agendaSettings.slot_interval_minutes ?? 15).toString());
+      setStartTime((agendaSettings.start_time ?? '08:00').substring(0, 5));
+      setEndTime((agendaSettings.end_time ?? '20:00').substring(0, 5));
       
       const days: Record<string, boolean> = {};
       WORK_DAYS.forEach(day => {
-        days[day.key] = agendaSettings.consultation_days.includes(day.key);
+        days[day.key] = (agendaSettings.consultation_days ?? []).includes(day.key);
       });
       setWorkDays(days);
     }
