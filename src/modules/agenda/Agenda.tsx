@@ -18,6 +18,7 @@ import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCir
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
+import type { DayCellMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
 import { useIdleTimer } from '../../hooks/useIdleTimer';
 
@@ -221,6 +222,36 @@ export function Agenda() {
     });
   };
 
+  // Función para atenuar días bloqueados o no laborables
+  const handleDayCellDidMount = (info: DayCellMountArg) => {
+    const formattedDate = format(info.date, 'yyyy-MM-dd');
+    const isBlocked = isDateBlocked(formattedDate);
+    const isNonWorkDay = !isWorkDay(formattedDate);
+
+    if (isBlocked || isNonWorkDay) {
+      // Aplica un color de fondo atenuado y un color de texto secundario
+      info.el.style.backgroundColor = currentTheme.id.includes('dark') ? '#2A2A2A' : '#F5F5F5';
+      info.el.style.color = currentTheme.colors.textSecondary;
+      info.el.style.opacity = '0.6';
+      
+      // Añadir una clase CSS para identificar estos días
+      info.el.classList.add('fc-day-blocked');
+      
+      // Opcional: agregar un título tooltip
+      if (isBlocked) {
+        info.el.title = 'Fecha bloqueada - No disponible para citas';
+      } else if (isNonWorkDay) {
+        info.el.title = 'No es día de consulta';
+      }
+    } else {
+      // Asegura que los días activos tengan el color de fondo predeterminado del tema
+      info.el.style.backgroundColor = '';
+      info.el.style.color = '';
+      info.el.style.opacity = '';
+      info.el.classList.remove('fc-day-blocked');
+      info.el.title = '';
+    }
+  };
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     const selectedDateTime = new Date(selectInfo.start);
     const selectedDateString = format(selectedDateTime, 'yyyy-MM-dd');
@@ -539,6 +570,7 @@ export function Agenda() {
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
                 eventDidMount={handleEventDidMount}
+                dayCellDidMount={handleDayCellDidMount}
                 slotLabelInterval={agendaSettings ? `00:${(agendaSettings.slot_interval_minutes ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
                 allDaySlot={false}
                 eventTimeFormat={{
@@ -642,6 +674,27 @@ export function Agenda() {
                   }
                   .fc-event-title {
                     font-size: 0.7rem !important;
+                  }
+                  /* Estilos adicionales para días bloqueados */
+                  .fc-day-blocked {
+                    position: relative;
+                  }
+                  .fc-day-blocked::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: repeating-linear-gradient(
+                      45deg,
+                      transparent,
+                      transparent 2px,
+                      ${currentTheme.colors.border} 2px,
+                      ${currentTheme.colors.border} 4px
+                    );
+                    opacity: 0.1;
+                    pointer-events: none;
                   }
                 `}
               </style>
