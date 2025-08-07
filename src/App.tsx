@@ -27,6 +27,7 @@ const ClinicalEvolution = lazy(() => import('./pages/ClinicalEvolution').then(mo
 const Prescriptions = lazy(() => import('./pages/Prescriptions').then(module => ({ default: module.Prescriptions })));
 const Somatometry = lazy(() => import('./pages/Somatometry').then(module => ({ default: module.Somatometry })));
 const PatientFilesPage = lazy(() => import('./pages/PatientFilesPage').then(module => ({ default: module.PatientFilesPage })));
+const AntecedentesNoPatologicos = lazy(() => import('./pages/AntecedentesNoPatologicos').then(module => ({ default: module.AntecedentesNoPatologicos })));
 const Users = lazy(() => import('./pages/Users').then(module => ({ default: module.Users })));
 const BusinessUnits = lazy(() => import('./modules/clinica/BusinessUnits').then(module => ({ default: module.BusinessUnits })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
@@ -182,6 +183,14 @@ function AppContent() {
           <PrivateRoute>
             <Layout>
               <PatientFilesPage />
+            </Layout>
+          </PrivateRoute>
+        } />
+            
+        <Route path="/antecedentes-no-patologicos" element={
+          <PrivateRoute>
+            <Layout>
+              <AntecedentesNoPatologicos />
             </Layout>
           </PrivateRoute>
         } />

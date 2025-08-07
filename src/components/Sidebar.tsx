@@ -11,6 +11,7 @@ const baseNavigation: NavigationItem[] = [
   { name: 'Pacientes', href: '/patients', icon: Users, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Citas', href: '/appointments', icon: CalendarDays, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Config. Agenda', href: '/settings/schedule', icon: Clock, roles: ['Administrador', 'Medico'] },
+  { name: 'Antecedentes No Patológicos', href: '/antecedentes-no-patologicos', icon: FileText, roles: ['Administrador', 'Medico'] },
 /*  
   { name: 'Ficha Clínica', href: '/clinical-history', icon: FileText, roles: ['Administrador', 'Medico'] },
   { name: 'Evolución Clínica', href: '/clinical-evolution', icon: Activity, roles: ['Administrador', 'Medico'] },

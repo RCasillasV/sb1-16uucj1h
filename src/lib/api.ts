@@ -1691,5 +1691,98 @@ export const api = {
         enfermedades_cronicas_resolved: []
       };
     }
+  },
+
+  antecedentesNoPatologicos: {
+    async getByPatientId(patientId: string) {
+      const { data, error } = await supabase
+        .from('tpPacienteHistNoPatologica')
+        .select('*')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error fetching non-pathological history:', error);
+        return null;
+      }
+
+      return data && data.length > 0 ? data[0] : null;
+    },
+
+    async create(historialData: Tables['tpPacienteHistNoPatologica']['Insert']) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const historialWithUser = {
+        ...historialData,
+        user_id: session.user.id
+      };
+
+      const { data, error } = await supabase
+        .from('tpPacienteHistNoPatologica')
+        .insert(historialWithUser)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating non-pathological history:', error);
+        throw error;
+      }
+
+      return data;
+    },
+
+    async update(id: string, historialData: Tables['tpPacienteHistNoPatologica']['Update']) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const { data, error } = await supabase
+        .from('tpPacienteHistNoPatologica')
+        .update({
+          ...historialData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating non-pathological history:', error);
+        throw error;
+      }
+
+      return data;
+    },
+
+    async getOrCreate(patientId: string) {
+      // Intentar obtener el historial existente
+      const existingHistory = await this.getByPatientId(patientId);
+      
+      if (existingHistory) {
+        return existingHistory;
+      }
+
+      // Si no existe, crear uno nuevo
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const newHistory = await this.create({
+        patient_id: patientId,
+        user_id: session.user.id,
+        habitos_estilo_vida: {},
+        entorno_social: {},
+        historial_adicional: {},
+        notas_generales: null
+      });
+
+      return newHistory;
+    }
   }
 };

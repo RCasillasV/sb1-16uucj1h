@@ -331,6 +331,13 @@ export function MainHeader({
             )}
           </span>
         </Link>
+        <Link
+          to="/antecedentes-no-patologicos"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
+        >
+          <FileText className="h-4 w-4" />
+          Antecedentes No Patológicos
+        </Link>
       </div>
     );
   };

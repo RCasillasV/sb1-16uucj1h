@@ -690,6 +690,41 @@ export interface Database {
           notas_generales?: string | null
         }
       }
+      tpPacienteHistNoPatologica: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          patient_id: string
+          user_id: string
+          habitos_estilo_vida: Json
+          entorno_social: Json
+          historial_adicional: Json
+          notas_generales: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          patient_id: string
+          user_id: string
+          habitos_estilo_vida?: Json
+          entorno_social?: Json
+          historial_adicional?: Json
+          notas_generales?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          patient_id?: string
+          user_id?: string
+          habitos_estilo_vida?: Json
+          entorno_social?: Json
+          historial_adicional?: Json
+          notas_generales?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
