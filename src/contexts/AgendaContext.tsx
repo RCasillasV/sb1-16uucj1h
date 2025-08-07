@@ -92,11 +92,10 @@ export function AgendaProvider({ children }: { children: React.ReactNode }) {
     if (!agendaSettings) return false;
     
     const dateObj = new Date(date);
-    const dayOfWeek = dateObj.toLocaleDateString('es-ES', { weekday: 'long' });
+    const dayOfWeek = dateObj.toLocaleDateString('es-ES', { weekday: 'long', timeZone: 'UTC' });
     const capitalizedDay = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
     
-    console.log(`isWorkDay: Date ${date}, Day of week (raw): "${dayOfWeek}", Capitalized: "${capitalizedDay}"`);
-    console.log('isWorkDay: Configured consultation_days:', agendaSettings.consultation_days);
+    console.log(`isWorkDay: Checking date ${date}. Day of week (raw): "${dayOfWeek}", Capitalized: "${capitalizedDay}". Configured days:`, agendaSettings.consultation_days);
     console.log('isWorkDay: includes result:', agendaSettings.consultation_days.includes(capitalizedDay));
     
     return agendaSettings.consultation_days.includes(capitalizedDay);
