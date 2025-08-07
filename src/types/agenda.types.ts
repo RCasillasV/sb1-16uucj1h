@@ -12,8 +12,8 @@ export interface TcAgendaSettingDB {
     created_at: string;
     updated_at: string;
     idbu: string; // UUID
-    start_time: string; // "HH:MM:SS"
-    end_time: string;   // "HH:MM:SS"
+    start_time: string; // "HH:MM"
+    end_time: string;   // "HH:MM"
     consultation_days: string[]; // text[]
     slot_interval_minutes: number;
     user_id: string | null;
