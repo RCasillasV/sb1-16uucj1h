@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
@@ -16,40 +16,25 @@ interface MiniCalendarProps {
     start: Date;
     end: Date;
   };
-  onMonthChange?: (date: Date) => void;
 }
 
-export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDates, onMonthChange }: MiniCalendarProps) {
+export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDates }: MiniCalendarProps) {
   const { currentTheme } = useTheme();
   const { blockedDates, isDateBlocked, isWorkDay } = useAgenda();
-  const [currentMonth, setCurrentMonth] = React.useState(startOfMonth(selectedDate));
-  const localNavigation = useRef(false); // New ref to track local navigation
-
-  React.useEffect(() => {
-    // Only update currentMonth from external changes if not initiated locally
-    if (!localNavigation.current) {
-      if (!isSameMonth(currentMonth, currentViewDates.start)) {
-        setCurrentMonth(startOfMonth(currentViewDates.start));
-      }
-    } else {
-      // Reset localNavigation after it has been processed
-      localNavigation.current = false;
-    }
-  }, [currentViewDates, currentMonth]);
+  
+  // Derivar el mes mostrado directamente de currentViewDates.start
+  const displayedMonth = startOfMonth(currentViewDates.start);
 
   // Handle today button click
   const handleTodayClick = () => {
     const today = new Date();
-    localNavigation.current = true; // Mark as local navigation
-    setCurrentMonth(startOfMonth(today));
     onDateSelect(today);
-    onMonthChange?.(today);
   };
 
   // Get calendar days including days from adjacent months
   const calendarDays = React.useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth); //endOfMonth(monthStart);
+    const monthStart = displayedMonth;
+    const monthEnd = endOfMonth(displayedMonth);
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start on Monday
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 }); // End on Sunday
 
@@ -62,7 +47,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
     }
 
     return days;
-  }, [currentMonth]);
+  }, [displayedMonth]);
 
   // Get events for selected date
   const selectedDateEvents = events.filter(event => {
@@ -80,17 +65,13 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
 
   // Navigation handlers with synchronization
   const handlePrevMonth = () => {
-    const newMonth = subMonths(currentMonth, 1);
-    localNavigation.current = true; // Mark as local navigation
-    setCurrentMonth(newMonth);
-    onMonthChange?.(newMonth);
+    const newMonthDate = subMonths(displayedMonth, 1);
+    onDateSelect(newMonthDate);
   };
 
   const handleNextMonth = () => {
-    const newMonth = addMonths(currentMonth, 1);
-    localNavigation.current = true; // Mark as local navigation
-    setCurrentMonth(newMonth);
-    onMonthChange?.(newMonth);
+    const newMonthDate = addMonths(displayedMonth, 1);
+    onDateSelect(newMonthDate);
   };
 
   return (
@@ -116,7 +97,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
               className="text-[10px] font-medium capitalize leading-tight"
               style={{ color: currentTheme.colors.text }}
             >
-              {format(currentMonth, 'MMMM yyyy', { locale: es })}
+              {format(displayedMonth, 'MMMM yyyy', { locale: es })}
             </span>
             <button
               type="button"
@@ -153,7 +134,7 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
         <div className="grid grid-cols-7 gap-px">
           {calendarDays.map((day) => {
             const isSelected = isSameDay(day, selectedDate);
-            const isCurrentMonth = isSameMonth(day, currentMonth);
+            const isCurrentMonth = isSameMonth(day, displayedMonth);
             const dayString = format(day, 'yyyy-MM-dd');
             const isDayBlocked = isDateBlocked(dayString);
             const isDayWorkDay = isWorkDay(dayString);

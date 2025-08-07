@@ -425,7 +425,6 @@ export function Agenda() {
               onDateSelect={handleDateChange}
               events={events}
               currentViewDates={currentViewDates}
-              onMonthChange={handleMonthChange}
             />
           </div>
 
