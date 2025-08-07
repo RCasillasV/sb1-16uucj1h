@@ -7,6 +7,7 @@ import { api } from '../lib/api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
+import { Modal } from '../components/Modal';
 
 interface Consultorio {
   id: number;
