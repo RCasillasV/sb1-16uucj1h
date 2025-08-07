@@ -10,7 +10,7 @@
       - `start_time` (time without time zone)
       - `end_time` (time without time zone)
       - `consultation_days` (text array)
-      - `slot_interval_minutes` (integer)
+      - `slot_interval` (integer)
       - `user_id` (uuid, foreign key to users)
 
     - `blocked_dates`
@@ -39,11 +39,11 @@ CREATE TABLE IF NOT EXISTS agenda_settings (
   start_time time without time zone NOT NULL DEFAULT '08:00:00',
   end_time time without time zone NOT NULL DEFAULT '18:00:00',
   consultation_days text[] NOT NULL DEFAULT ARRAY['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'],
-  slot_interval_minutes integer NOT NULL DEFAULT 30,
+  slot_interval integer NOT NULL DEFAULT 30,
   user_id uuid,
   CONSTRAINT agenda_settings_idbu_fkey FOREIGN KEY (idbu) REFERENCES "tcBu"("idBu") ON DELETE CASCADE,
   CONSTRAINT agenda_settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
-  CONSTRAINT agenda_settings_slot_interval_check CHECK (slot_interval_minutes IN (15, 20, 30, 45, 60)),
+  CONSTRAINT agenda_settings_slot_interval_check CHECK (slot_interval IN (15, 20, 30, 45, 60)),
   CONSTRAINT agenda_settings_time_check CHECK (start_time < end_time)
 );
 
