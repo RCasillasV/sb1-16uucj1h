@@ -1611,7 +1611,7 @@ export const api = {
 
       const { data, error } = await supabase
         .from('tcConsultorios')
-        .select('id, consultorio as nombre, activo')
+        .select('id, consultorio, activo')
         .eq('idbu', currentUserAttributes.idbu)
         .order('id');
 
@@ -1623,7 +1623,7 @@ export const api = {
       return data || [];
     },
 
-    async updateBatch(consultorios: Array<{ id: number; nombre: string; activo: boolean }>) {
+    async updateBatch(consultorios: Array<{ id: number; consultorio: string; activo: boolean }>) {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {
         throw new Error('No authenticated user found');
@@ -1638,7 +1638,7 @@ export const api = {
         supabase
           .from('tcConsultorios')
           .update({
-            consultorio: consultorio.nombre,
+            consultorio: consultorio.consultorio,
             activo: consultorio.activo,
             updated_at: new Date().toISOString()
           })

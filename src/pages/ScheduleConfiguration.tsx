@@ -10,7 +10,7 @@ import clsx from 'clsx';
 
 interface Consultorio {
   id: number;
-  nombre: string;
+  consultorio: string;
   activo: boolean;
 }
 
@@ -71,9 +71,9 @@ export function ScheduleConfiguration() {
 
   // Consultorios state
   const [consultorios, setConsultorios] = useState<Consultorio[]>([
-    { id: 1, nombre: 'Consultorio 1', activo: true },
-    { id: 2, nombre: 'Consultorio 2', activo: false },
-    { id: 3, nombre: 'Consultorio 3', activo: false }
+    { id: 1, consultorio: 'Consultorio 1', activo: true },
+    { id: 2, consultorio: 'Consultorio 2', activo: false },
+    { id: 3, consultorio: 'Consultorio 3', activo: false }
   ]);
 
   // Blocked dates state
@@ -164,9 +164,9 @@ export function ScheduleConfiguration() {
     }
   };
 
-  const updateConsultorioName = (id: number, nombre: string) => {
+  const updateConsultorioName = (id: number, consultorio: string) => {
     setConsultorios(prev => 
-      prev.map(c => c.id === id ? { ...c, nombre } : c)
+      prev.map(c => c.id === id ? { ...c, consultorio } : c)
     );
   };
 
@@ -429,7 +429,7 @@ export function ScheduleConfiguration() {
                       </label>
                     </div>
                     <input
-                      value={consultorio.nombre}
+                      value={consultorio.consultorio}
                       onChange={(e) => updateConsultorioName(consultorio.id, e.target.value)}
                       disabled={!consultorio.activo}
                       className={clsx(
