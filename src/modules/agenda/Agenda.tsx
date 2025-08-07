@@ -236,6 +236,7 @@ export function Agenda() {
   // Función corregida para atenuar días bloqueados o no laborables
   const handleDayCellDidMount = (arg: DayCellMountArg) => {
     console.log('=== handleDayCellDidMount called ===', arg.date);
+    console.log('=== handleDayCellDidMount called ===', arg.date);
     
     const formattedDate = format(arg.date, 'yyyy-MM-dd');
     const dayName = arg.date.toLocaleDateString('es-ES', { weekday: 'long', timeZone: 'UTC' });
