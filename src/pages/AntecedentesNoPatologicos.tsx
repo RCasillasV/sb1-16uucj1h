@@ -85,14 +85,6 @@ function Switch({ checked, onCheckedChange, disabled = false }: SwitchProps) {
 export function AntecedentesNoPatologicos() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
-  const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
-  const [activeTab, setActiveTab] = useState<TabType>('habitos');
-  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
 
   const {
     control,
