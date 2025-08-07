@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import vue from '@vitejs/plugin-vue';
 
 // Validate environment variables at build time
 const requiredEnvVars = [
@@ -16,7 +15,7 @@ for (const envVar of requiredEnvVars) {
 }
 
 export default defineConfig({
-  plugins: [react(), vue()],
+  plugins: [react()],
   build: {
     target: 'esnext',
     minify: 'esbuild',
