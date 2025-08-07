@@ -1362,12 +1362,7 @@ export const api = {
     }
   },
 
-  agendaSettings: {
-    async get() {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.user) {
-        throw new Error('No authenticated user found');
-      }
+ 
 
       const currentUserAttributes = await api.users.getCurrentUserAttributes(session.user.id);
       if (!currentUserAttributes?.idbu) {
@@ -1443,6 +1438,11 @@ export const api = {
 
   // Configuración de agenda
   agendaSettings: {
+    async get() {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error('No authenticated user found');
+      }
     async get() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user) {
