@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Calendar, MapPin, X, Plus, Save, AlertCircle } from 'lucide-react';
 import { Clock, Calendar, MapPin, X, Plus, Save, AlertCircle, Trash2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
