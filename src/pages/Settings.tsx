@@ -71,6 +71,12 @@ export function Settings() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const settingsCards = [
+     {
+      icon: Calendar,
+      title: 'Configuración de Agenda',
+      description: 'Configure horarios, consultorios y días de atención médica.',
+      onClick: () => navigate('/settings/schedule')
+    },
     {
       icon: Palette,
       title: 'Apariencia',
@@ -94,12 +100,6 @@ export function Settings() {
       title: 'Usuarios',
       description: 'Administra los usuarios, roles y permisos del sistema',
       onClick: () => navigate('/users')
-    },
-    {
-      icon: Calendar,
-      title: 'Configuración de Agenda',
-      description: 'Configure horarios, consultorios y días de atención médica.',
-      onClick: () => navigate('/settings/schedule')
     },
     {
       icon: NotebookTabs,
