@@ -17,8 +17,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin, X } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
 import clsx from 'clsx';
-import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg } from '@fullcalendar/core';
-import type { DayCellMountArg } from '@fullcalendar/core';
+import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg, DayCellMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
 import { useIdleTimer } from '../../hooks/useIdleTimer';
 
