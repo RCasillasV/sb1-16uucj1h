@@ -536,7 +536,7 @@ export function Agenda() {
                 select={handleDateSelect}
                 eventClick={handleEventClick}
                 datesSet={handleDatesSet}
-                slotDuration={agendaSettings ? `00:${agendaSettings.slot_interval_minutes.toString().padStart(2, '0')}:00` : "00:15:00"}
+                slotDuration={agendaSettings ? `00:${(agendaSettings.slot_interval_minutes ?? 15).toString().padStart(2, '0')}:00` : "00:15:00"}
                 slotMinTime="08:00:00"
                 slotMaxTime="22:00:00"
                 eventDidMount={handleEventDidMount}
