@@ -220,9 +220,9 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
                 </button>
               </th>
               <th className="px-6 py-2 text-center text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
-                <button className="whitespace-nowrap text-center"
+                <button 
                   onClick={() => handleSort('age')}
-                  className={sortButtonStyle.base}
+                  className={clsx("whitespace-nowrap text-center", sortButtonStyle.base)}
                   style={sortField === 'age' ? sortButtonStyle.active : sortButtonStyle.inactive}
                 >
                   Edad
