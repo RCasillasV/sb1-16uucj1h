@@ -24,7 +24,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-core': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['lucide-react', 'clsx', 'vue'],
+          'vendor-ui': ['lucide-react', 'clsx'],
           'vendor-date': ['date-fns'],
           'vendor-editor': ['react-quill'],
           'vendor-calendar': [
