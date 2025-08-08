@@ -102,6 +102,9 @@ export function CitasPage() {
   const [showDateTimeErrorModal, setShowDateTimeErrorModal] = useState(false);
   const [hasPreviousAppointments, setHasPreviousAppointments] = useState(false); // Nuevo estado
   const [showPhoneModal, setShowPhoneModal] = useState(false); // Nuevo estado para el modal de teléfono
+  // New state for active consultorios
+  const [activeConsultorios, setActiveConsultorios] = useState<Array<{ id: number; consultorio: string; activo: boolean; }>>([]);
+
 
   // Estado para citas en la fecha seleccionada
   const [appointmentsOnSelectedDate, setAppointmentsOnSelectedDate] = useState<any[]>([]);
@@ -138,6 +141,24 @@ export function CitasPage() {
     form.setValue('fecha_cita', initialDate);
     form.setValue('hora_cita', initialTime);
   }, [form, initialDate, initialTime]);
+
+  // useEffect to fetch active consultorios
+  useEffect(() => {
+    const fetchConsultorios = async () => {
+      try {
+        const consultoriosData = await api.consultorios.getAll();
+        const active = consultoriosData.filter(c => c.activo);
+        setActiveConsultorios(active);
+        // Set default consultorio if none is selected or if the selected one is inactive
+        if (active.length > 0 && (!form.getValues('consultorio') || !active.some(c => c.id === form.getValues('consultorio')))) {
+          form.setValue('consultorio', active[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching consultorios:', error);
+      }
+    };
+    fetchConsultorios();
+  }, []); // Run only once on component mount
 
   // useEffect para cargar datos de cita en modo edición
   useEffect(() => {
@@ -953,9 +974,11 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                         color: currentTheme.colors.text,
                       }}
                     >
-                      <option value={1}>Consultorio 1</option>
-                      <option value={2}>Consultorio 2</option>
-                      <option value={3}>Consultorio 3</option>
+                      {activeConsultorios.map(consultorio => (
+                        <option key={consultorio.id} value={consultorio.id}>
+                          {consultorio.consultorio}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
