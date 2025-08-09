@@ -909,12 +909,7 @@ export function Agenda() {
                   selectedPatient: selectedPatient
                 }
               })}
-              className={clsx(buttonClasses.base)}
-              style={{
-                background: 'transparent',
-                border: `1px solid ${currentTheme.colors.primary}`,
-                color: currentTheme.colors.primary,
-              }}
+              className={clsx(buttonClasses.base, buttonClasses.outline)}
             >
               Formulario Completo
             </button>
