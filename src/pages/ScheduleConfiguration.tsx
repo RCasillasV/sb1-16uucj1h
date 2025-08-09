@@ -20,7 +20,7 @@ interface BloqueoFecha {
   start_date: string;
   end_date: string;
   reason: string;
-  block_type: 'vacation' | 'congress' | 'legal' | 'other';
+  block_type: 'vacation' | 'congress' | 'legal' | 'maintenance'| 'travel'| 'other';
 }
 
 interface TcAgendaSettings {
@@ -43,7 +43,9 @@ const WORK_DAYS = [
 const BLOCK_TYPES = [
   { value: 'vacation', label: 'Vacaciones', color: 'bg-blue-100 text-blue-800' },
   { value: 'congress', label: 'Congreso', color: 'bg-purple-100 text-purple-800' },
-  { value: 'legal', label: 'Descanso Legal', color: 'bg-green-100 text-green-800' },
+  { value: 'legal', label: 'Descanso Obligatorio', color: 'bg-green-100 text-green-800' },
+  { value: 'maintenance', label: 'Mantenimento consultorio', color: 'bg-gray-100 text-gray-800' }
+  { value: 'travel', label: 'Viaje', color: 'bg-gray-100 text-gray-800' }
   { value: 'other', label: 'Otro', color: 'bg-gray-100 text-gray-800' }
 ];
 
