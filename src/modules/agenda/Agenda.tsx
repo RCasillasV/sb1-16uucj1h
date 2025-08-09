@@ -882,7 +882,7 @@ export function Agenda() {
         )}
       </Modal>
 
-      {/* Modal de cita rápida */}
+      {/* ============== Modal de cita rápida =======================*/}
 <Modal
   isOpen={showQuickAppointmentModal}
   onClose={() => {
