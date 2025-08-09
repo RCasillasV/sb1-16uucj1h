@@ -898,11 +898,7 @@ export function Agenda() {
                 setShowQuickAppointmentModal(false);
                 setAppointmentError(null);
               }}
-              className={clsx(buttonClasses.base, 'border')}
-              style={{
-                background: 'transparent',
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text,
+              className={clsx(buttonClasses.base, buttonClasses.secondary)}
               }}
             >
               Cancelar
