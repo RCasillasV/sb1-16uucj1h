@@ -9,6 +9,7 @@ export function useStyles() {
     return {
       base: clsx(
         'btn',
+        'btn-md',
         buttonStyle === 'pill' && 'btn-pill',
         buttonStyle === 'rounded' && 'btn-rounded',
         buttonStyle === 'square' && 'btn-square',
