@@ -883,46 +883,57 @@ export function Agenda() {
       </Modal>
 
       {/* Modal de cita rápida */}
-      <Modal
-        isOpen={showQuickAppointmentModal}
-        onClose={() => {
+<Modal
+  isOpen={showQuickAppointmentModal}
+  onClose={() => {
+    setShowQuickAppointmentModal(false);
+    setAppointmentError(null);
+  }}
+  title="Agendar Cita Rápida"
+  className="max-w-2xl"
+  actions={
+    <div className="flex justify-end gap-2">
+      {/* Botón Cancelar */}
+      <button
+        onClick={() => {
           setShowQuickAppointmentModal(false);
           setAppointmentError(null);
         }}
-        title="Agendar Cita Rápida"
-        className="max-w-2xl"
-        actions={
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => {
-                setShowQuickAppointmentModal(false);
-                setAppointmentError(null);
-              }}
-              className={clsx(buttonClasses.base, buttonClasses.secondary)}
-             >
-              Cancelar
-            </button>
-            <button
-              onClick={() => navigate('/citas', {
-                state: {
-                  selectedDate: new Date(`${appointmentForm.fecha_cita}T${appointmentForm.hora_cita}`),
-                  selectedPatient: selectedPatient
-                }
-              })}
-              className={clsx(buttonClasses.base, buttonClasses.outline)}
-            >
-              Formulario Completo
-            </button>
-            <button
-              onClick={handleQuickAppointmentSubmit}
-              disabled={submittingAppointment || !appointmentForm.motivo.trim()}
-              className={clsx(buttonClasses.base, buttonClasses.primary, 'disabled:opacity-50')}
-            >
-              {submittingAppointment ? 'Agendando...' : 'Agendar'}
-            </button>
-          </div>
-        }
+        // Elimina clases de padding y redondeo si están aquí
+        className={clsx(buttonClasses.base, buttonClasses.secondary)}
+        style={{
+          background: 'transparent',
+          borderColor: currentTheme.colors.border,
+          color: currentTheme.colors.text,
+        }}
       >
+        Cancelar
+      </button>
+      {/* Botón Formulario Completo */}
+      <button
+        onClick={() => navigate('/citas', {
+          state: {
+            selectedDate: new Date(`${appointmentForm.fecha_cita}T${appointmentForm.hora_cita}`),
+            selectedPatient: selectedPatient
+          }
+        })}
+        // Elimina clases de padding y redondeo si están aquí
+        className={clsx(buttonClasses.base, buttonClasses.outline)}
+      >
+        Formulario Completo
+      </button>
+      {/* Botón Agendar */}
+      <button
+        onClick={handleQuickAppointmentSubmit}
+        disabled={submittingAppointment || !appointmentForm.motivo.trim()}
+        // Elimina clases de padding y redondeo si están aquí
+        className={clsx(buttonClasses.base, buttonClasses.primary, 'disabled:opacity-50')}
+      >
+        {submittingAppointment ? 'Agendando...' : 'Agendar'}
+      </button>
+    </div>
+  }
+>
         <div className="space-y-4">
           {appointmentError && (
             <div 
