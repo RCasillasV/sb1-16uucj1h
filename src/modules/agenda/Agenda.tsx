@@ -899,8 +899,7 @@ export function Agenda() {
                 setAppointmentError(null);
               }}
               className={clsx(buttonClasses.base, buttonClasses.secondary)}
-              }}
-            >
+             >
               Cancelar
             </button>
             <button
