@@ -57,7 +57,8 @@ export default defineConfig({
       '@fullcalendar/interaction',
       '@fullcalendar/react',
       '@fullcalendar/timegrid',
-      '@supabase/supabase-js'
+      '@supabase/supabase-js',
+      '@tanstack/react-query'
     ]
   }
 });
