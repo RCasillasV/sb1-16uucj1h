@@ -2,6 +2,13 @@ import { supabase } from './supabase';
 import { format, startOfDay, subDays } from 'date-fns';
 import type { Database } from '../types/database.types';
 
+// Bucket configuration
+const BUCKET_NAME = import.meta.env.VITE_BUCKET_NAME || 'default-bucket';
+
+if (!BUCKET_NAME) {
+  throw new Error('VITE_BUCKET_NAME environment variable is required');
+}
+
 // Add a sleep utility function
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -203,10 +210,10 @@ export const api = {
           throw new Error('No authenticated user found');
         }
 
-        const folderPath = `pacientes/${session.user.id}`;
+        const folderPath = `patients/${patientId}`;
         
         const { data, error } = await supabase.storage
-          .from('00000000-default-bucket')
+          .from(BUCKET_NAME)
           .list(folderPath, {
             limit: 100,
             offset: 0,
@@ -219,7 +226,7 @@ export const api = {
 
         const files = (data || []).map(file => {
           const { data: { publicUrl } } = supabase.storage
-            .from('00000000-default-bucket')
+            .from(BUCKET_NAME)
             .getPublicUrl(`${folderPath}/${file.name}`);
 
           return {
