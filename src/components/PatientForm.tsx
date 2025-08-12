@@ -600,7 +600,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                </div>
               <div>
                 <label htmlFor="Calle" className="block mb-1 font-medium" style={labelStyle}>
-                  Calle
+                  Calle y número
                 </label>
                 <input
                   type="text"
