@@ -202,6 +202,31 @@ type UserAttributes = {
 };
 
 export const api = {
+  insurances: {
+    async getAllActive() {
+      const cacheKey = 'insurances:active';
+      const cached = cacheUtils.get(cacheKey);
+      
+      if (cached) {
+        return cached;
+      }
+
+      const { data, error } = await supabase
+        .from('tcAseguradora')
+        .select('idAs, Aseguradora, Contacto, URL, Notas')
+        .eq('Activo', true)
+        .order('Aseguradora', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching active insurances:', error);
+        return [];
+      }
+
+      cacheUtils.set(cacheKey, data || []);
+      return data || [];
+    }
+  },
+
   files: {
     async getByPatientId(patientId: string) {
       try {

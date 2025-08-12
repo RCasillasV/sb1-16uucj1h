@@ -734,15 +734,21 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                 <label htmlFor="Aseguradora" className="block mb-1 font-medium" style={labelStyle}>
                   Aseguradora
                 </label>
-                <input
-                  type="text"
+                <select
                   name="Aseguradora"
                   id="Aseguradora"
                   value={formValues.Aseguradora}
                   onChange={(e) => setFormValues(prev => ({ ...prev, Aseguradora: e.target.value }))}
                   className="max-w-full md:w-full p2  rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 transition-colors"
                   style={inputStyle}
-                />
+                >
+                  <option value="">Seleccionar aseguradora...</option>
+                  {activeInsurances.map((insurance) => (
+                    <option key={insurance.idAs} value={insurance.Aseguradora}>
+                      {insurance.Aseguradora}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
