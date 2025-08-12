@@ -11,7 +11,8 @@ import {
   Users,
   Calendar,
   Info,
-  FolderOpen
+  FolderOpen,
+  Clock
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import clsx from 'clsx';
