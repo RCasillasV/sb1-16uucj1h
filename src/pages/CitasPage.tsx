@@ -65,7 +65,7 @@ type FormData = z.infer<typeof formSchema>;
 // Cache para evitar múltiples llamadas a get_user_idbu
 let cachedUserData: { idbu: string; specialty: string } | null = null;
 let cacheTimestamp = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const CACHE_DURATION = 25 * 60 * 1000; // 25 minutos
 
 export function CitasPage() {
   const { currentTheme } = useTheme();
