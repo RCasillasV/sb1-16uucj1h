@@ -535,7 +535,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
               <div>
                 <label htmlFor="CURP" className="block mb-1 font-medium" style={labelStyle}>
                   <span style={{ color: currentTheme.colors.text }}>CURP</span>
-                  <span style={{ color: currentTheme.colors.primary }}> a 18 posiciones</span>
+                  <span style={{ color: currentTheme.colors.primary font-small }}> a 18 posiciones</span>
                 </label>
                 <input
                   autoFocus 
