@@ -534,11 +534,8 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="CURP" className="block mb-1 font-medium" style={labelStyle}>
-                  CURP
+                  CURP a 18 posiciones
                 </label>
-               <p className="text-xs mb-1" style={{ color: currentTheme.colors.textSecondary }}>
-                 Poner CURP a 18 posiciones
-               </p>
                 <input
                   autoFocus 
                   type="text"
