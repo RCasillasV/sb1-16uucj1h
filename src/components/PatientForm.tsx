@@ -86,6 +86,10 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
   const [formData, setFormData] = useState<HTMLFormElement | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('basicos');
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [activeInsurances, setActiveInsurances] = useState<Array<{
+    idAs: string;
+    Aseguradora: string;
+  }>>([]);
   const [formValues, setFormValues] = useState({
     // Básicos
     Nombre: patient?.Nombre || '',
@@ -171,6 +175,19 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
       }
     };
     fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    const fetchActiveInsurances = async () => {
+      try {
+        const insurances = await api.insurances.getAllActive();
+        setActiveInsurances(insurances);
+      } catch (error) {
+        console.error('Error fetching active insurances:', error);
+        // No establecer error aquí para no interrumpir el flujo del formulario
+      }
+    };
+    fetchActiveInsurances();
   }, []);
 
   const savePatient = async (form: HTMLFormElement) => {
