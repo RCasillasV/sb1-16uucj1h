@@ -72,7 +72,7 @@ export function Settings() {
 
   const settingsCards = [
      {
-      icon: Calendar,
+      icon: Clock,
       title: 'Configuración de Agenda',
       description: 'Configure horarios, consultorios y días de atención médica.',
       onClick: () => navigate('/settings/schedule')
