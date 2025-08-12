@@ -8,6 +8,7 @@ import { PostalCodeLookup } from './PostalCodeLookup';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { queryClient } from '../lib/react-query';
 import { FileUpload } from './FileUpload';
 import clsx from 'clsx';
 
@@ -180,14 +181,32 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
   useEffect(() => {
     const fetchActiveInsurances = async () => {
       try {
-        const insurances = await api.insurances.getAllActive();
-        setActiveInsurances(insurances);
+        // Usar queryClient para obtener datos con caché que se puede invalidar
+        const cachedData = queryClient.getQueryData(['activeInsurances']);
+        
+        if (cachedData) {
+          setActiveInsurances(cachedData as Array<{ idAs: string; Aseguradora: string; }>);
+        } else {
+          const insurances = await api.insurances.getAllActive();
+          setActiveInsurances(insurances);
+          // Guardar en caché
+          queryClient.setQueryData(['activeInsurances'], insurances);
+        }
       } catch (error) {
         console.error('Error fetching active insurances:', error);
         // No establecer error aquí para no interrumpir el flujo del formulario
       }
     };
     fetchActiveInsurances();
+    
+    // Listener para invalidaciones del caché
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (event.query.queryKey[0] === 'activeInsurances' && event.type === 'updated') {
+        fetchActiveInsurances();
+      }
+    });
+    
+    return () => unsubscribe();
   }, []);
 
   const savePatient = async (form: HTMLFormElement) => {

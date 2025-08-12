@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Building2, Search, Plus, Edit, Trash2, Check, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
+import { queryClient } from '../lib/react-query';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 
@@ -97,6 +98,9 @@ export function InsuranceManagement() {
         Notas: '',
         Activo: true,
       });
+      
+      // Invalidar caché para que PatientForm obtenga datos actualizados
+      queryClient.invalidateQueries({ queryKey: ['activeInsurances'] });
     } catch (err) {
       console.error('Error saving insurance:', err);
       setError(err instanceof Error ? err.message : 'Error al guardar aseguradora');
@@ -117,6 +121,9 @@ export function InsuranceManagement() {
       await fetchInsurances();
       setShowDeleteModal(false);
       setSelectedInsurance(null);
+      
+      // Invalidar caché para que PatientForm obtenga datos actualizados
+      queryClient.invalidateQueries({ queryKey: ['activeInsurances'] });
     } catch (err) {
       console.error('Error deleting insurance:', err);
       setError(err instanceof Error ? err.message : 'Error al eliminar aseguradora');
@@ -282,6 +289,9 @@ export function InsuranceManagement() {
 
                             if (error) throw error;
                             await fetchInsurances();
+                            
+                            // Invalidar caché para que PatientForm obtenga datos actualizados
+                            queryClient.invalidateQueries({ queryKey: ['activeInsurances'] });
                           } catch (err) {
                             console.error('Error updating insurance status:', err);
                           }
