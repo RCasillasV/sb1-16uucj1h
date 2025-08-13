@@ -1821,11 +1821,12 @@ export const api = {
   federalEntities: {
     getAll: async () => {
       const { data, error } = await supabase
-        .from('tcEntidadFed')
-        .select('Entidad_Federativa')
-        .order('Entidad_Federativa', { ascending: true });
+        .from('tcEntidadFed') // Nombre de la tabla
+        .select('Entidad_Federativa') // ¡Ajustado a Entidad_Federativa!
+        .order('id', { ascending: true }); // Ordenar por id
 
       if (error) throw error;
+      // Mapear para devolver solo los valores de la columna
       return data.map(item => item.Entidad_Federativa);
     },
   },
