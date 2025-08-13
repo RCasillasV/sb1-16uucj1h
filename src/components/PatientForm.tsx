@@ -811,15 +811,21 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                 <label htmlFor="EstadoNacimiento" className="block mb-1 font-medium" style={labelStyle}>
                   Estado de Nacimiento
                 </label>
-                <input
-                  type="text"
+                <select
                   name="EstadoNacimiento"
                   id="EstadoNacimiento"
                   value={formValues.EstadoNacimiento}
                   onChange={(e) => setFormValues(prev => ({ ...prev, EstadoNacimiento: e.target.value }))}
                   className="max-w-full md:w-full p2  rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 transition-colors"
                   style={inputStyle}
-                />
+                >
+                  <option value="">Seleccionar...</option>
+                  {federalEntities.map((entity) => (
+                    <option key={entity} value={entity}>
+                      {entity}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
