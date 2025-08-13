@@ -187,7 +187,8 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
       }
     };
     fetchFederalEntities(); // <-- Asegúrate de que se llame
-  }, []);
+  },
+[]);
   
   useEffect(() => {
     const fetchActiveInsurances = async () => {
