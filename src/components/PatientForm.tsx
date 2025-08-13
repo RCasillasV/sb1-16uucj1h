@@ -178,6 +178,18 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
     fetchUserInfo();
   }, []);
 
+    const fetchFederalEntities = async () => { // <-- Este useEffect
+      try {
+        const entities = await api.federalEntities.getAll();
+        setFederalEntities(entities);
+      } catch (err) {
+        console.error('Error fetching federal entities:', err);
+        // Puedes manejar el error aquí, por ejemplo, mostrando un mensaje al usuario
+      }
+    };
+    fetchFederalEntities(); // <-- Asegúrate de que se llame
+  }, []);
+  
   useEffect(() => {
     const fetchActiveInsurances = async () => {
       try {
