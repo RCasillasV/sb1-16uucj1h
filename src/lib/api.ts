@@ -1830,4 +1830,4 @@ export const api = {
       return data.map(item => item.Entidad_Federativa);
     },
   },
-};
+}; 
