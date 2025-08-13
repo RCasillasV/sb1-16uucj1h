@@ -176,7 +176,6 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
       }
     };
     fetchUserInfo();
-  }, []);
 
     const fetchFederalEntities = async () => { // <-- Este useEffect
       try {
