@@ -1821,7 +1821,7 @@ export const api = {
   federalEntities: {
     getAll: async () => {
       const { data, error } = await supabase
-        .from('tcEntidadFed') // Nombre de la tabla
+        .from('sires.tcEntidadFed') // Nombre de la tabla
         .select('Entidad_Federativa') // ¡Ajustado a Entidad_Federativa!
         .order('id', { ascending: true }); // Ordenar por id
 
