@@ -87,6 +87,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
   const [formData, setFormData] = useState<HTMLFormElement | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('basicos');
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [federalEntities, setFederalEntities] = useState<string[]>([]);
   const [activeInsurances, setActiveInsurances] = useState<Array<{
     idAs: string;
     Aseguradora: string;
