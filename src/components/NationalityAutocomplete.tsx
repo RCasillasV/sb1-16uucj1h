@@ -77,7 +77,10 @@ export function NationalityAutocomplete({
     setSuggestions([]);
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
-  }, [onChange]);
+    if (onSelectCallback) { // <--- LLAMAR AL CALLBACK AQUÍ
+       onSelectCallback();
+     }
+  }, [onChange, onSelectCallback]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
