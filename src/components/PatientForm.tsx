@@ -10,6 +10,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { queryClient } from '../lib/react-query';
 import { FileUpload } from './FileUpload';
+import { NationalityAutocomplete } from './c';
+
 import clsx from 'clsx';
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
@@ -852,8 +854,8 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                   value={formValues.Nacionalidad}
                   onChange={(e) => setFormValues(prev => ({ ...prev, Nacionalidad: e.target.value }))}
                   className="max-w-full md:w-full p2  rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 transition-colors"
-                  style={inputStyle}
-                />
+                  style={inputStyle}   
+                 />            
               </div>
 
               <div>
