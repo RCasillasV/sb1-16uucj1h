@@ -54,7 +54,7 @@ export function NationalityAutocomplete({
           .from('tcNacionalidades') // Asumiendo el nacionalidad de la tabla
           .select('id, nacionalidad') // Asumiendo las columnas 'id' y 'nacionalidad'
           .ilike('nacionalidad', `%${searchTerm}%`)
-          .order('id', { ascending: true })
+          .order('nacionalidad', { ascending: true })
           .limit(15);
 
         if (error) throw error;
