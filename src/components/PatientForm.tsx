@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
 import type { Database } from '../types/database.types';
 import { User, X } from 'lucide-react';
@@ -851,6 +851,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                    value={formValues.Nacionalidad}
                    onChange={(selectedNationality) => setFormValues(prev => ({ ...prev, Nacionalidad: selectedNationality }))}
                    placeholder="Buscar nacionalidad..."
+                   onSelectCallback={() => religionInputRef.current?.focus()}
                  />
               </div>
 
@@ -859,6 +860,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                   Religión
                 </label>
                 <input
+                  ref={religionInputRef}
                   type="text"
                   name="Religion"
                   id="Religion"
