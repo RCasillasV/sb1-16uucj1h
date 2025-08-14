@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+// src/components/PatientForm.tsx
+import React, { useState, useEffect, useRef } from 'react'; // <--- IMPORTAR useRef
 import { api } from '../lib/api';
 import type { Database } from '../types/database.types';
 import { User, X } from 'lucide-react';
@@ -10,7 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { queryClient } from '../lib/react-query';
 import { FileUpload } from './FileUpload';
-import { NationalityAutocomplete } from "./NationalityAutocomplete";
+import { NationalityAutocomplete } from "./NationalityAutocomplete"; // Asegúrate de que esta importación sea correcta
 
 import clsx from 'clsx';
 
@@ -134,6 +135,10 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
     Responsable: patient?.Responsable || ''
 
   });
+
+  // <--- NUEVA REFERENCIA PARA EL CAMPO RELIGIÓN
+  const religionInputRef = useRef<HTMLInputElement>(null);
+  // --- FIN NUEVA REFERENCIA ---
   
   const formatDateForInput = (dateString: string | undefined) => {
     if (!dateString) return '';
@@ -180,23 +185,21 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
     };
     fetchUserInfo();
 
-    const fetchFederalEntities = async () => { // <-- Este useEffect
+    const fetchFederalEntities = async () => {
       try {
         const entities = await api.federalEntities.getAll();
         setFederalEntities(entities);
       } catch (err) {
         console.error('Error fetching federal entities:', err);
-        // Puedes manejar el error aquí, por ejemplo, mostrando un mensaje al usuario
       }
     };
-    fetchFederalEntities(); // <-- Asegúrate de que se llame
+    fetchFederalEntities();
   },
 []);
   
   useEffect(() => {
     const fetchActiveInsurances = async () => {
       try {
-        // Usar queryClient para obtener datos con caché que se puede invalidar
         const cachedData = queryClient.getQueryData(['activeInsurances']);
         
         if (cachedData) {
@@ -204,17 +207,14 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
         } else {
           const insurances = await api.insurances.getAllActive();
           setActiveInsurances(insurances);
-          // Guardar en caché
           queryClient.setQueryData(['activeInsurances'], insurances);
         }
       } catch (error) {
         console.error('Error fetching active insurances:', error);
-        // No establecer error aquí para no interrumpir el flujo del formulario
       }
     };
     fetchActiveInsurances();
     
-    // Listener para invalidaciones del caché
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
       if (event.query.queryKey[0] === 'activeInsurances' && event.type === 'updated') {
         fetchActiveInsurances();
@@ -586,7 +586,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
               <div>
                 <label htmlFor="CURP" className="block mb-1 font-medium" style={labelStyle}>
                   <span style={{ color: currentTheme.colors.text }}>CURP</span>
-                  <span className="text-xs" style={{ color: currentTheme.colors.textsecondary}}> a 18 posiciones</span>
+                  <span className="text-xs" style={{ color: currentTheme.colors.textSecondary}}> a 18 posiciones</span>
                 </label>
                 <input
                   autoFocus 
@@ -851,7 +851,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                    value={formValues.Nacionalidad}
                    onChange={(selectedNationality) => setFormValues(prev => ({ ...prev, Nacionalidad: selectedNationality }))}
                    placeholder="Buscar nacionalidad..."
-                   onSelectCallback={() => religionInputRef.current?.focus()}
+                   onSelectCallback={() => religionInputRef.current?.focus()} // <--- PASAR EL CALLBACK AQUÍ
                  />
               </div>
 
@@ -860,7 +860,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                   Religión
                 </label>
                 <input
-                  ref={religionInputRef}
+                  ref={religionInputRef} // <--- ASIGNAR LA REFERENCIA AQUÍ
                   type="text"
                   name="Religion"
                   id="Religion"
