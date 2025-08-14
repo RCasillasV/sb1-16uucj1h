@@ -23,6 +23,7 @@ export function NationalityAutocomplete({
   onChange,
   placeholder = 'Buscar nacionalidad...',
   disabled = false,
+  onSelectCallback, 
 }: NationalityAutocompleteProps) {
   const { currentTheme } = useTheme();
   const [searchTerm, setSearchTerm] = useState(value);
