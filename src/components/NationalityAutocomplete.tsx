@@ -15,6 +15,7 @@ interface NationalityAutocompleteProps {
   onChange: (nationalityName: string) => void; // Callback cuando se selecciona una nacionalidad
   placeholder?: string;
   disabled?: boolean;
+  onSelectCallback?: () => void;
 }
 
 export function NationalityAutocomplete({
