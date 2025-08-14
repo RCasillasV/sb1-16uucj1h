@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { queryClient } from '../lib/react-query';
 import { FileUpload } from './FileUpload';
-import { NationalityAutocomplete } from './c';
+import { NationalityAutocomplete } from "./NationalityAutocomplete";
 
 import clsx from 'clsx';
 
