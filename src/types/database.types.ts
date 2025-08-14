@@ -7,7 +7,7 @@ type Json =
   | Json[]
 
 export interface Database {
-  sires: {
+  public: {
     Tables: {
       tcCodigosPostales: {
         Row: {
