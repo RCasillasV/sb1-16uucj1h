@@ -845,17 +845,13 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
 
               <div>
                 <label htmlFor="Nacionalidad" className="block mb-1 font-medium" style={labelStyle}>
-                  Nacionalidad
+                    Nacionalidad
                 </label>
-                <input
-                  type="text"
-                  name="Nacionalidad"
-                  id="Nacionalidad"
-                  value={formValues.Nacionalidad}
-                  onChange={(e) => setFormValues(prev => ({ ...prev, Nacionalidad: e.target.value }))}
-                  className="max-w-full md:w-full p2  rounded-md shadow-sm focus:ring-2 focus:ring-offset-2 transition-colors"
-                  style={inputStyle}   
-                 />            
+                <NationalityAutocomplete
+                   value={formValues.Nacionalidad}
+                   onChange={(selectedNationality) => setFormValues(prev => ({ ...prev, Nacionalidad: selectedNationality }))}
+                   placeholder="Buscar nacionalidad..."
+                 />
               </div>
 
               <div>
