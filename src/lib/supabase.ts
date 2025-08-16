@@ -18,7 +18,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
-/*
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
@@ -118,6 +118,3 @@ if (import.meta.env.DEV && window._supabaseClient) {
     window._supabaseClient = supabaseClient;
   }
 }
-
-// Exporta la instancia del cliente Supabase (ya sea la nueva o la reutilizada)
-export const supabase = supabaseClient;
