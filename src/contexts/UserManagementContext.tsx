@@ -152,5 +152,5 @@ export const useUserManagement = () => {
   if (context === undefined) {
     throw new Error('useUserManagement must be used within a UserManagementProvider');
   }
-  return context;
+  return context; 
 };
