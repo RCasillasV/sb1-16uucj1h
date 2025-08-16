@@ -83,6 +83,7 @@ function Switch({ checked, onCheckedChange, disabled = false }: SwitchProps) {
 }
 
 export function AntecedentesNoPatologicos() {
+  const [loading, setLoading] = useState(true);
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
