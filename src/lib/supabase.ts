@@ -1,4 +1,3 @@
-window._supabaseClient
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database.types';
 declare global {
@@ -20,16 +19,16 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // Implementación del patrón Singleton para el cliente Supabase
-export const supabase: ReturnType<typeof createClient>;
+let clientInstance: ReturnType<typeof createClient>;
 
 // Comprueba si estamos en modo de desarrollo (import.meta.env.DEV)
 // Y si ya existe una instancia del cliente Supabase en el objeto 'window'
 if (import.meta.env.DEV && window._supabaseClient) {
   // Si es así, reutiliza esa instancia existente
-  supabaseClient = window._supabaseClient;
+  clientInstance = window._supabaseClient;
 } else {
   // Si no estamos en desarrollo o no hay una instancia existente, crea un nuevo cliente
-  supabaseClient = createClient<Database>(supabaseUrl, supabaseKey, {
+  clientInstance = createClient<Database>(supabaseUrl, supabaseKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -72,6 +71,8 @@ if (import.meta.env.DEV && window._supabaseClient) {
 
   // Si estamos en desarrollo, guarda la nueva instancia del cliente en el objeto 'window'
   if (import.meta.env.DEV) {
-    window._supabaseClient = supabaseClient;
+    window._supabaseClient = clientInstance;
   }
 }
+
+export const supabase = clientInstance;
