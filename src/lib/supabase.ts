@@ -71,6 +71,8 @@ if (import.meta.env.DEV && window._supabaseClient) {
 
   // Si estamos en desarrollo, guarda la nueva instancia del cliente en el objeto 'window'
   if (import.meta.env.DEV) {
+    console.log('Supabase URL exists:', !!supabaseUrl);
+    console.log('Supabase Key exists:', !!supabaseKey);
     window._supabaseClient = clientInstance;
   }
 }
