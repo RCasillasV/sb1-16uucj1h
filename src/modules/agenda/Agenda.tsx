@@ -115,7 +115,9 @@ export function Agenda() {
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // This useEffect will handle scrolling to the current time after the calendar renders

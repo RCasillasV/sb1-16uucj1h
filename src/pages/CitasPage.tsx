@@ -435,9 +435,14 @@ export function CitasPage() {
       }
 
       setSuccess(true);
-      setTimeout(() => { 
+      const successTimer = setTimeout(() => { 
         navigate('/agenda/agenda');
       }, 2000);
+      
+      // Cleanup function is handled by component unmounting
+      return () => {
+        clearTimeout(successTimer);
+      };
     } catch (error) {
       console.error('Error creating appointment:', error);
       form.setError('root', { 

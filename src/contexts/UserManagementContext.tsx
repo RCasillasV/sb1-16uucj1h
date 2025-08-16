@@ -45,6 +45,9 @@ export function UserManagementProvider({ children }: { children: React.ReactNode
     } finally {
       setLoading(false);
     }
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const toggleUserStatus = useCallback(async (user: User) => {

@@ -221,7 +221,9 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
       }
     });
     
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const savePatient = async (form: HTMLFormElement) => {

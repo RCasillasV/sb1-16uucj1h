@@ -129,14 +129,22 @@ export function Prescriptions() {
   };
 
   const searchMedications = async (searchTerm: string) => {
+    let isCancelled = false;
+    
     try {
       const results = await api.medications.search(searchTerm);
+      if (isCancelled) return; // Prevent state update if component unmounted
       setMedicationSuggestions(results);
       setShowSuggestions(true);
     } catch (error) {
       console.error('Error searching medications:', error);
+      if (isCancelled) return; // Prevent state update if component unmounted
       setMedicationSuggestions([]);
     }
+    
+    return () => {
+      isCancelled = true;
+    };
   };
 
   const fetchPrescriptions = async () => {

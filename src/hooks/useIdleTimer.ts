@@ -98,7 +98,8 @@ export function useIdleTimer({
       });
       clearAllTimers();
     };
-  }, [isCountingDown, resetTimer, clearAllTimers]);
+  }
+  )
 
   return {
     remainingTime,

@@ -103,10 +103,14 @@ export function PatientReportPage() {
     if (shouldAutoPrint && patient && !loading && !autoPrintTriggered) {
       setAutoPrintTriggered(true);
       // Small delay to ensure content is fully rendered
-      setTimeout(() => {
+      const printTimer = setTimeout(() => {
         console.log('PatientReportPage: Disparando window.print()');
         window.print();
       }, 500);
+      
+      return () => {
+        clearTimeout(printTimer);
+      };
     }
   }, [patient, loading, autoPrintTriggered]);
 
