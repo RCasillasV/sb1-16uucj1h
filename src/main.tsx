@@ -14,13 +14,13 @@ if (!root) {
 } else {
   createRoot(root).render(
     <StrictMode>
-      <BrowseRouter> 
+      <BrowserRouter> 
         <ErrorBoundary>
           <AuthProvider>
             <App />
           </AuthProvider>
         </ErrorBoundary>
-      </BrowseRouter>
+      </BrowserRouter>
     </StrictMode>
   );
 }
