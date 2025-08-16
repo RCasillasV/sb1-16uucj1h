@@ -14,7 +14,7 @@ if (!root) {
 } else {
   createRoot(root).render(
     <StrictMode>
-      <HashRouter> {/* ✅ Único Router */}
+      <HashRouter> 
         <ErrorBoundary>
           <AuthProvider>
             <App />
