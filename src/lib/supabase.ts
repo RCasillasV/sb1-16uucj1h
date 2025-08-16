@@ -21,7 +21,7 @@ const customStorage = {
     try {
       return localStorage.getItem(key);
     } catch (err) {
-      console.error('Error accessing localStorage:', err);
+      console.error('Error al acceder a localStorage:', err);
       return null;
     }
   },
@@ -29,14 +29,14 @@ const customStorage = {
     try {
       localStorage.setItem(key, value);
     } catch (err) {
-      console.error('Error setting localStorage:', err);
+      console.error('Error al guardar en localStorage:', err);
     }
   },
   removeItem: (key: string) => {
     try {
       localStorage.removeItem(key);
     } catch (err) {
-      console.error('Error removing from localStorage:', err);
+      console.error('Error al eliminar de localStorage:', err);
     }
   }
 };
@@ -49,15 +49,15 @@ const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
 // Validación de entorno
 if (!supabaseUrl || !supabaseKey) {
   throw new Error(
-    'Missing Supabase environment variables. Please check your .env file.'
+    'Faltan las variables de entorno de Supabase. Revisa tu archivo .env.'
   );
 }
 
 // Logs solo en desarrollo
 if (import.meta.env.DEV) {
-  console.log('Supabase URL exists:', !!supabaseUrl);
-  console.log('Supabase Key exists:', !!supabaseKey);
-  console.log('App Version:', appVersion);
+  console.log('Supabase URL encontrada:', !!supabaseUrl);
+  console.log('Supabase Key encontrada:', !!supabaseKey);
+  console.log('Versión de la app:', appVersion);
 }
 
 // Factory / Singleton para cliente Supabase
