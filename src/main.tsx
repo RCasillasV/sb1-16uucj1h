@@ -17,7 +17,7 @@ if (!root) {
     <StrictMode>
       <BrowserRouter> 
         <ErrorBoundary>
-          <AuthProvider> {/* 👈 Envuelve tu App aquí */}
+          <AuthProvider> 
             <App />
           </AuthProvider>
         </ErrorBoundary>
