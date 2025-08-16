@@ -19,51 +19,8 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: {
-      getItem: (key) => {
-        try {
-          return localStorage.getItem(key);
-        } catch (error) {
-          console.error('Error accessing localStorage:', error);
-          return null;
-        }
-      },
-      setItem: (key, value) => {
-        try {
-          localStorage.setItem(key, value);
-        } catch (error) {
-          console.error('Error setting localStorage:', error);
-        }
-      },
-      removeItem: (key) => {
-        try {
-          localStorage.removeItem(key);
-        } catch (error) {
-          console.error('Error removing from localStorage:', error);
-        }
-      }
-    },
-    storageKey: 'supabase.auth.session',
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 2,
-    },
-  },
-  global: {
-    headers: { 'x-application-name': 'doctorsoft' },
-  },
-});
-*/
-// ... (después de las comprobaciones de variables de entorno: if (!supabaseUrl || !supabaseKey) { ... })
-
 // Implementación del patrón Singleton para el cliente Supabase
-let supabaseClient: ReturnType<typeof createClient>;
+export const supabase: ReturnType<typeof createClient>;
 
 // Comprueba si estamos en modo de desarrollo (import.meta.env.DEV)
 // Y si ya existe una instancia del cliente Supabase en el objeto 'window'
