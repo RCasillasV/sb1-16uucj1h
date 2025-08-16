@@ -15,11 +15,13 @@ if (!root) {
 } else {
   createRoot(root).render(
     <StrictMode>
-      <ErrorBoundary>
-        <AuthProvider> {/* 👈 Envuelve tu App aquí */}
-          <App />
-        </AuthProvider>
-      </ErrorBoundary>
+      <BrowserRouter> 
+        <ErrorBoundary>
+          <AuthProvider> {/* 👈 Envuelve tu App aquí */}
+            <App />
+          </AuthProvider>
+        </ErrorBoundary>
+      </BrowserRouter>
     </StrictMode>
   );
 }
