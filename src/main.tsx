@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
@@ -14,13 +14,13 @@ if (!root) {
 } else {
   createRoot(root).render(
     <StrictMode>
-      <HashRouter> 
+      <BrowseRouter> 
         <ErrorBoundary>
           <AuthProvider>
             <App />
           </AuthProvider>
         </ErrorBoundary>
-      </HashRouter>
+      </BrowseRouter>
     </StrictMode>
   );
 }
