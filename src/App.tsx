@@ -246,7 +246,7 @@ function App() {
   //console.log('App component started rendering');
 
   return (
-    <Router>
+    
       <AuthProvider>
         <ThemeProvider>
           <SelectedPatientProvider>
@@ -258,7 +258,7 @@ function App() {
           </SelectedPatientProvider>
         </ThemeProvider>
       </AuthProvider>
-    </Router>
+    
   );
 }
 
