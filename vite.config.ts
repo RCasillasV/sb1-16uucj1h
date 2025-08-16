@@ -17,6 +17,7 @@ for (const envVar of requiredEnvVars) {
 export default defineConfig({
   plugins: [react()],
   build: {
+    outDir: 'dist',
     target: 'esnext',
     minify: 'esbuild',
     cssMinify: true,
