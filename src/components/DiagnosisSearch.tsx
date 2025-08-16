@@ -112,7 +112,9 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -149,7 +151,9 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
     };
 
     const debounceTimeout = setTimeout(searchDiagnoses, 300);
-    return () => clearTimeout(debounceTimeout);
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
   }, [searchTerm, selectedDiagnoses]);
 
   const handleSelect = (diagnosis: Diagnosis) => {

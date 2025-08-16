@@ -70,7 +70,9 @@ export function NationalityAutocomplete({
       }
     }, 300); // 300ms de retardo para el debounce
 
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      clearTimeout(delayDebounceFn);
+    };
   }, [searchTerm]);
 
   const handleSelectSuggestion = useCallback((nationality: Nationality) => {

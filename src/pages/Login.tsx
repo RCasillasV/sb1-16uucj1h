@@ -44,7 +44,9 @@ function useTemporaryMessage(message, duration = 10000) {
     if (message) {
       setMsg(message);
       const timer = setTimeout(() => setMsg(null), duration);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [message, duration]);
   return [msg, setMsg];

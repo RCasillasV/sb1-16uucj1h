@@ -109,7 +109,9 @@ export function Register() {
       console.error('Registration error:', err);
       setError(err instanceof Error ? err.message : 'Error al registrar el usuario');
     } finally {
-      setLoading(false);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   };
 

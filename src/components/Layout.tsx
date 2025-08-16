@@ -52,7 +52,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -196,7 +198,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleClickOutside = () => setShowContextMenu(false);
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, []);
 
   const handleContextMenuClick = useCallback((e: React.MouseEvent) => {
