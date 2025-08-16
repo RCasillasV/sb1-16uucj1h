@@ -1,12 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom'; // ✅ Usar HashRouter aquí
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { AuthProvider } from './contexts/AuthContext'; // 👈 Importa el provider
+import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
 
-// Enable React concurrent features
 const root = document.getElementById('root');
 if (!root) {
   console.error('Elemento raíz no encontrado');
@@ -15,21 +14,13 @@ if (!root) {
 } else {
   createRoot(root).render(
     <StrictMode>
-      <BrowserRouter> 
+      <HashRouter> {/* ✅ Único Router */}
         <ErrorBoundary>
-          <AuthProvider> 
+          <AuthProvider>
             <App />
           </AuthProvider>
         </ErrorBoundary>
-      </BrowserRouter>
+      </HashRouter>
     </StrictMode>
   );
-}
-
-// Limpieza de consola en producción
-if (import.meta.env.PROD) {
-  console.log = () => {};
-  console.info = () => {};
-  console.warn = () => {};
-  console.error = () => {};
 }
