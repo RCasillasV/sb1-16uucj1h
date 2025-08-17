@@ -395,7 +395,7 @@ export function MainHeader({
         <Modal
           isOpen={showReportModal}
           onClose={handleCloseReport}
-          title="Informe del Paciente"
+          title="Ficha de datos del Paciente"
           className="max-w-6xl w-full"
         >
           <PatientReport
