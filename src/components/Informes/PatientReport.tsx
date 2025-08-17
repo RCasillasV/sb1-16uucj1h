@@ -263,7 +263,7 @@ export function PatientReport({
               className="text-2xl font-bold"
               style={{ color: currentTheme.colors.text }}
             >
-              Informe del Paciente
+              Fecha de datos del Paciente
             </h1>
           </div>
           <div className="flex gap-2">
@@ -294,7 +294,7 @@ export function PatientReport({
             className="text-lg font-bold"
             style={{ color: currentTheme.colors.text }}
           >
-            Informe Completo
+            Ficha Completa
           </h2>
           <div className="flex gap-2">
             <button
@@ -331,7 +331,7 @@ export function PatientReport({
         {/* Report Header - for print */}
         <div className="text-center mb-8 print:mb-6">
           <h1 className="text-3xl font-bold mb-2 print:text-black" style={{ color: currentTheme.colors.text }}>
-            Informe del Paciente
+            Ficha del Paciente
           </h1>
           <p className="text-sm print:text-black" style={{ color: currentTheme.colors.textSecondary }}>
             Generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
