@@ -169,7 +169,7 @@ export function MainHeader({
                 </>
               )}
               { (
-                <>
+                <> 
                   <Separator />
                   <InfoItem 
                     icon={Calendar} 
