@@ -377,7 +377,7 @@ export function PatientReportPage() {
           <div className="hidden print:block mt-12 pt-6 border-t border-gray-300">
             <div className="text-center text-sm text-gray-600">
               <p>DoctorSoft+ - Sistema de Gestión Médica</p>
-              <p>Informe generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}</p>
+              <p>Ficha generada el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}</p>
             </div>
           </div>
         </div>
