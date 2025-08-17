@@ -231,7 +231,7 @@ export function MainHeader({
                 style={{ color: currentTheme.colors.text }}
               >
                 <Printer className="h-4 w-4" />
-                Informe
+                Ficha de datos
               </button>
             </div>
           )}
