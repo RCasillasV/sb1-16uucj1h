@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 // --- 1. Definición de Tipos y Esquemas ---
 
 interface Diagnosis {
-  Consecutivo: number;
+  Consecutivo: string;
   Catalog_Key: string;
   Nombre: string;
 }
@@ -27,6 +27,7 @@ interface Diagnosis {
 interface HeredoFamilialPathology {
   id_patologia?: number;
   nombre_patologia: string;
+  codigo_cie10?: string;
   edad_inicio_familiar?: number;
   notas_especificas_familiar?: string;
 }
@@ -60,6 +61,7 @@ const familyMemberSchema = z.object({
   patologias: z.array(z.object({
     id_patologia: z.number().optional(),
     nombre_patologia: z.string(),
+    codigo_cie10: z.string().optional(),
     edad_inicio_familiar: z.number().nullable().optional(),
     notas_especificas_familiar: z.string().nullable().optional(),
   })).default([]),
@@ -241,7 +243,7 @@ export function HeredoFamHistory() {
       
       // Convertir los datos de patologías al formato de Diagnosis
       const formattedPatologies: Diagnosis[] = data.map(patology => ({
-        Consecutivo: parseInt(patology.id),
+        Consecutivo: patology.id,
         Catalog_Key: patology.codcie10 || patology.nombre.substring(0, 6).toUpperCase(),
         Nombre: patology.nombre,
       }));
@@ -322,6 +324,7 @@ export function HeredoFamHistory() {
           const newPathology: HeredoFamilialPathology = {
             id_patologia: diagnosis.Consecutivo,
             nombre_patologia: diagnosis.Nombre,
+            codigo_cie10: diagnosis.Catalog_Key,
             codigo_cie10: diagnosis.Catalog_Key,
             edad_inicio_familiar: undefined,
             notas_especificas_familiar: '',
