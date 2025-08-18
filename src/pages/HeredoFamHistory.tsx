@@ -27,7 +27,6 @@ interface Diagnosis {
 interface HeredoFamilialPathology {
   id_patologia?: number;
   nombre_patologia: string;
-  codigo_cie10?: string;
   edad_inicio_familiar?: number;
   notas_especificas_familiar?: string;
 }
@@ -61,7 +60,6 @@ const familyMemberSchema = z.object({
   patologias: z.array(z.object({
     id_patologia: z.number().optional(),
     nombre_patologia: z.string(),
-    codigo_cie10: z.string().optional(),
     edad_inicio_familiar: z.number().nullable().optional(),
     notas_especificas_familiar: z.string().nullable().optional(),
   })).default([]),
