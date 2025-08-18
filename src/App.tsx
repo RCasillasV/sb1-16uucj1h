@@ -28,6 +28,7 @@ const Prescriptions = lazy(() => import('./pages/Prescriptions').then(module => 
 const Somatometry = lazy(() => import('./pages/Somatometry').then(module => ({ default: module.Somatometry })));
 const PatientFilesPage = lazy(() => import('./pages/PatientFilesPage').then(module => ({ default: module.PatientFilesPage })));
 const AntecedentesNoPatologicos = lazy(() => import('./pages/AntecedentesNoPatologicos').then(module => ({ default: module.AntecedentesNoPatologicos })));
+const HeredoFamHistory = lazy(() => import('./pages/HeredoFamHistory').then(module => ({ default: module.HeredoFamHistory })));
 const Users = lazy(() => import('./pages/Users').then(module => ({ default: module.Users })));
 const BusinessUnits = lazy(() => import('./modules/clinica/BusinessUnits').then(module => ({ default: module.BusinessUnits })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
@@ -191,6 +192,14 @@ function AppContent() {
           <PrivateRoute>
             <Layout>
               <AntecedentesNoPatologicos />
+            </Layout>
+          </PrivateRoute>
+        } />
+            
+        <Route path="/heredo-familial-history" element={
+          <PrivateRoute>
+            <Layout>
+              <HeredoFamHistory />
             </Layout>
           </PrivateRoute>
         } />
