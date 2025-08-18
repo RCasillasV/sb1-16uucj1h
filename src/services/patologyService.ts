@@ -13,7 +13,7 @@ export const patologies = {
     if (cached) return cached;
 
     const data = await svc.getAll(
-      `id, nombre, codcie10, especialidad, sexo, activo, created_at`
+      `id, nombre, especialidad, sexo, activo, created_at`
     );
     cache.set(key, data);
     return data;
@@ -27,7 +27,7 @@ export const patologies = {
     const data = await handle(
       supabase
         .from('tcPatologias')
-        .select('id, nombre, codcie10, especialidad, sexo')
+        .select('id, nombre, especialidad, sexo')
         .eq('activo', true)
         .order('nombre'),
       []
