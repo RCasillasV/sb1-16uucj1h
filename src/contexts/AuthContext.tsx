@@ -32,51 +32,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   // Function to fetch user attributes using centralized API
-const fetchUserAttributes = async (userId: string): Promise<Partial<UserWithAttributes>> => {
-  console.log('fetchUserAttributes called for userId:', userId);
-
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('idbu, nombre, rol, estado, deleted_at')
-      .eq('id', userId)
-      .single();
-
-    if (error) {
-      console.error('Error fetching user attributes from users table:', error);
-      throw error;
-    }
-
-    if (data) {
-      console.log('Fetched user attributes from users table:', data);
+  const fetchUserAttributes = async (userId: string): Promise<Partial<UserWithAttributes>> => {
+    console.log('fetchUserAttributes called for userId:', userId);
+    
+    try {
+      // Use centralized API function
+      const userAttributes = await api.users.getCurrentUserAttributes(userId);
+      
+      if (userAttributes) {
+        console.log('AuthContext: Fetched user attributes successfully:', userAttributes);
+        return {
+          idbu: userAttributes.idbu,
+          nombre: userAttributes.nombre,
+          userRole: userAttributes.rol,
+          estado: userAttributes.estado,
+          deleted_at: userAttributes.deleted_at
+        };
+      }
+      
+      // No user attributes found, use defaults
+      console.warn('AuthContext: No user attributes found, using defaults');
       return {
-        idbu: data.idbu,
-        nombre: data.nombre,
-        userRole: data.rol,
-        estado: data.estado,
-        deleted_at: data.deleted_at
+        idbu: null,
+        nombre: null,
+        userRole: 'Recepcionista',
+        estado: 'Activo',
+        deleted_at: null
+      };
+    } catch (error) {
+      console.error('AuthContext: Error in fetchUserAttributes:', error);
+      // Return defaults on error
+      return {
+        idbu: null,
+        nombre: null,
+        userRole: 'Recepcionista',
+        estado: 'Activo',
+        deleted_at: null
       };
     }
+  };
 
-    console.warn('No user data found in users table, using defaults');
-    return {
-      idbu: null,
-      nombre: null,
-      userRole: 'Recepcionista',
-      estado: 'Activo',
-      deleted_at: null
-    };
-  } catch (error) {
-    console.error('Error in fetchUserAttributes fallback:', error);
-    return {
-      idbu: null,
-      nombre: null,
-      userRole: 'Recepcionista',
-      estado: 'Activo',
-      deleted_at: null
-    };
-  }
-};
   useEffect(() => {
     // Check active sessions and set the user with role
     const checkSessionAndSetUser = async () => {
@@ -256,4 +251,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}; 
