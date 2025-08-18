@@ -42,7 +42,7 @@ const heredoFamilialFormDataSchema = z.object({
 
 type HeredoFamilialFormData = z.infer<typeof heredoFamilialFormDataSchema>;
 
-export function HeredoFamilialHistory() {
+export function HeredoFamHistory() { // <-- Nombre del componente actualizado
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
@@ -476,45 +476,3 @@ export function HeredoFamilialHistory() {
             >
               Notas Generales sobre el Historial Heredo-Familiar
             </label>
-            <textarea
-              id="notas"
-              {...register('notas')}
-              rows={4}
-              className="w-full p-2 rounded-md border"
-              style={{
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Botones de Acción */}
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => navigate('/patients')} // O a la página anterior
-            className={clsx(buttonStyle.base, 'border')}
-            style={{
-              background: 'transparent',
-              borderColor: currentTheme.colors.border,
-              color: currentTheme.colors.text,
-            }}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className={clsx(buttonStyle.base, 'disabled:opacity-50')}
-            style={buttonStyle.primary}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? 'Guardando...' : 'Guardar Historial'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
