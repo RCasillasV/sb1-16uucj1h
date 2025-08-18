@@ -13,7 +13,7 @@ export const appointments = {
     if (cached) return cached;
 
     const data = await svc.getAll(
-      `
+      ` 
       id, fecha_cita, hora_cita, estado,
       patients:id_paciente(id,Nombre,Paterno,Materno)
       `
