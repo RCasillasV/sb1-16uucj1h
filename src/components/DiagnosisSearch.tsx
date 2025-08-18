@@ -34,12 +34,14 @@ function SortableDiagnosisTag({ diagnosis, onRemove }: SortableDiagnosisTagProps
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: diagnosis.Consecutivo.toString() });
+  } = useSortable({ 
     id: diagnosis.Consecutivo.toString(),
     data: {
       type: 'diagnosis',
       diagnosis: diagnosis,
     },
+  });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
