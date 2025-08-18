@@ -245,12 +245,6 @@ export function PatologiesManagement() {
                   className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
-                  Código CIE-10
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
                   Especialidad
                 </th>
                 <th 
@@ -302,9 +296,6 @@ export function PatologiesManagement() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       {patology.nombre}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {patology.codcie10 || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {patology.especialidad || '-'}
