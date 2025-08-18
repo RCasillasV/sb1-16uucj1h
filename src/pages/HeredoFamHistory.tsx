@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Family, User, FileText, Plus, Save, AlertCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Contact as Family, User, FileText, Plus, Save, AlertCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
