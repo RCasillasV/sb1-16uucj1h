@@ -233,8 +233,26 @@ export function HeredoFamHistory() {
     }
     if (!authLoading && user) {
       fetchHeredoFamilialHistory();
+      loadAllActivePatologies();
     }
   }, [selectedPatient, user, authLoading]);
+
+  const loadAllActivePatologies = async () => {
+    try {
+      const data = await api.patologies.getAllActive();
+      
+      // Convertir los datos de patologías al formato de Diagnosis
+      const formattedPatologies: Diagnosis[] = data.map(patology => ({
+        Consecutivo: parseInt(patology.id),
+        Catalog_Key: patology.codcie10 || patology.nombre.substring(0, 6).toUpperCase(),
+        Nombre: patology.nombre,
+      }));
+      
+      setGlobalSelectedCatalogDiagnoses(formattedPatologies);
+    } catch (err) {
+      console.error('Error loading all active pathologies:', err);
+    }
+  };
 
   const fetchHeredoFamilialHistory = async () => {
     if (!selectedPatient) return;

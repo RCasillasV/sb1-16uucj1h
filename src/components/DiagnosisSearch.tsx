@@ -219,4 +219,3 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
       </div>
     </div>
   );
-}
