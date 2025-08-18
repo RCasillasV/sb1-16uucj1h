@@ -12,7 +12,8 @@ import {
   Calendar,
   Info,
   FolderOpen,
-  Clock
+  Clock,
+  Stethoscope
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import clsx from 'clsx';
@@ -86,6 +87,12 @@ export function Settings() {
         setActivePath(['Configuración', 'Apariencia']);
         setActiveSection('apariencia');
       }
+    },
+    {
+      icon: Stethoscope,
+      title: 'Catálogo de Patologías',
+      description: 'Gestiona las patologías disponibles por especialidad y género.',
+      onClick: () => navigate('/settings/patologias')
     },
     {
       icon: Building2,
