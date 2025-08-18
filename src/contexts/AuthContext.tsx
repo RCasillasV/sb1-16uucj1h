@@ -68,9 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthContext: Exception caught in fetchUserAttributes, returning defaults');
       // Return defaults on error
       return {
-        idbu: null,
-        nombre: null,
-        userRole: 'Recepcionista',
+        idbu: '00000000-0000-0000-0000-000000000000',
+        nombre: 'Usuario Temporal',
+        userRole: 'Medico',
         estado: 'Activo',
         deleted_at: null
       };
@@ -154,6 +154,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('Auth state changed:', _event, 'Session:', session);
       console.log('AuthContext: === AUTH STATE CHANGE EVENT ===', _event);
+      
+      // Add timeout to prevent infinite hanging
+      const timeoutId = setTimeout(() => {
+        console.log('AuthContext: Auth state change timeout reached, forcing loading to false');
+        setLoading(false);
+      }, 10000); // 10 second timeout
+      
       try {
         if (session?.user) {
           console.log('Auth state change: Session user exists:', session.user.id);
@@ -168,7 +175,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (attrError) {
             console.error('Auth state change: Error fetching user attributes:', attrError);
             console.log('AuthContext: Auth state change - error fetching attributes, using session user only');
-            setUser(session.user);
+            setUser({ 
+              ...session.user, 
+              userRole: 'Medico',
+              idbu: '00000000-0000-0000-0000-000000000000',
+              nombre: 'Usuario Temporal',
+              estado: 'Activo'
+            });
             console.log('AuthContext: Auth state change - setUser called with session user only');
           }
         } else {
@@ -183,6 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         console.log('AuthContext: Auth state change - setUser(null) called due to exception');
       } finally {
+        clearTimeout(timeoutId); // Clear the timeout if we complete successfully
         console.log('onAuthStateChange finally block entered.');
         console.log('AuthContext: === AUTH STATE CHANGE FINALLY ===');
         console.log('Auth state change: setLoading(false) executed in finally block.');

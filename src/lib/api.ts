@@ -53,21 +53,27 @@ class BaseService {
 // Users service
 const users = {
   async getCurrentUserAttributes(userId: string) {
+    console.log('api.users.getCurrentUserAttributes: Starting for userId:', userId);
     try {
+      console.log('api.users.getCurrentUserAttributes: About to query tcUsuarios table');
       const { data, error } = await supabase
         .from('tcUsuarios')
         .select('nombre, email, telefono, rol, estado, idbu, deleted_at')
         .eq('idusuario', userId)
         .single();
 
+      console.log('api.users.getCurrentUserAttributes: Query completed. Error:', error, 'Data:', data);
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user attributes:', error);
+        console.log('api.users.getCurrentUserAttributes: Returning null due to error');
         return null;
       }
 
+      console.log('api.users.getCurrentUserAttributes: Returning data:', data);
       return data;
     } catch (error) {
       console.error('Error in getCurrentUserAttributes:', error);
+      console.log('api.users.getCurrentUserAttributes: Exception caught, returning null');
       return null;
     }
   }
