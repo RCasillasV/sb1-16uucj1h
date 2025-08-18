@@ -33,6 +33,7 @@ interface HeredoFamilialPathology {
 }
 
 interface FamilyMember {
+  id?: bigint;
   miembro_fam_key: string;
   estado_vital: string;
   edad?: number;
@@ -53,6 +54,7 @@ const FIXED_FAMILY_MEMBERS = [
 
 // Esquema Zod para un familiar individual
 const familyMemberSchema = z.object({
+  id: z.bigint().optional(),
   miembro_fam_key: z.string(),
   estado_vital: z.string(),
   edad: z.number().nullable().optional(),
@@ -208,6 +210,7 @@ export function HeredoFamHistory() {
     resolver: zodResolver(heredoFamilialFormDataSchema),
     defaultValues: {
       familyMembers: FIXED_FAMILY_MEMBERS.map(member => ({
+        id: undefined,
         miembro_fam_key: member.key,
         estado_vital: '',
         edad: undefined,
@@ -245,9 +248,10 @@ export function HeredoFamHistory() {
       
       // Mapear los datos cargados a la estructura de familiares fijos
       const familyMembersData = FIXED_FAMILY_MEMBERS.map(fixedMember => {
-        const existingRecord = records.find(record => record.miembro_fam === fixedMember.key);
+        const existingRecord = records.find((record: any) => record.miembro_fam === fixedMember.key);
         
         return {
+          id: existingRecord?.id,
           miembro_fam_key: fixedMember.key,
           estado_vital: existingRecord?.estado_vital || '',
           edad: existingRecord?.edad || undefined,
@@ -361,6 +365,7 @@ export function HeredoFamHistory() {
         // Solo guardar si hay datos relevantes (estado vital o patologías)
         if (familyMember.estado_vital || familyMember.patologias.length > 0) {
           const payload = {
+            id: familyMember.id,
             patient_id: selectedPatient.id,
             id_usuario: user.id,
             idbu: user.idbu,
