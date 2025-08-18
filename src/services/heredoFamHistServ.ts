@@ -1,4 +1,4 @@
-// src/services/heredoFamilialHistoryService.ts
+// src/services/heredoFamHistServ.ts
 import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 
