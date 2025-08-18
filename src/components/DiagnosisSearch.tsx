@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, useSortable, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import clsx from 'clsx';
 
 interface Diagnosis {
@@ -81,12 +80,8 @@ function SortableDiagnosisTag({ diagnosis, onRemove }: SortableDiagnosisTagProps
 
 export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: DiagnosisSearchProps) {
   const { currentTheme } = useTheme();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState<Diagnosis[]>([]);
+  const [availablePatologies, setAvailablePatologies] = useState<Diagnosis[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -102,70 +97,34 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
     })
   );
 
-  // Virtual list setup
-  const rowVirtualizer = useVirtualizer({
-    count: results.length,
-    getScrollElement: () => resultsRef.current,
-    estimateSize: () => 40,
-    overscan: 5,
-  });
-
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    const searchDiagnoses = async () => {
-      if (!searchTerm.trim()) {
-        setResults([]);
-        return;
-      }
-
+    const loadActivePatologies = async () => {
       setIsLoading(true);
       try {
-        const searchTerms = searchTerm.toLowerCase().split(' ');
-
-        const { data, error } = await supabase
-          .from('tcCIE10')
-          .select('Consecutivo, Catalog_Key, Nombre')
-          .or(searchTerms.map(term => `Catalog_Key.ilike.%${term}%,Nombre.ilike.%${term}%`).join(','))
-          .limit(10);
-
-        if (error) throw error;
+        // Cargar patologías activas directamente del catálogo
+        const data = await api.patologies.getAllActive();
         
-        // Filter out already selected diagnoses
-        const filteredData = data.filter(diagnosis => 
-          !selectedDiagnoses.some(selected => selected.Consecutivo === diagnosis.Consecutivo)
-        );
+        // Convertir los datos de patologías al formato de Diagnosis
+        const formattedPatologies: Diagnosis[] = data.map(patology => ({
+          Consecutivo: parseInt(patology.id),
+          Catalog_Key: patology.codcie10 || patology.nombre.substring(0, 6).toUpperCase(),
+          Nombre: patology.nombre,
+        }));
         
-        setResults(filteredData);
+        setAvailablePatologies(formattedPatologies);
       } catch (error) {
-        console.error('Error searching diagnoses:', error);
-        setResults([]);
+        console.error('Error loading active patologies:', error);
+        setAvailablePatologies([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    const debounceTimeout = setTimeout(searchDiagnoses, 300);
-    return () => {
-      clearTimeout(debounceTimeout);
-    };
-  }, [searchTerm, selectedDiagnoses]);
+    loadActivePatologies();
+  }, []);
 
   const handleSelect = (diagnosis: Diagnosis) => {
     onSelect(diagnosis);
-    setSearchTerm('');
-    setShowResults(false);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -184,8 +143,13 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
     }
   };
 
+  // Filtrar patologías disponibles para no mostrar las ya seleccionadas
+  const unselectedPatologies = availablePatologies.filter(patology =>
+    !selectedDiagnoses.some(selected => selected.Consecutivo === patology.Consecutivo)
+  );
+
   return (
-    <div className="space-y-2" ref={searchRef}>
+    <div className="space-y-4">
       {/* Selected diagnoses tags */}
       <DndContext 
         sensors={sensors}
@@ -207,104 +171,49 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
         </SortableContext>
       </DndContext>
 
-      {/* Search input */}
-      <div className="relative">
-        <div className="relative">
-          <Search 
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" 
-            style={{ color: currentTheme.colors.textSecondary }}
-          />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setShowResults(true);
-            }}
-            onFocus={() => setShowResults(true)}
-            placeholder="Buscar diagnóstico por código o nombre..."
-            className="w-full pl-10 pr-4 py-2 rounded-md border"
-            style={{
-              background: currentTheme.colors.surface,
-              borderColor: currentTheme.colors.border,
-              color: currentTheme.colors.text,
-            }}
-          />
-        </div>
-
-        {/* Results dropdown */}
-        {showResults && (searchTerm.trim() || isLoading) && (
+      {/* Available pathologies from catalog */}
+      <div>
+        <h4 
+          className="text-sm font-medium mb-2"
+          style={{ color: currentTheme.colors.text }}
+        >
+          Patologías Disponibles del Catálogo:
+        </h4>
+        
+        {isLoading ? (
           <div 
-            ref={resultsRef}
-            className="absolute z-50 w-full mt-1 rounded-md shadow-lg border overflow-auto"
-            style={{ 
-              background: currentTheme.colors.surface,
-              borderColor: currentTheme.colors.border,
-              maxHeight: '400px',
-            }}
+            className="p-4 text-center text-sm"
+            style={{ color: currentTheme.colors.textSecondary }}
           >
-            {isLoading ? (
-              <div 
-                className="p-4 text-center text-sm"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Buscando diagnósticos...
-              </div>
-            ) : results.length === 0 ? (
-              <div 
-                className="p-4 text-center text-sm"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                No se encontraron diagnósticos
-              </div>
-            ) : (
-              <div
+            Cargando patologías del catálogo...
+          </div>
+        ) : unselectedPatologies.length === 0 ? (
+          <div 
+            className="p-4 text-center text-sm"
+            style={{ color: currentTheme.colors.textSecondary }}
+          >
+            No hay patologías disponibles en el catálogo
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 border rounded-md" style={{ borderColor: currentTheme.colors.border }}>
+            {unselectedPatologies.map((patology) => (
+              <button
+                key={patology.Consecutivo}
+                onClick={() => handleSelect(patology)}
+                className="flex items-center gap-1 px-2 py-1 text-sm rounded-md border transition-colors hover:bg-black/5"
                 style={{
-                  height: `${Math.min(results.length * 40, 400)}px`,
+                  background: currentTheme.colors.surface,
+                  borderColor: currentTheme.colors.border,
+                  color: currentTheme.colors.text,
                 }}
               >
-                <div
-                  style={{
-                    height: `${rowVirtualizer.getTotalSize()}px`,
-                    width: '100%',
-                    position: 'relative',
-                  }}
-                >
-                  {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                    const diagnosis = results[virtualRow.index];
-                    return (
-                      <div
-                        key={diagnosis.Consecutivo}
-                        className={clsx(
-                          'absolute top-0 left-0 w-full',
-                          'px-4 py-2 cursor-pointer hover:bg-black/5 transition-colors'
-                        )}
-                        style={{
-                          height: `${virtualRow.size}px`,
-                          transform: `translateY(${virtualRow.start}px)`,
-                        }}
-                        onClick={() => handleSelect(diagnosis)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span 
-                            className="font-medium"
-                            style={{ color: currentTheme.colors.primary }}
-                          >
-                            {diagnosis.Catalog_Key}
-                          </span>
-                          <span 
-                            className="truncate"
-                            style={{ color: currentTheme.colors.text }}
-                          >
-                            {diagnosis.Nombre}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                <span className="font-medium text-xs" style={{ color: currentTheme.colors.primary }}>
+                  {patology.Catalog_Key}
+                </span>
+                <span className="text-xs">-</span>
+                <span className="text-xs truncate max-w-[200px]">{patology.Nombre}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
