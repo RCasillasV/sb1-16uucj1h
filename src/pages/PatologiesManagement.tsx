@@ -489,30 +489,6 @@ export function PatologiesManagement() {
               placeholder="Ej: Hipertensión arterial"
             />
           </div>
-
-          <div>
-            <label 
-              htmlFor="codcie10" 
-              className="block text-sm font-medium mb-1"
-              style={{ color: currentTheme.colors.text }}
-            >
-              Código CIE-10
-            </label>
-            <input
-              type="text"
-              id="codcie10"
-              value={formData.codcie10}
-              onChange={(e) => setFormData({ ...formData, codcie10: e.target.value })}
-              className="w-full rounded-md shadow-sm"
-              style={{
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text,
-              }}
-              placeholder="Ej: I10"
-            />
-          </div>
-
           <div>
             <label 
               htmlFor="especialidad" 
