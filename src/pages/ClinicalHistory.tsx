@@ -1352,20 +1352,6 @@ export function ClinicalHistory() {
             </div>
           </CollapsibleSection>
 
-          {/* Antecedentes No Patológicos */}
-          <CollapsibleSection title="3. Antecedentes No Patológicos">
-            <div 
-              className="p-4 rounded-md text-center"
-              style={{ 
-                background: currentTheme.colors.background,
-                color: currentTheme.colors.textSecondary 
-              }}
-            >
-              <p>Sección en desarrollo - Antecedentes No Patológicos</p>
-              <p className="text-sm mt-2">Aquí se registrarán los antecedentes no patológicos del paciente</p>
-            </div>
-          </CollapsibleSection>
-
           {/* Antecedentes Gineco-Obstétricos (solo para mujeres) */}
           {selectedPatient.Sexo === 'Femenino' && (
             <CollapsibleSection title="4. Antecedentes Gineco-Obstétricos">
