@@ -32,6 +32,28 @@ export const appointments = {
     );
   },
 
+  async getByPatientId(patientId: string) {
+    const key = `patient_${patientId}`;
+    const cached = cache.get(key);
+    if (cached) return cached;
+
+    const data = await handle(
+      supabase
+        .from('tcCitas')
+        .select(`
+          *,
+          patients:id_paciente(id,Nombre,Paterno,Materno)
+        `)
+        .eq('id_paciente', patientId)
+        .order('fecha_cita', { ascending: false })
+        .order('hora_cita', { ascending: false }),
+      []
+    );
+    
+    cache.set(key, data);
+    return data;
+  },
+
   async createSecure(dto: {
     id_paciente: string;
     fecha_cita: string;
