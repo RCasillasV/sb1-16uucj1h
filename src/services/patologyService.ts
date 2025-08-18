@@ -80,7 +80,7 @@ export const patologies = {
         .from('tcPatologias')
         .select('id, nombre, codcie10, especialidad, sexo')
         .eq('activo', true)
-        .or(`nombre.ilike.%${searchTerm}%,codcie10.ilike.%${searchTerm}%`)
+        .or(`nombre.ilike.%${searchTerm}%,especialidad.ilike.%${searchTerm}%`)
         .order('nombre')
         .limit(20),
       []
