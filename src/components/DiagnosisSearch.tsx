@@ -62,9 +62,8 @@ function SortableDiagnosisTag({ diagnosis, onRemove }: SortableDiagnosisTagProps
         isDragging && 'shadow-lg'
       )}
     >
+      <GripVertical className="h-3 w-3 opacity-50" />
       <span className="font-medium">{diagnosis.Catalog_Key}</span>
-      <span className="mx-1">-</span>
-      <span>{diagnosis.Nombre}</span>
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -210,8 +209,6 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
                 <span className="font-medium text-xs" style={{ color: currentTheme.colors.primary }}>
                   {patology.Catalog_Key}
                 </span>
-                <span className="text-xs">-</span>
-                <span className="text-xs truncate max-w-[200px]">{patology.Nombre}</span>
               </button>
             ))}
           </div>
