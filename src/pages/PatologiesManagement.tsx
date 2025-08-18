@@ -236,31 +236,31 @@ export function PatologiesManagement() {
             <thead>
               <tr style={{ background: currentTheme.colors.background }}>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Nombre
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Especialidad
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Sexo
                 </th>
                 <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Estado
                 </th>
                 <th 
-                  className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Acciones
@@ -272,7 +272,7 @@ export function PatologiesManagement() {
                 <tr>
                   <td 
                     colSpan={6} 
-                    className="px-6 py-4 text-center"
+                    className="px-6 py-2 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     Cargando patologías...
@@ -282,7 +282,7 @@ export function PatologiesManagement() {
                 <tr>
                   <td 
                     colSpan={6} 
-                    className="px-6 py-4 text-center"
+                    className="px-6 py-2 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     No hay patologías registradas
@@ -294,16 +294,16 @@ export function PatologiesManagement() {
                     key={patology.id}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap">
                       {patology.nombre}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap">
                       {patology.especialidad || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap">
                       {patology.sexo || 'Indistinto'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap">
                       <button
                         onClick={async () => {
                           try {
@@ -331,7 +331,7 @@ export function PatologiesManagement() {
                         />
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-6 py-2 whitespace-nowrap text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => {
@@ -370,7 +370,7 @@ export function PatologiesManagement() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div 
-            className="px-6 py-3 flex items-center justify-between border-t"
+            className="px-6 py-2 flex items-center justify-between border-t"
             style={{ borderColor: currentTheme.colors.border }}
           >
             <div>
