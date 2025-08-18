@@ -11,6 +11,7 @@ import { api } from '../lib/api'; // Asegúrate de que api.ts exporte heredoFami
 import { Modal } from '../components/Modal';
 import { DiagnosisSearch } from '../components/DiagnosisSearch'; // Para seleccionar patologías del catálogo
 import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
 
 // --- 1. Definición de Tipos y Esquemas Zod ---
 
@@ -476,3 +477,33 @@ export function HeredoFamHistory() { // <-- Nombre del componente actualizado
             >
               Notas Generales sobre el Historial Heredo-Familiar
             </label>
+            <textarea
+              id="notas"
+              {...register('notas')}
+              rows={4}
+              className="w-full p-2 rounded-md border"
+              style={{
+                background: currentTheme.colors.surface,
+                borderColor: currentTheme.colors.border,
+                color: currentTheme.colors.text,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Botón de Guardar */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={saving}
+            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
+            style={buttonStyle.primary}
+          >
+            <Save className="h-4 w-4" />
+            {saving ? 'Guardando...' : 'Guardar Historial'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
