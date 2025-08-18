@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { api } from './api';
 
 export async function requireSession() {
   const { data: { session }, error } = await supabase.auth.getSession();
@@ -9,7 +10,7 @@ export async function requireSession() {
 }
 
 export async function requireBusinessUnit(userId: string) {
-  const attrs = await users.getCurrentUserAttributes(userId);
+  const attrs = await api.users.getCurrentUserAttributes(userId);
   if (!attrs?.idbu) {
     throw new Error('Usuario sin unidad de negocio (idbu)');
   }
