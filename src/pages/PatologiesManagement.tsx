@@ -294,16 +294,16 @@ export function PatologiesManagement() {
                     key={patology.id}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-6 py-2 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap truncate">
                       {patology.nombre}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap truncate">
                       {patology.especialidad || '-'}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap truncate">
                       {patology.sexo || 'Indistinto'}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap">
+                    <td className="px-6 py-2 whitespace-nowrap truncate">
                       <button
                         onClick={async () => {
                           try {
@@ -331,7 +331,7 @@ export function PatologiesManagement() {
                         />
                       </button>
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap text-right">
+                    <td className="px-6 py-2 whitespace-nowrap truncate text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => {
