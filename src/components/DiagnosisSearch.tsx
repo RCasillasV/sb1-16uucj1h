@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { api } from '../lib/api';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, useSortable, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -15,7 +14,7 @@ interface Diagnosis {
 
 interface DiagnosisSearchProps {
   selectedDiagnoses: Diagnosis[];
-  onSelect: (diagnosis: Diagnosis) => void;
+  onSelect: (diagnosis: Diagnosis | Diagnosis[]) => void;
   onRemove: (diagnosis: Diagnosis) => void;
 }
 
@@ -34,7 +33,7 @@ function SortableDiagnosisTag({ diagnosis, onRemove }: SortableDiagnosisTagProps
     transition,
     isDragging,
   } = useSortable({ 
-    id: diagnosis.Consecutivo.toString(),
+    id: diagnosis.Consecutivo,
     data: {
       type: 'diagnosis',
       diagnosis: diagnosis,
@@ -79,10 +78,6 @@ function SortableDiagnosisTag({ diagnosis, onRemove }: SortableDiagnosisTagProps
 }
 
 export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: DiagnosisSearchProps) {
-  const { currentTheme } = useTheme();
-  const [availablePatologies, setAvailablePatologies] = useState<Diagnosis[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -96,36 +91,6 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
       },
     })
   );
-
-  useEffect(() => {
-    const loadActivePatologies = async () => {
-      setIsLoading(true);
-      try {
-        // Cargar patologías activas directamente del catálogo
-        const data = await api.patologies.getAllActive();
-        
-        // Convertir los datos de patologías al formato de Diagnosis
-        const formattedPatologies: Diagnosis[] = data.map(patology => ({
-          Consecutivo: patology.id,
-          Catalog_Key: patology.codcie10 || patology.nombre.substring(0, 6).toUpperCase(),
-          Nombre: patology.nombre,
-        }));
-        
-        setAvailablePatologies(formattedPatologies);
-      } catch (error) {
-        console.error('Error loading active patologies:', error);
-        setAvailablePatologies([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadActivePatologies();
-  }, []);
-
-  const handleSelect = (diagnosis: Diagnosis) => {
-    onSelect(diagnosis);
-  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -142,11 +107,6 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
       onSelect(reorderedDiagnoses);
     }
   };
-
-  // Filtrar patologías disponibles para no mostrar las ya seleccionadas
-  const unselectedPatologies = availablePatologies.filter(patology =>
-    !selectedDiagnoses.some(selected => selected.Consecutivo === patology.Consecutivo)
-  );
 
   return (
     <div className="space-y-4">
@@ -170,7 +130,6 @@ export function DiagnosisSearch({ selectedDiagnoses, onSelect, onRemove }: Diagn
           </div>
         </SortableContext>
       </DndContext>
-
     </div>
   );
 }
