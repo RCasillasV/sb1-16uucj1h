@@ -11,7 +11,7 @@ import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
-import { useDraggable } from '@dnd-kit/core';
+import { useDraggable } from '@dnd-kit/core'; 
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
