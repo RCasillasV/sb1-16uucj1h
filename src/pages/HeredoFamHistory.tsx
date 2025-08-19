@@ -419,7 +419,6 @@ export function HeredoFamHistory() {
           const payload = {
             ...(familyMember.id ? { id: familyMember.id } : {}),
             patient_id: selectedPatient.id,
-            idbu: selectedPatient.idbu, // idbu still needed for the API call but not in form
             miembro_fam: familyMember.miembro_fam_key,
             estado_vital: familyMember.estado_vital || null,
             patologias: familyMember.patologias,
