@@ -27,16 +27,20 @@ export const heredoFamilialHistory = {
   },
 
   async update(id: bigint, payload: any) {
+    console.log('heredoFamilialHistory service: Updating record with id:', id, 'payload:', payload);
     const result = await svc.update(id, payload);
     cache.clear(); // Limpiar cache al actualizar
     return result;
   },
 
   async createOrUpdate(payload: any) {
+    console.log('heredoFamilialHistory service: createOrUpdate called with payload:', payload);
     if (payload.id) {
+      console.log('heredoFamilialHistory service: Updating existing record');
       // Update existing record
       return await this.update(payload.id, payload);
     } else {
+      console.log('heredoFamilialHistory service: Creating new record');
       // Create new record
       return await this.create(payload);
     }

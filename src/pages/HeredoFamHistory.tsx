@@ -27,7 +27,7 @@ interface HeredoFamilialPathology {
 }
 
 interface FamilyMember {
-  id?: bigint;
+  id?: string;
   miembro_fam_key: string;
   estado_vital: string;
   edad?: number;
@@ -48,7 +48,7 @@ const FIXED_FAMILY_MEMBERS = [
 
 // Esquema Zod para un familiar individual
 const familyMemberSchema = z.object({
-  id: z.bigint().optional(),
+  id: z.string().optional(),
   miembro_fam_key: z.string(),
   estado_vital: z.string(),
   edad: z.preprocess(
@@ -81,10 +81,9 @@ interface DraggablePathologyTagProps {
   patology: AppPatology;
   onRemove: (patology: AppPatology) => void;
   isFromCatalog?: boolean;
-  isAssigned?: boolean;
 }
 
-function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAssigned = false }: DraggablePathologyTagProps) {
+function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: DraggablePathologyTagProps) {
   const { currentTheme } = useTheme();
   
   const buttonStyle = {
@@ -110,7 +109,6 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
     isDragging,
   } = useDraggable({
     id: `patology-${patology.id}`,
-    disabled: isAssigned,
     data: {
       type: 'patology',
       patology: patology,
@@ -121,38 +119,32 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
     zIndex: isDragging ? 1000 : 1,
-    opacity: isDragging ? .01 : isAssigned ? 0.6 : 1.0,
+    opacity: isDragging ? 0.01 : 1.0,
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      {...(isAssigned ? {} : attributes)}
-      {...(isAssigned ? {} : listeners)}
+      {...attributes}
+      {...listeners}
       className={clsx(
         'flex items-center gap-1 px-3 py-1 text-sm rounded-md touch-none select-none',
-        isAssigned ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
+        'cursor-grab active:cursor-grabbing',
         isDragging && 'shadow-lg',
         isFromCatalog ? 'bg-blue-100 text-blue-800 border border-blue-300' : 'bg-gray-100 text-gray-800 border border-gray-300'
       )}
     >
-      <GripVertical className={clsx("h-3 w-3", isAssigned ? "opacity-20" : "opacity-50")} />
-      <span className={clsx("truncate", isAssigned && "font-bold")}>{patology.nombre}</span>
+      <GripVertical className="h-3 w-3 opacity-50" />
+      <span className="truncate">{patology.nombre}</span>
       <button
         onClick={(e) => {
           e.stopPropagation();
-          if (!isAssigned) {
-            onRemove(patology);
-          }
+          onRemove(patology);
         }}
         style={buttonStyle.primary}
-        disabled={isAssigned}
         className={clsx(
-          "ml-1 p-0.5 rounded-full transition-colors",
-          isAssigned 
-            ? "opacity-30 cursor-not-allowed" 
-            : "hover:bg-black/10 cursor-pointer"
+          "ml-1 p-0.5 rounded-full transition-colors hover:bg-black/10 cursor-pointer"
         )}
       >
         <X className="h-3 w-3" />
@@ -208,7 +200,6 @@ export function HeredoFamHistory() {
   const [globalSelectedCatalogPatologies, setGlobalSelectedCatalogPatologies] = useState<AppPatology[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
 
   // Configurar sensores para drag and drop
   const sensors = useSensors(
@@ -255,18 +246,6 @@ export function HeredoFamHistory() {
   // Observar el estado completo de familyMembers para detectar cambios
   const watchedFamilyMembers = watch('familyMembers');
 
-  // Calcular qué patologías ya están asignadas a familiares
-  const assignedPatologyNames = useMemo(() => {
-    const assigned = new Set<string>();
-    watchedFamilyMembers?.forEach((familyMember: any) => {
-      if (familyMember.patologias) {
-        familyMember.patologias.forEach((patologia: HeredoFamilialPathology) => {
-          assigned.add(patologia.nombre_patologia);
-        });
-      }
-    });
-    return assigned;
-  }, [watchedFamilyMembers]);
 
   // --- 5. Lógica de Carga de Datos ---
   useEffect(() => {
@@ -424,6 +403,7 @@ export function HeredoFamHistory() {
           const payload = {
             ...(familyMember.id ? { id: familyMember.id } : {}),
             patient_id: selectedPatient.id,
+            idbu: selectedPatient.idbu,
             miembro_fam: familyMember.miembro_fam_key,
             estado_vital: familyMember.estado_vital || null,
             patologias: familyMember.patologias,
@@ -431,9 +411,12 @@ export function HeredoFamHistory() {
             edad: familyMember.edad || null,
           };
 
+          console.log('Saving family member data:', payload);
           await api.heredoFamilialHistory.createOrUpdate(payload);
         }
       }
+      
+      console.log('All family members saved successfully');
     } catch (err) {
       console.error('Error saving heredo familial history:', err);
       setError(err instanceof Error ? err.message : 'Error al guardar el historial heredo-familiar.');
@@ -568,7 +551,6 @@ export function HeredoFamHistory() {
                   patology={patology}
                   onRemove={handleGlobalCatalogRemove}
                   isFromCatalog={true}
-                  isAssigned={assignedPatologyNames.has(patology.nombre)}
                 />
               ))}
             </div>
