@@ -488,6 +488,51 @@ export function HeredoFamHistory() {
         onDragOver={handleDragOver}
       >        
 
+        {/* Sección de Patologías Disponibles */}
+        <div
+          className="rounded-lg shadow-lg p-6 mb-6"
+          style={{
+            background: currentTheme.colors.surface,
+            borderColor: currentTheme.colors.border,
+          }}
+        >
+          <h2 
+            className="text-lg font-medium mb-4 flex items-center gap-2"
+            style={{ 
+              color: currentTheme.colors.text,
+              fontFamily: currentTheme.typography.fonts.headings,
+            }}
+          >
+            Patologías Disponibles
+            <span 
+              className="px-2 py-1 text-sm rounded-full"
+              style={{ 
+                background: `${currentTheme.colors.primary}20`,
+                color: currentTheme.colors.primary,
+              }}
+            >
+              {globalSelectedCatalogDiagnoses.length}
+            </span>
+          </h2>
+          <p 
+            className="text-sm mb-4"
+            style={{ color: currentTheme.colors.textSecondary }}
+          >
+            Arrastre las patologías desde aquí hacia la fila del familiar correspondiente
+          </p>
+          
+          <div className="flex flex-wrap gap-2">
+            {globalSelectedCatalogDiagnoses.map((diagnosis) => (
+              <DraggablePathologyTag
+                key={diagnosis.Consecutivo}
+                diagnosis={diagnosis}
+                onRemove={handleGlobalCatalogRemove}
+                isFromCatalog={true}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Tabla de Familiares */}
         <div
           className="rounded-lg shadow-lg overflow-hidden"
@@ -676,8 +721,8 @@ export function HeredoFamHistory() {
       >
         <p className="font-medium mb-1">Instrucciones:</p>
         <ul className="space-y-1 text-xs">
-          <li>1. Las patologías activas están disponibles para usar en cada familiar</li>
-          <li>2. Agregue patologías directamente en cada fila del familiar</li>
+          <li>1. Arrastre las patologías desde la sección "Patologías Disponibles" hacia la fila del familiar correspondiente</li>
+          <li>2. Las patologías se añadirán automáticamente al familiar cuando las suelte en su fila</li>
           <li>3. Complete el estado vital, edad y observaciones para cada familiar según corresponda</li>
           <li>4. Haga clic en "Guardar" para guardar todos los cambios</li>
         </ul>
