@@ -658,7 +658,7 @@ export function HeredoFamHistory() {
                       </td>
 
                       {/* Observaciones */}
-                      <td className="px-4 py-1">
+                      <td className="px-2 py-1">
                         <textarea
                           {...register(`familyMembers.${index}.observaciones`)}
                           placeholder="Observaciones"
