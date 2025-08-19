@@ -610,7 +610,7 @@ export function HeredoFamHistory() {
                       </td>
 
                       {/* Patologías */}
-                      <td className="px-4 py-1">
+                      <td className="px-2 py-1">
                         <div
                           className={clsx(
                             'min-h-[60px] p-3 rounded-md border-2 border-dashed transition-colors',
