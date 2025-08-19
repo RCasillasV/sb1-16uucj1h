@@ -503,7 +503,7 @@ export function HeredoFamHistory() {
             </span>
           </h2>
           <p 
-            className="text-sm mb-2"
+            className="text-sm mb-0"
             style={{ color: currentTheme.colors.textSecondary }}
           >
             Arrastre las patologías desde aquí hacia la fila del familiar correspondiente
