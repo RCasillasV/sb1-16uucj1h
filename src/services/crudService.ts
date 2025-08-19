@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { handle, requireSession, requireBusinessUnit } from '../lib/apiHelpers';
 
-export function createService<Table extends string>(table: Table, userIdColumnName: string = 'user_id') {
+export function createService<Table extends string>(table: Table, userIdColumnName: string = 'user_id', includeIdbu: boolean = true) {
   return {
     getAll<R = any>(select: string, fallback: R[] = []) {
       return handle(supabase.from<Table>(table).select<R>(select), fallback);
@@ -16,11 +16,18 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
 
     async create<R = any>(data: object) {
       const user = await requireSession();
-      const idbu = await requireBusinessUnit(user.id);
+      
+      const insertData: any = { ...data, [userIdColumnName]: user.id };
+      
+      if (includeIdbu) {
+        const idbu = await requireBusinessUnit(user.id);
+        insertData.idbu = idbu;
+      }
+      
       return handle(
         supabase
           .from<Table>(table)
-          .insert({ ...data, [userIdColumnName]: user.id, idbu })
+          .insert(insertData)
           .select<R>()
           .single(),
         null
@@ -29,11 +36,18 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
 
     async update<R = any>(id: string, data: object) {
       const user = await requireSession();
-      const idbu = await requireBusinessUnit(user.id);
+      
+      const updateData: any = { ...data, [userIdColumnName]: user.id };
+      
+      if (includeIdbu) {
+        const idbu = await requireBusinessUnit(user.id);
+        updateData.idbu = idbu;
+      }
+      
       return handle(
         supabase
           .from<Table>(table)
-          .update({ ...data, [userIdColumnName]: user.id, idbu })
+          .update(updateData)
           .eq('id', id)
           .select<R>()
           .single(),

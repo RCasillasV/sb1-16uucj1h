@@ -733,7 +733,6 @@ export interface Database {
           updated_at: string // timestamp without time zone
           patient_id: string // uuid
           id_usuario: string // uuid
-          idbu: string // uuid
           miembro_fam: string | null // text
           estado_vital: string | null // text
           patologias: Json | null // json (JSONB)
@@ -745,7 +744,6 @@ export interface Database {
           updated_at?: string // timestamp without time zone
           patient_id: string // uuid
           id_usuario?: string // uuid, default auth.uid()
-          idbu: string // uuid
           miembro_fam?: string | null // text
           estado_vital?: string | null // text
           patologias?: Json | null // json (JSONB)
@@ -757,7 +755,6 @@ export interface Database {
           updated_at?: string // timestamp without time zone
           patient_id?: string // uuid
           id_usuario?: string // uuid
-          idbu?: string // uuid
           miembro_fam?: string | null // text
           estado_vital?: string | null // text
           patologias?: Json | null // json (JSONB)
