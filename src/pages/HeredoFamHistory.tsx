@@ -242,7 +242,6 @@ export function HeredoFamHistory() {
       // Convertir los datos de patologías al formato de Diagnosis
       const formattedPatologies: Diagnosis[] = data.map(patology => ({
         Consecutivo: patology.id,
-        Catalog_Key: patology.codcie10 || patology.nombre.substring(0, 6).toUpperCase(),
         Nombre: patology.nombre,
       }));
       
