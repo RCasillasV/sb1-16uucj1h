@@ -107,7 +107,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
       {...attributes}
       {...listeners}
       className={clsx(
-        'flex items-center gap-2 px-3 py-1 text-sm rounded-md cursor-grab active:cursor-grabbing touch-none select-none',
+        'flex items-center gap-1 px-3 py-1 text-sm rounded-md cursor-grab active:cursor-grabbing touch-none select-none',
         isDragging && 'shadow-lg',
         isFromCatalog ? 'bg-blue-100 text-blue-800 border border-blue-300' : 'bg-gray-100 text-gray-800 border border-gray-300'
       )}
