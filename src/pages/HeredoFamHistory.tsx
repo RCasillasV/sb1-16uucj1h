@@ -481,13 +481,14 @@ export function HeredoFamHistory() {
           {saving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
-
+/*
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
       >
+*/        
         {/* Sección de Catálogo Global */}
         <div
           className="rounded-lg shadow-lg p-6 mb-6"
