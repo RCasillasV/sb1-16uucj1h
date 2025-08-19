@@ -296,8 +296,14 @@ export function HeredoFamHistory() {
       const familyMembersData = FIXED_FAMILY_MEMBERS.map(fixedMember => {
         const existingRecord = records.find((record: any) => record.miembro_fam === fixedMember.key);
         
+        // Lógica corregida para 'id':
+        let memberId: string | undefined = undefined;
+        if (existingRecord?.id !== null && existingRecord?.id !== undefined) {
+          memberId = String(existingRecord.id);
+        }
+
         return {
-          id: existingRecord?.id,
+          id: memberId, // Usar el ID correctamente determinado
           miembro_fam_key: fixedMember.key,
           estado_vital: existingRecord?.estado_vital || '',
           edad: existingRecord?.edad || undefined,
