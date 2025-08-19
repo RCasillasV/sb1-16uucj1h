@@ -53,11 +53,10 @@ const familyMemberSchema = z.object({
   estado_vital: z.string().nullable().optional(),
   edad: z.preprocess(
     (val) => {
-      // Convertir string vacío, NaN, undefined, o null a null
-      if (val === '' || val === undefined || val === null || Number.isNaN(val)) {
+      // Convertir string vacío, null, undefined, o NaN a null
+      if (val === '' || val === null || val === undefined) {
         return null;
       }
-      // Convertir a número si es posible
       const num = Number(val);
       return Number.isNaN(num) ? null : num;
     },
