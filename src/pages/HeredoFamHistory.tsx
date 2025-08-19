@@ -204,10 +204,13 @@ export function HeredoFamHistory() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
   const [globalSelectedCatalogPatologies, setGlobalSelectedCatalogPatologies] = useState<AppPatology[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
 
   // Configurar sensores para drag and drop
   const sensors = useSensors(
@@ -427,6 +430,7 @@ export function HeredoFamHistory() {
             estado_vital: familyMember.estado_vital || null,
             patologias: familyMember.patologias,
             notas: familyMember.observaciones || null,
+            edad: familyMember.edad || null,
           };
 
           await api.heredoFamilialHistory.createOrUpdate(payload);
