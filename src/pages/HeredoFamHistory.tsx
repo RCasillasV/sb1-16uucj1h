@@ -100,7 +100,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
     zIndex: isDragging ? 1000 : 1,
-    opacity: isDragging ? .01 : isAssigned ? 0.4 : 1.0,
+    opacity: isDragging ? .01 : isAssigned ? 0.2 : 1.0,
   };
 
   return (
@@ -113,10 +113,14 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
         'flex items-center gap-1 px-3 py-1 text-sm rounded-md touch-none select-none',
         isAssigned ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
         isDragging && 'shadow-lg',
-        isFromCatalog ? 'bg-blue-100 text-blue-800 border border-blue-300' : 'bg-gray-100 text-gray-800 border border-gray-300'
+        isAssigned 
+          ? 'bg-gray-200 text-gray-400 border border-gray-200' 
+          : isFromCatalog 
+            ? 'bg-blue-100 text-blue-800 border border-blue-300' 
+            : 'bg-gray-100 text-gray-800 border border-gray-300'
       )}
     >
-      <GripVertical className={clsx('h-3 w-3', isAssigned ? 'opacity-20' : 'opacity-50')} />
+      <GripVertical className={clsx('h-3 w-3', isAssigned ? 'opacity-10' : 'opacity-50')} />
       <span className="truncate">{patology.nombre}</span>
       {isAssigned && (
         <span className="text-xs font-medium" style={{ color: currentTheme.colors.textSecondary }}>
@@ -130,7 +134,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
         }}
         className={clsx(
           'ml-1 p-0.5 rounded-full transition-colors',
-          isAssigned ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/10'
+          isAssigned ? 'opacity-10 cursor-not-allowed' : 'hover:bg-black/10'
         )}
         disabled={isAssigned}
       >
