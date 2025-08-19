@@ -510,241 +510,247 @@ export function HeredoFamHistory() {
             Antecedentes Heredo-Familiares
           </h1>
         </div>
-        <button
-          onClick={handleSubmit(onSubmit)}
-          disabled={saving}
-          className={buttonStyle.base}
-          style={buttonStyle.primary}
-        >
-          <Save className="h-4 w-4" />
-          {saving ? 'Guardando...' : 'Guardar'}
-        </button>
       </div>
-      <DndContext
+
+      <form id="heredo-fam-form" onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={saving}
+            className={buttonStyle.base}
+            style={buttonStyle.primary}
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? 'Guardando...' : 'Guardar'}
+          </button>
+        </div>
+
+        <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
-      >        
+        >        
 
-        {/* Sección de Patologías Disponibles */}
-        <div
-          className="rounded-lg shadow-lg px-4 pt-2 pb-2 mb-0"
-          style={{
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-          }}
-        >
-          <h2 
-            className="text-lg font-medium mb-1 flex items-center gap-1"
-            style={{ 
-              color: currentTheme.colors.text,
-              fontFamily: currentTheme.typography.fonts.headings,
+          {/* Sección de Patologías Disponibles */}
+          <div
+            className="rounded-lg shadow-lg px-4 pt-2 pb-2 mb-0"
+            style={{
+              background: currentTheme.colors.surface,
+              borderColor: currentTheme.colors.border,
             }}
           >
-            Patologías Disponibles
-            <span 
-              className="px-2 py-1 text-sm rounded-full"
+            <h2 
+              className="text-lg font-medium mb-1 flex items-center gap-1"
               style={{ 
-                background: `${currentTheme.colors.primary}20`,
-                color: currentTheme.colors.primary,
+                color: currentTheme.colors.text,
+                fontFamily: currentTheme.typography.fonts.headings,
               }}
             >
-              {globalSelectedCatalogPatologies.length}
-            </span>
-          </h2>
-          <p 
-            className="text-sm mb-1"
-            style={{ color: currentTheme.colors.textSecondary }}
-          >
-            Arrastre las patologías desde aquí hacia la fila del familiar correspondiente
-          </p>
-          
-          <div className="flex flex-wrap gap-1.5">
-            {globalSelectedCatalogPatologies.map((patology) => (
-              <DraggablePathologyTag
-                key={patology.id}
-                patology={patology}
-                onRemove={handleGlobalCatalogRemove}
-                isFromCatalog={true}
-                isAssigned={assignedPatologyNames.has(patology.nombre)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Tabla de Familiares */}
-        <div
-          className="rounded-lg shadow-lg overflow-hidden"
-          style={{
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-          }}
-        >
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr
-                  style={{
-                    background: currentTheme.colors.background,
-                    borderColor: currentTheme.colors.border,
-                  }}
-                >
-                  <th className="px-4 py-1 pt-1 pb-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-                    Parentesco
-                  </th>
-                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-                    Estado Vital
-                  </th>
-                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-                    Edad
-                  </th>
-                  <th className="px-2 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-                    Patologías
-                  </th>
-                  <th className="px-2 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-                    Observaciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-                {fields.map((field, index) => {
-                  const familyMember = FIXED_FAMILY_MEMBERS.find(m => m.key === field.miembro_fam_key);
-                  const isDropTarget = overId === `family-${field.miembro_fam_key}`;
-                  
-                  return (
-                    <DroppableFamilyRow
-                      key={field.id}
-                      familyMemberKey={field.miembro_fam_key}
-                      isOver={isDropTarget}
-                    >
-                      {/* Parentesco */}
-                      <td className="px-4 py-1">
-                        <span
-                          className="font-medium"
-                          style={{ color: currentTheme.colors.text }}
-                        >
-                          {familyMember?.label}
-                        </span>
-                      </td>
-
-                      {/* Estado Vital */}
-                      <td className="px-4 py-1">
-                        <select
-                          {...register(`familyMembers.${index}.estado_vital`)}
-                          className="w-full p-2 text-sm rounded-md border"
-                          style={{
-                            background: currentTheme.colors.surface,
-                            borderColor: currentTheme.colors.border,
-                            color: currentTheme.colors.text,
-                          }}
-                        >
-                          <option value="">Seleccione</option>
-                          <option value="Vivo">Vivo</option>
-                          <option value="Fallecido">Fallecido</option>
-                          <option value="Desconocido">Desconocido</option>
-                        </select>
-                      </td>
-
-                      {/* Edad */}
-                      <td className="px-4 py-1">
-                        <input
-                          type="number"
-                          {...register(`familyMembers.${index}.edad`, { valueAsNumber: true })}
-                          placeholder="Edad"
-                          className="w-16 p-2 text-sm rounded-md border"
-                          style={{
-                            background: currentTheme.colors.surface,
-                            borderColor: currentTheme.colors.border,
-                            color: currentTheme.colors.text,
-                          }}
-                        />
-                      </td>
-
-                      {/* Patologías */}
-                      <td className="px-2 py-1">
-                        <div
-                          className={clsx(
-                            'min-h-[30px] p-3 rounded-md border-2 border-dashed transition-colors',
-                            isDropTarget ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
-                          )}
-                          style={{
-                            background: isDropTarget 
-                              ? `${currentTheme.colors.primary}20` 
-                              : currentTheme.colors.background,
-                            borderColor: isDropTarget 
-                              ? currentTheme.colors.primary 
-                              : currentTheme.colors.border,
-                          }}
-                        >
-                          {watch(`familyMembers.${index}.patologias`)?.length === 0 ? (
-                            <p
-                              className="text-xs text-center italic"
-                              style={{ color: currentTheme.colors.textSecondary }}
-                            >
-                              {isDropTarget 
-                                ? 'Suelte aquí la patología' 
-                                : 'Arrastre patologías aquí'
-                              }
-                            </p>
-                          ) : (
-                            <div className="flex flex-wrap gap-1">
-                              {watch(`familyMembers.${index}.patologias`)?.map((pathology: HeredoFamilialPathology, pathIndex: number) => (
-                                <div
-                                  key={pathIndex}
-                                  className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-800 border"
-                                >
-                                  <span className="truncate max-w-[120px] font-bold">{pathology.nombre_patologia}</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => removePathologyFromFamilyMember(index, pathIndex)}
-                                    className="p-0.5 rounded-full hover:bg-red-100 transition-colors"
-                                  >
-                                    <X className="h-4 w-4 text-red-500" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Observaciones */}
-                      <td className="px-2 py-1">
-                        <textarea
-                          {...register(`familyMembers.${index}.observaciones`)}
-                          placeholder="Observaciones"
-                          rows={1}
-                          className="w-full p-2 text-sm rounded-md border"
-                          style={{
-                            background: currentTheme.colors.surface,
-                            borderColor: currentTheme.colors.border,
-                            color: currentTheme.colors.text,
-                          }}
-                        />
-                      </td>
-                    </DroppableFamilyRow>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Drag Overlay */}
-        <DragOverlay>
-          {activeDragId ? (
-            <div
-              className="flex items-center gap-2 px-3 py-1 text-sm rounded-md bg-blue-100 text-blue-800 border border-blue-300 shadow-lg"
-            >
-              <GripVertical className="h-3 w-3 opacity-50" />
-              <span className="font-medium">
-                {globalSelectedCatalogPatologies.find(p => `patology-${p.id}` === activeDragId)?.nombre}
+              Patologías Disponibles
+              <span 
+                className="px-2 py-1 text-sm rounded-full"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                }}
+              >
+                {globalSelectedCatalogPatologies.length}
               </span>
+            </h2>
+            <p 
+              className="text-sm mb-1"
+              style={{ color: currentTheme.colors.textSecondary }}
+            >
+              Arrastre las patologías desde aquí hacia la fila del familiar correspondiente
+            </p>
+            
+            <div className="flex flex-wrap gap-1.5">
+              {globalSelectedCatalogPatologies.map((patology) => (
+                <DraggablePathologyTag
+                  key={patology.id}
+                  patology={patology}
+                  onRemove={handleGlobalCatalogRemove}
+                  isFromCatalog={true}
+                  isAssigned={assignedPatologyNames.has(patology.nombre)}
+                />
+              ))}
             </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+          </div>
+
+          {/* Tabla de Familiares */}
+          <div
+            className="rounded-lg shadow-lg overflow-hidden"
+            style={{
+              background: currentTheme.colors.surface,
+              borderColor: currentTheme.colors.border,
+            }}
+          >
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr
+                    style={{
+                      background: currentTheme.colors.background,
+                      borderColor: currentTheme.colors.border,
+                    }}
+                  >
+                    <th className="px-4 py-1 pt-1 pb-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                      Parentesco
+                    </th>
+                    <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                      Estado Vital
+                    </th>
+                    <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                      Edad
+                    </th>
+                    <th className="px-2 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                      Patologías
+                    </th>
+                    <th className="px-2 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                      Observaciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
+                  {fields.map((field, index) => {
+                    const familyMember = FIXED_FAMILY_MEMBERS.find(m => m.key === field.miembro_fam_key);
+                    const isDropTarget = overId === `family-${field.miembro_fam_key}`;
+                    
+                    return (
+                      <DroppableFamilyRow
+                        key={field.id}
+                        familyMemberKey={field.miembro_fam_key}
+                        isOver={isDropTarget}
+                      >
+                        {/* Parentesco */}
+                        <td className="px-4 py-1">
+                          <span
+                            className="font-medium"
+                            style={{ color: currentTheme.colors.text }}
+                          >
+                            {familyMember?.label}
+                          </span>
+                        </td>
+
+                        {/* Estado Vital */}
+                        <td className="px-4 py-1">
+                          <select
+                            {...register(`familyMembers.${index}.estado_vital`)}
+                            className="w-full p-2 text-sm rounded-md border"
+                            style={{
+                              background: currentTheme.colors.surface,
+                              borderColor: currentTheme.colors.border,
+                              color: currentTheme.colors.text,
+                            }}
+                          >
+                            <option value="">Seleccione</option>
+                            <option value="Vivo">Vivo</option>
+                            <option value="Fallecido">Fallecido</option>
+                            <option value="Desconocido">Desconocido</option>
+                          </select>
+                        </td>
+
+                        {/* Edad */}
+                        <td className="px-4 py-1">
+                          <input
+                            type="number"
+                            {...register(`familyMembers.${index}.edad`, { valueAsNumber: true })}
+                            placeholder="Edad"
+                            className="w-16 p-2 text-sm rounded-md border"
+                            style={{
+                              background: currentTheme.colors.surface,
+                              borderColor: currentTheme.colors.border,
+                              color: currentTheme.colors.text,
+                            }}
+                          />
+                        </td>
+
+                        {/* Patologías */}
+                        <td className="px-2 py-1">
+                          <div
+                            className={clsx(
+                              'min-h-[30px] p-3 rounded-md border-2 border-dashed transition-colors',
+                              isDropTarget ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
+                            )}
+                            style={{
+                              background: isDropTarget 
+                                ? `${currentTheme.colors.primary}20` 
+                                : currentTheme.colors.background,
+                              borderColor: isDropTarget 
+                                ? currentTheme.colors.primary 
+                                : currentTheme.colors.border,
+                            }}
+                          >
+                            {watch(`familyMembers.${index}.patologias`)?.length === 0 ? (
+                              <p
+                                className="text-xs text-center italic"
+                                style={{ color: currentTheme.colors.textSecondary }}
+                              >
+                                {isDropTarget 
+                                  ? 'Suelte aquí la patología' 
+                                  : 'Arrastre patologías aquí'
+                                }
+                              </p>
+                            ) : (
+                              <div className="flex flex-wrap gap-1">
+                                {watch(`familyMembers.${index}.patologias`)?.map((pathology: HeredoFamilialPathology, pathIndex: number) => (
+                                  <div
+                                    key={pathIndex}
+                                    className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-800 border"
+                                  >
+                                    <span className="truncate max-w-[120px] font-bold">{pathology.nombre_patologia}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => removePathologyFromFamilyMember(index, pathIndex)}
+                                      className="p-0.5 rounded-full hover:bg-red-100 transition-colors"
+                                    >
+                                      <X className="h-4 w-4 text-red-500" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Observaciones */}
+                        <td className="px-2 py-1">
+                          <textarea
+                            {...register(`familyMembers.${index}.observaciones`)}
+                            placeholder="Observaciones"
+                            rows={1}
+                            className="w-full p-2 text-sm rounded-md border"
+                            style={{
+                              background: currentTheme.colors.surface,
+                              borderColor: currentTheme.colors.border,
+                              color: currentTheme.colors.text,
+                            }}
+                          />
+                        </td>
+                      </DroppableFamilyRow>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Drag Overlay */}
+          <DragOverlay>
+            {activeDragId ? (
+              <div
+                className="flex items-center gap-2 px-3 py-1 text-sm rounded-md bg-blue-100 text-blue-800 border border-blue-300 shadow-lg"
+              >
+                <GripVertical className="h-3 w-3 opacity-50" />
+                <span className="font-medium">
+                  {globalSelectedCatalogPatologies.find(p => `patology-${p.id}` === activeDragId)?.nombre}
+                </span>
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </form>
 
       {/* Instrucciones para el usuario */}
       <div
