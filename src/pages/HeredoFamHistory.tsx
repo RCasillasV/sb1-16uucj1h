@@ -12,7 +12,6 @@ import { Modal } from '../components/Modal';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
-import { useMemo } from 'react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
@@ -75,10 +74,9 @@ interface DraggablePathologyTagProps {
   patology: AppPatology;
   onRemove: (patology: AppPatology) => void;
   isFromCatalog?: boolean;
-  isAssigned?: boolean;
 }
 
-function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAssigned = false }: DraggablePathologyTagProps) {
+function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: DraggablePathologyTagProps) {
   const { currentTheme } = useTheme();
   const {
     attributes,
@@ -89,7 +87,6 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
     isDragging,
   } = useDraggable({
     id: `patology-${patology.id}`,
-    disabled: isAssigned, // Deshabilitar arrastre si ya está asignada
     data: {
       type: 'patology',
       patology: patology,
@@ -99,39 +96,30 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
-    zIndex: isDragging ? 10 : 1,
-    opacity: isDragging ? .5 : isAssigned ? 0.5 : 1.,
+    zIndex: isDragging ? 1000 : 1,
+    opacity: isDragging ? .01 : 1.0,
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      {...(isAssigned ? {} : attributes)}
-      {...(isAssigned ? {} : listeners)}
+      {...attributes}
+      {...listeners}
       className={clsx(
-        'flex items-center gap-1 px-3 py-1 text-sm rounded-md touch-none select-none',
-        isAssigned ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
+        'flex items-center gap-1 px-3 py-1 text-sm rounded-md cursor-grab active:cursor-grabbing touch-none select-none',
         isDragging && 'shadow-lg',
-        isAssigned 
-          ? 'bg-blue-100 text-blue-800 border border-blue-300' 
-          : isFromCatalog 
-            ? 'bg-gray-200 text-gray-400 border border-gray-200' 
-            : 'bg-gray-100 text-gray-800 border border-gray-300'
+        isFromCatalog ? 'bg-blue-100 text-blue-800 border border-blue-300' : 'bg-gray-100 text-gray-800 border border-gray-300'
       )}
     >
-      <GripVertical className={clsx('h-3 w-3', isAssigned ? 'opacity-50' : 'opacity-10')} />
+      <GripVertical className="h-3 w-3 opacity-50" />
       <span className="truncate">{patology.nombre}</span>
       <button
         onClick={(e) => {
           e.stopPropagation();
           onRemove(patology);
         }}
-        className={clsx(
-          'ml-1 p-0.5 rounded-full transition-colors',
-          isFromCatalog ? 'opacity-10 cursor-not-allowed' : 'hover:bg-black/10'
-        )}
-        disabled={isFromCatalog}
+        className="ml-1 p-0.5 rounded-full hover:bg-black/10 transition-colors"
       >
         <X className="h-3 w-3" />
       </button>
@@ -228,28 +216,6 @@ export function HeredoFamHistory() {
     control,
     name: 'familyMembers',
   });
-
-  // Calcular patologías ya asignadas para oscurecer en el catálogo
-  const assignedPathologies = useMemo(() => {
-    const allAssignedPathologies = new Set<string>();
-    
-    // Obtener todos los miembros de la familia del formulario
-    const familyMembers = watch('familyMembers') || [];
-    
-    // Iterar sobre cada miembro de la familia
-    familyMembers.forEach((member: any) => {
-      // Iterar sobre las patologías de cada miembro
-      if (member.patologias && Array.isArray(member.patologias)) {
-        member.patologias.forEach((pathology: HeredoFamilialPathology) => {
-          if (pathology.nombre_patologia) {
-            allAssignedPathologies.add(pathology.nombre_patologia);
-          }
-        });
-      }
-    });
-    
-    return allAssignedPathologies;
-  }, [watch('familyMembers')]);
 
   // --- 5. Lógica de Carga de Datos ---
   useEffect(() => {
@@ -550,7 +516,6 @@ export function HeredoFamHistory() {
                 patology={patology}
                 onRemove={handleGlobalCatalogRemove}
                 isFromCatalog={true}
-                isAssigned={assignedPathologies.has(patology.nombre)}
               />
             ))}
           </div>
