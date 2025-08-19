@@ -359,6 +359,10 @@ export function HeredoFamHistory() {
             ...currentPatologias,
             newPathology,
           ]);
+          
+          console.log(`Added pathology "${patology.nombre}" to family member "${familyMemberKey}"`);
+        } else {
+          console.log(`Pathology "${patology.nombre}" already exists for family member "${familyMemberKey}"`);
         }
       }
     }
