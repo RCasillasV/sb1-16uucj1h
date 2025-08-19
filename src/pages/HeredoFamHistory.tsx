@@ -485,7 +485,7 @@ export function HeredoFamHistory() {
           }}
         >
           <h2 
-            className="text-lg font-medium mb-4 flex items-center gap-1"
+            className="text-lg font-medium mb-2 flex items-center gap-1"
             style={{ 
               color: currentTheme.colors.text,
               fontFamily: currentTheme.typography.fonts.headings,
