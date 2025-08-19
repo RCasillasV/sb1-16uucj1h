@@ -482,18 +482,6 @@ export function HeredoFamHistory() {
         </button>
       </div>
 
-      {error && (
-        <div
-          className="p-4 rounded-md border-l-4"
-          style={{
-            background: '#FEE2E2',
-            borderLeftColor: '#DC2626',
-            color: '#DC2626',
-          }}
-        >
-        </div>
-      )}
-
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
