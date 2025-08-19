@@ -178,18 +178,6 @@ export function HeredoFamHistory() {
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
-  // Calcular qué patologías ya están asignadas a familiares
-  const assignedPatologyNames = useMemo(() => {
-    const assigned = new Set<string>();
-    fields.forEach(field => {
-      const patologias = watch(`familyMembers.${fields.indexOf(field)}.patologias`) || [];
-      patologias.forEach((patologia: HeredoFamilialPathology) => {
-        assigned.add(patologia.nombre_patologia);
-      });
-    });
-    return assigned;
-  }, [fields, watch]);
-
   // Configurar sensores para drag and drop
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -231,6 +219,18 @@ export function HeredoFamHistory() {
     control,
     name: 'familyMembers',
   });
+
+  // Calcular qué patologías ya están asignadas a familiares
+  const assignedPatologyNames = useMemo(() => {
+    const assigned = new Set<string>();
+    fields.forEach(field => {
+      const patologias = watch(`familyMembers.${fields.indexOf(field)}.patologias`) || [];
+      patologias.forEach((patologia: HeredoFamilialPathology) => {
+        assigned.add(patologia.nombre_patologia);
+      });
+    });
+    return assigned;
+  }, [fields, watch]);
 
   // --- 5. Lógica de Carga de Datos ---
   useEffect(() => {
