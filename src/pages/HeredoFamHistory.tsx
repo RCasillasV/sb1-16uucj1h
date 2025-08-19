@@ -478,7 +478,7 @@ export function HeredoFamHistory() {
           style={buttonStyle.primary}
         >
           <Save className="h-4 w-4" />
-          {saving ? 'Guardando...' : 'Guardar Antecedentes'}
+          {saving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
 
