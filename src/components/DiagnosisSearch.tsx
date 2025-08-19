@@ -61,8 +61,6 @@ function SortableDiagnosisTag({ diagnosis, onRemove }: SortableDiagnosisTagProps
         isDragging && 'shadow-lg'
       )}
     >
-      <span className="font-medium">{diagnosis.Catalog_Key}</span>
-      <span className="mx-1">-</span>
       <span>{diagnosis.Nombre}</span>
       <button
         onClick={(e) => {
