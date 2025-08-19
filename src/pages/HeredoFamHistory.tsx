@@ -129,9 +129,9 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
         }}
         className={clsx(
           'ml-1 p-0.5 rounded-full transition-colors',
-          isAssigned ? 'hover:bg-black/10' : 'opacity-10 cursor-not-allowed'
+          isFromCatalog ? 'opacity-10 cursor-not-allowed' : 'hover:bg-black/10'
         )}
-        disabled={!isAssigned}
+        disabled={isFromCatalog}
       >
         <X className="h-3 w-3" />
       </button>
