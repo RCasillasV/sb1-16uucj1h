@@ -547,10 +547,10 @@ export function HeredoFamHistory() {
                   <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Edad
                   </th>
-                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-2 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Patologías
                   </th>
-                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-2 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Observaciones
                   </th>
                 </tr>
