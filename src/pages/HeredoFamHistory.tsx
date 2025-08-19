@@ -521,12 +521,7 @@ export function HeredoFamHistory() {
             <FileText className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
             Catálogo de Patologías
           </h2>
-          <p
-            className="text-sm mb-4"
-            style={{ color: currentTheme.colors.textSecondary }}
-          >
-            Busque y seleccione patologías del catálogo, luego arrástrelas al familiar correspondiente en la tabla.
-          </p>
+ 
           
           <DiagnosisSearch
             selectedDiagnoses={globalSelectedCatalogDiagnoses}
@@ -543,6 +538,12 @@ export function HeredoFamHistory() {
               >
                 Patologías seleccionadas (arrastre a la fila del familiar):
               </h3>
+              <p
+            className="text-sm mb-4"
+            style={{ color: currentTheme.colors.textSecondary }}
+          >
+            Busque y seleccione patologías del catálogo, luego arrástrelas al familiar correspondiente en la tabla.
+          </p>
               <div className="flex flex-wrap gap-2">
                 {globalSelectedCatalogDiagnoses.map((diagnosis) => (
                   <DraggablePathologyTag
