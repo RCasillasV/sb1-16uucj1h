@@ -600,7 +600,7 @@ export function HeredoFamHistory() {
                           type="number"
                           {...register(`familyMembers.${index}.edad`, { valueAsNumber: true })}
                           placeholder="Edad"
-                          className="w-16 p-2 text-sm rounded-md border"
+                          className="w-18 p-2 text-sm rounded-md border"
                           style={{
                             background: currentTheme.colors.surface,
                             borderColor: currentTheme.colors.border,
