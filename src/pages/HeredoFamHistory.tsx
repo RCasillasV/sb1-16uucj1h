@@ -316,7 +316,7 @@ export function HeredoFamHistory() {
         return {
           id: existingRecord?.id,
           miembro_fam_key: fixedMember.key,
-          idbu: user.idbu,
+          idbu: selectedPatient.idbu,
           estado_vital: existingRecord?.estado_vital || '',
           edad: existingRecord?.edad || undefined,
           patologias: (existingRecord?.patologias || []) as HeredoFamilialPathology[],
