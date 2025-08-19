@@ -24,8 +24,6 @@ interface AppPatology {
 
 interface HeredoFamilialPathology {
   nombre_patologia: string;
-  edad_inicio_familiar?: number;
-  notas_especificas_familiar?: string;
 }
 
 interface FamilyMember {
@@ -67,8 +65,6 @@ const familyMemberSchema = z.object({
   ),
   patologias: z.array(z.object({
     nombre_patologia: z.string(),
-    edad_inicio_familiar: z.number().nullable().optional(),
-    notas_especificas_familiar: z.string().nullable().optional(),
   })).default([]),
   observaciones: z.string().nullable().optional(),
 });
@@ -369,8 +365,6 @@ export function HeredoFamHistory() {
         if (!alreadyExists) {
           const newPathology: HeredoFamilialPathology = {
             nombre_patologia: patology.nombre,
-            edad_inicio_familiar: undefined,
-            notas_especificas_familiar: '',
           };
 
           setValue(`familyMembers.${familyMemberIndex}.patologias`, [
