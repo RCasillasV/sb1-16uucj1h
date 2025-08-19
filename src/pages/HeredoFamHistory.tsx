@@ -513,16 +513,7 @@ export function HeredoFamHistory() {
             background: currentTheme.colors.surface,
             borderColor: currentTheme.colors.border,
           }}
-        >
-          <h2
-            className="text-lg font-medium mb-4 flex items-center gap-2"
-            style={{ color: currentTheme.colors.text }}
-          >
-            <FileText className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-            Catálogo de Patologías
-          </h2>
- 
-          
+        >       
           <DiagnosisSearch
             selectedDiagnoses={globalSelectedCatalogDiagnoses}
             onSelect={handleGlobalCatalogSelect}
