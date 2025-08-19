@@ -538,7 +538,7 @@ export function HeredoFamHistory() {
                     borderColor: currentTheme.colors.border,
                   }}
                 >
-                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-4 py-1 pt-1 pb-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Parentesco
                   </th>
                   <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
