@@ -513,13 +513,14 @@ export function HeredoFamHistory() {
             background: currentTheme.colors.surface,
             borderColor: currentTheme.colors.border,
           }}
+          /*
         >       
           <DiagnosisSearch
             selectedDiagnoses={globalSelectedCatalogDiagnoses}
             onSelect={handleGlobalCatalogSelect}
             onRemove={handleGlobalCatalogRemove}
           />
-
+       */
           {/* Lista de Patologías Seleccionadas Globalmente (Arrastrables) */}
           {globalSelectedCatalogDiagnoses.length > 0 && (
             <div className="mt-4">
