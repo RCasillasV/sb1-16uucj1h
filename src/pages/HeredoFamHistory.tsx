@@ -417,16 +417,12 @@ export function HeredoFamHistory() {
           const payload = {
             id: familyMember.id,
             patient_id: selectedPatient.id,
-            id_usuario: user.id,
-            idbu: user.idbu,
             miembro_fam: familyMember.miembro_fam_key,
             estado_vital: familyMember.estado_vital || null,
             patologias: familyMember.patologias,
             notas: familyMember.observaciones || null,
           };
 
-          // Aquí deberías llamar a tu API para crear/actualizar cada familiar
-          // La implementación exacta dependerá de tu estructura de API
           await api.heredoFamilialHistory.createOrUpdate(payload);
         }
       }

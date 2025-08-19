@@ -3,7 +3,7 @@ import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 
 const cache = new Cache<any[]>(5 * 60 * 1000, 'heredo_familial_'); // Cache por 5 minutos
-const svc = createService<'tpFcHeredoFamiliar'>('tpFcHeredoFamiliar');
+const svc = createService<'tpFcHeredoFamiliar'>('tpFcHeredoFamiliar', 'id_usuario');
 
 export const heredoFamilialHistory = {
   async getAllByPatientId(patientId: string) {

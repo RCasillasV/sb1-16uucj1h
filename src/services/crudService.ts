@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { handle, requireSession, requireBusinessUnit } from '../lib/apiHelpers';
 
-export function createService<Table extends string>(table: Table) {
+export function createService<Table extends string>(table: Table, userIdColumnName: string = 'user_id') {
   return {
     getAll<R = any>(select: string, fallback: R[] = []) {
       return handle(supabase.from<Table>(table).select<R>(select), fallback);
@@ -20,7 +20,7 @@ export function createService<Table extends string>(table: Table) {
       return handle(
         supabase
           .from<Table>(table)
-          .insert({ ...data, user_id: user.id, idbu })
+          .insert({ ...data, [userIdColumnName]: user.id, idbu })
           .select<R>()
           .single(),
         null
@@ -33,7 +33,7 @@ export function createService<Table extends string>(table: Table) {
       return handle(
         supabase
           .from<Table>(table)
-          .update({ ...data, user_id: user.id, idbu })
+          .update({ ...data, [userIdColumnName]: user.id, idbu })
           .eq('id', id)
           .select<R>()
           .single(),

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { handle } from '../lib/apiHelpers';
 
 const cache = new Cache<any[]>(30 * 60 * 1000, 'patologies_');
-const svc = createService<'tcPatologias'>('tcPatologias');
+const svc = createService<'tcPatologias'>('tcPatologias', 'idusuario');
 
 export const patologies = {
   async getAll() {
