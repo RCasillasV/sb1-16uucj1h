@@ -487,49 +487,6 @@ export function HeredoFamHistory() {
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
       >        
-        {/* Sección de Catálogo Global */}
-        <div
-          className="rounded-lg shadow-lg p-6 mb-6"
-          style={{
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-          }}
-        
-         >       
-          <DiagnosisSearch
-            selectedDiagnoses={globalSelectedCatalogDiagnoses}
-            onSelect={handleGlobalCatalogSelect}
-            onRemove={handleGlobalCatalogRemove}
-         />
-       
-          {/* Lista de Patologías Seleccionadas Globalmente (Arrastrables) */}
-          {globalSelectedCatalogDiagnoses.length > 0 && (
-            <div className="mt-4">
-              <h3
-                className="text-sm font-medium mb-2"
-                style={{ color: currentTheme.colors.text }}
-              >
-                Patologías seleccionadas (arrastre a la fila del familiar):
-              </h3>
-              <p
-            className="text-sm mb-4"
-            style={{ color: currentTheme.colors.textSecondary }}
-          >
-            Busque y seleccione patologías del catálogo, luego arrástrelas al familiar correspondiente en la tabla.
-          </p>
-              <div className="flex flex-wrap gap-2">
-                {globalSelectedCatalogDiagnoses.map((diagnosis) => (
-                  <DraggablePathologyTag
-                    key={diagnosis.Consecutivo}
-                    diagnosis={diagnosis}
-                    onRemove={handleGlobalCatalogRemove}
-                    isFromCatalog={true}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Tabla de Familiares */}
         <div
@@ -719,10 +676,10 @@ export function HeredoFamHistory() {
       >
         <p className="font-medium mb-1">Instrucciones:</p>
         <ul className="space-y-1 text-xs">
-          <li>1. Busque y seleccione patologías en el catálogo de arriba</li>
-          <li>2. Arrastre las patologías desde el catálogo hacia la fila del familiar correspondiente</li>
+          <li>1. Las patologías activas están disponibles para usar en cada familiar</li>
+          <li>2. Agregue patologías directamente en cada fila del familiar</li>
           <li>3. Complete el estado vital, edad y observaciones para cada familiar según corresponda</li>
-          <li>4. Haga clic en "Guardar Antecedentes" para guardar todos los cambios</li>
+          <li>4. Haga clic en "Guardar" para guardar todos los cambios</li>
         </ul>
       </div>
     </div>
