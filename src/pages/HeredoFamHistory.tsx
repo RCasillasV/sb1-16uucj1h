@@ -478,7 +478,7 @@ export function HeredoFamHistory() {
 
         {/* Sección de Patologías Disponibles */}
         <div
-          className="rounded-lg shadow-lg px-6 pt-2 pb-2 mb-2"
+          className="rounded-lg shadow-lg px-6 pt-2 pb-2 mb-0"
           style={{
             background: currentTheme.colors.surface,
             borderColor: currentTheme.colors.border,
