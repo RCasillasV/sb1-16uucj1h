@@ -509,7 +509,7 @@ export function HeredoFamHistory() {
             Arrastre las patologías desde aquí hacia la fila del familiar correspondiente
           </p>
           
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-2">
             {globalSelectedCatalogPatologies.map((patology) => (
               <DraggablePathologyTag
                 key={patology.id}
