@@ -538,19 +538,19 @@ export function HeredoFamHistory() {
                     borderColor: currentTheme.colors.border,
                   }}
                 >
-                  <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Parentesco
                   </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Estado Vital
                   </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Edad
                   </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Patologías
                   </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
+                  <th className="px-4 py-1 text-left text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
                     Observaciones
                   </th>
                 </tr>
@@ -567,7 +567,7 @@ export function HeredoFamHistory() {
                       isOver={isDropTarget}
                     >
                       {/* Parentesco */}
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-1">
                         <span
                           className="font-medium"
                           style={{ color: currentTheme.colors.text }}
@@ -577,7 +577,7 @@ export function HeredoFamHistory() {
                       </td>
 
                       {/* Estado Vital */}
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-1">
                         <select
                           {...register(`familyMembers.${index}.estado_vital`)}
                           className="w-full p-2 text-sm rounded-md border"
@@ -595,7 +595,7 @@ export function HeredoFamHistory() {
                       </td>
 
                       {/* Edad */}
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-1">
                         <input
                           type="number"
                           {...register(`familyMembers.${index}.edad`, { valueAsNumber: true })}
@@ -610,7 +610,7 @@ export function HeredoFamHistory() {
                       </td>
 
                       {/* Patologías */}
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-1">
                         <div
                           className={clsx(
                             'min-h-[60px] p-3 rounded-md border-2 border-dashed transition-colors',
@@ -658,7 +658,7 @@ export function HeredoFamHistory() {
                       </td>
 
                       {/* Observaciones */}
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-1">
                         <textarea
                           {...register(`familyMembers.${index}.observaciones`)}
                           placeholder="Observaciones"
