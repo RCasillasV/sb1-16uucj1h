@@ -416,8 +416,8 @@ export function HeredoFamHistory() {
 
   // --- 9. Lógica de Envío del Formulario ---
   const onSubmit = async (data: HeredoFamilialFormData) => {
+    console.log('Attempting to save HeredoFamilialHistory. Data:', data);
     if (!selectedPatient || !user) return;
-
     setSaving(true);
     setError(null);
 
