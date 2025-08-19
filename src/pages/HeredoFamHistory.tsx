@@ -204,8 +204,6 @@ export function HeredoFamHistory() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
   const [globalSelectedCatalogPatologies, setGlobalSelectedCatalogPatologies] = useState<AppPatology[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
