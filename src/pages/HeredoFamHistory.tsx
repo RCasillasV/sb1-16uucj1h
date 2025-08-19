@@ -648,7 +648,7 @@ export function HeredoFamHistory() {
                                     onClick={() => removePathologyFromFamilyMember(index, pathIndex)}
                                     className="p-0.5 rounded-full hover:bg-red-100 transition-colors"
                                   >
-                                    <X className="h-3 w-3 text-red-500" />
+                                    <X className="h-1 w-3 text-red-500" />
                                   </button>
                                 </div>
                               ))}
