@@ -491,12 +491,6 @@ export function HeredoFamHistory() {
             color: '#DC2626',
           }}
         >
-          <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 flex-shrink-0" />
-            <div className="ml-3">
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          </div>
         </div>
       )}
 
