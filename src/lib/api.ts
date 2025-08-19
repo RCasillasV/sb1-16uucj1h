@@ -6,6 +6,7 @@ import { patologies } from '../services/patologyService';
 import { supabase } from './supabase';
 import { Cache } from './cache';
 import { requireSession, requireBusinessUnit } from './apiHelpers';
+import { DEFAULT_BU } from '../utils/constants';
 
 // Cache instances
 const cache = new Cache<any>(5 * 60 * 1000, 'api_');
@@ -66,15 +67,50 @@ const users = {
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user attributes:', error);
         console.log('api.users.getCurrentUserAttributes: Returning null due to error');
-        return null;
+        return {
+          nombre: null,
+          email: null,
+          telefono: null,
+          rol: null,
+          estado: null,
+          idbu: DEFAULT_BU,
+          deleted_at: null
+        };
       }
 
+      // If data exists, ensure idbu is never null
+      if (data) {
+        const result = {
+          ...data,
+          idbu: data.idbu || DEFAULT_BU
+        };
+        console.log('api.users.getCurrentUserAttributes: Returning data with fallback idbu:', result);
+        return result;
+      }
+
+      // If no data found, return default structure with DEFAULT_BU
       console.log('api.users.getCurrentUserAttributes: Returning data:', data);
-      return data;
+      return {
+        nombre: null,
+        email: null,
+        telefono: null,
+        rol: null,
+        estado: null,
+        idbu: DEFAULT_BU,
+        deleted_at: null
+      };
     } catch (error) {
       console.error('Error in getCurrentUserAttributes:', error);
       console.log('api.users.getCurrentUserAttributes: Exception caught, returning null');
-      return null;
+      return {
+        nombre: null,
+        email: null,
+        telefono: null,
+        rol: null,
+        estado: null,
+        idbu: DEFAULT_BU,
+        deleted_at: null
+      };
     }
   }
 };
