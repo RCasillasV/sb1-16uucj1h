@@ -9,7 +9,6 @@ import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
-import { DiagnosisSearch } from '../components/DiagnosisSearch';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { useDroppable } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
@@ -18,16 +17,13 @@ import { useNavigate } from 'react-router-dom';
 
 // --- 1. Definición de Tipos y Esquemas ---
 
-interface Diagnosis {
-  Consecutivo: string;
-  Catalog_Key: string;
-  Nombre: string;
+interface AppPatology {
+  id: string;
+  nombre: string;
 }
 
 interface HeredoFamilialPathology {
-  id_patologia?: number;
   nombre_patologia: string;
-  codigo_cie10?: string;
   edad_inicio_familiar?: number;
   notas_especificas_familiar?: string;
 }
@@ -59,9 +55,7 @@ const familyMemberSchema = z.object({
   estado_vital: z.string(),
   edad: z.number().nullable().optional(),
   patologias: z.array(z.object({
-    id_patologia: z.number().optional(),
     nombre_patologia: z.string(),
-    codigo_cie10: z.string().optional(),
     edad_inicio_familiar: z.number().nullable().optional(),
     notas_especificas_familiar: z.string().nullable().optional(),
   })).default([]),
@@ -77,12 +71,12 @@ type HeredoFamilialFormData = z.infer<typeof heredoFamilialFormDataSchema>;
 
 // --- 2. Componente para Patología Arrastrable ---
 interface DraggablePathologyTagProps {
-  diagnosis: Diagnosis;
-  onRemove: (diagnosis: Diagnosis) => void;
+  patology: AppPatology;
+  onRemove: (patology: AppPatology) => void;
   isFromCatalog?: boolean;
 }
 
-function DraggablePathologyTag({ diagnosis, onRemove, isFromCatalog = false }: DraggablePathologyTagProps) {
+function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: DraggablePathologyTagProps) {
   const { currentTheme } = useTheme();
   const {
     attributes,
@@ -92,10 +86,10 @@ function DraggablePathologyTag({ diagnosis, onRemove, isFromCatalog = false }: D
     transition,
     isDragging,
   } = useDraggable({
-    id: `diagnosis-${diagnosis.Consecutivo}`,
+    id: `patology-${patology.id}`,
     data: {
-      type: 'diagnosis',
-      diagnosis: diagnosis,
+      type: 'patology',
+      patology: patology,
     },
   });
 
@@ -119,11 +113,11 @@ function DraggablePathologyTag({ diagnosis, onRemove, isFromCatalog = false }: D
       )}
     >
       <GripVertical className="h-3 w-3 opacity-50" />
-      <span className="truncate">{diagnosis.Nombre}</span>
+      <span className="truncate">{patology.nombre}</span>
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onRemove(diagnosis);
+          onRemove(patology);
         }}
         className="ml-1 p-0.5 rounded-full hover:bg-black/10 transition-colors"
       >
@@ -177,7 +171,7 @@ export function HeredoFamHistory() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
-  const [globalSelectedCatalogDiagnoses, setGlobalSelectedCatalogDiagnoses] = useState<Diagnosis[]>([]);
+  const [globalSelectedCatalogPatologies, setGlobalSelectedCatalogPatologies] = useState<AppPatology[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
@@ -239,13 +233,13 @@ export function HeredoFamHistory() {
     try {
       const data = await api.patologies.getAllActive();
       
-      // Convertir los datos de patologías al formato de Diagnosis
-      const formattedPatologies: Diagnosis[] = data.map(patology => ({
-        Consecutivo: patology.id,
-        Nombre: patology.nombre,
+      // Convertir los datos de patologías al formato de AppPatology
+      const formattedPatologies: AppPatology[] = data.map(patology => ({
+        id: patology.id,
+        nombre: patology.nombre,
       }));
       
-      setGlobalSelectedCatalogDiagnoses(formattedPatologies);
+      setGlobalSelectedCatalogPatologies(formattedPatologies);
     } catch (err) {
       console.error('Error loading all active pathologies:', err);
     }
@@ -298,10 +292,10 @@ export function HeredoFamHistory() {
 
     // Verificar si se arrastró una patología del catálogo a un familiar
     if (
-      active.data.current?.type === 'diagnosis' &&
+      active.data.current?.type === 'patology' &&
       over.data.current?.type === 'family-member'
     ) {
-      const diagnosis = active.data.current.diagnosis as Diagnosis;
+      const patology = active.data.current.patology as AppPatology;
       const familyMemberKey = over.data.current.familyMemberKey as string;
       
       // Encontrar el índice del familiar en el array del formulario
@@ -314,15 +308,12 @@ export function HeredoFamHistory() {
         
         // Verificar si la patología ya existe para evitar duplicados
         const alreadyExists = currentPatologias.some(
-          (p: HeredoFamilialPathology) => p.codigo_cie10 === diagnosis.Catalog_Key
+          (p: HeredoFamilialPathology) => p.nombre_patologia === patology.nombre
         );
 
         if (!alreadyExists) {
           const newPathology: HeredoFamilialPathology = {
-            id_patologia: diagnosis.Consecutivo,
-            nombre_patologia: diagnosis.Nombre,
-            codigo_cie10: diagnosis.Catalog_Key,
-            codigo_cie10: diagnosis.Catalog_Key,
+            nombre_patologia: patology.nombre,
             edad_inicio_familiar: undefined,
             notas_especificas_familiar: '',
           };
@@ -341,23 +332,23 @@ export function HeredoFamHistory() {
   };
 
   // --- 7. Manejo del Catálogo Global ---
-  const handleGlobalCatalogSelect = (diagnosisOrArray: Diagnosis | Diagnosis[]) => {
-    if (Array.isArray(diagnosisOrArray)) {
-      setGlobalSelectedCatalogDiagnoses(diagnosisOrArray);
+  const handleGlobalCatalogSelect = (patologyOrArray: AppPatology | AppPatology[]) => {
+    if (Array.isArray(patologyOrArray)) {
+      setGlobalSelectedCatalogPatologies(patologyOrArray);
     } else {
-      const isAlreadySelected = globalSelectedCatalogDiagnoses.some(
-        d => d.Consecutivo === diagnosisOrArray.Consecutivo
+      const isAlreadySelected = globalSelectedCatalogPatologies.some(
+        p => p.id === patologyOrArray.id
       );
       
       if (!isAlreadySelected) {
-        setGlobalSelectedCatalogDiagnoses(prev => [...prev, diagnosisOrArray]);
+        setGlobalSelectedCatalogPatologies(prev => [...prev, patologyOrArray]);
       }
     }
   };
 
-  const handleGlobalCatalogRemove = (diagnosis: Diagnosis) => {
-    setGlobalSelectedCatalogDiagnoses(prev =>
-      prev.filter(d => d.Consecutivo !== diagnosis.Consecutivo)
+  const handleGlobalCatalogRemove = (patology: AppPatology) => {
+    setGlobalSelectedCatalogPatologies(prev =>
+      prev.filter(p => p.id !== patology.id)
     );
   };
 
@@ -508,7 +499,7 @@ export function HeredoFamHistory() {
                 color: currentTheme.colors.primary,
               }}
             >
-              {globalSelectedCatalogDiagnoses.length}
+              {globalSelectedCatalogPatologies.length}
             </span>
           </h2>
           <p 
@@ -519,10 +510,10 @@ export function HeredoFamHistory() {
           </p>
           
           <div className="flex flex-wrap gap-2">
-            {globalSelectedCatalogDiagnoses.map((diagnosis) => (
+            {globalSelectedCatalogPatologies.map((patology) => (
               <DraggablePathologyTag
-                key={diagnosis.Consecutivo}
-                diagnosis={diagnosis}
+                key={patology.id}
+                patology={patology}
                 onRemove={handleGlobalCatalogRemove}
                 isFromCatalog={true}
               />
@@ -651,7 +642,6 @@ export function HeredoFamHistory() {
                                   key={pathIndex}
                                   className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-800 border"
                                 >
-                                  <span className="font-medium">{pathology.codigo_cie10}</span>
                                   <span className="truncate max-w-[120px]">{pathology.nombre_patologia}</span>
                                   <button
                                     type="button"
@@ -697,11 +687,7 @@ export function HeredoFamHistory() {
             >
               <GripVertical className="h-3 w-3 opacity-50" />
               <span className="font-medium">
-                {globalSelectedCatalogDiagnoses.find(d => `diagnosis-${d.Consecutivo}` === activeDragId)?.Catalog_Key}
-              </span>
-              <span>-</span>
-              <span className="truncate">
-                {globalSelectedCatalogDiagnoses.find(d => `diagnosis-${d.Consecutivo}` === activeDragId)?.Nombre}
+                {globalSelectedCatalogPatologies.find(p => `patology-${p.id}` === activeDragId)?.nombre}
               </span>
             </div>
           ) : null}
