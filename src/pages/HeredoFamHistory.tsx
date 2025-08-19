@@ -613,7 +613,7 @@ export function HeredoFamHistory() {
                       <td className="px-2 py-1">
                         <div
                           className={clsx(
-                            'min-h-[60px] p-3 rounded-md border-2 border-dashed transition-colors',
+                            'min-h-[30px] p-3 rounded-md border-2 border-dashed transition-colors',
                             isDropTarget ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
                           )}
                           style={{
