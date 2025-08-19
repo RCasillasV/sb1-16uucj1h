@@ -79,6 +79,21 @@ interface DraggablePathologyTagProps {
 
 function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAssigned = false }: DraggablePathologyTagProps) {
   const { currentTheme } = useTheme();
+  
+  const buttonStyle = {
+    base: clsx(
+      'px-4 py-2 transition-colors',
+      currentTheme.buttons.style === 'pill' && 'rounded-full',
+      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
+      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
+      currentTheme.buttons.animation && 'hover:scale-105'
+    ),
+    primary: {
+      background: currentTheme.colors.buttonPrimary,
+      color: currentTheme.colors.buttonText,
+    },
+  };
+  
   const {
     attributes,
     listeners,
