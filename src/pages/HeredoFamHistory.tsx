@@ -120,9 +120,18 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onRemove(patology);
+          if (!isAssigned) {
+            onRemove(patology);
+          }
         }}
-        className="ml-1 p-0.5 rounded-full hover:bg-black/10 transition-colors"
+        style={buttonStyle.primary}
+        disabled={isAssigned}
+        className={clsx(
+          "ml-1 p-0.5 rounded-full transition-colors",
+          isAssigned 
+            ? "opacity-30 cursor-not-allowed" 
+            : "hover:bg-black/10 cursor-pointer"
+        )}
       >
         <X className="h-3 w-3" />
       </button>
@@ -481,17 +490,9 @@ export function HeredoFamHistory() {
         <button
           onClick={handleSubmit(onSubmit)}
           disabled={saving}
-            if (!isAssigned) {
-              onRemove(patology);
-            }
+          className={buttonStyle.base}
           style={buttonStyle.primary}
-          disabled={isAssigned}
-          className={clsx(
-            "ml-1 p-0.5 rounded-full transition-colors",
-            isAssigned 
-              ? "opacity-30 cursor-not-allowed" 
-              : "hover:bg-black/10 cursor-pointer"
-          )}
+        >
           <Save className="h-4 w-4" />
           {saving ? 'Guardando...' : 'Guardar'}
         </button>
