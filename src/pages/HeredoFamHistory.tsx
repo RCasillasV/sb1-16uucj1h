@@ -119,7 +119,6 @@ function DraggablePathologyTag({ diagnosis, onRemove, isFromCatalog = false }: D
       )}
     >
       <GripVertical className="h-3 w-3 opacity-50" />
-      <span className="font-medium">{diagnosis.Catalog_Key}</span>
       <span className="truncate">{diagnosis.Nombre}</span>
       <button
         onClick={(e) => {
