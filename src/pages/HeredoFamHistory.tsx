@@ -100,7 +100,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
     zIndex: isDragging ? 1000 : 1,
-    opacity: isDragging ? .01 : isAssigned ? 1.0 : 0.1,
+    opacity: isDragging ? .5 : isAssigned ? 0.5 : 1.,
   };
 
   return (
