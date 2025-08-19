@@ -462,7 +462,7 @@ export function HeredoFamHistory() {
         <button
           onClick={handleSubmit(onSubmit)}
           disabled={saving}
-          className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
+          className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-1')}
           style={buttonStyle.primary}
         >
           <Save className="h-4 w-4" />
@@ -485,7 +485,7 @@ export function HeredoFamHistory() {
           }}
         >
           <h2 
-            className="text-lg font-medium mb-4 flex items-center gap-2"
+            className="text-lg font-medium mb-4 flex items-center gap-1"
             style={{ 
               color: currentTheme.colors.text,
               fontFamily: currentTheme.typography.fonts.headings,
