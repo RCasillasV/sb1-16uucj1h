@@ -90,7 +90,7 @@ export function Settings() {
     },
     {
       icon: Stethoscope,
-      title: 'Catálogo de Patologías',
+      title: 'Catálogo de Patologías disponibles',
       description: 'Gestiona las patologías disponibles por especialidad y género.',
       onClick: () => navigate('/settings/patologias')
     },
