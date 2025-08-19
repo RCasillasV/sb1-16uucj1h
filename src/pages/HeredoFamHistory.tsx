@@ -415,7 +415,7 @@ export function HeredoFamHistory() {
         // Solo guardar si hay datos relevantes (estado vital o patologías)
         if (familyMember.estado_vital || familyMember.patologias.length > 0) {
           const payload = {
-            id: familyMember.id,
+            ...(familyMember.id ? { id: familyMember.id } : {}),
             patient_id: selectedPatient.id,
             miembro_fam: familyMember.miembro_fam_key,
             estado_vital: familyMember.estado_vital || null,
