@@ -100,7 +100,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
     zIndex: isDragging ? 1000 : 1,
-    opacity: isDragging ? .01 : isAssigned ? 0.2 : 1.0,
+    opacity: isDragging ? .01 : isAssigned ? 1.0 : 0.4,
   };
 
   return (
@@ -114,19 +114,14 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
         isAssigned ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
         isDragging && 'shadow-lg',
         isAssigned 
-          ? 'bg-gray-200 text-gray-400 border border-gray-200' 
+          ? 'bg-blue-100 text-blue-800 border border-blue-300' 
           : isFromCatalog 
-            ? 'bg-blue-100 text-blue-800 border border-blue-300' 
+            ? 'bg-gray-200 text-gray-400 border border-gray-200' 
             : 'bg-gray-100 text-gray-800 border border-gray-300'
       )}
     >
-      <GripVertical className={clsx('h-3 w-3', isAssigned ? 'opacity-10' : 'opacity-50')} />
+      <GripVertical className={clsx('h-3 w-3', isAssigned ? 'opacity-50' : 'opacity-10')} />
       <span className="truncate">{patology.nombre}</span>
-      {isAssigned && (
-        <span className="text-xs font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-          (Asignada)
-        </span>
-      )}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -134,9 +129,9 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false, isAs
         }}
         className={clsx(
           'ml-1 p-0.5 rounded-full transition-colors',
-          isAssigned ? 'opacity-10 cursor-not-allowed' : 'hover:bg-black/10'
+          isAssigned ? 'hover:bg-black/10' : 'opacity-10 cursor-not-allowed'
         )}
-        disabled={isAssigned}
+        disabled={!isAssigned}
       >
         <X className="h-3 w-3" />
       </button>
