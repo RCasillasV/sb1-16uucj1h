@@ -642,13 +642,13 @@ export function HeredoFamHistory() {
                                   key={pathIndex}
                                   className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-800 border"
                                 >
-                                  <span className="truncate max-w-[120px]">{pathology.nombre_patologia}</span>
+                                  <span className="truncate max-w-[120px] font-bold">{pathology.nombre_patologia}</span>
                                   <button
                                     type="button"
                                     onClick={() => removePathologyFromFamilyMember(index, pathIndex)}
                                     className="p-0.5 rounded-full hover:bg-red-100 transition-colors"
                                   >
-                                    <X className="h-1 w-3 text-red-500" />
+                                    <X className="h-4 w-4 text-red-500" />
                                   </button>
                                 </div>
                               ))}
