@@ -220,17 +220,21 @@ export function HeredoFamHistory() {
     name: 'familyMembers',
   });
 
+  // Observar el estado completo de familyMembers para detectar cambios
+  const watchedFamilyMembers = watch('familyMembers');
+
   // Calcular qué patologías ya están asignadas a familiares
   const assignedPatologyNames = useMemo(() => {
     const assigned = new Set<string>();
-    fields.forEach(field => {
-      const patologias = watch(`familyMembers.${fields.indexOf(field)}.patologias`) || [];
-      patologias.forEach((patologia: HeredoFamilialPathology) => {
-        assigned.add(patologia.nombre_patologia);
-      });
+    watchedFamilyMembers?.forEach((familyMember: any) => {
+      if (familyMember.patologias) {
+        familyMember.patologias.forEach((patologia: HeredoFamilialPathology) => {
+          assigned.add(patologia.nombre_patologia);
+        });
+      }
     });
     return assigned;
-  }, [fields, watch]);
+  }, [watchedFamilyMembers]);
 
   // --- 5. Lógica de Carga de Datos ---
   useEffect(() => {
