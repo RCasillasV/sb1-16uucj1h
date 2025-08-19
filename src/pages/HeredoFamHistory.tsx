@@ -53,7 +53,18 @@ const familyMemberSchema = z.object({
   id: z.bigint().optional(),
   miembro_fam_key: z.string(),
   estado_vital: z.string(),
-  edad: z.number().nullable().optional(),
+  edad: z.preprocess(
+    (val) => {
+      // Convertir string vacío, NaN, undefined, o null a null
+      if (val === '' || val === undefined || val === null || Number.isNaN(val)) {
+        return null;
+      }
+      // Convertir a número si es posible
+      const num = Number(val);
+      return Number.isNaN(num) ? null : num;
+    },
+    z.number().nullable().optional()
+  ),
   patologias: z.array(z.object({
     nombre_patologia: z.string(),
     edad_inicio_familiar: z.number().nullable().optional(),
