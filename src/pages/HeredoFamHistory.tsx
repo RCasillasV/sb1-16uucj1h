@@ -662,7 +662,7 @@ export function HeredoFamHistory() {
                         <textarea
                           {...register(`familyMembers.${index}.observaciones`)}
                           placeholder="Observaciones"
-                          rows={2}
+                          rows={1}
                           className="w-full p-2 text-sm rounded-md border"
                           style={{
                             background: currentTheme.colors.surface,
