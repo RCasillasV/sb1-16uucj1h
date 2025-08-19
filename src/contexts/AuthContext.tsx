@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { DEFAULT_BU } from '../utils/constants';
 import type { User, AuthError } from '@supabase/supabase-js';
 
 type UserWithAttributes = User & {
@@ -55,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthProvider: User info retrieved successfully:', data);
       return {
         userRole: data.rol,
-        idbu: data.idbu,
+        idbu: data.idbu || DEFAULT_BU,
         nombre: data.nombre,
         estado: data.estado
       };
@@ -63,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthProvider: Error getting user info, using defaults:', error);
       return {
         userRole: 'Medico',
-        idbu: '00000000-0000-0000-0000-000000000000',
+        idbu: DEFAULT_BU,
         nombre: 'Usuario',
         estado: 'Activo'
       };
@@ -145,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser({ 
               ...session.user, 
               userRole: 'Medico',
-              idbu: '00000000-0000-0000-0000-000000000000',
+              idbu: DEFAULT_BU,
               nombre: 'Usuario',
               estado: 'Activo'
             });
