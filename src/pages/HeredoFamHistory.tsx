@@ -50,7 +50,7 @@ const FIXED_FAMILY_MEMBERS = [
 const familyMemberSchema = z.object({
   id: z.string().optional(),
   miembro_fam_key: z.string(),
-  estado_vital: z.string(),
+  estado_vital: z.string().nullable().optional(),
   edad: z.preprocess(
     (val) => {
       // Convertir string vacío, NaN, undefined, o null a null
@@ -223,7 +223,7 @@ export function HeredoFamHistory() {
     reset,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<HeredoFamilialFormData>({
     resolver: zodResolver(heredoFamilialFormDataSchema),
     defaultValues: {
@@ -246,6 +246,14 @@ export function HeredoFamHistory() {
   // Observar el estado completo de familyMembers para detectar cambios
   const watchedFamilyMembers = watch('familyMembers');
 
+  // Debug form state
+  useEffect(() => {
+    console.log("=== HeredoFamHistory Form Debug ===");
+    console.log("Form errors:", errors);
+    console.log("Form is valid:", isValid);
+    console.log("Watched family members:", watchedFamilyMembers);
+    console.log("===================================");
+  }, [errors, isValid, watchedFamilyMembers]);
 
   // --- 5. Lógica de Carga de Datos ---
   useEffect(() => {
@@ -390,7 +398,12 @@ export function HeredoFamHistory() {
 
   // --- 9. Lógica de Envío del Formulario ---
   const onSubmit = async (data: HeredoFamilialFormData) => {
+    console.log("=== onSubmit function called ===");
     console.log('Attempting to save HeredoFamilialHistory. Data:', data);
+    console.log("Selected patient:", selectedPatient);
+    console.log("User:", user);
+    console.log("================================");
+    
     if (!selectedPatient || !user) return;
     setSaving(true);
     setError(null);
