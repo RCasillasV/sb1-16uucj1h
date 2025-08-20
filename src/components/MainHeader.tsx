@@ -63,7 +63,7 @@ export function MainHeader({
     if (showClinicalHistorySubmenu && clinicalHistoryButtonRef.current) {
       const calculatePosition = () => {
         const buttonRect = clinicalHistoryButtonRef.current!.getBoundingClientRect();
-        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollX = window.scrollX + 36 || window.pageXOffset;
         const scrollY = window.scrollY || window.pageYOffset;
         
         // Position below the button, centered horizontally
