@@ -10,7 +10,7 @@ import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
 import type { Database } from '../../types/database.types';
-
+ 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 type NonPathologicalHistoryRecord = Database['public']['Tables']['tpPacienteHistNoPatol']['Row'];
 
