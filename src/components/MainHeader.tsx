@@ -210,31 +210,41 @@ export function MainHeader({
                 border: `1px solid ${currentTheme.colors.border}`,
               }}
             >
-              <button
+                  <div>
+                    <div className="font-medium">Antecedentes Patológicos</div>
+                    <div className="text-xs opacity-75">Enfermedades y cirugías previas</div>
+                  </div>
                 onClick={handleDeselectPatient}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors"
                 style={{ color: currentTheme.colors.text }}
               >
-                Deseleccionar
+                  className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
               </button>
               
               <button
                 onClick={handleEditPatient}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors"
+                  <div>
+                    <div className="font-medium">Antecedentes no Patológicos</div>
+                    <div className="text-xs opacity-75">Hábitos y estilo de vida</div>
+                  </div>
                 style={{ color: currentTheme.colors.text }}
               >
                 Editar
               </button>
               
-              <button
+                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
                 onClick={handleShowReport}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
                 style={{ color: currentTheme.colors.text }}
               >
-                <Printer className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Antecedentes Gineco-Obstétricos</div>
+                      <div className="text-xs opacity-75">Historia ginecológica y obstétrica</div>
+                    </div>
                 Ficha de datos
               </button>
             </div>
+            </>
           )}
         </div>
       </div>
@@ -264,7 +274,12 @@ export function MainHeader({
         >
           <button
             onClick={() => setShowClinicalHistorySubmenu(!showClinicalHistorySubmenu)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
+            className={clsx(
+              "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
+              showClinicalHistorySubmenu 
+                ? "bg-black/10" 
+                : "hover:bg-black/5"
+            )}
             style={{ position: 'relative' }}
           >
             <FileText className="h-4 w-4" />
@@ -288,6 +303,21 @@ export function MainHeader({
           </button>
           
           {showClinicalHistorySubmenu && (
+            <>
+              {/* Caret/Arrow pointing up */}
+              <div 
+                className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30"
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: '8px solid transparent',
+                  borderRight: '8px solid transparent',
+                  borderBottom: `8px solid ${currentTheme.colors.surface}`,
+                  filter: 'drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.1))'
+                }}
+              />
+              
+              {/* Popover container */}
             <div 
               className="absolute top-full left-0 mt-1 py-1 w-80 rounded-md shadow-lg z-20 border"
               style={{ 
@@ -320,25 +350,45 @@ export function MainHeader({
                 className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-black/5 transition-colors"
                 style={{ color: currentTheme.colors.text }}
                 onClick={() => setShowClinicalHistorySubmenu(false)}
-              >
+                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 py-2 w-96 rounded-lg shadow-xl z-20 border-2 backdrop-blur-sm"
                 <Activity className="h-4 w-4" />
                 Antecedentes no Patológicos
-              </Link>
+                  borderColor: currentTheme.colors.primary,
+                  boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px ${currentTheme.colors.primary}20`,
               
               {selectedPatient?.Sexo?.toLowerCase() === 'femenino' && (
+                {/* Header del popover */}
+                <div 
+                  className="px-4 py-2 border-b text-center"
+                  style={{ 
+                    borderColor: currentTheme.colors.border,
+                    background: `${currentTheme.colors.primary}08`
+                  }}
+                >
+                  <h4 
+                    className="text-sm font-semibold"
+                    style={{ color: currentTheme.colors.primary }}
+                  >
+                    Ficha Clínica Completa
+                  </h4>
+                </div>
+                
                 <Link
                   to="/gyneco-obstetric-history"
-                  className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-black/5 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
                   <Heart className="h-4 w-4" />
-                  Antecedentes Gineco-Obstétricos
+                  <div>
+                    <div className="font-medium">Antecedentes Heredo-Familiares</div>
+                    <div className="text-xs opacity-75">Historia familiar de enfermedades</div>
+                  </div>
                 </Link>
               )}
             </div>
           )}
-        </div>
+                  className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
         <Link
           to="/clinical-evolution"
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
