@@ -89,6 +89,7 @@ export function MainHeader({
     } else {
       setPopoverPosition(null);
     }
+  }, [showClinicalHistorySubmenu]);
 
   const handleShowReport = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -204,7 +205,7 @@ export function MainHeader({
                   />
                 </>
               )}
-              { (
+              {(
                 <> 
                   <Separator />
                   <InfoItem 
@@ -294,11 +295,10 @@ export function MainHeader({
         style={{ borderColor: currentTheme.colors.border }}
       >
         <div 
-          className="relative z-10"
+          className="relative"
           onMouseLeave={() => setShowClinicalHistorySubmenu(false)}
         >
           <button
-            ref={clinicalHistoryButtonRef}
             onClick={() => setShowClinicalHistorySubmenu(!showClinicalHistorySubmenu)}
             className={clsx(
               "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
@@ -330,14 +330,10 @@ export function MainHeader({
           
           {showClinicalHistorySubmenu && (
             <>
-              {/* Caret/Arrow pointing up - Fixed positioned */}
+              {/* Caret/Arrow pointing up */}
               <div 
-                className="fixed z-50"
+                className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30"
                 style={{
-                  top: clinicalHistoryPopoverPosition ? clinicalHistoryPopoverPosition.top - 4 : 0,
-                  left: clinicalHistoryPopoverPosition && clinicalHistoryButtonRef.current 
-                    ? clinicalHistoryPopoverPosition.left + 192 - 8 // Center on popover (192 is half of 384px width)
-                    : 0,
                   width: 0,
                   height: 0,
                   borderLeft: '8px solid transparent',
@@ -349,14 +345,11 @@ export function MainHeader({
               
               {/* Popover container */}
               <div 
-                className="fixed py-2 w-96 rounded-lg shadow-xl z-50 border-2 backdrop-blur-sm"
+                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 py-2 w-96 rounded-lg shadow-xl z-20 border-2 backdrop-blur-sm"
                 style={{ 
                   background: currentTheme.colors.surface,
                   borderColor: currentTheme.colors.primary,
                   boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px ${currentTheme.colors.primary}20`,
-                  top: clinicalHistoryPopoverPosition?.top || 0,
-                  left: clinicalHistoryPopoverPosition?.left || 0,
-                  visibility: clinicalHistoryPopoverPosition ? 'visible' : 'hidden',
                 }}
               >
                 {/* Header del popover */}
@@ -566,4 +559,3 @@ export function MainHeader({
     </div>
   );
 }
-  }, [showClinicalHistorySubmenu]);
