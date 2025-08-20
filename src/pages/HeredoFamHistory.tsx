@@ -139,7 +139,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onRemove(patology);
+          /*onRemove(patology);*/
         }}
         style={buttonStyle.primary}
         className={clsx(
@@ -557,7 +557,7 @@ export function HeredoFamHistory() {
                 <DraggablePathologyTag
                   key={patology.id}
                   patology={patology}
-                  /*onRemove={handleGlobalCatalogRemove}*/
+                  onRemove={handleGlobalCatalogRemove}
                   isFromCatalog={true}
                 />
               ))}
