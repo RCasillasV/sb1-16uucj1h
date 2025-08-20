@@ -61,7 +61,7 @@ export function MainHeader({
   // Calculate popover position when it should be shown
   useEffect(() => {
     if (showClinicalHistorySubmenu && clinicalHistoryButtonRef.current) {
-      const calculatePosition = () => {
+      const calculatePosition = () => { 
         const buttonRect = clinicalHistoryButtonRef.current!.getBoundingClientRect();
         const scrollX = window.scrollX || window.pageXOffset;
         const scrollY = window.scrollY || window.pageYOffset;
@@ -101,7 +101,7 @@ export function MainHeader({
       
       // Check if click is outside both the button and the popover
       if (
-      const left = buttonRect.left + scrollX + 12; // 12px para alinear con el padding-left del icono
+        clinicalHistoryButtonRef.current && 
         !clinicalHistoryButtonRef.current.contains(target) &&
         clinicalHistoryPopoverRef.current &&
         !clinicalHistoryPopoverRef.current.contains(target)
