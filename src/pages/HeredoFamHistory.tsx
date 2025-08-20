@@ -14,6 +14,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core'; 
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
+import { HeredoFamilialReport } from '../components/Informes/HeredoFamilialReport';
 
 // --- 1. Definición de Tipos y Esquemas ---
 
@@ -34,6 +35,8 @@ interface FamilyMember {
   patologias: HeredoFamilialPathology[];
   observaciones?: string;
 }
+// Estado para controlar la visibilidad del modal del informe
+const [showReportModal, setShowReportModal] = useState(false);
 
 // Familiares predefinidos basados en tu captura de pantalla
 const FIXED_FAMILY_MEMBERS = [
