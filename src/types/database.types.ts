@@ -690,7 +690,7 @@ export interface Database {
           notas_generales?: string | null
         }
       }
-      tpPacienteHistNoPatologica: {
+      tpPacienteHistNoPatol: {
         Row: {
           id: string
           created_at: string
