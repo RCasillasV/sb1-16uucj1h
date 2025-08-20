@@ -431,7 +431,7 @@ export function HeredoFamHistory() {
             edad: familyMember.edad || null,
           };
 
-          console.log('Saving family member data:', payload);
+          console.log('Saving family member data:', payload); 
           await api.heredoFamilialHistory.createOrUpdate(payload);
         }
       }
