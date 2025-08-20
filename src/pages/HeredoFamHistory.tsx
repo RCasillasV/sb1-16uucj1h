@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Contact as Family, User, FileText, Plus, Save, AlertCircle, Trash2, X, GripVertical, Printer } from 'lucide-react';
+import { Contact, User, FileText, Plus, Save, AlertCircle, Trash2, X, GripVertical, Printer } from 'lucide-react';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent, useDroppable} from '@dnd-kit/core';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
@@ -501,7 +501,7 @@ export function HeredoFamHistory() {
       {/* Encabezado */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Family className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+          <Contact className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
           <h1
             className="text-2xl font-bold"
             style={{ color: currentTheme.colors.text }}
