@@ -205,7 +205,7 @@ export function MainHeader({
                   />
                 </>
               )}
-              {(
+              { (
                 <> 
                   <Separator />
                   <InfoItem 
@@ -295,10 +295,11 @@ export function MainHeader({
         style={{ borderColor: currentTheme.colors.border }}
       >
         <div 
-          className="relative"
+          className="relative z-10"
           onMouseLeave={() => setShowClinicalHistorySubmenu(false)}
         >
           <button
+            ref={clinicalHistoryButtonRef}
             onClick={() => setShowClinicalHistorySubmenu(!showClinicalHistorySubmenu)}
             className={clsx(
               "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
@@ -330,10 +331,14 @@ export function MainHeader({
           
           {showClinicalHistorySubmenu && (
             <>
-              {/* Caret/Arrow pointing up */}
+              {/* Caret/Arrow pointing up - Fixed positioned */}
               <div 
-                className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30"
+                className="fixed z-50"
                 style={{
+                  top: popoverPosition ? popoverPosition.top - 4 : 0,
+                  left: popoverPosition && clinicalHistoryButtonRef.current 
+                    ? popoverPosition.left + 192 - 8 // Center on popover (192 is half of 384px width)
+                    : 0,
                   width: 0,
                   height: 0,
                   borderLeft: '8px solid transparent',
@@ -345,11 +350,14 @@ export function MainHeader({
               
               {/* Popover container */}
               <div 
-                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 py-2 w-96 rounded-lg shadow-xl z-20 border-2 backdrop-blur-sm"
+                className="fixed py-2 w-96 rounded-lg shadow-xl z-50 border-2 backdrop-blur-sm"
                 style={{ 
                   background: currentTheme.colors.surface,
                   borderColor: currentTheme.colors.primary,
                   boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px ${currentTheme.colors.primary}20`,
+                  top: popoverPosition?.top || 0,
+                  left: popoverPosition?.left || 0,
+                  visibility: popoverPosition ? 'visible' : 'hidden',
                 }}
               >
                 {/* Header del popover */}
