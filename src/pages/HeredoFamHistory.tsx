@@ -557,7 +557,7 @@ export function HeredoFamHistory() {
                 <DraggablePathologyTag
                   key={patology.id}
                   patology={patology}
-                  onRemove={handleGlobalCatalogRemove}
+                  /*onRemove={handleGlobalCatalogRemove}*/
                   isFromCatalog={true}
                 />
               ))}
