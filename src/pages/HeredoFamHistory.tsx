@@ -23,7 +23,7 @@ interface AppPatology {
 }
 
 interface HeredoFamilialPathology {
-  nombre_patologia: string;
+  nPatologia: string;
 }
 
 interface FamilyMember {
@@ -63,7 +63,7 @@ const familyMemberSchema = z.object({
     z.number().nullable().optional()
   ),
   patologias: z.array(z.object({
-    nombre_patologia: z.string(),
+    nPatologia: z.string(),
   })).default([]),
   observaciones: z.string().nullable().optional(),
 });
@@ -351,12 +351,12 @@ export function HeredoFamHistory() {
         
         // Verificar si la patología ya existe para evitar duplicados
         const alreadyExists = currentPatologias.some(
-          (p: HeredoFamilialPathology) => p.nombre_patologia === patology.nombre
+          (p: HeredoFamilialPathology) => p.nPatologia === patology.nombre
         );
 
         if (!alreadyExists) {
           const newPathology: HeredoFamilialPathology = {
-            nombre_patologia: patology.nombre,
+            nPatologia: patology.nombre,
           };
 
           setValue(`familyMembers.${familyMemberIndex}.patologias`, [
@@ -697,7 +697,7 @@ export function HeredoFamHistory() {
                                     key={pathIndex}
                                     className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-gray-100 text-gray-800 border"
                                   >
-                                    <span className="truncate max-w-[120px] font-bold">{pathology.nombre_patologia}</span>
+                                    <span className="truncate max-w-[120px] font-bold">{pathology.nPatologia}</span>
                                     <button
                                       type="button"
                                       onClick={() => removePathologyFromFamilyMember(index, pathIndex)}
