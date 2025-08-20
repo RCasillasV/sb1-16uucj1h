@@ -13,7 +13,7 @@ import type { Database } from '../types/database.types';
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 
-const HORIZONTAL_OFFSET = 44; // Pixels to shift the popover to the right
+const HORIZONTAL_OFFSET = 12; // Pixels to shift the popover to the right
 
 interface MainHeaderProps {
   selectedPatient: Patient | null;
