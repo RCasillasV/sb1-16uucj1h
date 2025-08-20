@@ -289,7 +289,7 @@ export function MainHeader({
           
           {showClinicalHistorySubmenu && (
             <div 
-              className="absolute top-full left-0 mt-1 py-1 w-64 rounded-md shadow-lg z-20 border"
+              className="absolute top-full left-0 mt-1 py-1 w-80 rounded-md shadow-lg z-20 border"
               style={{ 
                 background: currentTheme.colors.surface,
                 borderColor: currentTheme.colors.border,
