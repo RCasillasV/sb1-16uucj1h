@@ -1,6 +1,6 @@
 import React from 'react';  
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
 import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from './Modal';
@@ -54,6 +54,41 @@ export function MainHeader({
   const { currentTheme } = useTheme();
   const [showReportModal, setShowReportModal] = useState(false);
   const [showClinicalHistorySubmenu, setShowClinicalHistorySubmenu] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState<{ top: number; left: number } | null>(null);
+  const clinicalHistoryButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Calculate popover position when it should be shown
+  useEffect(() => {
+    if (showClinicalHistorySubmenu && clinicalHistoryButtonRef.current) {
+      const calculatePosition = () => {
+        const buttonRect = clinicalHistoryButtonRef.current!.getBoundingClientRect();
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        // Position below the button, centered horizontally
+        const top = buttonRect.bottom + scrollY + 8; // 8px gap
+        const left = buttonRect.left + scrollX + (buttonRect.width / 2) - (384 / 2); // 384px is w-96
+        
+        // Ensure popover doesn't go off-screen
+        const adjustedLeft = Math.max(16, Math.min(left, window.innerWidth - 384 - 16));
+        
+        setPopoverPosition({ top, left: adjustedLeft });
+      };
+
+      calculatePosition();
+
+      // Recalculate on resize or scroll
+      const handleReposition = () => calculatePosition();
+      window.addEventListener('resize', handleReposition);
+      window.addEventListener('scroll', handleReposition);
+
+      return () => {
+        window.removeEventListener('resize', handleReposition);
+        window.removeEventListener('scroll', handleReposition);
+      };
+    } else {
+      setPopoverPosition(null);
+    }
 
   const handleShowReport = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -259,10 +294,11 @@ export function MainHeader({
         style={{ borderColor: currentTheme.colors.border }}
       >
         <div 
-          className="relative"
+          className="relative z-10"
           onMouseLeave={() => setShowClinicalHistorySubmenu(false)}
         >
           <button
+            ref={clinicalHistoryButtonRef}
             onClick={() => setShowClinicalHistorySubmenu(!showClinicalHistorySubmenu)}
             className={clsx(
               "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
@@ -294,10 +330,14 @@ export function MainHeader({
           
           {showClinicalHistorySubmenu && (
             <>
-              {/* Caret/Arrow pointing up */}
+              {/* Caret/Arrow pointing up - Fixed positioned */}
               <div 
-                className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30"
+                className="fixed z-50"
                 style={{
+                  top: clinicalHistoryPopoverPosition ? clinicalHistoryPopoverPosition.top - 4 : 0,
+                  left: clinicalHistoryPopoverPosition && clinicalHistoryButtonRef.current 
+                    ? clinicalHistoryPopoverPosition.left + 192 - 8 // Center on popover (192 is half of 384px width)
+                    : 0,
                   width: 0,
                   height: 0,
                   borderLeft: '8px solid transparent',
@@ -309,11 +349,14 @@ export function MainHeader({
               
               {/* Popover container */}
               <div 
-                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 py-2 w-96 rounded-lg shadow-xl z-20 border-2 backdrop-blur-sm"
+                className="fixed py-2 w-96 rounded-lg shadow-xl z-50 border-2 backdrop-blur-sm"
                 style={{ 
                   background: currentTheme.colors.surface,
                   borderColor: currentTheme.colors.primary,
                   boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px ${currentTheme.colors.primary}20`,
+                  top: clinicalHistoryPopoverPosition?.top || 0,
+                  left: clinicalHistoryPopoverPosition?.left || 0,
+                  visibility: clinicalHistoryPopoverPosition ? 'visible' : 'hidden',
                 }}
               >
                 {/* Header del popover */}
@@ -523,3 +566,4 @@ export function MainHeader({
     </div>
   );
 }
+  }, [showClinicalHistorySubmenu]);
