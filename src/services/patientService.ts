@@ -11,7 +11,7 @@ export const patients = {
     if (cached) return cached;
 
     const data = await svc.getAll(
-      `id, Nombre, Paterno, Materno, FechaNacimiento, Sexo, Email`
+      `id, Nombre, Paterno, Materno, FechaNacimiento, Sexo, Telefono, Email`
     );
     cache.set(key, data);
     return data;
