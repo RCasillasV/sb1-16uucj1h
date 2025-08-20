@@ -56,6 +56,7 @@ export function MainHeader({
   const [showClinicalHistorySubmenu, setShowClinicalHistorySubmenu] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<{ top: number; left: number } | null>(null);
   const clinicalHistoryButtonRef = useRef<HTMLButtonElement>(null);
+  const clinicalHistoryPopoverRef = useRef<HTMLDivElement>(null);
 
   // Calculate popover position when it should be shown
   useEffect(() => {
@@ -89,6 +90,33 @@ export function MainHeader({
     } else {
       setPopoverPosition(null);
     }
+  }, [showClinicalHistorySubmenu]);
+
+  // Handle click outside to close the popover
+  useEffect(() => {
+    if (!showClinicalHistorySubmenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      
+      // Check if click is outside both the button and the popover
+      if (
+        clinicalHistoryButtonRef.current && 
+        !clinicalHistoryButtonRef.current.contains(target) &&
+        clinicalHistoryPopoverRef.current &&
+        !clinicalHistoryPopoverRef.current.contains(target)
+      ) {
+        setShowClinicalHistorySubmenu(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [showClinicalHistorySubmenu]);
 
   const handleShowReport = (e: React.MouseEvent) => {
@@ -296,7 +324,6 @@ export function MainHeader({
       >
         <div 
           className="relative z-10"
-          onMouseLeave={() => setShowClinicalHistorySubmenu(false)}
         >
           <button
             ref={clinicalHistoryButtonRef}
@@ -350,6 +377,7 @@ export function MainHeader({
               
               {/* Popover container */}
               <div 
+                ref={clinicalHistoryPopoverRef}
                 className="fixed py-2 w-96 rounded-lg shadow-xl z-50 border-2 backdrop-blur-sm"
                 style={{ 
                   background: currentTheme.colors.surface,
