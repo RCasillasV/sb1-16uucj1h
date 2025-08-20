@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Contact as Family, User, FileText, Plus, Save, AlertCircle, Trash2, X, GripVertical } from 'lucide-react';
+import { Contact as Family, User, FileText, Plus, Save, AlertCircle, Trash2, X, GripVertical, Printer } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +14,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core'; 
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
+import { HeredoFamilialReport } from '../components/Informes/HeredoFamilialReport';
 import { HeredoFamilialReport } from '../components/Informes/HeredoFamilialReport';
 
 // --- 1. Definición de Tipos y Esquemas ---
@@ -35,8 +36,6 @@ interface FamilyMember {
   patologias: HeredoFamilialPathology[];
   observaciones?: string;
 }
-// Estado para controlar la visibilidad del modal del informe
-const [showReportModal, setShowReportModal] = useState(false);
 
 // Familiares predefinidos basados en tu captura de pantalla
 const FIXED_FAMILY_MEMBERS = [
@@ -202,6 +201,7 @@ export function HeredoFamHistory() {
   const [globalSelectedCatalogPatologies, setGlobalSelectedCatalogPatologies] = useState<AppPatology[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // Configurar sensores para drag and drop
   const sensors = useSensors(
@@ -512,6 +512,17 @@ export function HeredoFamHistory() {
             Antecedentes Heredo-Familiares
           </h1>
         </div>
+        {selectedPatient && (
+          <button
+            type="button"
+            onClick={() => setShowReportModal(true)}
+            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
+            style={buttonStyle.primary}
+          >
+            <Printer className="h-4 w-4" />
+            Imprimir Informe
+          </button>
+        )}
       </div>
 
       <form id="heredo-fam-form" onSubmit={handleSubmit(onSubmit)} className="space-y-3">
@@ -773,6 +784,23 @@ export function HeredoFamHistory() {
           </div>
         </div>
       </form>
+
+      {/* Modal del Informe Heredo-Familiar */}
+      {selectedPatient && (
+        <Modal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          title="Informe de Antecedentes Heredo-Familiares"
+          className="max-w-6xl w-full"
+        >
+          <HeredoFamilialReport
+            patientId={selectedPatient.id}
+            isModalView={true}
+            onClose={() => setShowReportModal(false)}
+            patientData={selectedPatient}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
