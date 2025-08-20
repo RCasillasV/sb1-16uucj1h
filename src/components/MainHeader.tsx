@@ -101,7 +101,7 @@ export function MainHeader({
       
       // Check if click is outside both the button and the popover
       if (
-        clinicalHistoryButtonRef.current && 
+      const left = buttonRect.left + scrollX + 12; // 12px para alinear con el padding-left del icono
         !clinicalHistoryButtonRef.current.contains(target) &&
         clinicalHistoryPopoverRef.current &&
         !clinicalHistoryPopoverRef.current.contains(target)
