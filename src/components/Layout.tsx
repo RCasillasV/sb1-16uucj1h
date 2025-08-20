@@ -242,7 +242,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex" style={{
       background: currentTheme.colors.background,
       color: currentTheme.colors.text,
-      fontFamily: currentTheme.typography.fontFamily,
     }}>
       <Sidebar 
         isExpanded={isExpanded}

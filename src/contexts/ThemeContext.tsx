@@ -50,6 +50,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Apply fonts
+    root.style.setProperty('--font-headings', `"${currentTheme.typography.fonts.headings}", sans-serif`);
+    root.style.setProperty('--font-subheadings', `"${currentTheme.typography.fonts.subheadings}", sans-serif`);
+    root.style.setProperty('--font-body', `"${currentTheme.typography.fonts.body}", sans-serif`);
+    root.style.setProperty('--font-ui', `"${currentTheme.typography.fonts.ui}", sans-serif`);
+
     // Apply font size
     root.style.setProperty('--user-font-size-percentage', String(fontSize));
   }, [currentTheme, fontSize]);

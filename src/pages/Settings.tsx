@@ -186,10 +186,7 @@ export function Settings() {
               />
               <h1 
                 className="text-3xl font-bold"
-                style={{ 
-                  color: currentTheme.colors.text,
-                  fontFamily: currentTheme.typography.fontFamily,
-                }}
+                style={{ color: currentTheme.colors.text }}
               >
                 Configuración
               </h1>
