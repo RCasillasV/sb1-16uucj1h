@@ -12,7 +12,7 @@ import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
-import { HeredoFamilialReport } from '../components/Informes/HeredoFamiliarReport';
+import { HeredoFamiliarReport } from '../components/Informes/HeredoFamiliarReport';
 
 // --- 1. Definición de Tipos y Esquemas ---
 
@@ -790,7 +790,7 @@ export function HeredoFamHistory() {
           title="Informe de Antecedentes Heredo-Familiares"
           className="max-w-6xl w-full"
         >
-          <HeredoFamilialReport
+          <HeredoFamiliarReport 
             patientId={selectedPatient.id}
             isModalView={true}
             onClose={() => setShowReportModal(false)}
