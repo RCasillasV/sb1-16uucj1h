@@ -12,7 +12,7 @@ export const heredoFamilialHistory = {
     if (cached) return cached;
 
     const { data, error } = await svc.getAll(
-      `id, created_at, updated_at, patient_id, id_usuario, idbu, miembro_fam, estado_vital, patologias, notas`
+      `id, created_at, updated_at, patient_id, id_usuario, idbu, miembro_fam, estado_vital, patologias, notas, edad`
     ).eq('patient_id', patientId); // Return array of records for all family members
 
     if (error) throw error;
