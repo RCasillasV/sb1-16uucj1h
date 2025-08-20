@@ -12,7 +12,7 @@ import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
-import { HeredoFamilialReport } from '../components/Informes/HeredoFamilialReport';
+import { HeredoFamilialReport } from '../components/Informes/HeredoFamiliarReport';
 
 // --- 1. Definición de Tipos y Esquemas ---
 
