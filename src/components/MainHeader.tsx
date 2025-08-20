@@ -58,6 +58,9 @@ export function MainHeader({
   const clinicalHistoryButtonRef = useRef<HTMLButtonElement>(null);
   const clinicalHistoryPopoverRef = useRef<HTMLDivElement>(null);
 
+  // Horizontal offset to respect sidebar spacing
+  const HORIZONTAL_OFFSET = 14;
+
   // Calculate popover position when it should be shown
   useEffect(() => {
     if (showClinicalHistorySubmenu && clinicalHistoryButtonRef.current) {
@@ -68,7 +71,7 @@ export function MainHeader({
         
         // Position below the button, centered horizontally
         const top = buttonRect.bottom + scrollY + 8; // 8px gap
-        const left = buttonRect.left + scrollX + (buttonRect.width / 2) - (384 / 2); // 384px is w-96
+        const left = buttonRect.left + scrollX + (buttonRect.width / 2) - (384 / 2) + HORIZONTAL_OFFSET; // 384px is w-96
         
         // Ensure popover doesn't go off-screen
         const adjustedLeft = Math.max(16, Math.min(left, window.innerWidth - 384 - 16));
