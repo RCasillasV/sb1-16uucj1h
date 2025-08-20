@@ -738,7 +738,7 @@ export function HeredoFamHistory() {
         </DndContext>
 
         {/* Instrucciones y botón Guardar en la parte inferior */}
-        <div className="flex justify-between items-end w-full mt-6">
+        <div className="flex justify-between items-start w-full mt-6">
           {/* Instrucciones para el usuario */}
           <div
             className="rounded-lg p-4 text-sm flex-1 mr-4"
@@ -749,10 +749,10 @@ export function HeredoFamHistory() {
           >
             <p className="font-medium mb-1">Instrucciones:</p>
             <ul className="space-y-1 text-xs">
-              <li>1. Arrastre las patologías desde la sección "Patologías Disponibles" hacia la fila del familiar correspondiente</li>
-              <li>2. Las patologías se añadirán automáticamente al familiar cuando las suelte en su fila</li>
-              <li>3. Complete el estado vital, edad y observaciones para cada familiar según corresponda</li>
-              <li>4. Haga clic en "Guardar" para guardar todos los cambios</li>
+              <li>1. Arrastre desde "Patologías Disponibles” al familiar correspondiente.</li>
+              <li>2. Al soltarlas, se asignarán automáticamente.</li>
+              <li>3. Complete estado vital, edad y observaciones de cada familiar.</li>
+              <li>4. Presione “Guardar” para confirmar cambios.</li>
             </ul>
           </div>
 
