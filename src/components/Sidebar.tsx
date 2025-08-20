@@ -12,7 +12,8 @@ const baseNavigation: NavigationItem[] = [
   { name: 'Citas', href: '/appointments', icon: CalendarDays, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Config. Agenda', href: '/settings/schedule', icon: Clock, roles: ['Administrador', 'Medico'] },
   { name: 'Antecedentes No Patológicos', href: '/antecedentes-no-patologicos', icon: FileText, roles: ['Administrador', 'Medico'] },
-    { name: 'Antecedentes Heredo-Familiares', href: '/heredo-familial-history', icon: Family, roles: ['Administrador', 'Medico'] },
+  { name: 'Antecedentes Heredo-Familiares', href: '/heredo-familial-history', icon: Family, roles: ['Administrador', 'Medico'] },
+  { name: 'Antecedentes Patológicos', href: '/pathological-history', icon: Stethoscope, roles: ['Administrador', 'Medico'] },
 
 /*  
   { name: 'Ficha Clínica', href: '/clinical-history', icon: FileText, roles: ['Administrador', 'Medico'] },

@@ -1,7 +1,7 @@
 import React from 'react';  
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family } from 'lucide-react';
+import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family, Stethoscope } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from './Modal';
 import { PatientReport } from './Informes/PatientReport';
@@ -425,10 +425,10 @@ export function MainHeader({
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
-                  <FileText className="h-4 w-4" />
+                  <Stethoscope className="h-4 w-4" />
                   <div>
                     <div className="font-medium">Antecedentes Patológicos</div>
-                    <div className="text-xs opacity-75">Enfermedades y cirugías previas</div>
+                    <div className="text-xs opacity-75">Enfermedades crónicas, cirugías y hospitalizaciones</div>
                   </div>
                 </Link>
                 

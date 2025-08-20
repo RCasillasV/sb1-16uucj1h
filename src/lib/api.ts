@@ -636,4 +636,44 @@ export const api = {
   // Patient history services
   antecedentesNoPatologicos,
   heredoFamilialHistory,
+
+  // Pathological history service
+  pathologicalHistory: {
+    async getByPatientId(patientId: string) {
+      const { data, error } = await supabase
+        .from('tpPacienteHistPatologica')
+        .select('*')
+        .eq('id_paciente', patientId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+
+    async create(payload: any) {
+      const { data, error } = await supabase
+        .from('tpPacienteHistPatologica')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+
+    async update(id: string, payload: any) {
+      const { data, error } = await supabase
+        .from('tpPacienteHistPatologica')
+        .update({
+          ...payload,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+  },
 };
