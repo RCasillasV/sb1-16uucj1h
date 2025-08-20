@@ -83,7 +83,7 @@ function Switch({ checked, onCheckedChange, disabled = false }: SwitchProps) {
     </button>
   );
 }
-
+   
 export function AntecedentesNoPatologicos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
