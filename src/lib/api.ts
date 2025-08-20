@@ -523,7 +523,7 @@ const blockedDates = {
 const antecedentesNoPatologicos = {
   async getByPatientId(patientId: string) {
     const { data, error } = await supabase
-      .from('tpPacienteHistNoPatologica')
+      .from('tpPacienteHistNoPatol')
       .select('*')
       .eq('patient_id', patientId)
       .single();
@@ -534,7 +534,7 @@ const antecedentesNoPatologicos = {
 
   async create(payload: any) {
     const { data, error } = await supabase
-      .from('tpPacienteHistNoPatologica')
+      .from('tpPacienteHistNoPatol')
       .insert([payload])
       .select()
       .single();
@@ -545,7 +545,7 @@ const antecedentesNoPatologicos = {
 
   async update(id: string, payload: any) {
     const { data, error } = await supabase
-      .from('tpPacienteHistNoPatologica')
+      .from('tpPacienteHistNoPatol')
       .update({
         ...payload,
         updated_at: new Date().toISOString()
