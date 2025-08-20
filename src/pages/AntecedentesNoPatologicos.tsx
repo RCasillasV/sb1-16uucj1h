@@ -1,7 +1,5 @@
-```diff
---- /dev/null
-+++ src/pages/AntecedentesNoPatologicos.tsx
-@@ -0,0 +1,700 @@
+//src/pages/AntecedentesNoPatologicos.tsx
+
 +import React, { useState, useEffect } from 'react';
 +import { useForm, Controller } from 'react-hook-form';
 +import { zodResolver } from '@hookform/resolvers/zod';
