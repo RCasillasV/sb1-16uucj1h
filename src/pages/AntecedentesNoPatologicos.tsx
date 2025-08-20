@@ -998,4 +998,3 @@ export function AntecedentesNoPatologicos() {
     setValue(fieldPath as any, newArray);
   }
 }
-```
