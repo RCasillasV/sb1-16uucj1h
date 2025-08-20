@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Printer, ArrowLeft, User, X, Family } from 'lucide-react';
+import { Printer, ArrowLeft, User, X, Contact } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { api } from '../../lib/api';
@@ -223,7 +223,7 @@ export function HeredoFamilialReport({
       {!isModalView && (
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div className="flex items-center gap-3">
-            <Family className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+            <Conctact className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
             <h1
               className="text-2xl font-bold"
               style={{ color: currentTheme.colors.text }}
