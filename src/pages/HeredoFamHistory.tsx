@@ -37,11 +37,11 @@ interface FamilyMember {
 // Familiares predefinidos basados en tu captura de pantalla
 const FIXED_FAMILY_MEMBERS = [
   { key: 'Madre', label: 'Madre' },
-  { key: 'Abuela (Materna)', label: 'Abuela (Materna)' },
-  { key: 'Abuelo (Materno)', label: 'Abuelo (Materno)' },
+  { key: 'Abuela Materna', label: 'Abuela Materna' },
+  { key: 'Abuelo Materno', label: 'Abuelo Materno' },
   { key: 'Padre', label: 'Padre' },
-  { key: 'Abuela (Paterna)', label: 'Abuela (Paterna)' },
-  { key: 'Abuelo (Paterno)', label: 'Abuelo (Paterno)' },
+  { key: 'Abuela Paterna', label: 'Abuela Paterna' },
+  { key: 'Abuelo Paterno', label: 'Abuelo Paterno' },
   { key: 'Hermanos', label: 'Hermanos' },
 ];
 
