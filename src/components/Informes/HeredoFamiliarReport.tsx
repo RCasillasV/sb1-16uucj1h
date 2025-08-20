@@ -8,6 +8,7 @@ import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import clsx from 'clsx';
 import type { Database } from '../../types/database.types';
+import { FIXED_FAMILY_MEMBERS } from '../../pages/HeredoFamHistory';
 
 type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 type HeredoFamilialRecord = Database['public']['Tables']['tpFcHeredoFamiliar']['Row'];
@@ -73,6 +74,23 @@ export function HeredoFamiliarReport({
       setLoading(false);
     }
   };
+
+  // Ordenar registros según el orden definido en FIXED_FAMILY_MEMBERS
+  const familyMemberOrder = React.useMemo(() => {
+    const orderMap = new Map<string, number>();
+    FIXED_FAMILY_MEMBERS.forEach((member, index) => {
+      orderMap.set(member.key, index);
+    });
+    return orderMap;
+  }, []);
+
+  const sortedHeredoFamilialRecords = React.useMemo(() => {
+    return [...heredoFamilialRecords].sort((a, b) => {
+      const orderA = familyMemberOrder.get(a.miembro_fam || '') ?? Infinity;
+      const orderB = familyMemberOrder.get(b.miembro_fam || '') ?? Infinity;
+      return orderA - orderB;
+    });
+  }, [heredoFamilialRecords, familyMemberOrder]);
 
   const handlePrint = () => {
     window.print();
@@ -328,7 +346,7 @@ export function HeredoFamiliarReport({
 
         {/* Heredo Familial Records */}
         <InfoSection title="Antecedentes Heredo-Familiares">
-          {heredoFamilialRecords.length === 0 ? (
+          {sortedHeredoFamilialRecords.length === 0 ? (
             <div className="col-span-full text-center py-4">
               <p className="text-base print:text-black" style={{ color: currentTheme.colors.textSecondary }}>
                 No hay antecedentes heredo-familiares registrados con patologías o datos relevantes.
@@ -347,7 +365,7 @@ export function HeredoFamiliarReport({
                   </tr>
                 </thead>
                 <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-                  {heredoFamilialRecords.map((record) => (
+                  {sortedHeredoFamilialRecords.map((record) => (
                     <tr key={record.id} style={{ color: currentTheme.colors.text }}>
                       <td className="px-4 py-2 whitespace-nowrap">{record.miembro_fam}</td>
                       <td className="px-4 py-2 whitespace-nowrap">{record.estado_vital || 'No especificado'}</td>
