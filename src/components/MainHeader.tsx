@@ -1,7 +1,7 @@
 import React from 'react';  
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Family } from 'lucide-react';
+import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from './Modal';
 import { PatientReport } from './Informes/PatientReport';
