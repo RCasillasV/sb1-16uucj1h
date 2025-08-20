@@ -1,4 +1,4 @@
-src/components/Informes/NonPathologicalHistoryReport.tsx
+//src/components/Informes/NonPathologicalHistoryReport.tsx
 
 import React, { useState, useEffect } from 'react';
 import { Printer, ArrowLeft, User, X, FileText } from 'lucide-react';
