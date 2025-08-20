@@ -296,7 +296,7 @@ export function MainHeader({
             <>
               {/* Caret/Arrow pointing up */}
               <div 
-                className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30"
+                className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
                 style={{
                   width: 0,
                   height: 0,
@@ -309,7 +309,7 @@ export function MainHeader({
               
               {/* Popover container */}
               <div 
-                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 py-2 w-96 rounded-lg shadow-xl z-20 border-2 backdrop-blur-sm"
+                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 py-2 w-96 rounded-lg shadow-xl z-50 border-2 backdrop-blur-sm"
                 style={{ 
                   background: currentTheme.colors.surface,
                   borderColor: currentTheme.colors.primary,
