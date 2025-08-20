@@ -139,7 +139,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
       <button
         onClick={(e) => {
           e.stopPropagation();
-          /*onRemove(patology);*/
+          /*onRemove(patology); comentado no permite borrar patologías disponibles*/
         }}
         style={buttonStyle.primary}
         className={clsx(
