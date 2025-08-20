@@ -117,7 +117,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,
-    zIndex: isDragging ? 1000 : 1,
+    zIndex: isDragging ? 100 : 1,
     opacity: isDragging ? 0.01 : 1.0,
   };
 
