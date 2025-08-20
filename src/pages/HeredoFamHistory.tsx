@@ -135,7 +135,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
       )}
     >
       <GripVertical className="h-3 w-3 opacity-50" />
-      <span className="truncate">{patology.nombre}</span>
+      <span className="truncate" font-bold >{patology.nombre}</span>
       <button
         onClick={(e) => {
           e.stopPropagation();
