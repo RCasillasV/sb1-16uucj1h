@@ -19,7 +19,7 @@ interface HeredoFamilialReportProps {
   patientData?: Patient | null; // Optional: pass patient data to avoid refetching
 }
 
-export function HeredoFamilialReport({
+export function HeredoFamiliarReport({
   patientId,
   isModalView = false,
   onClose,
