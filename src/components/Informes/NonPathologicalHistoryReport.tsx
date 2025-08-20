@@ -14,7 +14,7 @@
 +import type { Database } from '../../types/database.types';
 +
 +type Patient = Database['public']['Tables']['tcPacientes']['Row'];
-+type NonPathologicalHistoryRecord = Database['public']['Tables']['tpPacienteHistNoPatologica']['Row'];
++type NonPathologicalHistoryRecord = Database['public']['Tables']['tpPacienteHistNoPatol']['Row'];
 +
 +interface NonPathologicalHistoryReportProps {
 +  patientId: string;
