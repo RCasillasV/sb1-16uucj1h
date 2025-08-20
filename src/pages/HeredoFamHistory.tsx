@@ -469,7 +469,7 @@ export function HeredoFamHistory() {
         title="Selección de Paciente Requerida"
         actions={
           <button
-            className={buttonStyle.base}
+            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
             style={buttonStyle.primary}
             onClick={() => {
               setShowWarningModal(false);
@@ -772,7 +772,7 @@ export function HeredoFamHistory() {
             <button
               type="submit"
               disabled={saving}
-              className={buttonStyle.base}
+              className={clsx(buttonStyle.base, 'flex items-center gap-2')}
               style={buttonStyle.primary}
             >
               <Save className="h-4 w-4 mr-2" />
