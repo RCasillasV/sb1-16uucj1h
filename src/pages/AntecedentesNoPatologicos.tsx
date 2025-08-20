@@ -435,7 +435,7 @@ export function AntecedentesNoPatologicos() {
                         <option value="ninguna">Ninguna</option>
                         <option value="1-2-tazas">1-2 tazas</option>
                         <option value="3-4-tazas">3-4 tazas</option>
-                        <option value="5-mas">5ññ tazas</option>
+                        <option value="5-mas">5+ tazas</option>
                       </select>
                     </div>
                   </div>
@@ -482,7 +482,7 @@ export function AntecedentesNoPatologicos() {
                         <option value="sedentario">Sedentario</option>
                         <option value="ligero">Ligero (1-2/sem)</option>
                         <option value="moderado">Moderado (3-4/sem)</option>
-                        <option value="intenso">Intenso (5ññ/sem)</option>
+                        <option value="intenso">Intenso (5+/sem)</option>
                       </select>
                     </div>
                   </div>
@@ -544,7 +544,7 @@ export function AntecedentesNoPatologicos() {
                         <option value="<5">Menos de 5</option>
                         <option value="5-6">5-6 horas</option>
                         <option value="7-8">7-8 horas</option>
-                        <option value="9ñ">9ñ horas</option>
+                        <option value="9+">9+ horas</option>
                       </select>
                     </div>
 
@@ -630,7 +630,7 @@ export function AntecedentesNoPatologicos() {
                         <option value="1">1 persona</option>
                         <option value="2-3">2-3 personas</option>
                         <option value="4-5">4-5 personas</option>
-                        <option value="6ññ">6ññ personas</option>
+                        <option value="6+">6+ personas</option>
                       </select>
                     </div>
                   </div>
