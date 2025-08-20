@@ -153,7 +153,7 @@
 +    },
 +    secondary: {
 +      background: 'transparent',
-+      border: `1px solid ${currentTheme.colors.border}`,
++      border: \`1px solid ${currentTheme.colors.border}`,
 +      color: currentTheme.colors.text,
 +    },
 +  };
@@ -315,7 +315,7 @@
 +
 +        {/* Patient identification */}
 +        <div className="text-center mb-8 p-6 rounded-lg print:bg-gray-100 print:rounded-none"
-+             style={{ background: `${currentTheme.colors.primary}10` }}>
++             style={{ background: \`${currentTheme.colors.primary}10` }}>
 +          <div
 +            className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 print:bg-gray-400"
 +            style={{ background: currentTheme.colors.primary }}

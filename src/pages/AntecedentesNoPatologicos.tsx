@@ -895,7 +895,7 @@
 +                <span 
 +                  className="px-2 py-1 rounded-full text-xs border"
 +                  style={{ 
-+                    background: `${currentTheme.colors.primary}20`,
++                    background: \`${currentTheme.colors.primary}20`,
 +                    color: currentTheme.colors.primary,
 +                    borderColor: currentTheme.colors.border,
 +                  }}
@@ -907,7 +907,7 @@
 +                <span 
 +                  className="px-2 py-1 rounded-full text-xs border"
 +                  style={{ 
-+                    background: `${currentTheme.colors.primary}20`,
++                    background: \`${currentTheme.colors.primary}20`,
 +                    color: currentTheme.colors.primary,
 +                    borderColor: currentTheme.colors.border,
 +                  }}
@@ -931,7 +931,7 @@
 +                <span 
 +                  className="px-2 py-1 rounded-full text-xs border"
 +                  style={{ 
-+                    background: `${currentTheme.colors.primary}20`,
++                    background: \`${currentTheme.colors.primary}20`,
 +                    color: currentTheme.colors.primary,
 +                    borderColor: currentTheme.colors.border,
 +                  }}
@@ -943,7 +943,7 @@
 +                <span 
 +                  className="px-2 py-1 rounded-full text-xs border"
 +                  style={{ 
-+                    background: `${currentTheme.colors.primary}20`,
++                    background: \`${currentTheme.colors.primary}20`,
 +                    color: currentTheme.colors.primary,
 +                    borderColor: currentTheme.colors.border,
 +                  }}
