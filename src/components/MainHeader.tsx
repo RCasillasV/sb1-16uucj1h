@@ -61,7 +61,7 @@ export function MainHeader({
   // Calculate popover position when it should be shown
   useEffect(() => {
     if (showClinicalHistorySubmenu && clinicalHistoryButtonRef.current) {
-      const calculatePosition = () => { 
+      const calculatePosition = () => {
         const buttonRect = clinicalHistoryButtonRef.current!.getBoundingClientRect();
         const scrollX = window.scrollX || window.pageXOffset;
         const scrollY = window.scrollY || window.pageYOffset;
