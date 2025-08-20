@@ -1,7 +1,7 @@
 import React from 'react';  
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer } from 'lucide-react';
+import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Family } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from './Modal';
 import { PatientReport } from './Informes/PatientReport';
@@ -53,6 +53,7 @@ export function MainHeader({
 }: MainHeaderProps) {
   const { currentTheme } = useTheme();
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showClinicalHistorySubmenu, setShowClinicalHistorySubmenu] = useState(false);
 
   const handleShowReport = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -257,25 +258,87 @@ export function MainHeader({
         className="flex items-center gap-2 px-6 py-2 border-t overflow-x-auto relative"
         style={{ borderColor: currentTheme.colors.border }}
       >
-       <Link
-          to="/clinical-history"
-          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors relative"
-          style={{ position: 'relative' }}
+        <div 
+          className="relative"
+          onMouseLeave={() => setShowClinicalHistorySubmenu(false)}
         >
-          <FileText className="h-4 w-4" />
-          Ficha Clínica
-         {clinicalHistoryCount > 0 && (
-         <span 
-              className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
-              style={{
-                background: currentTheme.colors.primary,
-                color: currentTheme.colors.buttonText
+          <button
+            onClick={() => setShowClinicalHistorySubmenu(!showClinicalHistorySubmenu)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
+            style={{ position: 'relative' }}
+          >
+            <FileText className="h-4 w-4" />
+            Ficha Clínica
+            {showClinicalHistorySubmenu ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )}
+            {clinicalHistoryCount > 0 && (
+              <span 
+                className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
+                style={{
+                  background: currentTheme.colors.primary,
+                  color: currentTheme.colors.buttonText
+                }}
+              >
+                {clinicalHistoryCount}
+              </span>
+            )}
+          </button>
+          
+          {showClinicalHistorySubmenu && (
+            <div 
+              className="absolute top-full left-0 mt-1 py-1 w-64 rounded-md shadow-lg z-20 border"
+              style={{ 
+                background: currentTheme.colors.surface,
+                borderColor: currentTheme.colors.border,
               }}
             >
-              {clinicalHistoryCount}
-            </span>
+              <Link
+                to="/heredo-familial-history"
+                className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-black/5 transition-colors"
+                style={{ color: currentTheme.colors.text }}
+                onClick={() => setShowClinicalHistorySubmenu(false)}
+              >
+                <Family className="h-4 w-4" />
+                Antecedentes Heredo-Familiares
+              </Link>
+              
+              <Link
+                to="/pathological-history"
+                className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-black/5 transition-colors"
+                style={{ color: currentTheme.colors.text }}
+                onClick={() => setShowClinicalHistorySubmenu(false)}
+              >
+                <FileText className="h-4 w-4" />
+                Antecedentes Patológicos
+              </Link>
+              
+              <Link
+                to="/antecedentes-no-patologicos"
+                className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-black/5 transition-colors"
+                style={{ color: currentTheme.colors.text }}
+                onClick={() => setShowClinicalHistorySubmenu(false)}
+              >
+                <Activity className="h-4 w-4" />
+                Antecedentes no Patológicos
+              </Link>
+              
+              {selectedPatient?.Sexo?.toLowerCase() === 'femenino' && (
+                <Link
+                  to="/gyneco-obstetric-history"
+                  className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-black/5 transition-colors"
+                  style={{ color: currentTheme.colors.text }}
+                  onClick={() => setShowClinicalHistorySubmenu(false)}
+                >
+                  <Heart className="h-4 w-4" />
+                  Antecedentes Gineco-Obstétricos
+                </Link>
+              )}
+            </div>
           )}
-        </Link>
+        </div>
         <Link
           to="/clinical-evolution"
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
