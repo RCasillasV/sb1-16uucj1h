@@ -84,6 +84,10 @@ function Switch({ checked, onCheckedChange, disabled = false }: SwitchProps) {
 
 export function AntecedentesNoPatologicos() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('habitos');
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
