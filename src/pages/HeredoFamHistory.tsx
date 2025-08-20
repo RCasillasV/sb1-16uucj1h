@@ -4,17 +4,14 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Contact as Family, User, FileText, Plus, Save, AlertCircle, Trash2, X, GripVertical, Printer } from 'lucide-react';
+import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent, useDroppable} from '@dnd-kit/core';
+import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
-import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { useDroppable } from '@dnd-kit/core';
-import { useDraggable } from '@dnd-kit/core'; 
-import clsx from 'clsx';
-import { useNavigate } from 'react-router-dom';
-import { HeredoFamilialReport } from '../components/Informes/HeredoFamilialReport';
 import { HeredoFamilialReport } from '../components/Informes/HeredoFamilialReport';
 
 // --- 1. Definición de Tipos y Esquemas ---
