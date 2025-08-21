@@ -428,7 +428,7 @@ export function MainHeader({
                   <Stethoscope className="h-4 w-4" />
                   <div>
                     <div className="font-medium">Antecedentes Patológicos</div>
-                    <div className="text-xs opacity-75">Enfermedades crónicas, cirugías y hospitalizaciones</div>
+                    <div className="text-xs opacity-75">Enfermedades, cirugías y hospitalizaciones</div>
                   </div>
                 </Link>
                                
