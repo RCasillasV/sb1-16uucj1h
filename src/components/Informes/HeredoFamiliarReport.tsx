@@ -45,6 +45,45 @@ export function HeredoFamiliarReport({
     }
   }, [user, authLoading, patientId, patientData]);
 
+  // Manejar eventos de impresión para aplicar estilos solo cuando sea necesario
+  useEffect(() => {
+    if (!isModalView) return;
+
+    const handleBeforePrint = () => {
+      console.log('Before print: añadiendo clase is-printing-modal');
+      document.body.classList.add('is-printing-modal');
+      
+      // Agregar ID específico para targeting CSS
+      const modalContent = document.getElementById('modal-print-target');
+      if (modalContent) {
+        modalContent.classList.add('print-report-modal');
+      }
+    };
+
+    const handleAfterPrint = () => {
+      console.log('After print: eliminando clase is-printing-modal');
+      document.body.classList.remove('is-printing-modal');
+      
+      // Remover ID específico
+      const modalContent = document.getElementById('modal-print-target');
+      if (modalContent) {
+        modalContent.classList.remove('print-report-modal');
+      }
+    };
+
+    // Registrar event listeners
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+      // Asegurar que la clase se elimine si el componente se desmonta
+      document.body.classList.remove('is-printing-modal');
+    };
+  }, [isModalView]);
+
   const fetchReportData = async () => {
     setLoading(true);
     setError(null);
@@ -93,7 +132,10 @@ export function HeredoFamiliarReport({
   }, [heredoFamilialRecords, familyMemberOrder]);
 
   const handlePrint = () => {
-    window.print();
+    // Add a small delay to ensure DOM is ready for print
+    setTimeout(() => {
+      window.print();
+    }, 100); // 100ms delay
   };
 
   const formatDate = (dateString: string) => {
@@ -241,7 +283,7 @@ export function HeredoFamiliarReport({
       {!isModalView && (
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div className="flex items-center gap-3">
-            <Conctact className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
+            <Contact className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
             <h1
               className="text-2xl font-bold"
               style={{ color: currentTheme.colors.text }}
