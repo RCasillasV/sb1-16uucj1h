@@ -526,6 +526,7 @@ const antecedentesNoPatologicos = {
       .from('tpPacienteHistNoPatol')
       .select('*')
       .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
       .limit(1);
 
     if (error) {
@@ -535,18 +536,40 @@ const antecedentesNoPatologicos = {
       }
       throw error; // Lanza cualquier otro tipo de error
     }
-    return data; // Si no hay error, devuelve los datos
+    return data?.[0] || null; // Devuelve el primer registro o null si no hay datos
    },
 
   async create(payload: any) {
-    const { data, error } = await supabase
-      .from('tpPacienteHistNoPatol')
-      .insert([payload])
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('tpPacienteHistNoPatol')
+        .insert([payload])
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      // Si es un error de restricción de unicidad para esta tabla específica
+      if (error.code === '23505' && error.message?.includes('unique_patient_non_path_history')) {
+        console.log('Duplicate record detected, attempting to update existing record...');
+        
+        // Buscar el registro existente
+        const existingRecord = await this.getByPatientId(payload.patient_id);
+        
+        if (existingRecord) {
+          // Actualizar el registro existente
+          return await this.update(existingRecord.id, payload);
+        } else {
+          // Si no encontramos el registro existente, relanzar el error original
+          console.error('Unique constraint error but no existing record found');
+          throw error;
+        }
+      }
+      
+      // Para cualquier otro error, relanzar
+      throw error;
+    }
   },
 
   async update(id: string, payload: any) {
