@@ -652,8 +652,12 @@ export const api = {
         .eq('id_paciente', patientId)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+     if (error) {
+        if (error.code === 'PGRST116' && error.details === 'The result contains 0 rows') {
+          return null; // Devuelve null explícitamente para este caso
+          throw error; // Lanza cualquier otro tipo de error
+        }
+      return data; // Si no hay error, devuelve los datos
     },
 
     async create(payload: any) {
