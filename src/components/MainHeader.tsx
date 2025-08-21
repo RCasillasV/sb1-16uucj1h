@@ -431,20 +431,7 @@ export function MainHeader({
                     <div className="text-xs opacity-75">Enfermedades crónicas, cirugías y hospitalizaciones</div>
                   </div>
                 </Link>
-                
-                <Link
-                  to="/antecedentes-no-patologicos"
-                  className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
-                  style={{ color: currentTheme.colors.text }}
-                  onClick={() => setShowClinicalHistorySubmenu(false)}
-                >
-                  <Activity className="h-4 w-4" />
-                  <div>
-                    <div className="font-medium">Antecedentes no Patológicos</div>
-                    <div className="text-xs opacity-75">Hábitos y estilo de vida</div>
-                  </div>
-                </Link>
-                
+                               
                 <Link
                   to="/antecedentes-no-patologicos"
                   className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
