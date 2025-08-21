@@ -380,7 +380,7 @@ export function MainHeader({
               {/* Popover container */}
               <div 
                 ref={clinicalHistoryPopoverRef}
-                className="fixed py-2 w-96 rounded-lg shadow-xl z-50 border-2 backdrop-blur-sm"
+                className="fixed py-2 w-80 rounded-lg shadow-xl z-50 border-2 backdrop-blur-sm"
                 style={{ 
                   background: currentTheme.colors.surface,
                   borderColor: currentTheme.colors.primary,
