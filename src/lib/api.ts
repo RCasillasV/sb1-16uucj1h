@@ -526,7 +526,7 @@ const antecedentesNoPatologicos = {
       .from('tpPacienteHistNoPatol')
       .select('*')
       .eq('patient_id', patientId)
-      .single();
+      ..limit(1);
 
     if (error) {
       // Si PGRST116 y el resultado contiene 0 filas, significa que no hay registro, lo cual es esperado.
