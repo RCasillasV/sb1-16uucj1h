@@ -386,7 +386,7 @@ export function MainHeader({
                   borderColor: currentTheme.colors.primary,
                   boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px ${currentTheme.colors.primary}20`,
                   top: popoverPosition?.top || 0,
-                  left: popoverPosition?.left +24 || 24,
+                  left: popoverPosition?.left +32 || 24,
                   visibility: popoverPosition ? 'visible' : 'hidden',
                 }}
               >
