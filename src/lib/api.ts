@@ -705,7 +705,7 @@ export const api = {
         })
         .eq('id', id)
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
       return data;
