@@ -434,10 +434,7 @@ export function GynecoObstetricHistory() {
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               /> 
-            </div>
-
-            <div className="col-span-full">
-              <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                           <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Ritmo Menstrual
                 <Tooltip text="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado).">
                   <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
@@ -451,6 +448,10 @@ export function GynecoObstetricHistory() {
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
+            </div>
+
+            <div className="col-span-full">
+ 
             </div>
             <div className="col-span-full">
               <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
