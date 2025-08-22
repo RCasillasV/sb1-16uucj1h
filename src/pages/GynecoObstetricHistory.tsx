@@ -459,7 +459,7 @@ export function GynecoObstetricHistory() {
                 id="metodo_anticonceptivo"
                 {...register('metodo_anticonceptivo')}
                 placeholder="Ej: Píldoras, DIU, Condón, Ninguno"
-                className=" p-2 rounded-md border"
+                className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
             </div>
