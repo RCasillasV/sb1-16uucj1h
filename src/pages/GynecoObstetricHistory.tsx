@@ -419,7 +419,7 @@ export function GynecoObstetricHistory() {
           </div>
 
           {/* Sección de Historial Menstrual */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="fum" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Menstruación (FUM)
