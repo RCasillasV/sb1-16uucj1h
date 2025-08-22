@@ -66,6 +66,9 @@ export function MainHeader({
   useEffect(() => {
     if (showClinicalHistorySubmenu && clinicalHistoryButtonRef.current) {
       const calculatePosition = () => {
+        if (!clinicalHistoryButtonRef.current) {
+          return; // Exit if ref is null
+        }
         const buttonRect = clinicalHistoryButtonRef.current!.getBoundingClientRect();
         const scrollX = window.scrollX || window.pageXOffset;
         const scrollY = window.scrollY || window.pageYOffset;
