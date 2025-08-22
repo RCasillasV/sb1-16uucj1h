@@ -434,8 +434,6 @@ export function GynecoObstetricHistory() {
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
-            </div>
-            <div>
               <label htmlFor="menarquia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Edad de Menarquia (años)
                 <Tooltip text="La edad en años en la que la paciente tuvo su primera menstruación. Normalmente ocurre entre los 10 y 16 años.">
@@ -451,6 +449,7 @@ export function GynecoObstetricHistory() {
                 style={inputStyle}
               />
             </div>
+            
             <div className="col-span-full">
               <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Ritmo Menstrual
