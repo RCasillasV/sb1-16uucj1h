@@ -94,9 +94,9 @@ export function GynecoObstetricHistory() {
 
   // Efecto para calcular automáticamente las Gestas
   useEffect(() => {
-    const paras = watchedValues.paras || 0;
-    const abortos = watchedValues.abortos || 0;
-    const cesareas = watchedValues.cesareas || 0;
+    const paras = Number(watchedValues.paras) || 0;
+    const abortos = Number(watchedValues.abortos) || 0;
+    const cesareas = Number(watchedValues.cesareas) || 0;
     
     const totalGestas = paras + abortos + cesareas;
     
