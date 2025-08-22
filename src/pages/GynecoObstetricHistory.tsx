@@ -10,9 +10,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
-import { api } from '../lib/api'; // Importa el objeto api que ahora incluye gynecoObstetricHistory
+import { api } from '../lib/api';
 import { format, parseISO } from 'date-fns'; // Para formatear fechas
-import { Tooltip } from '../components/Tooltip'; // <-- Importa el nuevo componente Tooltip
+import { Tooltip } from '../components/Tooltip';
+import { GynecoObstetricReport } from '../components/Informes/GynecoObstetricReport';
 
 // Esquema de validación con Zod
 const gynecoObstetricSchema = z.object({
@@ -772,18 +773,12 @@ export function GynecoObstetricHistory() {
           title="Informe de Antecedentes Gineco-Obstétricos"
           className="max-w-6xl w-full"
         >
-          {/* Aquí iría el componente de informe si lo creas */}
-          <div className="p-4 text-center">
-            <p>Contenido del informe de antecedentes gineco-obstétricos.</p>
-            <p>Esta sección está en desarrollo.</p>
-            <button
-              onClick={() => setShowReportModal(false)}
-              className={clsx(buttonStyle.base, 'mt-4')}
-              style={buttonStyle.primary}
-            >
-              Cerrar
-            </button>
-          </div>
+          <GynecoObstetricReport
+            patientId={selectedPatient.id}
+            isModalView={true}
+            onClose={() => setShowReportModal(false)}
+            patientData={selectedPatient}
+          />
         </Modal>
       )}
     </div>
