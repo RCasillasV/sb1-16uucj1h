@@ -420,8 +420,7 @@ export function GynecoObstetricHistory() {
 
           {/* Sección de Historial Menstrual */}
           <div className="grid grid-cols-6 sm:grid-cols-4 gap-4"> 
-            <div>
-              <label htmlFor="fum" className="items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+            <label htmlFor="fum" className="items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Menstruación (FUM)
                 <Tooltip text="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo.">
                   <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
@@ -462,7 +461,6 @@ export function GynecoObstetricHistory() {
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
-            </div>
           </div>
 
           {/* Sección de Papanicolau y Mamografía */}
