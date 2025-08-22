@@ -448,8 +448,6 @@ export function GynecoObstetricHistory() {
                 className="p-2 rounded-md border"
                 style={inputStyle}
               />
-            </div>
-            <div className="col-span-full">
               <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Método Anticonceptivo Actual
                 <Tooltip text="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. Píldoras anticonceptivas, DIU, Condón, Implante, Ninguno).">
