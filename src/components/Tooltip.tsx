@@ -21,29 +21,50 @@ export function Tooltip({ children, text }: TooltipProps) {
   const handleBlur = () => setShowTooltip(false);
 
   useEffect(() => {
-    if (showTooltip && triggerRef.current && tooltipRef.current) {
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
-
-      // Posicionar el tooltip encima del icono, centrado horizontalmente
-      let top = triggerRect.top - tooltipRect.height - 8; // 8px de margen
-      let left = triggerRect.left + (triggerRect.width / 2) - (tooltipRect.width / 2);
-
-      // Ajustar si se sale por la parte superior de la pantalla
-      if (top < 0) {
-        top = triggerRect.bottom + 8; // Posicionar debajo si no hay espacio arriba
-      }
-
-      // Ajustar si se sale por los lados de la pantalla
-      if (left < 0) {
-        left = 0;
-      } else if (left + tooltipRect.width > window.innerWidth) {
-        left = window.innerWidth - tooltipRect.width;
-      }
-
-      setPosition({ top, left });
+    if (showTooltip && triggerRef.current) {
+      const calculatePosition = () => {
+        if (!triggerRef.current) return;
+        
+        const triggerRect = triggerRef.current.getBoundingClientRect();
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
+        
+        // Posicionar el tooltip encima del icono, centrado horizontalmente
+        // Usar coordenadas fijas del viewport
+        let top = triggerRect.top + scrollY - 40; // 40px arriba del trigger
+        let left = triggerRect.left + scrollX + (triggerRect.width / 2) - 100; // Centrado, asumiendo ancho de tooltip ~200px
+        
+        // Ajustar si se sale por la parte superior de la pantalla
+        if (top < scrollY + 10) {
+          top = triggerRect.bottom + scrollY + 8; // Posicionar debajo si no hay espacio arriba
+        }
+        
+        // Ajustar si se sale por los lados de la pantalla
+        if (left < scrollX + 10) {
+          left = scrollX + 10;
+        } else if (left + 200 > scrollX + window.innerWidth - 10) {
+          left = scrollX + window.innerWidth - 210;
+        }
+        
+        setPosition({ top, left });
+      };
+      
+      // Calcular posición inmediatamente
+      calculatePosition();
+      
+      // Recalcular en scroll y resize
+      const handleScroll = () => calculatePosition();
+      const handleResize = () => calculatePosition();
+      
+      window.addEventListener('scroll', handleScroll);
+      window.addEventListener('resize', handleResize);
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleResize);
+      };
     }
-  }, [showTooltip, text]); // Depende de showTooltip y text para recalcular
+  }, [showTooltip, text]);
 
   // Clonar el children para añadir los manejadores de eventos
   const triggerElement = React.cloneElement(children, {
@@ -62,7 +83,7 @@ export function Tooltip({ children, text }: TooltipProps) {
         <div
           ref={tooltipRef}
           className={clsx(
-            "absolute z-50 px-3 py-2 text-sm rounded-md shadow-lg whitespace-nowrap",
+            "fixed z-[9999] px-3 py-2 text-sm rounded-md shadow-lg max-w-xs",
             "transition-opacity duration-200 pointer-events-none"
           )}
           style={{
@@ -72,6 +93,7 @@ export function Tooltip({ children, text }: TooltipProps) {
             color: currentTheme.colors.text,
             borderColor: currentTheme.colors.border,
             borderWidth: '1px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1)',
             opacity: showTooltip ? 1 : 0,
           }}
         >
