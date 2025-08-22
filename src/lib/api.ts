@@ -176,7 +176,7 @@ const clinicalEvolution = {
     return data;
   }
 };
-
+ 
 // Prescriptions service
 const prescriptions = {
   async getByPatientId(patientId: string) {
