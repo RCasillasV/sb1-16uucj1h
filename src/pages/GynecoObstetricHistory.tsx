@@ -435,8 +435,7 @@ export function GynecoObstetricHistory() {
                 style={inputStyle}
               /> 
             </div>
-            <div>
-            </div>
+
             <div className="col-span-full">
               <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Ritmo Menstrual
