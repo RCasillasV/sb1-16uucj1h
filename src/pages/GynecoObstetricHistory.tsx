@@ -67,6 +67,8 @@ export function GynecoObstetricHistory() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<GynecoObstetricFormData>({
     resolver: zodResolver(gynecoObstetricSchema),
@@ -86,6 +88,22 @@ export function GynecoObstetricHistory() {
       notas_adicionales: null,
     },
   });
+
+  const watchedValues = watch();
+
+  // Efecto para calcular automáticamente las Gestas
+  useEffect(() => {
+    const paras = watchedValues.paras || 0;
+    const abortos = watchedValues.abortos || 0;
+    const cesareas = watchedValues.cesareas || 0;
+    
+    const totalGestas = paras + abortos + cesareas;
+    
+    // Solo actualizar si el valor calculado es diferente al actual
+    if (watchedValues.gestas !== totalGestas) {
+      setValue('gestas', totalGestas > 0 ? totalGestas : null);
+    }
+  }, [watchedValues.paras, watchedValues.abortos, watchedValues.cesareas, setValue, watchedValues.gestas]);
 
   useEffect(() => {
     if (!selectedPatient) {
@@ -326,7 +344,7 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="gestas" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Gestas
-                <Tooltip text="Número total de embarazos que ha tenido la paciente, incluyendo embarazos actuales, partos a término, partos prematuros, abortos y embarazos ectópicos.">
+                <Tooltip text="Calculado automáticamente como la suma de Paras + Abortos + Cesáreas. Representa el número total de embarazos que ha tenido la paciente.">
                   <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
                 </Tooltip>
               </label>
@@ -334,9 +352,14 @@ export function GynecoObstetricHistory() {
                 type="number"
                 id="gestas"
                 {...register('gestas')}
-                placeholder="Ej: 3"
-                className="w-full p-2 rounded-md border"
-                style={inputStyle}
+                readOnly
+                placeholder="Calculado automáticamente"
+                className="w-full p-2 rounded-md border cursor-not-allowed"
+                style={{
+                  ...inputStyle,
+                  backgroundColor: currentTheme.colors.background,
+                  opacity: 0.7,
+                }}
               />
             </div>
             <div>
@@ -553,6 +576,192 @@ export function GynecoObstetricHistory() {
             </button>
           </div>
         </form>
+
+        {/* Resumen */}
+        <div className="mt-6 pt-4 border-t" style={{ borderColor: currentTheme.colors.border }}>
+          <h4 
+            className="text-sm font-medium mb-2"
+            style={{ color: currentTheme.colors.text }}
+          >
+            Resumen:
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {watchedValues.gestas !== null && watchedValues.gestas > 0 && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                  borderColor: currentTheme.colors.border,
+                }}
+              >
+                Gestas: {watchedValues.gestas}
+              </span>
+            )}
+            {watchedValues.paras !== null && watchedValues.paras > 0 && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#DEF7EC',
+                  color: '#059669',
+                  borderColor: '#A7F3D0',
+                }}
+              >
+                Paras: {watchedValues.paras}
+              </span>
+            )}
+            {watchedValues.abortos !== null && watchedValues.abortos > 0 && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#FEE2E2',
+                  color: '#DC2626',
+                  borderColor: '#FCA5A5',
+                }}
+              >
+                Abortos: {watchedValues.abortos}
+              </span>
+            )}
+            {watchedValues.cesareas !== null && watchedValues.cesareas > 0 && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#FFFBEB',
+                  color: '#D97706',
+                  borderColor: '#FED7AA',
+                }}
+              >
+                Cesáreas: {watchedValues.cesareas}
+              </span>
+            )}
+            {watchedValues.fum && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                  borderColor: currentTheme.colors.border,
+                }}
+              >
+                FUM: {format(parseISO(watchedValues.fum), 'dd/MM/yyyy')}
+              </span>
+            )}
+            {watchedValues.menarquia !== null && watchedValues.menarquia > 0 && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                  borderColor: currentTheme.colors.border,
+                }}
+              >
+                Menarquia: {watchedValues.menarquia} años
+              </span>
+            )}
+            {watchedValues.ritmo_menstrual && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                  borderColor: currentTheme.colors.border,
+                }}
+              >
+                Ritmo: {watchedValues.ritmo_menstrual}
+              </span>
+            )}
+            {watchedValues.metodo_anticonceptivo && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#DBEAFE',
+                  color: '#2563EB',
+                  borderColor: '#93C5FD',
+                }}
+              >
+                Anticonceptivo: {watchedValues.metodo_anticonceptivo}
+              </span>
+            )}
+            {watchedValues.fecha_ultimo_papanicolau && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#F0F9FF',
+                  color: '#0EA5E9',
+                  borderColor: '#BAE6FD',
+                }}
+              >
+                Papanicolau: {format(parseISO(watchedValues.fecha_ultimo_papanicolau), 'dd/MM/yyyy')}
+              </span>
+            )}
+            {watchedValues.resultado_ultimo_papanicolau && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#F0F9FF',
+                  color: '#0EA5E9',
+                  borderColor: '#BAE6FD',
+                }}
+              >
+                Resultado Pap: {watchedValues.resultado_ultimo_papanicolau}
+              </span>
+            )}
+            {watchedValues.mamografia && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#F0FDF4',
+                  color: '#16A34A',
+                  borderColor: '#BBF7D0',
+                }}
+              >
+                Mamografía: {format(parseISO(watchedValues.mamografia), 'dd/MM/yyyy')}
+              </span>
+            )}
+            {watchedValues.resultado_mamografia && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: '#F0FDF4',
+                  color: '#16A34A',
+                  borderColor: '#BBF7D0',
+                }}
+              >
+                Resultado Mamografía: {watchedValues.resultado_mamografia}
+              </span>
+            )}
+            {watchedValues.notas_adicionales && (
+              <span 
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{ 
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                  borderColor: currentTheme.colors.border,
+                }}
+              >
+                Notas registradas
+              </span>
+            )}
+            {!watchedValues.gestas && 
+             !watchedValues.paras && 
+             !watchedValues.abortos && 
+             !watchedValues.cesareas && 
+             !watchedValues.fum && 
+             !watchedValues.menarquia && 
+             !watchedValues.ritmo_menstrual && 
+             !watchedValues.metodo_anticonceptivo && 
+             !watchedValues.fecha_ultimo_papanicolau && 
+             !watchedValues.mamografia && 
+             !watchedValues.notas_adicionales && (
+              <p 
+                className="text-sm"
+                style={{ color: currentTheme.colors.textSecondary }}
+              >
+                No hay información ingresada aún
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Modal del Informe Gineco-Obstétrico (si se implementa) */}
