@@ -431,7 +431,7 @@ export function GynecoObstetricHistory() {
                 type="date"
                 id="fum"
                 {...register('fum')}
-                className=" p-2 rounded-md border"
+                className="w-full  p-2 rounded-md border"
                 style={inputStyle}
               /> 
               <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
