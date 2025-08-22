@@ -133,7 +133,7 @@ const clinicalHistories = {
       .from('clinical_histories')
       .insert([payload])
       .select()
-      .single();
+      .limit(1);
 
     if (error) throw error;
     return data;
