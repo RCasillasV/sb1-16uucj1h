@@ -673,7 +673,7 @@ export const api = {
         .from('tpPacienteHistPatologica')
         .select('*')
         .eq('id_paciente', patientId)
-        .single();
+        .limit(1);
 
      if (error) {
         if (error.code === 'PGRST116' && error.details === 'The result contains 0 rows') {
