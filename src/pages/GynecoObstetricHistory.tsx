@@ -10,14 +10,252 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
-import { api } from '../lib/api';
-import { format, parseISO } from 'date-fns';
+import { api } from '../lib/api'; // Importa el objeto api que ahora incluye gynecoObstetricHistory
+import { format, parseISO } from 'date-fns'; // Para formatear fechas
 import { Tooltip } from '../components/Tooltip'; // <-- Importa el nuevo componente Tooltip
 
-// ... (resto de imports y esquemas)
+// Esquema de validación con Zod
+const gynecoObstetricSchema = z.object({
+  gestas: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  paras: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  abortos: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  cesareas: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  fum: z.string().nullable().optional(), // Fecha de última menstruación
+  menarquia: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  ritmo_menstrual: z.string().nullable().optional(), // Ej: "28x5"
+  metodo_anticonceptivo: z.string().nullable().optional(),
+  fecha_ultimo_papanicolau: z.string().nullable().optional(),
+  resultado_ultimo_papanicolau: z.string().nullable().optional(),
+  mamografia: z.string().nullable().optional(), // Fecha de última mamografía
+  resultado_mamografia: z.string().nullable().optional(),
+  notas_adicionales: z.string().nullable().optional(),
+});
+
+type GynecoObstetricFormData = z.infer<typeof gynecoObstetricSchema>;
 
 export function GynecoObstetricHistory() {
-  // ... (estados y hooks)
+  const { currentTheme } = useTheme();
+  const { selectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
+  const [showGenderWarningModal, setShowGenderWarningModal] = useState(false);
+  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false); // Estado para el modal de informe
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<GynecoObstetricFormData>({
+    resolver: zodResolver(gynecoObstetricSchema),
+    defaultValues: {
+      gestas: null,
+      paras: null,
+      abortos: null,
+      cesareas: null,
+      fum: null,
+      menarquia: null,
+      ritmo_menstrual: null,
+      metodo_anticonceptivo: null,
+      fecha_ultimo_papanicolau: null,
+      resultado_ultimo_papanicolau: null,
+      mamografia: null,
+      resultado_mamografia: null,
+      notas_adicionales: null,
+    },
+  });
+
+  useEffect(() => {
+    if (!selectedPatient) {
+      setShowWarningModal(true);
+      return;
+    }
+
+    // Check if patient is female
+    if (selectedPatient.Sexo?.toLowerCase() !== 'femenino') {
+      setShowGenderWarningModal(true);
+      return;
+    }
+
+    if (!authLoading && user) {
+      fetchGynecoObstetricHistory();
+    }
+  }, [selectedPatient, user, authLoading]);
+
+  const fetchGynecoObstetricHistory = async () => {
+    if (!selectedPatient) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await api.gynecoObstetricHistory.getByPatientId(selectedPatient.id);
+      if (data) {
+        setExistingRecordId(data.id);
+        reset({
+          gestas: data.gestas,
+          paras: data.paras,
+          abortos: data.abortos,
+          cesareas: data.cesareas,
+          fum: data.fum || null,
+          menarquia: data.menarquia,
+          ritmo_menstrual: data.ritmo_menstrual,
+          metodo_anticonceptivo: data.metodo_anticonceptivo,
+          fecha_ultimo_papanicolau: data.fecha_ultimo_papanicolau || null,
+          resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
+          mamografia: data.mamografia || null,
+          resultado_mamografia: data.resultado_mamografia,
+          notas_adicionales: data.notas_adicionales,
+        });
+      } else {
+        // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
+        setExistingRecordId(null);
+        reset(); 
+      }
+    } catch (err) {
+      console.error('Error fetching gyneco-obstetric history:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar los antecedentes gineco-obstétricos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmit = async (data: GynecoObstetricFormData) => {
+    if (!selectedPatient || !user) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const payload = {
+        patient_id: selectedPatient.id,
+        user_id: user.id, // user.id se obtiene del contexto de autenticación
+        // idbu se inyecta automáticamente por createService
+        ...data,
+      };
+
+      if (existingRecordId) {
+        await api.gynecoObstetricHistory.update(existingRecordId, payload);
+      } else {
+        const newRecord = await api.gynecoObstetricHistory.create(payload);
+        setExistingRecordId(newRecord.id);
+      }
+      // Opcional: Mostrar un mensaje de éxito
+    } catch (err) {
+      console.error('Error saving gyneco-obstetric history:', err);
+      setError(err instanceof Error ? err.message : 'Error al guardar los antecedentes gineco-obstétricos.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const buttonStyle = {
+    base: clsx(
+      'px-4 py-2 transition-colors',
+      currentTheme.buttons.style === 'pill' && 'rounded-full',
+      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
+      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
+      currentTheme.buttons.animation && 'hover:scale-105'
+    ),
+    primary: {
+      background: currentTheme.colors.buttonPrimary,
+      color: currentTheme.colors.buttonText,
+    },
+  };
+
+  const inputStyle = {
+    backgroundColor: currentTheme.colors.surface,
+    borderColor: currentTheme.colors.border,
+    color: currentTheme.colors.text,
+  };
+
+  // Renderizado condicional para modales de advertencia
+  if (!selectedPatient) {
+    return (
+      <Modal
+        isOpen={showWarningModal}
+        onClose={() => setShowWarningModal(false)}
+        title="Selección de Paciente Requerida"
+        actions={
+          <button
+            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
+            style={buttonStyle.primary}
+            onClick={() => {
+              setShowWarningModal(false);
+              navigate('/patients');
+            }}
+          >
+            Entendido
+          </button>
+        }
+      >
+        <p>Por favor, seleccione un paciente primero desde la sección de Pacientes.</p>
+      </Modal>
+    );
+  }
+
+  if (selectedPatient.Sexo?.toLowerCase() !== 'femenino') {
+    return (
+      <Modal
+        isOpen={showGenderWarningModal}
+        onClose={() => setShowGenderWarningModal(false)}
+        title="Sección No Aplicable"
+        actions={
+          <button
+            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
+            style={buttonStyle.primary}
+            onClick={() => {
+              setShowGenderWarningModal(false);
+              navigate('/patients');
+            }}
+          >
+            Entendido
+          </button>
+        }
+      >
+        <div className="text-center">
+          <Baby className="h-12 w-12 mx-auto mb-3 opacity-50" style={{ color: currentTheme.colors.textSecondary }} />
+          <p>Los antecedentes gineco-obstétricos solo aplican para pacientes de sexo femenino.</p>
+          <p className="text-sm mt-2" style={{ color: currentTheme.colors.textSecondary }}>
+            Paciente actual: {selectedPatient.Nombre} {selectedPatient.Paterno} ({selectedPatient.Sexo})
+          </p>
+        </div>
+      </Modal>
+    );
+  }
+
+  if (loading || authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
+        <span className="ml-3" style={{ color: currentTheme.colors.text }}>
+          {authLoading ? 'Autenticando...' : 'Cargando antecedentes gineco-obstétricos...'}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-4">
@@ -342,4 +580,3 @@ export function GynecoObstetricHistory() {
     </div>
   );
 }
- 
