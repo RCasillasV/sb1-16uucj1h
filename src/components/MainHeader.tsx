@@ -27,7 +27,9 @@ interface MainHeaderProps {
   clinicalHistoryCount: number;
   clinicalEvolutionCount: number;
   prescriptionsCount: number;
-  patientFilesCount: number;
+  ppatientFilesCount: number; 
+  gynecoObstetricCount: number;
+  
   lastAppointment: {
     date: Date;
     status: string;
