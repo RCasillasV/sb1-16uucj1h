@@ -346,7 +346,7 @@ export function GynecoObstetricHistory() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Sección de Gestas, Paras, Abortos, Cesáreas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
             <div>
               <label htmlFor="gestas" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Gestas
