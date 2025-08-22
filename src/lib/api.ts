@@ -3,6 +3,7 @@
 import { patients } from '../services/patientService';
 import { appointments } from '../services/appointmentService';
 import { patologies } from '../services/patologyService';
+import { gynecoObstetricHistory } from '../services/gynecoObstetricService';
 import { supabase } from './supabase';
 import { Cache } from './cache';
 import { requireSession, requireBusinessUnit } from './apiHelpers';
