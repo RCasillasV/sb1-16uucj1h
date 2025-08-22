@@ -1,5 +1,4 @@
--- supabase/migrations/YYYYMMDDHHMMSS_create_gyneco_obstetric_history_table.sql
-
+-- supabase/migrations/20250822170000_create_gyneco_obstetric_history_table.sql
 -- Crear la tabla tpPacienteHistGineObst
 CREATE TABLE public."tpPacienteHistGineObst" (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
