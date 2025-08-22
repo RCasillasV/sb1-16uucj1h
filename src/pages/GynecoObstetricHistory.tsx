@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Heart, Save, AlertCircle, Baby, Printer } from 'lucide-react';
+import { Heart, Save, AlertCircle, Baby, Printer, Info } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -323,49 +323,73 @@ export function GynecoObstetricHistory() {
           {/* Sección de Gestas, Paras, Abortos, Cesáreas */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label htmlFor="gestas" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="gestas" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Gestas
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="Número total de embarazos que ha tenido la paciente, incluyendo embarazos actuales, partos a término, partos prematuros, abortos y embarazos ectópicos."
+                />
               </label>
               <input
                 type="number"
                 id="gestas"
                 {...register('gestas')}
+                placeholder="Ej: 3"
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
             </div>
             <div>
-              <label htmlFor="paras" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="paras" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Paras
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="Número de partos que han llegado a término (después de las 37 semanas) o prematuros (entre las 20 y 37 semanas), resultando en un nacimiento vivo."
+                />
               </label>
               <input
                 type="number"
                 id="paras"
                 {...register('paras')}
+                placeholder="Ej: 2"
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
             </div>
             <div>
-              <label htmlFor="abortos" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="abortos" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Abortos
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="Número total de embarazos que terminaron antes de las 20 semanas de gestación, ya sea de forma espontánea o inducida."
+                />
               </label>
               <input
                 type="number"
                 id="abortos"
                 {...register('abortos')}
+                placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
             </div>
             <div>
-              <label htmlFor="cesareas" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="cesareas" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Cesáreas
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="Número de partos que se realizaron mediante una intervención quirúrgica (cesárea)."
+                />
               </label>
               <input
                 type="number"
                 id="cesareas"
                 {...register('cesareas')}
+                placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
@@ -375,8 +399,13 @@ export function GynecoObstetricHistory() {
           {/* Sección de Historial Menstrual */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="fum" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="fum" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Menstruación (FUM)
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo."
+                />
               </label>
               <input
                 type="date"
@@ -387,20 +416,31 @@ export function GynecoObstetricHistory() {
               />
             </div>
             <div>
-              <label htmlFor="menarquia" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="menarquia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Edad de Menarquia (años)
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="La edad en años en la que la paciente tuvo su primera menstruación. Normalmente ocurre entre los 10 y 16 años."
+                />
               </label>
               <input
                 type="number"
                 id="menarquia"
                 {...register('menarquia')}
+                placeholder="Ej: 13"
                 className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
             </div>
             <div className="col-span-full">
-              <label htmlFor="ritmo_menstrual" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
-                Ritmo Menstrual (ej. 28x5)
+              <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Ritmo Menstrual
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado)."
+                />
               </label>
               <input
                 type="text"
@@ -412,8 +452,13 @@ export function GynecoObstetricHistory() {
               />
             </div>
             <div className="col-span-full">
-              <label htmlFor="metodo_anticonceptivo" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Método Anticonceptivo Actual
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. Píldoras anticonceptivas, DIU, Condón, Implante, Ninguno)."
+                />
               </label>
               <input
                 type="text"
@@ -429,8 +474,13 @@ export function GynecoObstetricHistory() {
           {/* Sección de Papanicolau y Mamografía */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="fecha_ultimo_papanicolau" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="fecha_ultimo_papanicolau" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Último Papanicolau
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="Fecha en que se realizó la última prueba de Papanicolau (citología cervical), un examen para detectar cambios en las células del cuello uterino."
+                />
               </label>
               <input
                 type="date"
@@ -441,8 +491,13 @@ export function GynecoObstetricHistory() {
               />
             </div>
             <div>
-              <label htmlFor="resultado_ultimo_papanicolau" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="resultado_ultimo_papanicolau" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Resultado Último Papanicolau
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="El resultado del último Papanicolau. Valores comunes: Normal, ASCUS (células atípicas), NIC I/II/III (lesiones precancerosas)."
+                />
               </label>
               <input
                 type="text"
@@ -454,8 +509,13 @@ export function GynecoObstetricHistory() {
               />
             </div>
             <div>
-              <label htmlFor="mamografia" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="mamografia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Mamografía
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="Fecha en que se realizó la última mamografía, una radiografía de la mama utilizada para detectar el cáncer de mama."
+                />
               </label>
               <input
                 type="date"
@@ -466,8 +526,13 @@ export function GynecoObstetricHistory() {
               />
             </div>
             <div>
-              <label htmlFor="resultado_mamografia" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="resultado_mamografia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Resultado Última Mamografía
+                <Info
+                  className="h-4 w-4 ml-1 cursor-help"
+                  style={{ color: currentTheme.colors.textSecondary }}
+                  title="El resultado de la última mamografía, clasificado usando el sistema BIRADS. BIRADS 1: Normal, BIRADS 2: Hallazgos benignos, BIRADS 3: Probablemente benigno."
+                />
               </label>
               <input
                 type="text"
@@ -482,12 +547,18 @@ export function GynecoObstetricHistory() {
 
           {/* Notas Adicionales */}
           <div>
-            <label htmlFor="notas_adicionales" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+            <label htmlFor="notas_adicionales" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
               Notas Adicionales
+              <Info
+                className="h-4 w-4 ml-1 cursor-help"
+                style={{ color: currentTheme.colors.textSecondary }}
+                title="Cualquier otra información relevante sobre el historial gineco-obstétrico que no encaje en los campos anteriores (ej. antecedentes familiares de cáncer de mama, problemas de fertilidad, menopausia)."
+              />
             </label>
             <textarea
               id="notas_adicionales"
               {...register('notas_adicionales')}
+              placeholder="Ej: Antecedente familiar de cáncer de mama, problemas de fertilidad..."
               rows={4}
               className="w-full p-2 rounded-md border"
               style={inputStyle}
