@@ -431,7 +431,7 @@ export function GynecoObstetricHistory() {
                 type="date"
                 id="fum"
                 {...register('fum')}
-                className="w-full p-2 rounded-md border"
+                className=" p-2 rounded-md border"
                 style={inputStyle}
               /> 
                            <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
@@ -445,13 +445,9 @@ export function GynecoObstetricHistory() {
                 id="ritmo_menstrual"
                 {...register('ritmo_menstrual')}
                 placeholder="Ej: 28x5 (ciclo de 28 días, 5 días de sangrado)"
-                className="w-full p-2 rounded-md border"
+                className="p-2 rounded-md border"
                 style={inputStyle}
               />
-            </div>
-
-            <div className="col-span-full">
- 
             </div>
             <div className="col-span-full">
               <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
