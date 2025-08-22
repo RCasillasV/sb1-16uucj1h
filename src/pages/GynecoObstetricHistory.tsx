@@ -10,251 +10,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
-import { api } from '../lib/api'; // Importa el objeto api que ahora incluye gynecoObstetricHistory
-import { format, parseISO } from 'date-fns'; // Para formatear fechas
+import { api } from '../lib/api';
+import { format, parseISO } from 'date-fns';
+import { Tooltip } from '../components/Tooltip'; // <-- Importa el nuevo componente Tooltip
 
-// Esquema de validación con Zod
-const gynecoObstetricSchema = z.object({
-  gestas: z.preprocess(
-    (val) => (val === '' ? null : Number(val)),
-    z.number().int().min(0).nullable().optional()
-  ),
-  paras: z.preprocess(
-    (val) => (val === '' ? null : Number(val)),
-    z.number().int().min(0).nullable().optional()
-  ),
-  abortos: z.preprocess(
-    (val) => (val === '' ? null : Number(val)),
-    z.number().int().min(0).nullable().optional()
-  ),
-  cesareas: z.preprocess(
-    (val) => (val === '' ? null : Number(val)),
-    z.number().int().min(0).nullable().optional()
-  ),
-  fum: z.string().nullable().optional(), // Fecha de última menstruación
-  menarquia: z.preprocess(
-    (val) => (val === '' ? null : Number(val)),
-    z.number().int().min(0).nullable().optional()
-  ),
-  ritmo_menstrual: z.string().nullable().optional(), // Ej: "28x5"
-  metodo_anticonceptivo: z.string().nullable().optional(),
-  fecha_ultimo_papanicolau: z.string().nullable().optional(),
-  resultado_ultimo_papanicolau: z.string().nullable().optional(),
-  mamografia: z.string().nullable().optional(), // Fecha de última mamografía
-  resultado_mamografia: z.string().nullable().optional(),
-  notas_adicionales: z.string().nullable().optional(),
-});
-
-type GynecoObstetricFormData = z.infer<typeof gynecoObstetricSchema>;
+// ... (resto de imports y esquemas)
 
 export function GynecoObstetricHistory() {
-  const { currentTheme } = useTheme();
-  const { selectedPatient } = useSelectedPatient();
-  const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
-  const [showGenderWarningModal, setShowGenderWarningModal] = useState(false);
-  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
-  const [showReportModal, setShowReportModal] = useState(false); // Estado para el modal de informe
-
-  const {
-    control,
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<GynecoObstetricFormData>({
-    resolver: zodResolver(gynecoObstetricSchema),
-    defaultValues: {
-      gestas: null,
-      paras: null,
-      abortos: null,
-      cesareas: null,
-      fum: null,
-      menarquia: null,
-      ritmo_menstrual: null,
-      metodo_anticonceptivo: null,
-      fecha_ultimo_papanicolau: null,
-      resultado_ultimo_papanicolau: null,
-      mamografia: null,
-      resultado_mamografia: null,
-      notas_adicionales: null,
-    },
-  });
-
-  useEffect(() => {
-    if (!selectedPatient) {
-      setShowWarningModal(true);
-      return;
-    }
-
-    // Check if patient is female
-    if (selectedPatient.Sexo?.toLowerCase() !== 'femenino') {
-      setShowGenderWarningModal(true);
-      return;
-    }
-
-    if (!authLoading && user) {
-      fetchGynecoObstetricHistory();
-    }
-  }, [selectedPatient, user, authLoading]);
-
-  const fetchGynecoObstetricHistory = async () => {
-    if (!selectedPatient) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await api.gynecoObstetricHistory.getByPatientId(selectedPatient.id);
-      if (data) {
-        setExistingRecordId(data.id);
-        reset({
-          gestas: data.gestas,
-          paras: data.paras,
-          abortos: data.abortos,
-          cesareas: data.cesareas,
-          fum: data.fum || null,
-          menarquia: data.menarquia,
-          ritmo_menstrual: data.ritmo_menstrual,
-          metodo_anticonceptivo: data.metodo_anticonceptivo,
-          fecha_ultimo_papanicolau: data.fecha_ultimo_papanicolau || null,
-          resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
-          mamografia: data.mamografia || null,
-          resultado_mamografia: data.resultado_mamografia,
-          notas_adicionales: data.notas_adicionales,
-        });
-      } else {
-        // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
-        setExistingRecordId(null);
-        reset(); 
-      }
-    } catch (err) {
-      console.error('Error fetching gyneco-obstetric history:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los antecedentes gineco-obstétricos.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onSubmit = async (data: GynecoObstetricFormData) => {
-    if (!selectedPatient || !user) return;
-
-    setSaving(true);
-    setError(null);
-
-    try {
-      const payload = {
-        patient_id: selectedPatient.id,
-        user_id: user.id, // user.id se obtiene del contexto de autenticación
-        // idbu se inyecta automáticamente por createService
-        ...data,
-      };
-
-      if (existingRecordId) {
-        await api.gynecoObstetricHistory.update(existingRecordId, payload);
-      } else {
-        const newRecord = await api.gynecoObstetricHistory.create(payload);
-        setExistingRecordId(newRecord.id);
-      }
-      // Opcional: Mostrar un mensaje de éxito
-    } catch (err) {
-      console.error('Error saving gyneco-obstetric history:', err);
-      setError(err instanceof Error ? err.message : 'Error al guardar los antecedentes gineco-obstétricos.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const buttonStyle = {
-    base: clsx(
-      'px-4 py-2 transition-colors',
-      currentTheme.buttons.style === 'pill' && 'rounded-full',
-      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
-      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
-      currentTheme.buttons.animation && 'hover:scale-105'
-    ),
-    primary: {
-      background: currentTheme.colors.buttonPrimary,
-      color: currentTheme.colors.buttonText,
-    },
-  };
-
-  const inputStyle = {
-    backgroundColor: currentTheme.colors.surface,
-    borderColor: currentTheme.colors.border,
-    color: currentTheme.colors.text,
-  };
-
-  // Renderizado condicional para modales de advertencia
-  if (!selectedPatient) {
-    return (
-      <Modal
-        isOpen={showWarningModal}
-        onClose={() => setShowWarningModal(false)}
-        title="Selección de Paciente Requerida"
-        actions={
-          <button
-            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
-            style={buttonStyle.primary}
-            onClick={() => {
-              setShowWarningModal(false);
-              navigate('/patients');
-            }}
-          >
-            Entendido
-          </button>
-        }
-      >
-        <p>Por favor, seleccione un paciente primero desde la sección de Pacientes.</p>
-      </Modal>
-    );
-  }
-
-  if (selectedPatient.Sexo?.toLowerCase() !== 'femenino') {
-    return (
-      <Modal
-        isOpen={showGenderWarningModal}
-        onClose={() => setShowGenderWarningModal(false)}
-        title="Sección No Aplicable"
-        actions={
-          <button
-            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
-            style={buttonStyle.primary}
-            onClick={() => {
-              setShowGenderWarningModal(false);
-              navigate('/patients');
-            }}
-          >
-            Entendido
-          </button>
-        }
-      >
-        <div className="text-center">
-          <Baby className="h-12 w-12 mx-auto mb-3 opacity-50" style={{ color: currentTheme.colors.textSecondary }} />
-          <p>Los antecedentes gineco-obstétricos solo aplican para pacientes de sexo femenino.</p>
-          <p className="text-sm mt-2" style={{ color: currentTheme.colors.textSecondary }}>
-            Paciente actual: {selectedPatient.Nombre} {selectedPatient.Paterno} ({selectedPatient.Sexo})
-          </p>
-        </div>
-      </Modal>
-    );
-  }
-
-  if (loading || authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
-        <span className="ml-3" style={{ color: currentTheme.colors.text }}>
-          {authLoading ? 'Autenticando...' : 'Cargando antecedentes gineco-obstétricos...'}
-        </span>
-      </div>
-    );
-  }
+  // ... (estados y hooks)
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-4">
@@ -325,11 +88,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="gestas" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Gestas
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="Número total de embarazos que ha tenido la paciente, incluyendo embarazos actuales, partos a término, partos prematuros, abortos y embarazos ectópicos."
-                />
+                <Tooltip text="Número total de embarazos que ha tenido la paciente, incluyendo embarazos actuales, partos a término, partos prematuros, abortos y embarazos ectópicos.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="number"
@@ -343,11 +104,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="paras" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Paras
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="Número de partos que han llegado a término (después de las 37 semanas) o prematuros (entre las 20 y 37 semanas), resultando en un nacimiento vivo."
-                />
+                <Tooltip text="Número de partos que han llegado a término (después de las 37 semanas) o prematuros (entre las 20 y 37 semanas), resultando en un nacimiento vivo.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="number"
@@ -361,11 +120,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="abortos" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Abortos
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="Número total de embarazos que terminaron antes de las 20 semanas de gestación, ya sea de forma espontánea o inducida."
-                />
+                <Tooltip text="Número total de embarazos que terminaron antes de las 20 semanas de gestación, ya sea de forma espontánea o inducida.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="number"
@@ -379,11 +136,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="cesareas" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Cesáreas
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="Número de partos que se realizaron mediante una intervención quirúrgica (cesárea)."
-                />
+                <Tooltip text="Número de partos que se realizaron mediante una intervención quirúrgica (cesárea).">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="number"
@@ -401,11 +156,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="fum" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Menstruación (FUM)
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo."
-                />
+                <Tooltip text="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="date"
@@ -418,11 +171,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="menarquia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Edad de Menarquia (años)
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="La edad en años en la que la paciente tuvo su primera menstruación. Normalmente ocurre entre los 10 y 16 años."
-                />
+                <Tooltip text="La edad en años en la que la paciente tuvo su primera menstruación. Normalmente ocurre entre los 10 y 16 años.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="number"
@@ -436,11 +187,9 @@ export function GynecoObstetricHistory() {
             <div className="col-span-full">
               <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Ritmo Menstrual
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado)."
-                />
+                <Tooltip text="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado).">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="text"
@@ -454,11 +203,9 @@ export function GynecoObstetricHistory() {
             <div className="col-span-full">
               <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Método Anticonceptivo Actual
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. Píldoras anticonceptivas, DIU, Condón, Implante, Ninguno)."
-                />
+                <Tooltip text="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. Píldoras anticonceptivas, DIU, Condón, Implante, Ninguno).">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="text"
@@ -476,11 +223,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="fecha_ultimo_papanicolau" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Último Papanicolau
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="Fecha en que se realizó la última prueba de Papanicolau (citología cervical), un examen para detectar cambios en las células del cuello uterino."
-                />
+                <Tooltip text="Fecha en que se realizó la última prueba de Papanicolau (citología cervical), un examen para detectar cambios en las células del cuello uterino.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="date"
@@ -493,11 +238,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="resultado_ultimo_papanicolau" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Resultado Último Papanicolau
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="El resultado del último Papanicolau. Valores comunes: Normal, ASCUS (células atípicas), NIC I/II/III (lesiones precancerosas)."
-                />
+                <Tooltip text="El resultado del último Papanicolau. Valores comunes: Normal, ASCUS (células atípicas), NIC I/II/III (lesiones precancerosas).">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="text"
@@ -511,11 +254,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="mamografia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Mamografía
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="Fecha en que se realizó la última mamografía, una radiografía de la mama utilizada para detectar el cáncer de mama."
-                />
+                <Tooltip text="Fecha en que se realizó la última mamografía, una radiografía de la mama utilizada para detectar el cáncer de mama.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="date"
@@ -528,11 +269,9 @@ export function GynecoObstetricHistory() {
             <div>
               <label htmlFor="resultado_mamografia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Resultado Última Mamografía
-                <Info
-                  className="h-4 w-4 ml-1 cursor-help"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                  title="El resultado de la última mamografía, clasificado usando el sistema BIRADS. BIRADS 1: Normal, BIRADS 2: Hallazgos benignos, BIRADS 3: Probablemente benigno."
-                />
+                <Tooltip text="El resultado de la última mamografía, clasificado usando el sistema BIRADS. BIRADS 1: Normal, BIRADS 2: Hallazgos benignos, BIRADS 3: Probablemente benigno.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
               </label>
               <input
                 type="text"
@@ -549,11 +288,9 @@ export function GynecoObstetricHistory() {
           <div>
             <label htmlFor="notas_adicionales" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
               Notas Adicionales
-              <Info
-                className="h-4 w-4 ml-1 cursor-help"
-                style={{ color: currentTheme.colors.textSecondary }}
-                title="Cualquier otra información relevante sobre el historial gineco-obstétrico que no encaje en los campos anteriores (ej. antecedentes familiares de cáncer de mama, problemas de fertilidad, menopausia)."
-              />
+              <Tooltip text="Cualquier otra información relevante sobre el historial gineco-obstétrico que no encaje en los campos anteriores (ej. antecedentes familiares de cáncer de mama, problemas de fertilidad, menopausia).">
+                <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+              </Tooltip>
             </label>
             <textarea
               id="notas_adicionales"
