@@ -445,7 +445,7 @@ export function GynecoObstetricHistory() {
                 id="ritmo_menstrual"
                 {...register('ritmo_menstrual')}
                 placeholder="Ej: 28x5 (ciclo de 28 días, 5 días de sangrado)"
-                className="p-2 rounded-md border"
+                className="w-full p-2 rounded-md border"
                 style={inputStyle}
               />
               <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
