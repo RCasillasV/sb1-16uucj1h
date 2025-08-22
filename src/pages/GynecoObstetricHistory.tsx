@@ -552,19 +552,6 @@ export function GynecoObstetricHistory() {
               style={inputStyle}
             />
           </div>
-
-          {/* Botón de Guardar (también en el header) */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className={clsx(buttonStyle.base, 'disabled:opacity-50')}
-              style={buttonStyle.primary}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Guardando...' : 'Guardar'}
-            </button>
-          </div>
         </form>
 
         {/* Resumen */}
