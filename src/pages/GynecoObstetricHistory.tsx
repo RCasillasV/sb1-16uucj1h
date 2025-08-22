@@ -1,40 +1,174 @@
+// src/pages/GynecoObstetricHistory.tsx
 import React, { useState, useEffect } from 'react';
-import { Heart, Save, AlertCircle, Baby } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Heart, Save, AlertCircle, Baby, Printer } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
+import { api } from '../lib/api'; // Importa el objeto api que ahora incluye gynecoObstetricHistory
+import { format, parseISO } from 'date-fns'; // Para formatear fechas
+
+// Esquema de validación con Zod
+const gynecoObstetricSchema = z.object({
+  gestas: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  paras: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  abortos: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  cesareas: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  fum: z.string().nullable().optional(), // Fecha de última menstruación
+  menarquia: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).nullable().optional()
+  ),
+  ritmo_menstrual: z.string().nullable().optional(), // Ej: "28x5"
+  metodo_anticonceptivo: z.string().nullable().optional(),
+  fecha_ultimo_papanicolau: z.string().nullable().optional(),
+  resultado_ultimo_papanicolau: z.string().nullable().optional(),
+  mamografia: z.string().nullable().optional(), // Fecha de última mamografía
+  resultado_mamografia: z.string().nullable().optional(),
+  notas_adicionales: z.string().nullable().optional(),
+});
+
+type GynecoObstetricFormData = z.infer<typeof gynecoObstetricSchema>;
 
 export function GynecoObstetricHistory() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
   const [showGenderWarningModal, setShowGenderWarningModal] = useState(false);
+  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false); // Estado para el modal de informe
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<GynecoObstetricFormData>({
+    resolver: zodResolver(gynecoObstetricSchema),
+    defaultValues: {
+      gestas: null,
+      paras: null,
+      abortos: null,
+      cesareas: null,
+      fum: null,
+      menarquia: null,
+      ritmo_menstrual: null,
+      metodo_anticonceptivo: null,
+      fecha_ultimo_papanicolau: null,
+      resultado_ultimo_papanicolau: null,
+      mamografia: null,
+      resultado_mamografia: null,
+      notas_adicionales: null,
+    },
+  });
 
   useEffect(() => {
     if (!selectedPatient) {
       setShowWarningModal(true);
       return;
     }
-    
+
     // Check if patient is female
     if (selectedPatient.Sexo?.toLowerCase() !== 'femenino') {
       setShowGenderWarningModal(true);
       return;
     }
-    
+
     if (!authLoading && user) {
-      // TODO: Fetch gyneco-obstetric history data
-      setLoading(false);
+      fetchGynecoObstetricHistory();
     }
   }, [selectedPatient, user, authLoading]);
+
+  const fetchGynecoObstetricHistory = async () => {
+    if (!selectedPatient) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await api.gynecoObstetricHistory.getByPatientId(selectedPatient.id);
+      if (data) {
+        setExistingRecordId(data.id);
+        reset({
+          gestas: data.gestas,
+          paras: data.paras,
+          abortos: data.abortos,
+          cesareas: data.cesareas,
+          fum: data.fum || null,
+          menarquia: data.menarquia,
+          ritmo_menstrual: data.ritmo_menstrual,
+          metodo_anticonceptivo: data.metodo_anticonceptivo,
+          fecha_ultimo_papanicolau: data.fecha_ultimo_papanicolau || null,
+          resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
+          mamografia: data.mamografia || null,
+          resultado_mamografia: data.resultado_mamografia,
+          notas_adicionales: data.notas_adicionales,
+        });
+      } else {
+        // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
+        setExistingRecordId(null);
+        reset(); 
+      }
+    } catch (err) {
+      console.error('Error fetching gyneco-obstetric history:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar los antecedentes gineco-obstétricos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmit = async (data: GynecoObstetricFormData) => {
+    if (!selectedPatient || !user) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const payload = {
+        patient_id: selectedPatient.id,
+        user_id: user.id, // user.id se obtiene del contexto de autenticación
+        // idbu se inyecta automáticamente por createService
+        ...data,
+      };
+
+      if (existingRecordId) {
+        await api.gynecoObstetricHistory.update(existingRecordId, payload);
+      } else {
+        const newRecord = await api.gynecoObstetricHistory.create(payload);
+        setExistingRecordId(newRecord.id);
+      }
+      // Opcional: Mostrar un mensaje de éxito
+    } catch (err) {
+      console.error('Error saving gyneco-obstetric history:', err);
+      setError(err instanceof Error ? err.message : 'Error al guardar los antecedentes gineco-obstétricos.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const buttonStyle = {
     base: clsx(
@@ -50,6 +184,13 @@ export function GynecoObstetricHistory() {
     },
   };
 
+  const inputStyle = {
+    backgroundColor: currentTheme.colors.surface,
+    borderColor: currentTheme.colors.border,
+    color: currentTheme.colors.text,
+  };
+
+  // Renderizado condicional para modales de advertencia
   if (!selectedPatient) {
     return (
       <Modal
@@ -58,7 +199,7 @@ export function GynecoObstetricHistory() {
         title="Selección de Paciente Requerida"
         actions={
           <button
-            className={buttonStyle.base}
+            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
             style={buttonStyle.primary}
             onClick={() => {
               setShowWarningModal(false);
@@ -82,7 +223,7 @@ export function GynecoObstetricHistory() {
         title="Sección No Aplicable"
         actions={
           <button
-            className={buttonStyle.base}
+            className={clsx(buttonStyle.base, 'flex items-center gap-2')}
             style={buttonStyle.primary}
             onClick={() => {
               setShowGenderWarningModal(false);
@@ -97,7 +238,7 @@ export function GynecoObstetricHistory() {
           <Baby className="h-12 w-12 mx-auto mb-3 opacity-50" style={{ color: currentTheme.colors.textSecondary }} />
           <p>Los antecedentes gineco-obstétricos solo aplican para pacientes de sexo femenino.</p>
           <p className="text-sm mt-2" style={{ color: currentTheme.colors.textSecondary }}>
-            Paciente actual: {selectedPatient.Sexo}
+            Paciente actual: {selectedPatient.Nombre} {selectedPatient.Paterno} ({selectedPatient.Sexo})
           </p>
         </div>
       </Modal>
@@ -128,19 +269,32 @@ export function GynecoObstetricHistory() {
             Antecedentes Gineco-Obstétricos
           </h1>
         </div>
-        <button
-          onClick={() => {/* TODO: Implement save logic */}}
-          disabled={saving}
-          className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
-          style={buttonStyle.primary}
-        >
-          <Save className="h-4 w-4" />
-          {saving ? 'Guardando...' : 'Guardar'}
-        </button>
+        <div className="flex gap-2">
+          {selectedPatient && (
+            <button
+              type="button"
+              onClick={() => setShowReportModal(true)}
+              className={clsx(buttonStyle.base, 'flex items-center gap-2')}
+              style={buttonStyle.primary}
+            >
+              <Printer className="h-4 w-4" />
+              Imprimir Informe
+            </button>
+          )}
+          <button
+            onClick={handleSubmit(onSubmit)}
+            disabled={saving}
+            className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
+            style={buttonStyle.primary}
+          >
+            <Save className="h-4 w-4" />
+            {saving ? 'Guardando...' : 'Guardar'}
+          </button>
+        </div>
       </div>
 
       {error && (
-        <div 
+        <div
           className="p-4 rounded-md border-l-4"
           style={{
             background: '#FEE2E2',
@@ -157,42 +311,226 @@ export function GynecoObstetricHistory() {
         </div>
       )}
 
-      {/* Main Content */}
-      <div 
+      {/* Main Form Card */}
+      <div
         className="rounded-lg shadow-lg p-6"
-        style={{ 
+        style={{
           background: currentTheme.colors.surface,
           borderColor: currentTheme.colors.border,
         }}
       >
-        <div className="text-center py-12">
-          <Heart 
-            className="h-16 w-16 mx-auto mb-4 opacity-50" 
-            style={{ color: currentTheme.colors.textSecondary }} 
-          />
-          <h3 
-            className="text-lg font-medium mb-2"
-            style={{ color: currentTheme.colors.text }}
-          >
-            Antecedentes Gineco-Obstétricos
-          </h3>
-          <p 
-            className="text-sm"
-            style={{ color: currentTheme.colors.textSecondary }}
-          >
-            Esta sección está en desarrollo. Aquí se registrará el historial ginecológico y obstétrico de la paciente.
-          </p>
-          <div className="mt-4 text-xs" style={{ color: currentTheme.colors.textSecondary }}>
-            <p>Información a incluir:</p>
-            <ul className="mt-2 space-y-1">
-              <li>• Historial menstrual</li>
-              <li>• Embarazos y partos</li>
-              <li>• Métodos anticonceptivos</li>
-              <li>• Procedimientos ginecológicos</li>
-            </ul>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Sección de Gestas, Paras, Abortos, Cesáreas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label htmlFor="gestas" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Gestas
+              </label>
+              <input
+                type="number"
+                id="gestas"
+                {...register('gestas')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="paras" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Paras
+              </label>
+              <input
+                type="number"
+                id="paras"
+                {...register('paras')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="abortos" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Abortos
+              </label>
+              <input
+                type="number"
+                id="abortos"
+                {...register('abortos')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="cesareas" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Cesáreas
+              </label>
+              <input
+                type="number"
+                id="cesareas"
+                {...register('cesareas')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
           </div>
-        </div>
+
+          {/* Sección de Historial Menstrual */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="fum" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Fecha Última Menstruación (FUM)
+              </label>
+              <input
+                type="date"
+                id="fum"
+                {...register('fum')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="menarquia" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Edad de Menarquia (años)
+              </label>
+              <input
+                type="number"
+                id="menarquia"
+                {...register('menarquia')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div className="col-span-full">
+              <label htmlFor="ritmo_menstrual" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Ritmo Menstrual (ej. 28x5)
+              </label>
+              <input
+                type="text"
+                id="ritmo_menstrual"
+                {...register('ritmo_menstrual')}
+                placeholder="Ej: 28x5 (ciclo de 28 días, 5 días de sangrado)"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div className="col-span-full">
+              <label htmlFor="metodo_anticonceptivo" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Método Anticonceptivo Actual
+              </label>
+              <input
+                type="text"
+                id="metodo_anticonceptivo"
+                {...register('metodo_anticonceptivo')}
+                placeholder="Ej: Píldoras, DIU, Condón, Ninguno"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+          </div>
+
+          {/* Sección de Papanicolau y Mamografía */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="fecha_ultimo_papanicolau" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Fecha Último Papanicolau
+              </label>
+              <input
+                type="date"
+                id="fecha_ultimo_papanicolau"
+                {...register('fecha_ultimo_papanicolau')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="resultado_ultimo_papanicolau" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Resultado Último Papanicolau
+              </label>
+              <input
+                type="text"
+                id="resultado_ultimo_papanicolau"
+                {...register('resultado_ultimo_papanicolau')}
+                placeholder="Ej: Normal, ASCUS, NIC I"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="mamografia" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Fecha Última Mamografía
+              </label>
+              <input
+                type="date"
+                id="mamografia"
+                {...register('mamografia')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="resultado_mamografia" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Resultado Última Mamografía
+              </label>
+              <input
+                type="text"
+                id="resultado_mamografia"
+                {...register('resultado_mamografia')}
+                placeholder="Ej: BIRADS 1, BIRADS 2"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+          </div>
+
+          {/* Notas Adicionales */}
+          <div>
+            <label htmlFor="notas_adicionales" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              Notas Adicionales
+            </label>
+            <textarea
+              id="notas_adicionales"
+              {...register('notas_adicionales')}
+              rows={4}
+              className="w-full p-2 rounded-md border"
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Botón de Guardar (también en el header) */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={saving}
+              className={clsx(buttonStyle.base, 'disabled:opacity-50')}
+              style={buttonStyle.primary}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
+        </form>
       </div>
+
+      {/* Modal del Informe Gineco-Obstétrico (si se implementa) */}
+      {selectedPatient && showReportModal && (
+        <Modal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          title="Informe de Antecedentes Gineco-Obstétricos"
+          className="max-w-6xl w-full"
+        >
+          {/* Aquí iría el componente de informe si lo creas */}
+          <div className="p-4 text-center">
+            <p>Contenido del informe de antecedentes gineco-obstétricos.</p>
+            <p>Esta sección está en desarrollo.</p>
+            <button
+              onClick={() => setShowReportModal(false)}
+              className={clsx(buttonStyle.base, 'mt-4')}
+              style={buttonStyle.primary}
+            >
+              Cerrar
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
