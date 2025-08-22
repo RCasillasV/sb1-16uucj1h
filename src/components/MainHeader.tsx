@@ -67,6 +67,10 @@ export function MainHeader({
     if (showClinicalHistorySubmenu && clinicalHistoryButtonRef.current) {
       const calculatePosition = () => {
         if (!clinicalHistoryButtonRef.current) {
+          return; // Exit early if ref is null
+        }
+        
+        if (!clinicalHistoryButtonRef.current) {
           return; // Exit if ref is null
         }
         const buttonRect = clinicalHistoryButtonRef.current!.getBoundingClientRect();
