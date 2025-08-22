@@ -420,7 +420,8 @@ export function GynecoObstetricHistory() {
 
           {/* Sección de Historial Menstrual */}
           <div className="grid grid-cols-6 sm:grid-cols-4 gap-4"> 
-            <label htmlFor="fum" className="items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+            <div>
+              <label htmlFor="fum" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Menstruación (FUM)
                 <Tooltip text="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo.">
                   <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
@@ -433,34 +434,39 @@ export function GynecoObstetricHistory() {
                 className="w-full  p-2 rounded-md border"
                 style={inputStyle}
               /> 
-              <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
-                Ritmo Menstrual
-                <Tooltip text="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado).">
-                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
-                </Tooltip>
-              </label>
-              <input
-                type="text"
-                id="ritmo_menstrual"
-                {...register('ritmo_menstrual')}
-                placeholder="Ej: 28x5 (ciclo de 28 días, 5 días de sangrado)"
-                className="w-full p-2 rounded-md border"
-                style={inputStyle}
-              />
-              <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
-                Método Anticonceptivo Actual
-                <Tooltip text="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. Píldoras anticonceptivas, DIU, Condón, Implante, Ninguno).">
-                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
-                </Tooltip>
-              </label>
-              <input
-                type="text"
-                id="metodo_anticonceptivo"
-                {...register('metodo_anticonceptivo')}
-                placeholder="Ej: Píldoras, DIU, Condón, Ninguno"
-                className="w-full p-2 rounded-md border"
-                style={inputStyle}
-              />
+            </div>
+            <div>
+                <label htmlFor="ritmo_menstrual" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                  Ritmo Menstrual
+                  <Tooltip text="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado).">
+                    <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                  </Tooltip>
+                </label>
+                <input
+                  type="text"
+                  id="ritmo_menstrual"
+                  {...register('ritmo_menstrual')}
+                  placeholder="Ej: 28x5 (ciclo de 28 días, 5 días de sangrado)"
+                  className="w-full p-2 rounded-md border"
+                  style={inputStyle}
+                />
+            </div>
+            <div className="col-span-2">
+                <label htmlFor="metodo_anticonceptivo" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                  Método Anticonceptivo Actual
+                  <Tooltip text="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. Píldoras anticonceptivas, DIU, Condón, Implante, Ninguno).">
+                    <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                  </Tooltip>
+                </label>
+                <input
+                  type="text"
+                  id="metodo_anticonceptivo"
+                  {...register('metodo_anticonceptivo')}
+                  placeholder="Ej: Píldoras, DIU, Condón, Ninguno"
+                  className="w-full p-2 rounded-md border"
+                  style={inputStyle}
+                />
+            </div>
           </div>
 
           {/* Sección de Papanicolau y Mamografía */}
