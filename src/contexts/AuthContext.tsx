@@ -26,6 +26,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error);
+      }
+      
+      // Clear local storage
+      localStorage.removeItem('rememberMe');
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      setUser(null);
+      navigate('/login', { 
+        state: { message: 'Sesión cerrada exitosamente' }
+      });
+      
+      return { error: error as AuthError | null };
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+      setUser(null);
+      navigate('/login');
+      return { error: error as AuthError };
+    }
+  };
+
   // Simplified function to get basic user info
   const getBasicUserInfo = async (userId: string): Promise<Partial<UserWithAttributes>> => {
     console.log('AuthProvider: Getting basic user info for:', userId);
@@ -116,6 +146,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.log('AuthProvider: Init error:', error);
+        
+        // Check for the specific refresh token error
+        if (error instanceof AuthApiError && error.message.includes('Invalid Refresh Token')) {
+          console.error('AuthProvider: Invalid Refresh Token detected during init. Forcing logout.');
+          await signOut();
+          return;
+        }
+        
         if (isMounted) {
           setUser(null);
         }
@@ -132,6 +170,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('AuthProvider: Auth state changed:', event);
       
       if (!isMounted) return;
+
+      // Handle specific auth errors
+      if (event === 'TOKEN_REFRESHED' && !session) {
+        console.error('AuthProvider: Token refresh failed, likely invalid refresh token.');
+        await signOut();
+        return;
+      }
 
       if (session?.user) {
         console.log('AuthProvider: Auth change - user exists, getting info');
@@ -160,15 +205,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       if (isMounted) {
-        // Check for the specific refresh token error
-        if (error instanceof AuthApiError && error.message.includes('Invalid Refresh Token')) {
-          console.error('AuthProvider: Invalid Refresh Token detected. Forcing logout.');
-          // Call signOut to handle cleanup and redirection
-          await signOut(); 
-          return; // Exit initAuth early as signOut will handle navigation
-        }
-
-        // Existing fallback for other errors
         setLoading(false);
       }
     });
@@ -183,36 +219,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
-
-  const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Error signing out:', error);
-      }
-      
-      // Clear local storage
-      localStorage.removeItem('rememberMe');
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('supabase.auth.')) {
-          localStorage.removeItem(key);
-        }
-      });
-      
-      setUser(null);
-      navigate('/login', { 
-        state: { message: 'Sesión cerrada exitosamente' }
-      });
-      
-      return { error: error as AuthError | null };
-    } catch (error) {
-      console.error('Unexpected error during logout:', error);
-      setUser(null);
-      navigate('/login');
-      return { error: error as AuthError };
-    }
-  };
 
   const value = {
     user,
