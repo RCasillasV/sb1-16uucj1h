@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { DEFAULT_BU } from '../utils/constants';
-import type { User, AuthError } from '@supabase/supabase-js';
+import type { User, AuthError, AuthApiError } from '@supabase/supabase-js';
 
 type UserWithAttributes = User & {
   userRole?: string | null;
@@ -160,6 +160,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       if (isMounted) {
+        // Check for the specific refresh token error
+        if (error instanceof AuthApiError && error.message.includes('Invalid Refresh Token')) {
+          console.error('AuthProvider: Invalid Refresh Token detected. Forcing logout.');
+          // Call signOut to handle cleanup and redirection
+          await signOut(); 
+          return; // Exit initAuth early as signOut will handle navigation
+        }
+
+        // Existing fallback for other errors
         setLoading(false);
       }
     });
