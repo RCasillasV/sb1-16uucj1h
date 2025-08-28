@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Stethoscope, Search, Plus, Edit, Trash2, Check, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { queryClient } from '../lib/react-query';
 import { supabase } from '../lib/supabase';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
@@ -114,10 +115,12 @@ export function PatologiesManagement() {
       setFormData({
         nombre: '',
         codcie10: '',
+        // @ts-ignore
         especialidad: 'Medicina General',
         sexo: 'Indistinto',
         activo: true,
       });
+      queryClient.invalidateQueries({ queryKey: ['activePatologies'] }); // Invalida la caché de patologías activas
     } catch (err) {
       console.error('Error saving patology:', err);
       setError(err instanceof Error ? err.message : 'Error al guardar patología');
@@ -137,6 +140,7 @@ export function PatologiesManagement() {
 
       await fetchPatologies();
       setShowDeleteModal(false);
+      queryClient.invalidateQueries({ queryKey: ['activePatologies'] }); // Invalida la caché de patologías activas
       setSelectedPatology(null);
     } catch (err) {
       console.error('Error deleting patology:', err);
@@ -313,6 +317,7 @@ export function PatologiesManagement() {
                               .eq('id', patology.id);
 
                             if (error) throw error;
+                            queryClient.invalidateQueries({ queryKey: ['activePatologies'] }); // Invalida la caché de patologías activas
                             await fetchPatologies();
                           } catch (err) {
                             console.error('Error updating patology status:', err);

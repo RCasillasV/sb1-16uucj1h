@@ -20,10 +20,6 @@ export const patologies = {
   },
 
   async getAllActive() {
-    const key = 'active';
-    const cached = cache.get(key);
-    if (cached) return cached;
-
     const data = await handle(
       supabase
         .from('tcPatologias')
@@ -32,7 +28,6 @@ export const patologies = {
         .order('nombre'),
       []
     );
-    cache.set(key, data);
     return data;
   },
 

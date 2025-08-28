@@ -1,19 +1,20 @@
 // src/pages/HeredoFamHistory.tsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { useForm, useFieldArray, Controller, set } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Contact, User, FileText, Plus, Save, AlertCircle, Trash2, X, GripVertical, Printer, Settings } from 'lucide-react';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent, useDroppable, useDraggable} from '@dnd-kit/core';
 import clsx from 'clsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
 import { HeredoFamiliarReport } from '../components/Informes/HeredoFamiliarReport';
-import { Settings } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+
 
 // --- 1. Definición de Tipos y Esquemas ---
 
@@ -79,7 +80,7 @@ type HeredoFamilialFormData = z.infer<typeof heredoFamilialFormDataSchema>;
 interface DraggablePathologyTagProps {
   patology: AppPatology;
   onRemove: (patology: AppPatology) => void;
-  isFromCatalog?: boolean;
+  isFromCatalog?: boolean; // Indica si la patología viene del catálogo global
 }
 
 function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: DraggablePathologyTagProps) {
@@ -135,13 +136,15 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
       )}
     >
       <GripVertical className="h-3 w-3 opacity-50" />
-      <span className="truncate" font-bold >{patology.nombre}</span>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          /*onRemove(patology); comentado no permite borrar patologías disponibles*/
-        }}
-        style={buttonStyle.primary}
+      <span className="truncate font-bold">{patology.nombre}</span>
+      {/* El botón de eliminar solo se muestra si NO es del catálogo y se proporciona una función onRemove */}
+      {!isFromCatalog && onRemove && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation(); // Evita que el evento se propague al elemento arrastrable
+            onRemove(patology);
+          }}
         className={clsx(
           "ml-1 p-0.5 rounded-full transition-colors hover:bg-black/10 cursor-pointer"
         )}
@@ -149,7 +152,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
         <X className="h-3 w-3" />
       </button>
     </div>
-  );
+  ); // Se eliminó el estilo buttonStyle.primary de este botón
 }
 
 // --- 3. Componente para Área de Soltar Familiar ---
@@ -196,7 +199,6 @@ export function HeredoFamHistory() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
-  const [globalSelectedCatalogPatologies, setGlobalSelectedCatalogPatologies] = useState<AppPatology[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -255,31 +257,22 @@ export function HeredoFamHistory() {
     console.log("===================================");
   }, [errors, isValid, watchedFamilyMembers]);
 
+  // --- React Query para Patologías Disponibles ---
+  const { data: activePatologiesData, isLoading: isLoadingPatologies, error: patologiesError } = useQuery<AppPatology[]>({
+    queryKey: ['activePatologies'], // Clave única para esta consulta
+    queryFn: () => api.patologies.getAllActive(), // Función para obtener los datos
+    staleTime: 5 * 60 * 1000, // Los datos se consideran "frescos" por 5 minutos
+    // refetchOnWindowFocus: true es el valor por defecto, lo cual es útil aquí
+  });
+
   // --- 5. Lógica de Carga de Datos ---
   useEffect(() => {
     if (!selectedPatient) {
       setShowWarningModal(true);
       return;
     }
-    if (!authLoading && user) {
+    if (!authLoading && user) { // Solo cargar historial si el usuario está autenticado
       fetchHeredoFamilialHistory();
-      loadAllActivePatologies();
-    }
-  }, [selectedPatient, user, authLoading]);
-
-  const loadAllActivePatologies = async () => {
-    try {
-      const data = await api.patologies.getAllActive();
-      
-      // Convertir los datos de patologías al formato de AppPatology
-      const formattedPatologies: AppPatology[] = data.map(patology => ({
-        id: patology.id,
-        nombre: patology.nombre,
-      }));
-      
-      setGlobalSelectedCatalogPatologies(formattedPatologies);
-    } catch (err) {
-      console.error('Error loading all active pathologies:', err);
     }
   };
 
@@ -552,7 +545,7 @@ export function HeredoFamHistory() {
                 }}
               >
                 {globalSelectedCatalogPatologies.length}
-              </span>
+              </span> {/* Se eliminó globalSelectedCatalogPatologies y se reemplazó por activePatologiesData?.length */}
               <Link
                 to="/settings/patologias"
                 className="ml-2 p-1 rounded-full hover:bg-black/5 transition-colors"
@@ -574,14 +567,20 @@ export function HeredoFamHistory() {
               Arrastre las patologías desde aquí hacia la fila del familiar correspondiente
             </p>
             
-            <div className="flex flex-wrap gap-1.5">
-              {globalSelectedCatalogPatologies.map((patology) => (
-                <DraggablePathologyTag
-                  key={patology.id}
-                  patology={patology}
-                  onRemove={handleGlobalCatalogRemove}
-                  isFromCatalog={true}
-                />
+            <div className="flex flex-wrap gap-1.5 min-h-[40px]"> {/* Añadido min-h para evitar colapso */}
+              {isLoadingPatologies ? (
+                <div className="flex items-center gap-2 text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
+                  Cargando patologías...
+                </div>
+              ) : patologiesError ? (
+                <p className="text-sm text-red-500">Error: {patologiesError.message}</p>
+              ) : (activePatologiesData || []).map((patology) => (
+                  <DraggablePathologyTag
+                    key={patology.id}
+                    patology={patology}
+                    isFromCatalog={true} // No se pasa onRemove para que el botón X no aparezca
+                  />
               ))}
             </div>
           </div>
