@@ -130,7 +130,7 @@ function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: Dyn
   );
 }
 
-export function PathologicalHistory() {
+export default function PathologicalHistory() {
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
   const { currentTheme } = useTheme();
@@ -152,12 +152,6 @@ export function PathologicalHistory() {
     queryFn: () => api.patologies.getAllActive(),
     staleTime: 5 * 60 * 1000,
   });
-
-  // Filtrar sugerencias del catálogo
-  const filteredPatologySuggestions = (activePatologiesData || []).filter(patology =>
-    patology.nombre.toLowerCase().includes(customDiseaseInput.toLowerCase()) &&
-    !(watchedValues.enfermedades_cronicas || []).includes(patology.nombre)
-  );
 
   const {
     control,
@@ -184,6 +178,12 @@ export function PathologicalHistory() {
   });
 
   const watchedValues = watch();
+
+  // Filtrar sugerencias del catálogo
+  const filteredPatologySuggestions = (activePatologiesData || []).filter(patology =>
+    patology.nombre.toLowerCase().includes(customDiseaseInput.toLowerCase()) &&
+    !(watchedValues.enfermedades_cronicas || []).includes(patology.nombre)
+  );
 
   // Añadir patología personalizada
   const handleAddCustomDisease = () => {
@@ -742,7 +742,7 @@ export function PathologicalHistory() {
                     className="text-lg font-semibold"
                     style={{ color: currentTheme.colors.primary }}
                   >
-                    Hospitalizaciones Previas
+                    Hospitalizaciones
                   </h3>
                   
                   <DynamicListInput
@@ -755,7 +755,7 @@ export function PathologicalHistory() {
                       const current = watchedValues.hospitalizaciones || [];
                       setValue('hospitalizaciones', current.filter((_, i) => i !== index));
                     }}
-                    placeholder="Ej: Neumonía (2019), Infarto agudo de miocardio (2017)..."
+                    placeholder="Ej: Neumonía (2019), Infarto agudo de miocardio (2021)..."
                     itemType="Hospitalizaciones"
                   />
                 </div>
@@ -848,8 +848,8 @@ export function PathologicalHistory() {
                   </label>
                   <textarea
                     {...register('medicamentos_actuales')}
-                    placeholder="Liste los medicamentos que el paciente toma actualmente, dosis y frecuencia..."
-                    rows={5}
+                    placeholder="Liste los medicamentos que el paciente toma actualmente, dosis, frecuencia..."
+                    rows={6}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
@@ -864,7 +864,7 @@ export function PathologicalHistory() {
                   </label>
                   <textarea
                     {...register('notas_generales')}
-                    placeholder="Información adicional relevante sobre los antecedentes patológicos del paciente..."
+                    placeholder="Observaciones adicionales, antecedentes relevantes no incluidos en otras secciones..."
                     rows={4}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
@@ -874,7 +874,7 @@ export function PathologicalHistory() {
             )}
           </form>
 
-          {/* Resumen de información ingresada */}
+          {/* Resumen en la parte inferior */}
           <div 
             className="mt-6 p-4 rounded-md border"
             style={{
