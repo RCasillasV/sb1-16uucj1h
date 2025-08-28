@@ -151,6 +151,7 @@ function DraggablePathologyTag({ patology, onRemove, isFromCatalog = false }: Dr
       >
         <X className="h-3 w-3" />
       </button>
+      )}
     </div>
   ); // Se eliminó el estilo buttonStyle.primary de este botón
 }
@@ -202,6 +203,7 @@ export function HeredoFamHistory() {
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [globalSelectedCatalogPatologies, setGlobalSelectedCatalogPatologies] = useState<AppPatology[]>([]);
 
   // Configurar sensores para drag and drop
   const sensors = useSensors(
@@ -274,7 +276,7 @@ export function HeredoFamHistory() {
     if (!authLoading && user) { // Solo cargar historial si el usuario está autenticado
       fetchHeredoFamilialHistory();
     }
-  };
+  }, [selectedPatient, authLoading, user]);
 
   const fetchHeredoFamilialHistory = async () => {
     if (!selectedPatient) return;
@@ -544,7 +546,7 @@ export function HeredoFamHistory() {
                   color: currentTheme.colors.primary,
                 }}
               >
-                {globalSelectedCatalogPatologies.length}
+                {activePatologiesData?.length || 0}
               </span> {/* Se eliminó globalSelectedCatalogPatologies y se reemplazó por activePatologiesData?.length */}
               <Link
                 to="/settings/patologias"
@@ -579,7 +581,8 @@ export function HeredoFamHistory() {
                   <DraggablePathologyTag
                     key={patology.id}
                     patology={patology}
-                    isFromCatalog={true} // No se pasa onRemove para que el botón X no aparezca
+                    isFromCatalog={true}
+                    onRemove={() => {}} // No se pasa onRemove para que el botón X no aparezca
                   />
               ))}
             </div>
@@ -751,7 +754,7 @@ export function HeredoFamHistory() {
               >
                 <GripVertical className="h-3 w-3 opacity-50" />
                 <span className="font-medium">
-                  {globalSelectedCatalogPatologies.find(p => `patology-${p.id}` === activeDragId)?.nombre}
+                  {(activePatologiesData || []).find(p => `patology-${p.id}` === activeDragId)?.nombre}
                 </span>
               </div>
             ) : null}
@@ -770,10 +773,10 @@ export function HeredoFamHistory() {
           >
             <p className="font-medium mb-1">Instrucciones:</p>
             <ul className="space-y-1 text-xs">
-              <li>1. Arrastre desde "Patologías Disponibles” al familiar correspondiente.</li>
+              <li>1. Arrastre desde "Patologías Disponibles" al familiar correspondiente.</li>
               <li>2. Al soltarlas, se asignarán automáticamente.</li>
               <li>3. Complete estado vital, edad y observaciones de cada familiar.</li>
-              <li>4. Presione “Guardar” para confirmar cambios.</li>
+              <li>4. Presione "Guardar" para confirmar cambios.</li>
             </ul>
           </div>
 
