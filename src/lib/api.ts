@@ -676,6 +676,7 @@ export const api = {
         .from('tpPacienteHistPatologica')
         .select('*')
         .eq('id_paciente', patientId)
+        .order('created_at', { ascending: false }) 
         .limit(1);
 
      if (error) {
