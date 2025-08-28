@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -180,10 +180,19 @@ export default function PathologicalHistory() {
   const watchedValues = watch();
 
   // Filtrar sugerencias del catálogo
-  const filteredPatologySuggestions = (activePatologiesData || []).filter(patology =>
-    patology.nombre.toLowerCase().includes(customDiseaseInput.toLowerCase()) &&
-    !(watchedValues.enfermedades_cronicas || []).includes(patology.nombre)
-  );
+  const filteredPatologySuggestions = useMemo(() => {
+    if (!activePatologiesData || !customDiseaseInput || customDiseaseInput.length < 2) {
+      return [];
+    }
+    
+    // Verificación defensiva para watchedValues
+    const currentDiseases = (watchedValues && watchedValues.enfermedades_cronicas) || [];
+    
+    return activePatologiesData.filter(patology =>
+      patology.nombre.toLowerCase().includes(customDiseaseInput.toLowerCase()) &&
+      !currentDiseases.includes(patology.nombre)
+    );
+  }, [activePatologiesData, customDiseaseInput, watchedValues?.enfermedades_cronicas]);
 
   // Añadir patología personalizada
   const handleAddCustomDisease = () => {
