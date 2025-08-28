@@ -11,6 +11,7 @@ import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
 import { PathologicalHistoryReport } from '../components/Informes/PathologicalHistoryReport';
 import clsx from 'clsx';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Tipos para patologías
 interface AppPatology {
@@ -128,12 +129,35 @@ function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: Dyn
     </div>
   );
 }
+
+export default function PathologicalHistory() {
+  const { selectedPatient } = useSelectedPatient();
+  const { user, loading: authLoading } = useAuth();
+  const { currentTheme } = useTheme();
+  const navigate = useNavigate();
+  
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('enfermedades');
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [customDiseaseInput, setCustomDiseaseInput] = useState('');
+  const [showPatologySuggestions, setShowPatologySuggestions] = useState(false);
+
   // React Query para obtener patologías activas
   const { data: activePatologiesData, isLoading: isLoadingPatologies, error: patologiesError } = useQuery<AppPatology[]>({
     queryKey: ['activePatologies'],
     queryFn: () => api.patologies.getAllActive(),
     staleTime: 5 * 60 * 1000,
   });
+
+  // Filtrar sugerencias del catálogo
+  const filteredPatologySuggestions = (activePatologiesData || []).filter(patology =>
+    patology.nombre.toLowerCase().includes(customDiseaseInput.toLowerCase()) &&
+    !(watchedValues.enfermedades_cronicas || []).includes(patology.nombre)
+  );
 
   const {
     control,
@@ -171,6 +195,8 @@ function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: Dyn
       setCustomDiseaseInput('');
     }
   };
+
+  const {
     fields: hospitalizacionesFields,
     append: appendHospitalizacion,
     remove: removeHospitalizacion,
@@ -555,6 +581,24 @@ function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: Dyn
                         className="absolute z-10 w-full mt-1 rounded-md shadow-lg border max-h-60 overflow-y-auto"
                         style={{
                           background: currentTheme.colors.surface,
+                          borderColor: currentTheme.colors.border,
+                        }}
+                      >
+                        {filteredPatologySuggestions.map((patology) => (
+                          <button
+                            key={patology.id}
+                            type="button"
+                            onClick={() => handleSelectSuggestion(patology)}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                            style={{ color: currentTheme.colors.text }}
+                          >
+                            {patology.nombre}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
                   {/* Campo para agregar patologías personalizadas */}
                   <div className="space-y-2">
                     <label 
@@ -698,6 +742,149 @@ function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: Dyn
                     className="text-lg font-semibold"
                     style={{ color: currentTheme.colors.primary }}
                   >
+                    Hospitalizaciones Previas
+                  </h3>
+                  
+                  <DynamicListInput
+                    items={watchedValues.hospitalizaciones || []}
+                    onAdd={(item) => {
+                      const current = watchedValues.hospitalizaciones || [];
+                      setValue('hospitalizaciones', [...current, item]);
+                    }}
+                    onRemove={(index) => {
+                      const current = watchedValues.hospitalizaciones || [];
+                      setValue('hospitalizaciones', current.filter((_, i) => i !== index));
+                    }}
+                    placeholder="Ej: Neumonía (2019), Infarto agudo de miocardio (2017)..."
+                    itemType="Hospitalizaciones"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* PESTAÑA ALERGIAS E INMUNIZACIONES */}
+            {activeTab === 'alergias' && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label 
+                    className="block text-sm font-medium"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Alergias conocidas
+                  </label>
+                  <textarea
+                    {...register('alergias')}
+                    placeholder="Describa alergias a medicamentos, alimentos, sustancias ambientales, etc..."
+                    rows={4}
+                    className="w-full p-3 rounded-md border"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label 
+                    className="block text-sm font-medium"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Transfusiones sanguíneas
+                  </label>
+                  <textarea
+                    {...register('transfusiones')}
+                    placeholder="Historial de transfusiones sanguíneas, fechas, motivos..."
+                    rows={3}
+                    className="w-full p-3 rounded-md border"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label 
+                      className="block text-sm font-medium"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Estado de inmunización
+                    </label>
+                    <select
+                      {...register('estado_inmunizacion')}
+                      className="w-full p-3 rounded-md border"
+                      style={inputStyle}
+                    >
+                      <option value="">Seleccione...</option>
+                      <option value="completo">Completo</option>
+                      <option value="incompleto">Incompleto</option>
+                      <option value="desconocido">Desconocido</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label 
+                      className="block text-sm font-medium"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Detalles de inmunización
+                    </label>
+                    <textarea
+                      {...register('detalles_inmunizacion')}
+                      placeholder="Vacunas específicas, fechas, refuerzos pendientes..."
+                      rows={3}
+                      className="w-full p-3 rounded-md border"
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PESTAÑA MEDICAMENTOS Y NOTAS */}
+            {activeTab === 'medicamentos' && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label 
+                    className="block text-sm font-medium"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Medicamentos actuales
+                  </label>
+                  <textarea
+                    {...register('medicamentos_actuales')}
+                    placeholder="Liste los medicamentos que el paciente toma actualmente, dosis y frecuencia..."
+                    rows={5}
+                    className="w-full p-3 rounded-md border"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label 
+                    className="block text-sm font-medium"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Notas generales
+                  </label>
+                  <textarea
+                    {...register('notas_generales')}
+                    placeholder="Información adicional relevante sobre los antecedentes patológicos del paciente..."
+                    rows={4}
+                    className="w-full p-3 rounded-md border"
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+            )}
+          </form>
+
+          {/* Resumen de información ingresada */}
+          <div 
+            className="mt-6 p-4 rounded-md border"
+            style={{
+              background: currentTheme.colors.background,
+              borderColor: currentTheme.colors.border,
+            }}
+          >
+            <h4 
+              className="text-sm font-medium mb-2"
+              style={{ color: currentTheme.colors.text }}
             >
               Resumen:
             </h4>
