@@ -130,7 +130,7 @@ function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: Dyn
   );
 }
 
-export default function PathologicalHistory() {
+export function PathologicalHistory() {
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
   const { currentTheme } = useTheme();
