@@ -54,6 +54,28 @@ export const appointments = {
     return data;
   },
 
+  async getByDateAndConsultorio(fecha: string, consultorio: number) {
+    const key = `date_consultorio_${fecha}_${consultorio}`;
+    const cached = cache.get(key);
+    if (cached) return cached;
+
+    const data = await handle(
+      supabase
+        .from('tcCitas')
+        .select(`
+          *,
+          patients:id_paciente(id,Nombre,Paterno,Materno)
+        `)
+        .eq('fecha_cita', fecha)
+        .eq('consultorio', consultorio)
+        .order('hora_cita', { ascending: true }),
+      []
+    );
+    
+    cache.set(key, data);
+    return data;
+  },
+
   async createSecure(dto: {
     id_paciente: string;
     fecha_cita: string;
