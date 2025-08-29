@@ -5,6 +5,7 @@ import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, Fi
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from './Modal';
 import { PatientReport } from './Informes/PatientReport';
+import { ComprehensiveClinicalHistoryReport } from './Informes/ComprehensiveClinicalHistoryReport';
 import { format, parseISO, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { calculateAge } from '../utils/dateUtils';
@@ -56,6 +57,7 @@ export function MainHeader({
   handleEditPatient
 }: MainHeaderProps) {
   const { currentTheme } = useTheme();
+  const [showComprehensiveReportModal, setShowComprehensiveReportModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showClinicalHistorySubmenu, setShowClinicalHistorySubmenu] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<{ top: number; left: number } | null>(null);
@@ -308,6 +310,19 @@ export function MainHeader({
               >
                 <Printer className="h-4 w-4" />
                 Ficha de datos
+              </button>
+              
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowComprehensiveReportModal(true);
+                  setShowContextMenu(false);
+                }}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
+                style={{ color: currentTheme.colors.text }}
+              >
+                <FileText className="h-4 w-4" />
+                Informe Clínico Integral
               </button>
             </div>
           )}
@@ -612,6 +627,23 @@ export function MainHeader({
             patientId={selectedPatient.id}
             isModalView={true}
             onClose={handleCloseReport}
+            patientData={selectedPatient}
+          />
+        </Modal>
+      )}
+
+      {/* Modal del Informe Clínico Integral */}
+      {selectedPatient && (
+        <Modal
+          isOpen={showComprehensiveReportModal}
+          onClose={() => setShowComprehensiveReportModal(false)}
+          title="Informe Clínico Integral del Paciente"
+          className="max-w-6xl w-full"
+        >
+          <ComprehensiveClinicalHistoryReport
+            patientId={selectedPatient.id}
+            isModalView={true}
+            onClose={() => setShowComprehensiveReportModal(false)}
             patientData={selectedPatient}
           />
         </Modal>
