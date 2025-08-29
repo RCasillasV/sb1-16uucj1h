@@ -64,7 +64,7 @@ export function ComprehensiveClinicalHistoryReport({
 
     const handleBeforePrint = () => {
       document.body.classList.add('is-printing-modal');
-      const modalContent = document.getElementById('modal-print-target');
+      const modalContent = document.getElementById('modal-content-print-target');
       if (modalContent) {
         modalContent.classList.add('print-report-modal');
       }
@@ -72,7 +72,7 @@ export function ComprehensiveClinicalHistoryReport({
 
     const handleAfterPrint = () => {
       document.body.classList.remove('is-printing-modal');
-      const modalContent = document.getElementById('modal-print-target');
+      const modalContent = document.getElementById('modal-content-print-target');
       if (modalContent) {
         modalContent.classList.remove('print-report-modal');
       }

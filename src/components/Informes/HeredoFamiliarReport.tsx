@@ -56,7 +56,7 @@ export function HeredoFamiliarReport({
       document.body.classList.add('is-printing-modal');
       
       // Agregar ID específico para targeting CSS
-      const modalContent = document.getElementById('modal-print-target');
+      const modalContent = document.getElementById('modal-content-print-target');
       if (modalContent) {
         modalContent.classList.add('print-report-modal');
       }
@@ -67,7 +67,7 @@ export function HeredoFamiliarReport({
       document.body.classList.remove('is-printing-modal');
       
       // Remover ID específico
-      const modalContent = document.getElementById('modal-print-target');
+      const modalContent = document.getElementById('modal-content-print-target');
       if (modalContent) {
         modalContent.classList.remove('print-report-modal');
       }

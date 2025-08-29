@@ -31,7 +31,7 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 print-modal-root">
       {/* Backdrop */}
       <div 
         id="modal-overlay-print-target"
@@ -42,10 +42,10 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
       {/* Modal */}
       <div 
         className={clsx(
-          "relative rounded-lg shadow-xl w-full print:shadow-none print:rounded-none print:max-w-none print:p-0 modal-content print-modal-root",
+          "relative rounded-lg shadow-xl w-full print:shadow-none print:rounded-none print:max-w-none print:p-0 modal-content",
           className || "max-w-md"
         )}
-        id="modal-print-target"
+        id="modal-content-print-target"
         style={{ 
           background: currentTheme.colors.surface,
           borderColor: currentTheme.colors.border,
@@ -68,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
 
         {/* Content */}
         <div 
-          className="px-6 py-4 print:p-0 overflow-y-auto y max-h-[90vh]"
+          className="px-6 py-4 print:p-0 overflow-y-auto max-h-[90vh]"
           style={{ color: currentTheme.colors.text }}
         >
           {children}

@@ -42,6 +42,7 @@
   .print\:text-white { color: white !important; }
 
   /* Modal printing rules */
+  /* CRITICAL: Modal printing rules */
   /* Hide everything in the body except the modal's root when printing a modal */
   body.is-printing-modal > *:not(.print-modal-root) {
     display: none !important;
@@ -49,15 +50,19 @@
 
   /* Make the modal's root element visible and full screen for printing */
   body.is-printing-modal .print-modal-root {
-    display: flex !important;
+    display: block !important;
     position: fixed !important;
-    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
     background: white !important;
     z-index: 9999 !important;
     overflow: visible !important;
     box-sizing: border-box !important;
+    padding: 0 !important;
   }
 
   /* Hide the modal backdrop when printing */
@@ -66,7 +71,7 @@
   }
 
   /* Ensure the actual modal content is visible and styled for print */
-  body.is-printing-modal #modal-print-target {
+  body.is-printing-modal #modal-content-print-target {
     display: block !important;
     visibility: visible !important;
     position: static !important;
@@ -85,7 +90,7 @@
     box-sizing: border-box !important;
   }
 
-  body.is-printing-modal #modal-print-target * {
+  body.is-printing-modal #modal-content-print-target * {
     visibility: visible !important;
     opacity: 1 !important;
     color: black !important;
@@ -98,54 +103,54 @@
   }
 
   /* Display utilities */
-  body.is-printing-modal #modal-print-target .grid { display: grid !important; }
-  body.is-printing-modal #modal-print-target .flex { display: flex !important; }
-  body.is-printing-modal #modal-print-target .inline { display: inline !important; }
-  body.is-printing-modal #modal-print-target .inline-block { display: inline-block !important; }
-  body.is-printing-modal #modal-print-target .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
-  body.is-printing-modal #modal-print-target .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-  body.is-printing-modal #modal-print-target .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  body.is-printing-modal #modal-content-print-target .grid { display: grid !important; }
+  body.is-printing-modal #modal-content-print-target .flex { display: flex !important; }
+  body.is-printing-modal #modal-content-print-target .inline { display: inline !important; }
+  body.is-printing-modal #modal-content-print-target .inline-block { display: inline-block !important; }
+  body.is-printing-modal #modal-content-print-target .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+  body.is-printing-modal #modal-content-print-target .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body.is-printing-modal #modal-content-print-target .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 
   /* Spacing and border utilities */
-  body.is-printing-modal #modal-print-target .p-8 { padding: 2rem !important; }
-  body.is-printing-modal #modal-print-target .p-6 { padding: 1.5rem !important; }
-  body.is-printing-modal #modal-print-target .p-4 { padding: 1rem !important; }
-  body.is-printing-modal #modal-print-target .mb-8 { margin-bottom: 2rem !important; }
-  body.is-printing-modal #modal-print-target .mb-6 { margin-bottom: 1.5rem !important; }
-  body.is-printing-modal #modal-print-target .mb-4 { margin-bottom: 1rem !important; }
-  body.is-printing-modal #modal-print-target .mb-3 { margin-bottom: 0.75rem !important; }
-  body.is-printing-modal #modal-print-target .mb-2 { margin-bottom: 0.5rem !important; }
-  body.is-printing-modal #modal-print-target .gap-4 { gap: 1rem !important; }
-  body.is-printing-modal #modal-print-target .border-b-2 { border-bottom: 2px solid black !important; }
-  body.is-printing-modal #modal-print-target .border-t { border-top: 1px solid black !important; }
-  body.is-printing-modal #modal-print-target .rounded-lg { border-radius: 0 !important; }
+  body.is-printing-modal #modal-content-print-target .p-8 { padding: 2rem !important; }
+  body.is-printing-modal #modal-content-print-target .p-6 { padding: 1.5rem !important; }
+  body.is-printing-modal #modal-content-print-target .p-4 { padding: 1rem !important; }
+  body.is-printing-modal #modal-content-print-target .mb-8 { margin-bottom: 2rem !important; }
+  body.is-printing-modal #modal-content-print-target .mb-6 { margin-bottom: 1.5rem !important; }
+  body.is-printing-modal #modal-content-print-target .mb-4 { margin-bottom: 1rem !important; }
+  body.is-printing-modal #modal-content-print-target .mb-3 { margin-bottom: 0.75rem !important; }
+  body.is-printing-modal #modal-content-print-target .mb-2 { margin-bottom: 0.5rem !important; }
+  body.is-printing-modal #modal-content-print-target .gap-4 { gap: 1rem !important; }
+  body.is-printing-modal #modal-content-print-target .border-b-2 { border-bottom: 2px solid black !important; }
+  body.is-printing-modal #modal-content-print-target .border-t { border-top: 1px solid black !important; }
+  body.is-printing-modal #modal-content-print-target .rounded-lg { border-radius: 0 !important; }
 
   /* Images and page-breaks */
-  body.is-printing-modal #modal-print-target img {
+  body.is-printing-modal #modal-content-print-target img {
     display: block !important;
     max-width: 100% !important;
     height: auto !important;
     page-break-inside: avoid !important;
   }
-  body.is-printing-modal #modal-print-target .space-y-6 > * {
+  body.is-printing-modal #modal-content-print-target .space-y-6 > * {
     page-break-inside: avoid !important;
   }
 
   /* Headings and text */
-  body.is-printing-modal #modal-print-target h1,
-  body.is-printing-modal #modal-print-target h2,
-  body.is-printing-modal #modal-print-target h3,
-  body.is-printing-modal #modal-print-target h4,
-  body.is-printing-modal #modal-print-target h5,
-  body.is-printing-modal #modal-print-target h6 {
+  body.is-printing-modal #modal-content-print-target h1,
+  body.is-printing-modal #modal-content-print-target h2,
+  body.is-printing-modal #modal-content-print-target h3,
+  body.is-printing-modal #modal-content-print-target h4,
+  body.is-printing-modal #modal-content-print-target h5,
+  body.is-printing-modal #modal-content-print-target h6 {
     color: black !important;
     font-weight: bold !important;
     page-break-after: avoid !important;
   }
-  body.is-printing-modal #modal-print-target p,
-  body.is-printing-modal #modal-print-target span,
-  body.is-printing-modal #modal-print-target dt,
-  body.is-printing-modal #modal-print-target dd {
+  body.is-printing-modal #modal-content-print-target p,
+  body.is-printing-modal #modal-content-print-target span,
+  body.is-printing-modal #modal-content-print-target dt,
+  body.is-printing-modal #modal-content-print-target dd {
     color: black !important;
   }
 }
