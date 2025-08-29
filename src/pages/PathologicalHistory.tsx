@@ -1,23 +1,39 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { FileText, Save, AlertCircle, Plus, X, Printer, Heart, Pill, Stethoscope, Clipboard, Settings } from 'lucide-react';
+import { FileText, Save, AlertCircle, Plus, X, Printer, Heart, Pill, Stethoscope, Clipboard } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
 import { PathologicalHistoryReport } from '../components/Informes/PathologicalHistoryReport';
 import clsx from 'clsx';
-import { useTheme } from '../contexts/ThemeContext';
 
-// Tipos para patologías
-interface AppPatology {
-  id: string;
-  nombre: string;
-}
+// Esquemas de validación por sección
+const enfermedadesCronicasSchema = z.object({
+  enfermedades_cronicas: z.array(z.string()).default([]),
+  otras_enfermedades_cronicas: z.string().optional(),
+});
+
+const historialQuirurgicoSchema = z.object({
+  cirugias: z.array(z.string()).default([]),
+  hospitalizaciones: z.array(z.string()).default([]),
+});
+
+const alergiasInmunizacionesSchema = z.object({
+  alergias: z.string().optional(),
+  transfusiones: z.string().optional(),
+  estado_inmunizacion: z.string().optional(),
+  detalles_inmunizacion: z.string().optional(),
+});
+
+const medicamentosNotasSchema = z.object({
+  medicamentos_actuales: z.string().optional(),
+  notas_generales: z.string().optional(),
+});
 
 // Esquema principal del formulario
 const pathologicalHistorySchema = z.object({
@@ -130,28 +146,18 @@ function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: Dyn
   );
 }
 
-export default function PathologicalHistory() {
+export function PathologicalHistory() {
+  const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
-  const { currentTheme } = useTheme();
   const navigate = useNavigate();
-  
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
   const [activeTab, setActiveTab] = useState<TabType>('enfermedades');
-  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [customDiseaseInput, setCustomDiseaseInput] = useState('');
-  const [showPatologySuggestions, setShowPatologySuggestions] = useState(false);
-
-  // React Query para obtener patologías activas
-  const { data: activePatologiesData, isLoading: isLoadingPatologies, error: patologiesError } = useQuery<AppPatology[]>({
-    queryKey: ['activePatologies'],
-    queryFn: () => api.patologies.getAllActive(),
-    staleTime: 5 * 60 * 1000,
-  });
 
   const {
     control,
@@ -179,31 +185,23 @@ export default function PathologicalHistory() {
 
   const watchedValues = watch();
 
-  // Filtrar sugerencias del catálogo
-  const filteredPatologySuggestions = useMemo(() => {
-    if (!activePatologiesData || !customDiseaseInput || customDiseaseInput.length < 2) {
-      return [];
-    }
-    
-    // Verificación defensiva para watchedValues
-    const currentDiseases = (watchedValues && watchedValues.enfermedades_cronicas) || [];
-    
-    return activePatologiesData.filter(patology =>
-      patology.nombre.toLowerCase().includes(customDiseaseInput.toLowerCase()) &&
-      !currentDiseases.includes(patology.nombre)
-    );
-  }, [activePatologiesData, customDiseaseInput, watchedValues?.enfermedades_cronicas]);
+  const {
+    fields: enfermedadesFields,
+    append: appendEnfermedad,
+    remove: removeEnfermedad,
+  } = useFieldArray({
+    control,
+    name: 'enfermedades_cronicas',
+  });
 
-  // Añadir patología personalizada
-  const handleAddCustomDisease = () => {
-    if (!customDiseaseInput.trim()) return;
-    
-    const currentDiseases = watchedValues.enfermedades_cronicas || [];
-    if (!currentDiseases.includes(customDiseaseInput.trim())) {
-      setValue('enfermedades_cronicas', [...currentDiseases, customDiseaseInput.trim()]);
-      setCustomDiseaseInput('');
-    }
-  };
+  const {
+    fields: cirugiasFields,
+    append: appendCirugia,
+    remove: removeCirugia,
+  } = useFieldArray({
+    control,
+    name: 'cirugias',
+  });
 
   const {
     fields: hospitalizacionesFields,
@@ -213,58 +211,6 @@ export default function PathologicalHistory() {
     control,
     name: 'hospitalizaciones',
   });
-
-  // Manejar cambios en el input de enfermedades personalizadas
-  const handleDiseaseInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setCustomDiseaseInput(value);
-    setShowPatologySuggestions(value.length > 1);
-  };
-
-  // Añadir enfermedad a la lista
-  const handleAddDisease = (diseaseName: string) => {
-    if (!diseaseName.trim()) return;
-    
-    const currentDiseases = watchedValues.enfermedades_cronicas || [];
-    if (!currentDiseases.includes(diseaseName.trim())) {
-      setValue('enfermedades_cronicas', [...currentDiseases, diseaseName.trim()]);
-      setCustomDiseaseInput('');
-      setShowPatologySuggestions(false);
-    }
-  };
-
-  // Eliminar enfermedad de la lista
-  const removeChronicDisease = (patologyName: string) => {
-    const current = watchedValues.enfermedades_cronicas || [];
-    setValue('enfermedades_cronicas', current.filter(name => name !== patologyName));
-  };
-
-  // Toggle patología del catálogo
-  const toggleCatalogPathology = (patology: AppPatology) => {
-    const current = watchedValues.enfermedades_cronicas || [];
-    const isSelected = current.includes(patology.nombre);
-    
-    if (isSelected) {
-      setValue('enfermedades_cronicas', current.filter(name => name !== patology.nombre));
-    } else {
-      setValue('enfermedades_cronicas', [...current, patology.nombre]);
-    }
-  };
-
-  // Manejar Enter en el input
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (customDiseaseInput.trim()) {
-        handleAddDisease(customDiseaseInput);
-      }
-    }
-  };
-
-  // Seleccionar sugerencia del catálogo
-  const handleSelectSuggestion = (patology: AppPatology) => {
-    handleAddDisease(patology.nombre);
-  };
 
   useEffect(() => {
     if (!selectedPatient) {
@@ -502,204 +448,19 @@ export default function PathologicalHistory() {
                     Enfermedades Crónicas Diagnosticadas
                   </h3>
                   
-                  {/* Catálogo de patologías como botones */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label 
-                        className="block text-sm font-medium"
-                        style={{ color: currentTheme.colors.text }}
-                      >
-                        Seleccione del catálogo:
-                      </label>
-                      <Link
-                        to="/settings/patologias"
-                        className="flex items-center gap-1 p-1 rounded-lg hover:bg-black/5 transition-colors"
-                        title="Gestionar Catálogo de Patologías"
-                        style={{ color: currentTheme.colors.primary }}
-                      >
-                        <Settings className="h-4 w-4" />
-                        <span className="text-xs">Catálogo</span>
-                      </Link>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {isLoadingPatologies ? (
-                        <p className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
-                          Cargando patologías...
-                        </p>
-                      ) : patologiesError ? (
-                        <p className="text-sm text-red-500">Error: {patologiesError.message}</p>
-                      ) : (activePatologiesData || []).map((patology) => {
-                        const isSelected = (watchedValues.enfermedades_cronicas || []).includes(patology.nombre);
-                        return (
-                          <button
-                            key={patology.id}
-                            type="button"
-                            onClick={() => toggleCatalogPathology(patology)}
-                            className={clsx(
-                              'px-3 py-2 text-sm rounded-md transition-colors border',
-                              isSelected && 'bg-red-100 text-red-800 border-red-300',
-                              !isSelected && 'bg-white hover:bg-gray-50 border-gray-200'
-                            )}
-                            style={{
-                              backgroundColor: isSelected ? '#FEE2E2' : currentTheme.colors.surface,
-                              color: isSelected ? '#DC2626' : currentTheme.colors.text,
-                              borderColor: isSelected ? '#FCA5A5' : currentTheme.colors.border,
-                            }}
-                          >
-                            {patology.nombre}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  
-                  {/* Campo de entrada con sugerencias */}
-                  <div className="relative">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={customDiseaseInput}
-                        onChange={handleDiseaseInputChange}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Buscar en catálogo o agregar enfermedad personalizada..."
-                        className="flex-1 p-3 rounded-md border"
-                        style={inputStyle}
-                        onFocus={() => customDiseaseInput.length > 1 && setShowPatologySuggestions(true)}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleAddDisease(customDiseaseInput)}
-                        disabled={!customDiseaseInput.trim()}
-                        className={clsx(
-                          'px-4 py-3 rounded-md transition-colors',
-                          'disabled:opacity-50 disabled:cursor-not-allowed'
-                        )}
-                        style={{
-                          background: currentTheme.colors.primary,
-                          color: currentTheme.colors.buttonText,
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                    
-                    {/* Sugerencias del catálogo */}
-                    {showPatologySuggestions && filteredPatologySuggestions.length > 0 && (
-                      <div 
-                        className="absolute z-10 w-full mt-1 rounded-md shadow-lg border max-h-60 overflow-y-auto"
-                        style={{
-                          background: currentTheme.colors.surface,
-                          borderColor: currentTheme.colors.border,
-                        }}
-                      >
-                        {filteredPatologySuggestions.map((patology) => (
-                          <button
-                            key={patology.id}
-                            type="button"
-                            onClick={() => handleSelectSuggestion(patology)}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
-                            style={{ color: currentTheme.colors.text }}
-                          >
-                            {patology.nombre}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Campo para agregar patologías personalizadas */}
-                  <div className="space-y-2">
-                    <label 
-                      className="block text-sm font-medium"
-                      style={{ color: currentTheme.colors.text }}
-                    >
-                      Agregar otra patología:
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={customDiseaseInput}
-                        onChange={(e) => setCustomDiseaseInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddCustomDisease();
-                          }
-                        }}
-                        placeholder="Escriba el nombre de la enfermedad..."
-                        className="flex-1 p-2 rounded-md border"
-                        style={inputStyle}
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddCustomDisease}
-                        disabled={!customDiseaseInput.trim()}
-                        className={clsx(
-                          'px-3 py-2 rounded-md transition-colors',
-                          'disabled:opacity-50 disabled:cursor-not-allowed'
-                        )}
-                        style={{
-                          background: currentTheme.colors.primary,
-                          color: currentTheme.colors.buttonText,
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {/* Lista de enfermedades seleccionadas */}
-                  <div 
-                    className="min-h-[100px] p-4 rounded-md border"
-                    style={{
-                      background: currentTheme.colors.background,
-                      borderColor: currentTheme.colors.border,
+                  <DynamicListInput
+                    items={watchedValues.enfermedades_cronicas || []}
+                    onAdd={(item) => {
+                      const current = watchedValues.enfermedades_cronicas || [];
+                      setValue('enfermedades_cronicas', [...current, item]);
                     }}
-                  >
-                    {(watchedValues.enfermedades_cronicas || []).length > 0 ? (
-                      <div>
-                        <h4 
-                          className="text-sm font-medium mb-3"
-                          style={{ color: currentTheme.colors.text }}
-                        >
-                          Enfermedades seleccionadas ({(watchedValues.enfermedades_cronicas || []).length}):
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {(watchedValues.enfermedades_cronicas || []).map((patologyName, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-red-100 text-red-800 border border-red-300"
-                            >
-                              <span className="font-medium">{patologyName}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeChronicDisease(patologyName)}
-                                className="p-1 rounded-full hover:bg-red-200 transition-colors"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <Heart 
-                          className="h-12 w-12 mx-auto mb-3 opacity-50" 
-                          style={{ color: currentTheme.colors.textSecondary }} 
-                        />
-                        <p
-                          className="text-sm italic"
-                          style={{ color: currentTheme.colors.textSecondary }}
-                        >
-                          No hay enfermedades crónicas registradas.
-                          <br />
-                          Haga clic en las etiquetas del catálogo arriba o agregue una personalizada.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                    onRemove={(index) => {
+                      const current = watchedValues.enfermedades_cronicas || [];
+                      setValue('enfermedades_cronicas', current.filter((_, i) => i !== index));
+                    }}
+                    placeholder="Ej: Diabetes tipo 2, Hipertensión arterial..."
+                    itemType="Enfermedades"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -711,7 +472,7 @@ export default function PathologicalHistory() {
                   </label>
                   <textarea
                     {...register('otras_enfermedades_cronicas')}
-                    placeholder="Describa otras enfermedades crónicas relevantes que no se encuentren en el catálogo..."
+                    placeholder="Describa otras enfermedades crónicas relevantes..."
                     rows={4}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
@@ -751,7 +512,7 @@ export default function PathologicalHistory() {
                     className="text-lg font-semibold"
                     style={{ color: currentTheme.colors.primary }}
                   >
-                    Hospitalizaciones
+                    Hospitalizaciones Previas
                   </h3>
                   
                   <DynamicListInput
@@ -764,7 +525,7 @@ export default function PathologicalHistory() {
                       const current = watchedValues.hospitalizaciones || [];
                       setValue('hospitalizaciones', current.filter((_, i) => i !== index));
                     }}
-                    placeholder="Ej: Neumonía (2019), Infarto agudo de miocardio (2021)..."
+                    placeholder="Ej: Neumonía (2019), Infarto agudo al miocardio (2021)..."
                     itemType="Hospitalizaciones"
                   />
                 </div>
@@ -779,12 +540,12 @@ export default function PathologicalHistory() {
                     className="block text-sm font-medium"
                     style={{ color: currentTheme.colors.text }}
                   >
-                    Alergias conocidas
+                    Alergias a Medicamentos y Sustancias
                   </label>
                   <textarea
                     {...register('alergias')}
-                    placeholder="Describa alergias a medicamentos, alimentos, sustancias ambientales, etc..."
-                    rows={4}
+                    placeholder="Describa alergias a medicamentos, materiales (látex), anestésicos, etc..."
+                    rows={3}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
@@ -795,11 +556,11 @@ export default function PathologicalHistory() {
                     className="block text-sm font-medium"
                     style={{ color: currentTheme.colors.text }}
                   >
-                    Transfusiones sanguíneas
+                    Historial de Transfusiones
                   </label>
                   <textarea
                     {...register('transfusiones')}
-                    placeholder="Historial de transfusiones sanguíneas, fechas, motivos..."
+                    placeholder="Fechas, motivos y reacciones a transfusiones sanguíneas..."
                     rows={3}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
@@ -812,35 +573,36 @@ export default function PathologicalHistory() {
                       className="block text-sm font-medium"
                       style={{ color: currentTheme.colors.text }}
                     >
-                      Estado de inmunización
+                      Estado de Inmunización
                     </label>
                     <select
                       {...register('estado_inmunizacion')}
-                      className="w-full p-3 rounded-md border"
+                      className="w-full p-2 rounded-md border"
                       style={inputStyle}
                     >
-                      <option value="">Seleccione...</option>
-                      <option value="completo">Completo</option>
-                      <option value="incompleto">Incompleto</option>
+                      <option value="">Seleccionar...</option>
+                      <option value="completo">Esquema completo</option>
+                      <option value="incompleto">Esquema incompleto</option>
                       <option value="desconocido">Desconocido</option>
+                      <option value="no-aplica">No aplica</option>
                     </select>
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <label 
-                      className="block text-sm font-medium"
-                      style={{ color: currentTheme.colors.text }}
-                    >
-                      Detalles de inmunización
-                    </label>
-                    <textarea
-                      {...register('detalles_inmunizacion')}
-                      placeholder="Vacunas específicas, fechas, refuerzos pendientes..."
-                      rows={3}
-                      className="w-full p-3 rounded-md border"
-                      style={inputStyle}
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label 
+                    className="block text-sm font-medium"
+                    style={{ color: currentTheme.colors.text }}
+                  >
+                    Detalles de Inmunización
+                  </label>
+                  <textarea
+                    {...register('detalles_inmunizacion')}
+                    placeholder="Vacunas recibidas, fechas, vacunas pendientes..."
+                    rows={3}
+                    className="w-full p-3 rounded-md border"
+                    style={inputStyle}
+                  />
                 </div>
               </div>
             )}
@@ -853,12 +615,12 @@ export default function PathologicalHistory() {
                     className="block text-sm font-medium"
                     style={{ color: currentTheme.colors.text }}
                   >
-                    Medicamentos actuales
+                    Medicamentos Actuales
                   </label>
                   <textarea
                     {...register('medicamentos_actuales')}
-                    placeholder="Liste los medicamentos que el paciente toma actualmente, dosis, frecuencia..."
-                    rows={6}
+                    placeholder="Lista de medicamentos que el paciente toma actualmente, con dosis y frecuencia..."
+                    rows={4}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
@@ -869,11 +631,11 @@ export default function PathologicalHistory() {
                     className="block text-sm font-medium"
                     style={{ color: currentTheme.colors.text }}
                   >
-                    Notas generales
+                    Notas Generales
                   </label>
                   <textarea
                     {...register('notas_generales')}
-                    placeholder="Observaciones adicionales, antecedentes relevantes no incluidos en otras secciones..."
+                    placeholder="Información adicional relevante sobre los antecedentes patológicos del paciente..."
                     rows={4}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
@@ -883,14 +645,8 @@ export default function PathologicalHistory() {
             )}
           </form>
 
-          {/* Resumen en la parte inferior */}
-          <div 
-            className="mt-6 p-4 rounded-md border"
-            style={{
-              background: currentTheme.colors.background,
-              borderColor: currentTheme.colors.border,
-            }}
-          >
+          {/* Resumen */}
+          <div className="mt-6 pt-4 border-t" style={{ borderColor: currentTheme.colors.border }}>
             <h4 
               className="text-sm font-medium mb-2"
               style={{ color: currentTheme.colors.text }}
