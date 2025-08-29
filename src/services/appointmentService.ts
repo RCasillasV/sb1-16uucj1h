@@ -101,6 +101,12 @@ export const appointments = {
     return data;
   },
 
+  async create(payload: any) {
+    const result = await svc.create(payload);
+    cache.delete('all');
+    return result;
+  },
+
   async update(id: string, dto: any) {
     const result = await svc.update(id, dto);
     cache.delete('all');
