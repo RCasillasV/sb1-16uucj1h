@@ -84,17 +84,35 @@ export const appointments = {
     consultorio: number;
     duracion_minutos: number;
     tipo_consulta: string;
-    [key: string]: any;
+    tiempo_evolucion?: number | null;
+    unidad_tiempo?: 'horas' | 'dias' | 'semanas' | 'meses' | null;
+    sintomas_asociados?: string[];
+    urgente?: boolean;
+    notas?: string | null;
   }) {
     const user = await requireSession();
     const idbu = await requireBusinessUnit(user.id);
 
+    // Map parameters to match the expected p_ prefixed signature of agendar_cita function
+    const rpcPayload = {
+      p_id_paciente: dto.id_paciente,
+      p_fecha_cita: dto.fecha_cita,
+      p_hora_cita: dto.hora_cita,
+      p_motivo: dto.motivo,
+      p_consultorio: dto.consultorio,
+      p_duracion_minutos: dto.duracion_minutos,
+      p_tipo_consulta: dto.tipo_consulta,
+      p_tiempo_evolucion: dto.tiempo_evolucion,
+      p_unidad_tiempo: dto.unidad_tiempo,
+      p_sintomas_asociados: dto.sintomas_asociados,
+      p_urgente: dto.urgente,
+      p_notas: dto.notas,
+      // Note: p_id_user and p_idbu are NOT included here because the function
+      // obtains them internally via auth.uid() and a query to tcUsuarios
+    };
+
     const data = await handle(
-      supabase.rpc('agendar_cita', {
-        ...dto,
-        p_id_user: user.id,
-        p_idbu: idbu,
-      }),
+      supabase.rpc('agendar_cita', rpcPayload),
       null
     );
     cache.delete('all');
