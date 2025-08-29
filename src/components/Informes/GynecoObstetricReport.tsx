@@ -295,34 +295,6 @@ export function GynecoObstetricReport({
       )}
 
       {/* Actions for modal view */}
-      {isModalView && (
-        <div className="flex items-center justify-between mb-4 print:hidden">
-          <h2
-            className="text-lg font-bold"
-            style={{ color: currentTheme.colors.text }}
-          >
-            Informe de Antecedentes Gineco-Obstétricos
-          </h2>
-          <div className="flex gap-2">
-            <button
-              onClick={handlePrint}
-              className={buttonStyle.base}
-              style={buttonStyle.primary}
-            >
-              <Printer className="h-5 w-5 mr-2" />
-              Imprimir
-            </button>
-            <button
-              onClick={onClose}
-              className={buttonStyle.base}
-              style={buttonStyle.secondary}
-            >
-              <X className="h-5 w-5 mr-2" />
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Report content */}
       <div
