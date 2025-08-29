@@ -340,6 +340,7 @@ export function ComprehensiveClinicalHistoryReport({
               patientId={patientId}
               isModalView={true} // Pass true to hide its own header/buttons
               patientData={patient} // Pass patient data to avoid re-fetching
+              isSubReport={true}
             />
           </section>
 
@@ -352,6 +353,7 @@ export function ComprehensiveClinicalHistoryReport({
               patientId={patientId}
               isModalView={true}
               patientData={patient}
+              isSubReport={true}
             />
           </section>
 
@@ -364,6 +366,7 @@ export function ComprehensiveClinicalHistoryReport({
               patientId={patientId}
               isModalView={true}
               patientData={patient}
+              isSubReport={true}
             />
           </section>
 
@@ -377,6 +380,7 @@ export function ComprehensiveClinicalHistoryReport({
                 patientId={patientId}
                 isModalView={true}
                 patientData={patient}
+                isSubReport={true}
               />
             </section>
           )}

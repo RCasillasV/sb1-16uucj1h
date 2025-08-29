@@ -18,6 +18,7 @@ interface HeredoFamilialReportProps {
   isModalView?: boolean;
   onClose?: () => void;
   patientData?: Patient | null; // Optional: pass patient data to avoid refetching
+  isSubReport?: boolean;
 }
 
 export function HeredoFamiliarReport({
@@ -25,6 +26,7 @@ export function HeredoFamiliarReport({
   isModalView = false,
   onClose,
   patientData,
+  isSubReport = false,
 }: HeredoFamilialReportProps) {
   const { currentTheme } = useTheme();
   const { user, loading: authLoading } = useAuth();
@@ -280,7 +282,7 @@ export function HeredoFamiliarReport({
         : "max-w-4xl mx-auto p-6 print:p-0 print:max-w-none"
     )}>
       {/* Header with actions - hidden in print */}
-      {!isModalView && (
+      {!isModalView && !isSubReport && (
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div className="flex items-center gap-3">
             <Contact className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
@@ -326,37 +328,41 @@ export function HeredoFamiliarReport({
         }}
       >
         {/* Report Header - for print */}
-        <div className="text-center mb-8 print:mb-6">
-          <h1 className="text-3xl font-bold mb-2 print:text-black" style={{ color: currentTheme.colors.text }}>
-            Informe de Antecedentes Heredo-Familiares
-          </h1>
-          <p className="text-sm print:text-black" style={{ color: currentTheme.colors.textSecondary }}>
-            Generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
-          </p>
-        </div>
+        {!isSubReport && (
+          <>
+            <div className="text-center mb-8 print:mb-6">
+              <h1 className="text-3xl font-bold mb-2 print:text-black" style={{ color: currentTheme.colors.text }}>
+                Informe de Antecedentes Heredo-Familiares
+              </h1>
+              <p className="text-sm print:text-black" style={{ color: currentTheme.colors.textSecondary }}>
+                Generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
+              </p>
+            </div>
 
-        {/* Patient identification */}
-        <div className="text-center mb-8 p-6 rounded-lg print:bg-gray-100 print:rounded-none"
-             style={{ background: `${currentTheme.colors.primary}10` }}>
-          <div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 print:bg-gray-400"
-            style={{ background: currentTheme.colors.primary }}
-          >
-            <User className="w-8 h-8 print:text-white" style={{ color: currentTheme.colors.buttonText }} />
-          </div>
-          <h2 className="text-2xl font-bold mb-2 print:text-black" style={{ color: currentTheme.colors.text }}>
-            {patient.Nombre} {patient.Paterno} {patient.Materno}
-          </h2>
-          <div className="flex justify-center items-center gap-4 text-sm print:text-black"
-               style={{ color: currentTheme.colors.textSecondary }}>
-            <span>Folio: {patient.Folio || 'No asignado'}</span>
-            {age && <span>• {age.formatted}</span>}
-            <span>• {patient.Sexo}</span>
-            {patient.FechaNacimiento && (
-              <span>• Nacido el {formatDate(patient.FechaNacimiento)}</span>
-            )}
-          </div>
-        </div>
+            {/* Patient identification */}
+            <div className="text-center mb-8 p-6 rounded-lg print:bg-gray-100 print:rounded-none"
+                 style={{ background: `${currentTheme.colors.primary}10` }}>
+              <div
+                className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 print:bg-gray-400"
+                style={{ background: currentTheme.colors.primary }}
+              >
+                <User className="w-8 h-8 print:text-white" style={{ color: currentTheme.colors.buttonText }} />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 print:text-black" style={{ color: currentTheme.colors.text }}>
+                {patient.Nombre} {patient.Paterno} {patient.Materno}
+              </h2>
+              <div className="flex justify-center items-center gap-4 text-sm print:text-black"
+                   style={{ color: currentTheme.colors.textSecondary }}>
+                <span>Folio: {patient.Folio || 'No asignado'}</span>
+                {age && <span>• {age.formatted}</span>}
+                <span>• {patient.Sexo}</span>
+                {patient.FechaNacimiento && (
+                  <span>• Nacido el {formatDate(patient.FechaNacimiento)}</span>
+                )}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Heredo Familial Records */}
         <InfoSection title="Antecedentes Heredo-Familiares">
