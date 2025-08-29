@@ -151,7 +151,7 @@ export function NonPathologicalHistoryReport({
     },
     secondary: {
       background: 'transparent',
-      border: \`1px solid ${currentTheme.colors.border}`,
+      border: `1px solid ${currentTheme.colors.border}`,
       color: currentTheme.colors.text,
     },
   };
