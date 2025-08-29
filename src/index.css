@@ -42,17 +42,19 @@
   .print\:text-white { color: white !important; }
 
   /* Modal printing rules */
-  /* CRITICAL: Modal printing rules */
-  /* Hide everything in the body except the modal's root when printing a modal */
+  /* Hide everything in the body except the modal when printing */
   body.is-printing-modal > *:not(.print-modal-root) {
     display: none !important;
   }
 
-  /* Make the modal's root element visible and full screen for printing */
+  /* Make the modal root visible and full screen for printing */
   body.is-printing-modal .print-modal-root {
     display: block !important;
     position: fixed !important;
     top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
@@ -65,12 +67,12 @@
     padding: 0 !important;
   }
 
-  /* Hide the modal backdrop when printing */
+  /* Hide modal backdrop when printing */
   body.is-printing-modal #modal-overlay-print-target {
     display: none !important;
   }
 
-  /* Ensure the actual modal content is visible and styled for print */
+  /* Style the modal content for printing */
   body.is-printing-modal #modal-content-print-target {
     display: block !important;
     visibility: visible !important;
@@ -78,6 +80,7 @@
     width: auto !important;
     height: auto !important;
     max-width: none !important;
+    max-height: none !important;
     background: white !important;
     color: black !important;
     padding: 0.5in !important;
@@ -87,9 +90,9 @@
     box-shadow: none !important;
     z-index: auto !important;
     overflow: visible !important;
-    box-sizing: border-box !important;
   }
 
+  /* Ensure all modal content elements are visible for printing */
   body.is-printing-modal #modal-content-print-target * {
     visibility: visible !important;
     opacity: 1 !important;
@@ -100,6 +103,8 @@
     filter: none !important;
     position: static !important;
     transform: none !important;
+    overflow: visible !important;
+    max-height: none !important;
   }
 
   /* Display utilities */
@@ -154,3 +159,14 @@
     color: black !important;
   }
 }
+  /* Critical: Remove overflow and height constraints that can cause blank pages */
+  body.is-printing-modal .overflow-y-auto,
+  body.is-printing-modal .overflow-auto,
+  body.is-printing-modal .max-h-\[90vh\],
+  body.is-printing-modal .h-full,
+  body.is-printing-modal .min-h-screen {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: auto !important;
+  }

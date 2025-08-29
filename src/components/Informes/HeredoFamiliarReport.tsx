@@ -137,7 +137,7 @@ export function HeredoFamiliarReport({
     // Add a small delay to ensure DOM is ready for print
     setTimeout(() => {
       window.print();
-    }, 100); // 100ms delay
+    }, 500); // Increased delay for better rendering
   };
 
   const formatDate = (dateString: string) => {

@@ -71,7 +71,9 @@ export function NonPathologicalHistoryReport({
   };
 
   const handlePrint = () => {
-    window.print();
+    setTimeout(() => {
+      window.print();
+    }, 500); // Added delay for consistency
   };
 
   const formatDate = (dateString: string) => {

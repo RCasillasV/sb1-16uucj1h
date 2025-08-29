@@ -111,7 +111,7 @@ export function GynecoObstetricReport({
     // Add a small delay to ensure DOM is ready for print
     setTimeout(() => {
       window.print();
-    }, 100);
+    }, 500); // Increased delay for better rendering
   };
 
   const formatDate = (dateString: string) => {

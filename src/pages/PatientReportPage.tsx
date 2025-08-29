@@ -106,7 +106,7 @@ export function PatientReportPage() {
       const printTimer = setTimeout(() => {
         console.log('PatientReportPage: Disparando window.print()');
         window.print();
-      }, 500);
+      }, 1000); // Increased delay for auto-print
       
       return () => {
         clearTimeout(printTimer);
@@ -146,7 +146,9 @@ export function PatientReportPage() {
   };
 
   const handlePrint = () => {
-    window.print();
+    setTimeout(() => {
+      window.print();
+    }, 500); // Added delay for manual print
   };
 
   const buttonStyle = {

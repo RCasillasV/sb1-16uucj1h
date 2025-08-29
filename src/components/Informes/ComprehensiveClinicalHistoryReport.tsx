@@ -114,7 +114,7 @@ export function ComprehensiveClinicalHistoryReport({
   const handlePrint = () => {
     setTimeout(() => {
       window.print();
-    }, 100); // Small delay to ensure content is rendered before printing
+    }, 500); // Increased delay to ensure complete rendering
   };
 
   // Helper function to format dates
