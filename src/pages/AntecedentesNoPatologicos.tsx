@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { FileText, User, Home, Activity, Save, CheckCircle } from 'lucide-react';
+import { FileText, User, Home, Activity, Save, CheckCircle, Printer } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
+import { NonPathologicalHistoryReport } from '../components/Informes/NonPathologicalHistoryReport';
 import clsx from 'clsx';
 
 // Esquemas de validación por sección
@@ -95,6 +96,7 @@ export function AntecedentesNoPatologicos() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
+  const [showReportModal, setShowReportModal] = useState(false);
   
   console.log('AntecedentesNoPatologicos: user:', user, 'authLoading:', authLoading); // <-- Añade esta línea
 
@@ -301,15 +303,28 @@ export function AntecedentesNoPatologicos() {
             Información sobre hábitos, estilo de vida y entorno del paciente
           </p>
         </div>
-        <button
-          onClick={handleSubmit(onSubmit)}
-          disabled={saving}
-          className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
-          style={buttonStyle.primary}
-        >
-          <Save className="h-4 w-4" />
-          {saving ? 'Guardando...' : 'Guardar'}
-        </button>
+        <div className="flex gap-2">
+          {selectedPatient && (
+            <button
+              type="button"
+              onClick={() => setShowReportModal(true)}
+              className={clsx(buttonStyle.base, 'flex items-center gap-2')}
+              style={buttonStyle.primary}
+            >
+              <Printer className="h-4 w-4" />
+              Imprimir Informe
+            </button>
+          )}
+          <button
+            onClick={handleSubmit(onSubmit)}
+            disabled={saving}
+            className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
+            style={buttonStyle.primary}
+          >
+            <Save className="h-4 w-4" />
+            {saving ? 'Guardando...' : 'Guardar'}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -976,6 +991,23 @@ export function AntecedentesNoPatologicos() {
           </div>
         </div>
       </div>
+
+      {/* Modal del Informe de Antecedentes No Patológicos */}
+      {selectedPatient && (
+        <Modal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          title="Informe de Antecedentes No Patológicos"
+          className="max-w-6xl w-full"
+        >
+          <NonPathologicalHistoryReport
+            patientId={selectedPatient.id}
+            isModalView={true}
+            onClose={() => setShowReportModal(false)}
+            patientData={selectedPatient}
+          />
+        </Modal>
+      )}
     </div>
   );
 
