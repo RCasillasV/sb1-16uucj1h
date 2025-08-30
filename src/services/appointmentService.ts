@@ -14,8 +14,9 @@ export const appointments = {
 
     const data = await svc.getAll(
       ` 
-      id, fecha_cita, hora_cita, estado,
-      patients:id_paciente(id,Nombre,Paterno,Materno)
+      id, fecha_cita, hora_cita, estado,motivo, notas, urgente, consultorio,
+      tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados, hora_fin, 
+      duracion_minutos, patients:id_paciente(id,Nombre,Paterno,Materno)
       `
     );
     cache.set(key, data);
