@@ -60,6 +60,7 @@ export function PatologiesManagement() {
       const { data, error } = await supabase
         .from('tcPatologias')
         .select('*')
+        .order('activo', { ascending: false })
         .order('nombre');
 
       if (error) throw error;
