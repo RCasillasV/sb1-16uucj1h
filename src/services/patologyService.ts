@@ -77,7 +77,7 @@ export const patologies = {
         .eq('activo', true)
         .or(`nombre.ilike.%${searchTerm}%,especialidad.ilike.%${searchTerm}%`)
         .order('nombre')
-        .limit(20),
+        .limit(12),
       []
     );
     cache.set(key, data);
