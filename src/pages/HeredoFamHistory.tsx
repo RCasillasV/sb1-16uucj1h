@@ -251,6 +251,17 @@ export function HeredoFamHistory() {
   // Observar el estado completo de familyMembers para detectar cambios
   const watchedFamilyMembers = watch('familyMembers');
 
+  // useEffect para controlar la duración del mensaje de dragDropError
+  useEffect(() => {
+    if (dragDropError) {
+      const timer = setTimeout(() => {
+        setDragDropError(null);
+      }, 2000); // El mensaje desaparecerá después de 2 segundos
+
+      return () => clearTimeout(timer); // Limpia el temporizador si el componente se desmonta o el error cambia
+    }
+  }, [dragDropError]);
+  
   // Debug form state
   useEffect(() => {
     console.log("=== HeredoFamHistory Form Debug ===");
