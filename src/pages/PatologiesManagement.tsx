@@ -247,25 +247,25 @@ export function PatologiesManagement() {
                   Nombre
                 </th>
                 <th 
-                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-1 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Especialidad
                 </th>
                 <th 
-                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-1 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Sexo
                 </th>
                 <th 
-                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-1 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Estado
                 </th>
                 <th 
-                  className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-1 text-right text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Acciones
@@ -277,7 +277,7 @@ export function PatologiesManagement() {
                 <tr>
                   <td 
                     colSpan={6} 
-                    className="px-6 py-2 text-center"
+                    className="px-6 py-1 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     Cargando patologías...
@@ -287,7 +287,7 @@ export function PatologiesManagement() {
                 <tr>
                   <td 
                     colSpan={6} 
-                    className="px-6 py-2 text-center"
+                    className="px-6 py-1 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     No hay patologías registradas
@@ -299,16 +299,16 @@ export function PatologiesManagement() {
                     key={patology.id}
                     style={{ color: currentTheme.colors.text }}
                   >
-                    <td className="px-6 py-2 whitespace-nowrap truncate">
+                    <td className="px-6 py-1 whitespace-nowrap truncate">
                       {patology.nombre}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap truncate">
+                    <td className="px-6 py-1 whitespace-nowrap truncate">
                       {patology.especialidad || '-'}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap truncate">
+                    <td className="px-6 py-1 whitespace-nowrap truncate">
                       {patology.sexo || 'Indistinto'}
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap truncate">
+                    <td className="px-6 py-1 whitespace-nowrap truncate">
                       <button
                         onClick={async () => {
                           try {
