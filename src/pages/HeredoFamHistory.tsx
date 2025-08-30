@@ -353,7 +353,7 @@ export function HeredoFamHistory() {
 
       // Definir categorías de miembros familiares
       const FEMALE_FAMILY_MEMBERS = ['Madre', 'Abuela (Materna)', 'Abuela (Paterna)'];
-      const MALE_FAMILY_MEMBERS = ['Padre', 'Abuelo (Materno)', 'Abuelo (Paterna)'];
+      const MALE_FAMILY_MEMBERS = ['Padre', 'Abuelo (Materno)', 'Abuelo (Paterno)'];
 
       let isValidDrop = true;
       let validationMessage = '';
