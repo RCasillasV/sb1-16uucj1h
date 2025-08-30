@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 interface AppPatology {
   id: string;
   nombre: string;
+  sexo: 'Masculino' | 'Femenino' | 'Indistinto';
 }
 
 interface HeredoFamilialPathology {
