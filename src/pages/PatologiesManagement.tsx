@@ -164,7 +164,7 @@ export function PatologiesManagement() {
 
   const buttonStyle = {
     base: clsx(
-      'px-4 py-2 transition-colors',
+      'px-4 py-1 transition-colors',
       currentTheme.buttons.style === 'pill' && 'rounded-full',
       currentTheme.buttons.style === 'rounded' && 'rounded-lg',
       currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
@@ -219,7 +219,7 @@ export function PatologiesManagement() {
             placeholder="Buscar patologías..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-md border"
+            className="w-full pl-10 pr-4 py-1 rounded-md border"
             style={{
               background: currentTheme.colors.surface,
               borderColor: currentTheme.colors.border,
@@ -241,7 +241,7 @@ export function PatologiesManagement() {
             <thead>
               <tr style={{ background: currentTheme.colors.background }}>
                 <th 
-                  className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider"
+                  className="px-6 py-1 text-left text-xs font-medium uppercase tracking-wider"
                   style={{ color: currentTheme.colors.textSecondary }}
                 >
                   Nombre
@@ -337,7 +337,7 @@ export function PatologiesManagement() {
                         />
                       </button>
                     </td>
-                    <td className="px-6 py-2 whitespace-nowrap truncate text-right">
+                    <td className="px-6 py-1 whitespace-nowrap truncate text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => {
@@ -376,7 +376,7 @@ export function PatologiesManagement() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div 
-            className="px-6 py-2 flex items-center justify-between border-t"
+            className="px-6 py-1 flex items-center justify-between border-t"
             style={{ borderColor: currentTheme.colors.border }}
           >
             <div>
