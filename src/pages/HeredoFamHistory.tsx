@@ -62,7 +62,7 @@ const familyMemberSchema = z.object({
       const num = Number(val);
       return Number.isNaN(num) ? null : num;
     },
-    z.number().nullable().optional()
+    z.number().int().nullable().optional()
   ),
   patologias: z.array(z.object({
     nPatologia: z.string(),
@@ -195,11 +195,11 @@ export function HeredoFamHistory() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragDropError, setDragDropError] = useState<string | null>(null); // Nuevo estado para errores de drag and drop
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -321,13 +321,14 @@ export function HeredoFamHistory() {
   // --- 6. Lógica de Drag and Drop ---
   const handleDragStart = (event: DragStartEvent) => {
     setActiveDragId(event.active.id as string);
+    setDragDropError(null); // Limpiar errores de drag and drop al iniciar un nuevo arrastre
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDragId(null);
     setOverId(null);
-    setError(null);
+    setDragDropError(null); // Limpiar errores de drag and drop al finalizar el arrastre (si no hay nuevo error)
 
     if (!over) return;
 
@@ -368,7 +369,7 @@ export function HeredoFamHistory() {
       // ya que el grupo puede ser mixto o no tener un sexo definido para la restricción.
 
       if (!isValidDrop) {
-        setError(validationMessage);
+        setDragDropError(validationMessage); // Establecer el error específico de drag and drop
         return; // Detener el procesamiento si la validación falla
       }
       
@@ -548,6 +549,24 @@ export function HeredoFamHistory() {
         )}
       </div>
 
+      {error && ( // Bloque para mostrar el error general
+        <div
+          className="p-4 rounded-md border-l-4"
+          style={{
+            background: '#FEE2E2',
+            borderLeftColor: '#DC2626',
+            color: '#DC2626',
+          }}
+        >
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5" />
+            <div className="ml-3">
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form id="heredo-fam-form" onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         <DndContext
         sensors={sensors}
@@ -577,7 +596,7 @@ export function HeredoFamHistory() {
                 }}
               >
                 {activePatologiesData?.length || 0}
-              </span> {/* Se eliminó globalSelectedCatalogPatologies y se reemplazó por activePatologiesData?.length */}
+              </span>
               <Link
                 to="/settings/patologias"
                 className="ml-2 p-1 rounded-full hover:bg-black/5 transition-colors"
@@ -592,6 +611,19 @@ export function HeredoFamHistory() {
                 <Settings className="h-4 w-4" />
               </Link>
             </h2>
+            {dragDropError && ( // Renderizado condicional del nuevo mensaje de error
+              <div
+                className="flex items-center gap-2 text-sm px-2 py-1 rounded-md mb-2"
+                style={{
+                  background: '#FFFBEB', // Fondo amarillo claro para advertencia
+                  color: '#D97706', // Texto amarillo oscuro
+                  border: `1px solid #FCD34D`, // Borde amarillo
+                }}
+              >
+                <AlertCircle className="h-4 w-4 shrink-0" /> {/* Icono de advertencia */}
+                <span>{dragDropError}</span>
+              </div>
+            )}
             <p 
               className="text-sm mb-1"
               style={{ color: currentTheme.colors.textSecondary }}
@@ -745,7 +777,7 @@ export function HeredoFamHistory() {
                                       onClick={() => removePathologyFromFamilyMember(index, pathIndex)}
                                       className="p-0.5 rounded-full hover:bg-red-100 transition-colors"
                                     >
-                                      <X className="h-4 w-4 text-red-500" />
+                                      <X className="h-3 w-3 text-red-500" />
                                     </button>
                                   </div>
                                 ))}
