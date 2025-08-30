@@ -327,6 +327,7 @@ export function HeredoFamHistory() {
     const { active, over } = event;
     setActiveDragId(null);
     setOverId(null);
+    setError(null);
 
     if (!over) return;
 
@@ -337,12 +338,40 @@ export function HeredoFamHistory() {
     ) {
       const patology = active.data.current.patology as AppPatology;
       const familyMemberKey = over.data.current.familyMemberKey as string;
+
+      // Definir categorías de miembros familiares
+      const FEMALE_FAMILY_MEMBERS = ['Madre', 'Abuela (Materna)', 'Abuela (Paterna)'];
+      const MALE_FAMILY_MEMBERS = ['Padre', 'Abuelo (Materno)', 'Abuelo (Paterna)'];
+
+      let isValidDrop = true;
+      let validationMessage = '';
       
       // Encontrar el índice del familiar en el array del formulario
       const familyMemberIndex = fields.findIndex(
         field => field.miembro_fam_key === familyMemberKey
       );
 
+      if (FEMALE_FAMILY_MEMBERS.includes(familyMemberKey)) {
+        // Soltando en un miembro familiar femenino
+        if (patology.sexo === 'Masculino') {
+          isValidDrop = false;
+          validationMessage = `La patología '${patology.nombre}' es específica de sexo Masculino y no puede ser asignada a ${familyMemberKey}.`;
+        }
+      } else if (MALE_FAMILY_MEMBERS.includes(familyMemberKey)) {
+        // Soltando en un miembro familiar masculino
+        if (patology.sexo === 'Femenino') {
+          isValidDrop = false;
+          validationMessage = `La patología '${patology.nombre}' es específica de sexo Femenino y no puede ser asignada a ${familyMemberKey}.`;
+        }
+      }
+      // Para 'Hermanos' u otras categorías generales, no se aplica una restricción de sexo opuesto
+      // ya que el grupo puede ser mixto o no tener un sexo definido para la restricción.
+
+      if (!isValidDrop) {
+        setError(validationMessage);
+        return; // Detener el procesamiento si la validación falla
+      }
+      
       if (familyMemberIndex !== -1) {
         const currentPatologias = watch(`familyMembers.${familyMemberIndex}.patologias`) || [];
         
