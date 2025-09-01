@@ -335,7 +335,7 @@ export function Appointments() {
                 <tr>
                   <td 
                     colSpan={5} 
-                    className="px-6 py-4 text-center"
+                    className="px-6 py-2 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     {authLoading ? 'Autenticando...' : 'Cargando citas...'}
@@ -345,7 +345,7 @@ export function Appointments() {
                 <tr>
                   <td 
                     colSpan={5} 
-                    className="px-6 py-4 text-center"
+                    className="px-6 py-2 text-center"
                     style={{ color: currentTheme.colors.textSecondary }}
                   >
                     No hay citas registradas
@@ -367,19 +367,19 @@ export function Appointments() {
                       )}
                       style={{ color: currentTheme.colors.text }}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-2 whitespace-nowrap">
                         {formatAppointmentDate(appointment.fecha_cita, appointment.hora_cita)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-2 whitespace-nowrap">
                         {appointment.patients ? `${appointment.patients.Nombre} ${appointment.patients.Paterno}` : 'Paciente no encontrado'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-2 whitespace-nowrap">
                         {appointment.motivo}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-2 whitespace-nowrap">
                         {getStatusBadge(appointment.estado)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-6 py-2 whitespace-nowrap text-right">
                         <div className="flex justify-end gap-2">
                           {!isPast && (
                             <>
