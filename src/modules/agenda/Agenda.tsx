@@ -904,11 +904,6 @@ export function Agenda() {
           setAppointmentError(null);
         }}
         className={clsx(buttonClasses.base, buttonClasses.outline)}
-        style={{
-          background: 'transparent',
-          borderColor: currentTheme.colors.border,
-          color: currentTheme.colors.text,
-        }}
       >
         Cancelar
       </button>
@@ -922,11 +917,6 @@ export function Agenda() {
           }          
         })}
         className={clsx(buttonClasses.base, 'border')}
-        style={{
-            background: 'transparent',
-            borderColor: currentTheme.colors.border,
-            color: currentTheme.colors.text,
-        }}
       >
         Formulario Completo
       </button>
@@ -936,11 +926,6 @@ export function Agenda() {
         onClick={handleQuickAppointmentSubmit}
         disabled={submittingAppointment || !appointmentForm.motivo.trim()}
         className={clsx(buttonClasses.base, 'border')}
-                  style={{
-                    background: 'transparent',
-                    borderColor: currentTheme.colors.border,
-                    color: currentTheme.colors.text,
-                  }}
         >
         {submittingAppointment ? 'Agendando...' : 'Agendar'}
       </button>
