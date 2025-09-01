@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Modal } from '../../components/Modal';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useStyles } from '../../hooks/useStyles';
 import clsx from 'clsx';
 import type { EventInput } from '@fullcalendar/core';
 
@@ -33,20 +34,7 @@ export function ModalAgenda({
   onFormDataChange,
 }: ModalAgendaProps) {
   const { currentTheme } = useTheme();
-
-  const buttonStyle = {
-    base: clsx(
-      'px-4 py-2 transition-colors',
-      currentTheme.buttons.style === 'pill' && 'rounded-full',
-      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
-      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
-      currentTheme.buttons.animation && 'hover:scale-105'
-    ),
-    primary: {
-      background: currentTheme.colors.buttonPrimary,
-      color: currentTheme.colors.buttonText,
-    },
-  };
+  const { buttonClasses } = useStyles();
 
   return (
     <Modal
@@ -57,20 +45,14 @@ export function ModalAgenda({
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className={clsx(buttonStyle.base, 'border')}
-            style={{
-              background: 'transparent',
-              borderColor: currentTheme.colors.border,
-              color: currentTheme.colors.text,
-            }}
+            className={clsx(buttonClasses.base, buttonClasses.outline)}
           >
             Cancelar
           </button>
           <button
             onClick={onSubmit}
             disabled={!formData.reason.trim()}
-            className={buttonStyle.base}
-            style={buttonStyle.primary}
+            className={clsx(buttonClasses.base, buttonClasses.primary)}
           >
             {selectedEvent ? 'Actualizar' : 'Guardar'}
           </button>
