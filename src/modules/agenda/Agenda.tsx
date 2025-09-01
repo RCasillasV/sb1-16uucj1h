@@ -941,7 +941,7 @@ export function Agenda() {
                     borderColor: currentTheme.colors.border,
                     color: currentTheme.colors.text,
                   }}
-     >
+        >
         {submittingAppointment ? 'Agendando...' : 'Agendar'}
       </button>
     </div>
