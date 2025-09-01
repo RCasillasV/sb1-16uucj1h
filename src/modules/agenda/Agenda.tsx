@@ -932,10 +932,10 @@ export function Agenda() {
       </button>
       {/* Botón Agendar */}
       <button
+        type="button"
         onClick={handleQuickAppointmentSubmit}
         disabled={submittingAppointment || !appointmentForm.motivo.trim()}
-        // Elimina clases de padding y redondeo si están aquí
-       className={clsx(buttonStyle.base, 'border')}
+        className={clsx(buttonStyle.base, 'border')}
                   style={{
                     background: 'transparent',
                     borderColor: currentTheme.colors.border,
