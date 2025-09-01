@@ -903,7 +903,7 @@ export function Agenda() {
           setAppointmentError(null);
         }}
         // Elimina clases de padding y redondeo si están aquí
-        className={clsx(buttonClasses.base, buttonClasses.secondary)}
+        className={clsx(buttonClasses.base)}
         style={{
           background: 'transparent',
           borderColor: currentTheme.colors.border,
@@ -921,7 +921,7 @@ export function Agenda() {
           }
         })}
         // Elimina clases de padding y redondeo si están aquí
-        className={clsx(buttonClasses.base, buttonClasses.outline)}
+        className={clsx(buttonClasses.base)}
       >
         Formulario Completo
       </button>
