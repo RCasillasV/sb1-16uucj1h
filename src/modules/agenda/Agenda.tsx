@@ -921,7 +921,7 @@ export function Agenda() {
           }
         })}
         // Elimina clases de padding y redondeo si están aquí
-        className={clsx(buttonClasses.base)}
+        className={clsx(buttonClasses.outline)}
       >
         Formulario Completo
       </button>
