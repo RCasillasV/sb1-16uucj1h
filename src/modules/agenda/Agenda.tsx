@@ -903,7 +903,6 @@ export function Agenda() {
           setShowQuickAppointmentModal(false);
           setAppointmentError(null);
         }}
-        // Elimina clases de padding y redondeo si están aquí
         className={clsx(buttonClasses.base, buttonClasses.outline)}
         style={{
           background: 'transparent',
@@ -915,14 +914,19 @@ export function Agenda() {
       </button>
       {/* Botón Formulario Completo */}
       <button
+        type="button"
         onClick={() => navigate('/citas', {
           state: {
             selectedDate: new Date(`${appointmentForm.fecha_cita}T${appointmentForm.hora_cita}`),
             selectedPatient: selectedPatient
           }          
         })}
-
-        className={clsx(buttonClasses.base, buttonClasses.outline)}
+        className={clsx(buttonStyle.base, 'border')}
+        style={{
+            background: 'transparent',
+            borderColor: currentTheme.colors.border,
+            color: currentTheme.colors.text,
+        }}
       >
         Formulario Completo
       </button>
