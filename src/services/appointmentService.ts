@@ -46,8 +46,8 @@ export const appointments = {
           patients:id_paciente(id,Nombre,Paterno,Materno)
         `)
         .eq('id_paciente', patientId)
-        .order('fecha_cita', { ascending: false })
-        .order('hora_cita', { ascending: false }),
+        .order('fecha_cita', { ascending: true })
+        .order('hora_cita', { ascending: true }),
       []
     );
     
