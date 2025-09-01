@@ -898,6 +898,7 @@ export function Agenda() {
     <div className="flex justify-end gap-2">
       {/* Botón Cancelar */}
       <button
+        type="button"
         onClick={() => {
           setShowQuickAppointmentModal(false);
           setAppointmentError(null);
