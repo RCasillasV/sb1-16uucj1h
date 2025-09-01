@@ -618,6 +618,7 @@ export function Agenda() {
                   handleWindowResize={true}
                   stickyHeaderDates={true}
                   expandRows={true}
+                 nowIndicator={true}
                 />
               ) : (
                 <div className="flex items-center justify-center h-96">
