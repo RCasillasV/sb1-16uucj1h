@@ -743,7 +743,7 @@ export function Agenda() {
         title="Seleccionar Paciente"
         actions={
           <button
-            className={clsx(buttonClasses.base, buttonClasses.primary)}
+            className={clsx(buttonClasses.base, buttonClasses.outline)}
             onClick={() => setShowPatientSelectionModal(false)}
           >
             Cancelar
@@ -903,7 +903,7 @@ export function Agenda() {
           setAppointmentError(null);
         }}
         // Elimina clases de padding y redondeo si están aquí
-        className={clsx(buttonClasses.outline)}
+        className={clsx(buttonClasses.base, buttonClasses.outline)}
         style={{
           background: 'transparent',
           borderColor: currentTheme.colors.border,
@@ -921,7 +921,7 @@ export function Agenda() {
           }
         })}
         // Elimina clases de padding y redondeo si están aquí
-        className={clsx(buttonClasses.outline)}
+        className={clsx(buttonClasses.base, buttonClasses.outline)}
       >
         Formulario Completo
       </button>
