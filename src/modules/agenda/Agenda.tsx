@@ -903,7 +903,7 @@ export function Agenda() {
           setAppointmentError(null);
         }}
         // Elimina clases de padding y redondeo si están aquí
-        className={clsx(buttonClasses.base)}
+        className={clsx(buttonClasses.outline)}
         style={{
           background: 'transparent',
           borderColor: currentTheme.colors.border,
