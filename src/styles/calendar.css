@@ -55,3 +55,37 @@
 :root[data-theme="dark"] .fc-timegrid-slot {
   background-color: #1f2937 !important;
 }
+
+/* Estilo para el indicador de hora actual (línea roja) */
+.fc-now-indicator {
+  border-color: #EF4444 !important; /* Rojo brillante */
+  border-width: 2px !important; /* Grosor de la línea */
+  border-style: solid !important; /* Línea sólida */
+  opacity: 0.8; /* Transparencia para que no sea demasiado intrusiva */
+  z-index: 3; /* Asegura que esté por encima de otros elementos */
+}
+
+/* Círculo pequeño al inicio de la línea de hora actual */
+.fc-now-indicator::before {
+  content: '';
+  position: absolute;
+  top: -4px; /* Centrar verticalmente respecto a la línea */
+  left: -4px; /* Posición horizontal del círculo */
+  width: 8px; /* Tamaño del círculo */
+  height: 8px; /* Tamaño del círculo */
+  background-color: #EF4444; /* Color rojo del círculo */
+  border-radius: 50%; /* Forma de círculo perfecto */
+  border: 1px solid white; /* Borde blanco para mejor contraste */
+  z-index: 4; /* Por encima de la línea */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+}
+
+/* Estilo específico para la línea en vista de semana */
+.fc-timeGridWeek-view .fc-now-indicator {
+  border-width: 2.5px !important; /* Línea un poco más gruesa en vista semanal */
+}
+
+/* Animación suave para el indicador cuando se actualiza */
+.fc-now-indicator {
+  transition: all 0.3s ease-in-out;
+}
