@@ -921,7 +921,7 @@ export function Agenda() {
             selectedPatient: selectedPatient
           }          
         })}
-        className={clsx(buttonStyle.base, 'border')}
+        className={clsx(buttonClasses.base, 'border')}
         style={{
             background: 'transparent',
             borderColor: currentTheme.colors.border,
@@ -935,7 +935,7 @@ export function Agenda() {
         type="button"
         onClick={handleQuickAppointmentSubmit}
         disabled={submittingAppointment || !appointmentForm.motivo.trim()}
-        className={clsx(buttonStyle.base, 'border')}
+        className={clsx(buttonClasses.base, 'border')}
                   style={{
                     background: 'transparent',
                     borderColor: currentTheme.colors.border,
