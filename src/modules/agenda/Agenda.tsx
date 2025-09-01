@@ -918,9 +918,9 @@ export function Agenda() {
           state: {
             selectedDate: new Date(`${appointmentForm.fecha_cita}T${appointmentForm.hora_cita}`),
             selectedPatient: selectedPatient
-          }
+          }          
         })}
-        // Elimina clases de padding y redondeo si están aquí
+
         className={clsx(buttonClasses.base, buttonClasses.outline)}
       >
         Formulario Completo
@@ -930,8 +930,13 @@ export function Agenda() {
         onClick={handleQuickAppointmentSubmit}
         disabled={submittingAppointment || !appointmentForm.motivo.trim()}
         // Elimina clases de padding y redondeo si están aquí
-        className={clsx(buttonClasses.base, buttonClasses.primary, 'disabled:opacity-50')}
-      >
+       className={clsx(buttonStyle.base, 'border')}
+                  style={{
+                    background: 'transparent',
+                    borderColor: currentTheme.colors.border,
+                    color: currentTheme.colors.text,
+                  }}
+     >
         {submittingAppointment ? 'Agendando...' : 'Agendar'}
       </button>
     </div>
