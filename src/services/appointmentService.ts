@@ -12,17 +12,25 @@ export const appointments = {
     const cached = cache.get(key);
     if (cached) return cached;
 
-    const data = await svc.getAll(
-      ` 
-      id, fecha_cita, hora_cita, estado,motivo, notas, urgente, consultorio,
-      tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados, hora_fin, 
-      duracion_minutos, patients:id_paciente(id,Nombre,Paterno,Materno)
-      `
-    );
+    const { data, error } = await supabase
+      .from('tcCitas')
+      .select(
+        `id, fecha_cita, hora_cita, estado,motivo, notas, urgente, consultorio,
+        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados, hora_fin,
+        duracion_minutos, patients:id_paciente(id,Nombre,Paterno,Materno)
+        `
+      )
+      .order('fecha_cita', { ascending: true }) // Ordenar por fecha de forma ascendente
+      .order('hora_cita', { ascending: true }); // Luego ordenar por hora de forma ascendente
+
+    if (error) {
+      throw error; // Manejar el error si la consulta falla
+    }
+
     cache.set(key, data);
     return data;
   },
-
+  
   async getById(id: string) {
     return svc.getById(
       `
