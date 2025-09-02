@@ -323,16 +323,13 @@ export function Agenda() {
       setShowConfigurationErrorModal(true);
       return;
     }
+   navigate('/citas', {
+      state: {
+        selectedDate: selectedDateTime, // Pasa la fecha y hora seleccionadas
+        selectedPatient: selectedPatient // Pasa el paciente seleccionado
+      }
+    });
 
-    // Inicializar formulario con datos de selección
-    setAppointmentForm(prev => ({
-      ...prev,
-      fecha_cita: selectedDateString,
-      hora_cita: selectedTimeString,
-      duracion_minutos: agendaSettings.slot_interval
-    }));
-    
-    setShowQuickAppointmentModal(true);
   };
 
   const handleQuickAppointmentSubmit = async () => {
