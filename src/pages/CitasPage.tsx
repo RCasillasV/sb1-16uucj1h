@@ -589,7 +589,7 @@ export function CitasPage() {
     },
   };
 
-  if (!selectedPatient) {
+  if (!patientForForm)  {
     return (
       <div className="p-6 text-center">
         <p className="text-lg mb-4">Por favor seleccione un paciente primero</p>
