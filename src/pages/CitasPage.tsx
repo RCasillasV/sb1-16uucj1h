@@ -84,8 +84,8 @@ export function CitasPage() {
       tiempo_evolucion: '',
       unidad_tiempo: 'dias',
       sintomas_asociados: [],
-      fecha_cita: format(new Date(), 'yyyy-MM-dd'), // Will be updated below
-      hora_cita: '09:00', // Will be updated below
+      fecha_cita: initialDate, 
+      hora_cita: initialTime, 
       consultorio: 1,
       urgente: false,
       mismo_motivo: false,
