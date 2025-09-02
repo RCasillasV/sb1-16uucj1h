@@ -125,6 +125,9 @@ export function CitasPage() {
     viewOnly?: boolean;
   } | null;
 
+  console.log('CitasPage (top): Raw location.state:', location.state);
+  console.log('CitasPage (top): Raw navigationState.selectedDate:', navigationState?.selectedDate);
+  
   // Estado para modo de solo lectura
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(navigationState?.viewOnly || false);
 
@@ -144,7 +147,9 @@ export function CitasPage() {
     form.setValue('hora_cita', initialTime);
     console.log('CitasPage: Form values after initial setValue:', form.getValues('fecha_cita'), form.getValues('hora_cita'));
   }, [form, initialDate, initialTime]);
-
+  console.log('CitasPage (useEffect init): initialDate:', initialDate);
+  console.log('CitasPage (useEffect init): initialTime:', initialTime);
+  console.log('CitasPage (useEffect init): Form values after setValue:', form.getValues('fecha_cita'), form.getValues('hora_cita'));
   // useEffect to fetch active consultorios
   useEffect(() => {
     const fetchConsultorios = async () => {
