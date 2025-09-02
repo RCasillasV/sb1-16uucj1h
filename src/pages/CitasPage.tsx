@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, parseISO, addMinutes, isBefore, parseISO } from 'date-fns';
+import { format, parseISO, addMinutes, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Clock, Info, HelpCircle, AlertTriangle, Phone } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
