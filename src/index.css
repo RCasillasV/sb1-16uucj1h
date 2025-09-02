@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import custom global styles after Tailwind directives */
+@import './styles/global.css';
+
 /* Print Styles */
 @media print {
   @page { 
