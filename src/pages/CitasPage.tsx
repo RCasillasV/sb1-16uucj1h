@@ -8,6 +8,7 @@ import { format, parseISO, addMinutes, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Clock, Info, HelpCircle, AlertTriangle, Phone } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAgenda } from '../contexts/AgendaContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
