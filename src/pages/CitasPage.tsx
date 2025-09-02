@@ -526,8 +526,8 @@ export function CitasPage() {
         console.log('fetchSymptoms: Business Unit Specialty:', specialty);
 
         // Guardar en cache
-        cachedUserData = { idbu: userData.idbu, specialty };
-        cacheTimestamp = Date.now();
+        cachedUserDataRef.current = { idbu: userData.idbu, specialty };
+        cacheTimestampRef.current = Date.now();
         const formattedBirthDate = format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd');
         console.log('fetchSymptoms: Patient Birth Date (formatted):', formattedBirthDate);
 
