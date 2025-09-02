@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format, parseISO, addMinutes, isBefore } from 'date-fns';
@@ -25,22 +26,18 @@ const generateSchedule = (startTime: string, endTime: string, intervalMinutes: n
   
   const start = new Date(`2000/01/01 ${startTime}`);
   const end = new Date(`2000/01/01 ${endTime}`);
-  
   let currentTime = new Date(start);
-  
   while (currentTime <= end) {
     const hours = currentTime.getHours().toString().padStart(2, '0');
     const minutes = currentTime.getMinutes().toString().padStart(2, '0');
     times.push(`${hours}:${minutes}`);
-    
     currentTime.setMinutes(currentTime.getMinutes() + intervalMinutes);
   }
   
   return times;
 };
 
-// Generate time slots from 08:00 to 21:45 with 15-minute intervals
-const HORARIOS_CONSULTA = generateSchedule("08:00", "21:45", 15);
+// Generate time slots 
 
 const formSchema = z.object({
   tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia','revision', 'control']),
@@ -57,15 +54,8 @@ const formSchema = z.object({
   duracion_minutos: z.number().refine(val => [15, 20, 30, 40, 60].includes(val), { // Nuevo campo
     message: "La duración debe ser 15, 20, 30, 40 o 60 minutos."
   }),
-  hora_fin: z.string(), // Nuevo campo
+  hora_fin: z.string(),
 });
-
-type FormData = z.infer<typeof formSchema>;
-
-// Cache para evitar múltiples llamadas a get_user_idbu
-let cachedUserData: { idbu: string; specialty: string } | null = null;
-let cacheTimestamp = 0;
-const CACHE_DURATION = 25 * 60 * 1000; // 25 minutos
 
 export function CitasPage() {
   const { currentTheme } = useTheme();
@@ -92,6 +82,9 @@ export function CitasPage() {
   const initialTimeValue = selectedDateFromNav
     ? format(new Date(selectedDateFromNav), 'HH:mm')
     : '09:00';
+
+  // Acceder a la configuración de la agenda
+  const { agendaSettings, loading: agendaLoading } = useAgenda();
 
   // Estado para modo de solo lectura
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(navigationState?.viewOnly || false);
@@ -135,7 +128,22 @@ export function CitasPage() {
   // Estado para edición de citas
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const [loadingAppointment, setLoadingAppointment] = useState(false);
-  
+
+  // Generar HORARIOS_CONSULTA dinámicamente
+  const HORARIOS_CONSULTA = useMemo(() => {
+    if (!agendaSettings) {
+      return []; // Retorna un array vacío si la configuración no está cargada
+    }
+    // Asegúrate de que start_time y end_time estén en formato HH:MM
+    const startTime = agendaSettings.start_time.substring(0, 5);
+    const endTime = agendaSettings.end_time.substring(0, 5);
+    const interval = agendaSettings.slot_interval;
+    return generateSchedule(startTime, endTime, interval);
+  }, [agendaSettings]);
+
+  // Cache para evitar múltiples llamadas a get_user_idbu
+  let cachedUserData: { idbu: string; specialty: string } | null = null;
+
   // useEffect to fetch active consultorios
   useEffect(() => {
     const fetchConsultorios = async () => {
@@ -151,8 +159,8 @@ export function CitasPage() {
         console.error('Error fetching consultorios:', error);
       }
     };
-    fetchConsultorios();
-  }, []); // Run only once on component mount
+    fetchConsultorios(); // Se ejecuta una vez al montar el componente
+  }, []); 
 
   // useEffect para cargar datos de cita en modo edición
   useEffect(() => {
@@ -894,7 +902,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </label>
                     <select
                       {...form.register('hora_cita')}
-                      disabled={loadingAvailableSlots || isViewOnlyMode}
+                      disabled={loadingAvailableSlots || isViewOnlyMode || agendaLoading || !agendaSettings} // Deshabilitar si la agenda está cargando o no está configurada
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
@@ -902,7 +910,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                         color: currentTheme.colors.text,
                       }}
                     >
-                      {loadingAvailableSlots ? (
+                      {(loadingAvailableSlots || agendaLoading || !agendaSettings) ? ( // Mostrar mensaje de carga si la agenda está cargando
                         <option value="">Cargando horarios...</option>
                       ) : (
                         HORARIOS_CONSULTA.map(hora => {
