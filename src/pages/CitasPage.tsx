@@ -72,6 +72,9 @@ export function CitasPage() {
     viewOnly?: boolean;
   } | null;
 
+  // Determinar el paciente para esta página. Priorizar el estado de navegación, luego el contexto.
+  const patientForForm = navigationState?.selectedPatient || selectedPatient;
+
   // Calcular valores iniciales directamente antes de useForm
   const selectedDateFromNav = navigationState?.selectedDate;
   const initialDateValue = selectedDateFromNav
@@ -241,6 +244,13 @@ export function CitasPage() {
     loadAppointment();
   }, [navigationState?.editMode, navigationState?.appointmentId, form, setSelectedPatient]);
 
+  // Efecto para actualizar el selectedPatient del contexto si viene del estado de navegación
+  useEffect(() => {
+    if (navigationState?.selectedPatient && navigationState.selectedPatient !== selectedPatient) {
+      setSelectedPatient(navigationState.selectedPatient);
+    }
+  }, [navigationState?.selectedPatient, selectedPatient, setSelectedPatient]);
+  
   // Effect to check for previous appointments
   useEffect(() => {
     const checkPreviousAppointments = async () => {
