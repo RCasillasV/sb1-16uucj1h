@@ -416,6 +416,74 @@ export function Agenda() {
     });
   };
 
+  const handleEventDrop = async (dropInfo: any) => {
+    const event = dropInfo.event;
+    const oldEvent = dropInfo.oldEvent;
+    const revert = dropInfo.revert;
+
+    const newStartDate = format(event.start, 'yyyy-MM-dd');
+    const newStartTime = format(event.start, 'HH:mm');
+    const newEndTime = event.end ? format(event.end, 'HH:mm') : format(addMinutes(event.start, event.extendedProps.duracion_minutos || 30), 'HH:mm');
+    const durationMinutes = event.extendedProps.duracion_minutos || 30;
+    const consultorio = event.extendedProps.consultorio || 1;
+
+    // 1. Validaciones previas al intento de actualización
+    if (!agendaSettings) {
+      setConfigurationErrorMessage('No se ha cargado la configuración de la agenda. No se puede mover la cita.');
+      setShowConfigurationErrorModal(true);
+      revert();
+      return;
+    }
+
+    if (!isWorkDay(newStartDate)) {
+      setConfigurationErrorMessage('La nueva fecha no está configurada como día de atención médica.');
+      setShowConfigurationErrorModal(true);
+      revert();
+      return;
+    }
+
+    if (isDateBlocked(newStartDate)) {
+      setConfigurationErrorMessage('La nueva fecha está bloqueada. No se puede mover la cita aquí.');
+      setShowConfigurationErrorModal(true);
+      revert();
+      return;
+    }
+
+    const now = new Date();
+    if (event.start < now) {
+      setConfigurationErrorMessage('No se puede mover una cita a un horario en el pasado.');
+      setShowConfigurationErrorModal(true);
+      revert();
+      return;
+    }
+
+    // 2. Verificar disponibilidad del slot
+    try {
+      const availability = await checkSlotAvailability(newStartDate, newStartTime, durationMinutes, consultorio);
+      if (!availability.available) {
+        setConfigurationErrorMessage(`El slot seleccionado no está disponible: ${availability.reason || 'Conflicto con otra cita.'}`);
+        setShowConfigurationErrorModal(true);
+        revert();
+        return;
+      }
+
+      // 3. Actualizar la cita en la base de datos
+      await api.appointments.update(event.id, {
+        fecha_cita: newStartDate,
+        hora_cita: newStartTime,
+        hora_fin: newEndTime,
+      });
+
+      // 4. Refrescar las citas para asegurar sincronización
+      await fetchAppointments();
+    } catch (error) {
+      console.error('Error al mover la cita:', error);
+      setConfigurationErrorMessage('Error al mover la cita. Por favor, inténtelo de nuevo.');
+      setShowConfigurationErrorModal(true);
+      revert();
+    }
+  };
+
   const handleCloseDetailsModal = () => {
     setShowAppointmentDetailsModal(false);
   };
@@ -585,8 +653,12 @@ export function Agenda() {
                   dayMaxEvents={true}
                   weekends={true}
                   events={events}
+                editable={true}
+                eventStartEditable={true}
+                eventDurationEditable={true}
                   select={handleDateSelect}
                   eventClick={handleEventClick}
+                eventDrop={handleEventDrop}
                   datesSet={handleDatesSet}
                   slotDuration={`00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00`}
                   slotMinTime={agendaSettings.start_time} 
