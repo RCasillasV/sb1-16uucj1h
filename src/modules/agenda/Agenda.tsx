@@ -925,7 +925,7 @@ export function Agenda() {
         type="button"
         onClick={handleQuickAppointmentSubmit}
         disabled={submittingAppointment || !appointmentForm.motivo.trim()}
-        className={clsx(buttonClasses.base, 'border')}
+        className={clsx(buttonClasses.base, buttonClasses.primary)}
         >
         {submittingAppointment ? 'Agendando...' : 'Agendar'}
       </button>
