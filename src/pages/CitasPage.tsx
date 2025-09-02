@@ -38,8 +38,6 @@ const generateSchedule = (startTime: string, endTime: string, intervalMinutes: n
   return times;
 };
 
-// Generate time slots 
-
 const formSchema = z.object({
   tipo_consulta: z.enum(['primera', 'seguimiento', 'urgencia','revision', 'control']),
   motivo: z.string().min(2, { message: "El motivo de la cita es requerido" }),
