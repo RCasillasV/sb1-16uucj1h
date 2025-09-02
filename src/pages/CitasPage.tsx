@@ -131,25 +131,16 @@ export function CitasPage() {
   // Estado para modo de solo lectura
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(navigationState?.viewOnly || false);
 
-  // Configurar fecha inicial basada en la navegación
+  // Configurar fecha inicial basada en la navegación (DEBE ir antes de useForm)
   const initialDate = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'yyyy-MM-dd')
     : format(new Date(), 'yyyy-MM-dd');
 
-  // Configurar hora inicial basada en la navegación
+  // Configurar hora inicial basada en la navegación (DEBE ir antes de useForm)
   const initialTime = navigationState?.selectedDate 
     ? format(new Date(navigationState.selectedDate), 'HH:mm')
     : '09:00';
 
-  // Update form defaults based on navigation state
-  React.useEffect(() => {
-    form.setValue('fecha_cita', initialDate);
-    form.setValue('hora_cita', initialTime);
-    console.log('CitasPage: Form values after initial setValue:', form.getValues('fecha_cita'), form.getValues('hora_cita'));
-  }, [form, initialDate, initialTime]);
-  console.log('CitasPage (useEffect init): initialDate:', initialDate);
-  console.log('CitasPage (useEffect init): initialTime:', initialTime);
-  console.log('CitasPage (useEffect init): Form values after setValue:', form.getValues('fecha_cita'), form.getValues('hora_cita'));
   // useEffect to fetch active consultorios
   useEffect(() => {
     const fetchConsultorios = async () => {
