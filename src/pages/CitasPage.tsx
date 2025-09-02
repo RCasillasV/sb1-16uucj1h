@@ -73,6 +73,8 @@ export function CitasPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  console.log('CitasPage: navigationState al renderizar:', location.state);
+
   // Initialize form first, before any useEffect hooks that depend on it
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -140,6 +142,7 @@ export function CitasPage() {
   React.useEffect(() => {
     form.setValue('fecha_cita', initialDate);
     form.setValue('hora_cita', initialTime);
+    console.log('CitasPage: Form values after initial setValue:', form.getValues('fecha_cita'), form.getValues('hora_cita'));
   }, [form, initialDate, initialTime]);
 
   // useEffect to fetch active consultorios
@@ -172,7 +175,7 @@ export function CitasPage() {
         try {
           const fetchedAppointment = await api.appointments.getById(navigationState.appointmentId);
           console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
-          console.log('CitasPage: Fetched Appointment hora_cita (raw):', fetchedAppointment.hora_cita);
+          console.log('CitasPage: Fetched Appointment hora_cita (formated):', formattedHoraCita);;
           console.log('CitasPage: initialDate:', initialDate, 'initialTime:', initialTime);
           console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
           if (fetchedAppointment) {
@@ -207,6 +210,7 @@ export function CitasPage() {
               duracion_minutos: fetchedAppointment.duracion_minutos || 30,
               hora_fin: formattedHoraFin,
             });
+            console.log('CitasPage: Fetched Appointment hora_cita (formatted):', formattedHoraCita);
             console.log('CitasPage: Form values after reset:', form.getValues());
             
             // Establecer el paciente seleccionado
