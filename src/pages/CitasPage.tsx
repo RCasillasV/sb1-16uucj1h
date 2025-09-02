@@ -944,6 +944,8 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                             // No deshabilitar para que el valor inicial se mantenga seleccionado
                           }
 
+                             console.log(`CitasPage: Hora: ${hora}, isAvailable: ${isAvailable}, isCurrentSelection: ${isCurrentSelection}, isDisabled: ${isDisabled}, isPast: ${isPast}, form.watch('hora_cita'): ${form.watch('hora_cita')}`);
+                          
                           return (
                             <option
                               key={hora}
