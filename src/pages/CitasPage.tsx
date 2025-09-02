@@ -127,6 +127,11 @@ export function CitasPage() {
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const [loadingAppointment, setLoadingAppointment] = useState(false);
 
+  // Cache para evitar múltiples llamadas a get_user_idbu
+  const cachedUserDataRef = useRef<{ idbu: string; specialty: string } | null>(null);
+  const cacheTimestampRef = useRef(0);
+  const CACHE_DURATION = 25 * 60 * 1000; // 25 minutos
+  
   // Generar HORARIOS_CONSULTA dinámicamente
   const HORARIOS_CONSULTA = useMemo(() => {
     if (!agendaSettings) {
@@ -469,7 +474,7 @@ export function CitasPage() {
       
       try {
         // Verificar cache primero
-        if (cachedUserData && Date.now() - cacheTimestamp < CACHE_DURATION) {
+        if (cachedUserDataRef.current && Date.now() - cacheTimestampRef.current < CACHE_DURATION) {
           console.log('fetchSymptoms: Using cached user data');
           const specialty = cachedUserData.specialty;
           
