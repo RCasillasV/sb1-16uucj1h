@@ -916,7 +916,7 @@ export function Agenda() {
             selectedPatient: selectedPatient
           }          
         })}
-        className={clsx(buttonClasses.base, 'border')}
+        className={clsx(buttonClasses.base, buttonClasses.outline)}
       >
         Formulario Completo
       </button>
