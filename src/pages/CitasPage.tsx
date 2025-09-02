@@ -75,7 +75,28 @@ export function CitasPage() {
 
   console.log('CitasPage: navigationState al renderizar:', location.state);
 
-  // Initialize form first, before any useEffect hooks that depend on it
+  // Obtener datos del estado de navegación si vienen de Agenda
+  const navigationState = location.state as {
+    selectedDate?: Date;
+    editMode?: boolean;
+    appointmentId?: string;
+    selectedPatient?: any;
+    viewOnly?: boolean;
+  } | null;
+
+  // Calcular valores iniciales directamente antes de useForm
+  const selectedDateFromNav = navigationState?.selectedDate;
+  const initialDateValue = selectedDateFromNav
+    ? format(new Date(selectedDateFromNav), 'yyyy-MM-dd')
+    : format(new Date(), 'yyyy-MM-dd');
+  const initialTimeValue = selectedDateFromNav
+    ? format(new Date(selectedDateFromNav), 'HH:mm')
+    : '09:00';
+
+  // Estado para modo de solo lectura
+  const [isViewOnlyMode, setIsViewOnlyMode] = useState(navigationState?.viewOnly || false);
+
+  // Initialize form with directly calculated values
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -84,8 +105,8 @@ export function CitasPage() {
       tiempo_evolucion: '',
       unidad_tiempo: 'dias',
       sintomas_asociados: [],
-      fecha_cita: getFormDefaultValues().fecha_cita, 
-      hora_cita: getFormDefaultValues().hora_cita, 
+      fecha_cita: initialDateValue,
+      hora_cita: initialTimeValue,
       consultorio: 1,
       urgente: false,
       mismo_motivo: false,
@@ -107,7 +128,6 @@ export function CitasPage() {
   // New state for active consultorios
   const [activeConsultorios, setActiveConsultorios] = useState<Array<{ id: number; consultorio: string; activo: boolean; }>>([]);
 
-
   // Estado para citas en la fecha seleccionada
   const [appointmentsOnSelectedDate, setAppointmentsOnSelectedDate] = useState<any[]>([]);
   const [loadingAvailableSlots, setLoadingAvailableSlots] = useState(false);
@@ -115,50 +135,6 @@ export function CitasPage() {
   // Estado para edición de citas
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const [loadingAppointment, setLoadingAppointment] = useState(false);
-
-  // Obtener datos del estado de navegación si vienen de Agenda
-  const navigationState = location.state as {
-    selectedDate?: Date;
-    editMode?: boolean;
-    appointmentId?: string;
-    selectedPatient?: any;
-    viewOnly?: boolean;
-  } | null;
-
-  console.log('CitasPage (top): Raw location.state:', location.state);
-  console.log('CitasPage (top): Raw navigationState.selectedDate:', navigationState?.selectedDate);
-  
-  // Estado para modo de solo lectura
-  const [isViewOnlyMode, setIsViewOnlyMode] = useState(navigationState?.viewOnly || false);
-
-
-const getFormDefaultValues = (navigationState: any) => {
-  const selectedDateFromNav = navigationState?.selectedDate;
-
-  const initialDateValue = selectedDateFromNav
-    ? format(new Date(selectedDateFromNav), 'yyyy-MM-dd')
-    : format(new Date(), 'yyyy-MM-dd');
-
-  const initialTimeValue = selectedDateFromNav
-    ? format(new Date(selectedDateFromNav), 'HH:mm')
-    : '09:00';
-
-  return {
-    tipo_consulta: 'primera' as const, // Explicit type assertion for enum
-    motivo: '',
-    tiempo_evolucion: '',
-    unidad_tiempo: 'dias' as const, // Explicit type assertion for enum
-    sintomas_asociados: [],
-    fecha_cita: initialDateValue,
-    hora_cita: initialTimeValue,
-    consultorio: 1,
-    urgente: false,
-    mismo_motivo: false,
-    notas: '',
-    duracion_minutos: 30,
-    hora_fin: '',
-  }; 
-};
   
   // useEffect to fetch active consultorios
   useEffect(() => {
