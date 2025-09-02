@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, isBefore, parseISO, addMinutes } from 'date-fns';
+import { format, parseISO, addMinutes, isBefore, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Clock, Info, HelpCircle, AlertTriangle, Phone } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -326,7 +326,8 @@ export function CitasPage() {
     // Para las comprobaciones de superposición con otras citas, seguimos usando una fecha ficticia
     // Esto simplifica las comparaciones de tiempo puro y evita problemas con los cambios de día.
     const dummyDate = '2000-01-01'; // Fecha ficticia consistente para todas las comparaciones de tiempo
-    const slotStart = new Date(`2000-01-01T${timeSlot}:00`);
+    const fixedTimeComparisonDate = '2000-01-01';
+    const slotStart = parseISO(`${fixedTimeComparisonDate}T${timeSlot}:00`);
     const slotEnd = addMinutes(slotStart, duration);
     
     return !appointmentsOnSelectedDate.some(appointment => {
@@ -336,16 +337,16 @@ export function CitasPage() {
       }
       
       // Formatear hora_cita y hora_fin a HH:MM antes de usarlas
-      const formattedAppointmentHoraCita = appointment.hora_cita.substring(0, 5);
-      const appointmentStart = new Date(`${dummyDate}T${formattedAppointmentHoraCita}`);
+     const formattedAppointmentHoraCita = appointment.hora_cita.substring(0, 5);
+     const appointmentStart = parseISO(`${fixedTimeComparisonDate}T${formattedAppointmentHoraCita}`);
 
       let formattedAppointmentHoraFin = appointment.hora_fin;
       if (formattedAppointmentHoraFin) {
         formattedAppointmentHoraFin = formattedAppointmentHoraFin.substring(0, 5);
       }
-      const appointmentEnd = formattedAppointmentHoraFin
-        ? new Date(`${dummyDate}T${formattedAppointmentHoraFin}`)
-        : addMinutes(appointmentStart, appointment.duracion_minutos || 30);
+    const appointmentEnd = formattedAppointmentHoraFin
+      ? parseISO(`${fixedTimeComparisonDate}T${formattedAppointmentHoraFin}`)
+      : addMinutes(appointmentStart, appointment.duracion_minutos || 30);
 
       // Logs de depuración para la lógica de superposición
       console.log('--- Comprobando Slot para Superposición ---');
