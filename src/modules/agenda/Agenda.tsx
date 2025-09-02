@@ -410,7 +410,7 @@ export function Agenda() {
       state: {
         editMode: true,
         appointmentId: clickInfo.event.id,
-        selectedPatient: selectedPatient,
+        selectedPatient: clickInfo.event.extendedProps?.patient,
         viewOnly: isPastEvent
       }
     });
