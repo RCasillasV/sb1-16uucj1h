@@ -423,7 +423,7 @@ export function Agenda() {
 
     const newStartDate = format(event.start, 'yyyy-MM-dd');
     const newStartTime = format(event.start, 'HH:mm');
-    const newEndTime = event.end ? format(event.end, 'HH:mm') : format(addMinutes(event.start, event.extendedProps.duracion_minutos || 30), 'HH:mm');
+    const newEndTime = event.end ? format(event.end, 'HH:mm') : format(addMinutes(event.start, event.extendedProps?.duracion_minutos || 30), 'HH:mm');
     const durationMinutes = event.extendedProps.duracion_minutos || 30;
     const consultorio = event.extendedProps.consultorio || 1;
 
@@ -656,8 +656,12 @@ export function Agenda() {
                 editable={true}
                 eventStartEditable={true}
                 eventDurationEditable={true}
+                editable={true}
+                eventStartEditable={true}
+                eventDurationEditable={true}
                   select={handleDateSelect}
                   eventClick={handleEventClick}
+                eventDrop={handleEventDrop}
                 eventDrop={handleEventDrop}
                   datesSet={handleDatesSet}
                   slotDuration={`00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00`}
