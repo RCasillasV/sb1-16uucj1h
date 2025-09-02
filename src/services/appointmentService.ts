@@ -1,10 +1,13 @@
+// src/services/appointmentService.ts
+
 import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 import { handle, requireSession, requireBusinessUnit } from '../lib/apiHelpers';
 import { supabase } from '../lib/supabase';
 
 const cache = new Cache<any[]>(20 * 60 * 1000, 'appts_');
-const svc = createService<'tcCitas'>('tcCitas');
+// CAMBIO AQUÍ: Especificar 'id_user' como el nombre de la columna de usuario
+const svc = createService<'tcCitas'>('tcCitas', 'id_user');
 
 // Nueva función auxiliar interna para consultas de citas
 async function _fetchAppointments(patientId?: string) {
