@@ -1131,7 +1131,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
         }
       >
         <p className="text-lg font-medium" style={{ color: currentTheme.colors.text }}>
-          {selectedPatient.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
+          {selectedPatient?.Telefono ? selectedPatient.Telefono : 'No hay número de teléfono registrado.'}
         </p>
       </Modal>
     </div>
