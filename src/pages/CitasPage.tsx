@@ -131,36 +131,35 @@ export function CitasPage() {
   // Estado para modo de solo lectura
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(navigationState?.viewOnly || false);
 
-  // Función para calcular los valores por defecto del formulario
-  // Esto asegura que las variables se evalúen en el momento correcto
-  const getFormDefaultValues = () => {
+
+const getFormDefaultValues = (navigationState: any) => {
   const selectedDateFromNav = navigationState?.selectedDate;
 
   const initialDateValue = selectedDateFromNav
-      ? format(new Date(selectedDateFromNav), 'yyyy-MM-dd')
-      : format(new Date(), 'yyyy-MM-dd');
+    ? format(new Date(selectedDateFromNav), 'yyyy-MM-dd')
+    : format(new Date(), 'yyyy-MM-dd');
 
   const initialTimeValue = selectedDateFromNav
-      ? format(new Date(selectedDateFromNav), 'HH:mm')
-      : '09:00';
+    ? format(new Date(selectedDateFromNav), 'HH:mm')
+    : '09:00';
 
-    return {
-      tipo_consulta: 'primera' as const, // Explicit type assertion for enum
-      motivo: '',
-      tiempo_evolucion: '',
-      unidad_tiempo: 'dias' as const, // Explicit type assertion for enum
-      sintomas_asociados: [],
-      fecha_cita: initialDateValue,
-      hora_cita: initialTimeValue,
-      consultorio: 1,
-      urgente: false,
-      mismo_motivo: false,
-      notas: '',
-      duracion_minutos: 30,
-      hora_fin: '',
-    };
+  return {
+    tipo_consulta: 'primera' as const, // Explicit type assertion for enum
+    motivo: '',
+    tiempo_evolucion: '',
+    unidad_tiempo: 'dias' as const, // Explicit type assertion for enum
+    sintomas_asociados: [],
+    fecha_cita: initialDateValue,
+    hora_cita: initialTimeValue,
+    consultorio: 1,
+    urgente: false,
+    mismo_motivo: false,
+    notas: '',
+    duracion_minutos: 30,
+    hora_fin: '',
   }; 
-
+};
+  
   // useEffect to fetch active consultorios
   useEffect(() => {
     const fetchConsultorios = async () => {
