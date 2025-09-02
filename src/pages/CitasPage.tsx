@@ -173,7 +173,7 @@ export function CitasPage() {
           const fetchedAppointment = await api.appointments.getById(navigationState.appointmentId);
           console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
           console.log('CitasPage: Fetched Appointment hora_cita (raw):', fetchedAppointment.hora_cita);
-          
+          console.log('CitasPage: initialDate:', initialDate, 'initialTime:', initialTime);
           console.log('CitasPage: Fetched Appointment:', fetchedAppointment);
           if (fetchedAppointment) {
             setEditingAppointment(fetchedAppointment);
