@@ -134,7 +134,7 @@ export function GynecoObstetricHistory() {
       if (data) {
         setExistingRecordId(data.id);
         // Formatear las fechas a YYYY-MM-DD y asegurar valores no nulos para el formulario
-        const formattedData = {
+      const formattedData = {
           gestas: data.gestas,
           paras: data.paras,
           abortos: data.abortos,
@@ -150,7 +150,6 @@ export function GynecoObstetricHistory() {
           notas_adicionales: data.notas_adicionales,
         };
         reset(formattedData); // Pasa el objeto formattedData completo
-        });
       } else {
         // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
         setExistingRecordId(null);
