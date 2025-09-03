@@ -570,7 +570,7 @@ export function GynecoObstetricHistory() {
               id="notas_adicionales"
               {...register('notas_adicionales')}
               placeholder="Ej: Enfermedades de transmisión sexual, cirugías ginecológicas, problemas de fertilidad, menopausia..."
-              rows={4}
+              rows={2}
               className="w-full p-2 rounded-md border"
               style={inputStyle}
             />
