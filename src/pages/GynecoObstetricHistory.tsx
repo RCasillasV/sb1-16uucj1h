@@ -130,7 +130,9 @@ export function GynecoObstetricHistory() {
     setError(null);
 
     try {
+      console.log('GYNECO_HISTORY: Iniciando fetch para paciente:', selectedPatient.id); 
       const data = await api.gynecoObstetricHistory.getByPatientId(selectedPatient.id);
+      console.log('GYNECO_HISTORY: Datos recibidos de la API:', data);
       if (data) {
         setExistingRecordId(data.id);
         // Formatear las fechas a YYYY-MM-DD y asegurar valores no nulos para el formulario
@@ -149,8 +151,11 @@ export function GynecoObstetricHistory() {
           resultado_mamografia: data.resultado_mamografia,
           notas_adicionales: data.notas_adicionales,
         };
+        console.log('GYNECO_HISTORY: Datos formateados antes de reset:', formattedData);
         reset(formattedData); // Pasa el objeto formattedData completo
       } else {
+         console.log('GYNECO_HISTORY: No se encontró registro existente. Reseteando formulario.');
+
         // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
         setExistingRecordId(null);
         reset(); 
