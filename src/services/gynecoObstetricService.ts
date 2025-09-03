@@ -3,7 +3,8 @@ import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 import { supabase } from '../lib/supabase';
 import { handle } from '../lib/apiHelpers';
-
+import { requireSession, requireBusinessUnit } from '../lib/apiHelpers';
+ 
 // Define un tipo para la tabla para mejor tipado
 type GynecoObstetricHistoryTable = 'tpPacienteHistGineObst';
 
@@ -27,6 +28,13 @@ export const gynecoObstetricHistory = {
     const cached = cache.get(key);
     if (cached) return cached;
 
+    const user = await requireSession();
+    const user_idbu = await requireBusinessUnit(user.id);
+    const rls_idbu_check = await supabase.rpc('get_useridbu', { user_id: user.id }); // Llama a la función RPC directamente
+
+    console.log('GYNECO_SERVICE: Fetching for patientId:', patientId, 'and user_idbu (from app):', user_idbu); // LOG 1
+    console.log('GYNECO_SERVICE: RLS idbu check (from DB RPC):', rls_idbu_check.data); // LOG 2
+ 
     // Usamos .limit(1) y .single() para manejar el caso de 0 o 1 fila,
     // pero si hubiera más de 1, solo tomaría la primera.
     // Para este caso, asumimos que solo habrá un registro por paciente.
