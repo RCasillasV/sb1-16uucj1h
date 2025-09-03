@@ -133,23 +133,23 @@ export function GynecoObstetricHistory() {
       const data = await api.gynecoObstetricHistory.getByPatientId(selectedPatient.id);
       if (data) {
         setExistingRecordId(data.id);
-+        // Formatear las fechas a YYYY-MM-DD y asegurar valores no nulos para el formulario
-+        const formattedData = {
-+          gestas: data.gestas,
-+          paras: data.paras,
-+          abortos: data.abortos,
-+          cesareas: data.cesareas,
-+          fum: data.fum ? format(parseISO(data.fum), 'yyyy-MM-dd') : '',
-+          menarquia: data.menarquia,
-+          ritmo_menstrual: data.ritmo_menstrual,
-+          metodo_anticonceptivo: data.metodo_anticonceptivo,
-+          fecha_ultimo_papanicolau: data.fecha_ultimo_papanicolau ? format(parseISO(data.fecha_ultimo_papanicolau), 'yyyy-MM-dd') : '',
-+          resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
-+          mamografia: data.mamografia ? format(parseISO(data.mamografia), 'yyyy-MM-dd') : '',
-+          resultado_mamografia: data.resultado_mamografia,
-+          notas_adicionales: data.notas_adicionales,
-+        };
-+        reset(formattedData); // Pasa el objeto formattedData completo
+        // Formatear las fechas a YYYY-MM-DD y asegurar valores no nulos para el formulario
+        const formattedData = {
+          gestas: data.gestas,
+          paras: data.paras,
+          abortos: data.abortos,
+          cesareas: data.cesareas,
+          fum: data.fum ? format(parseISO(data.fum), 'yyyy-MM-dd') : '',
+          menarquia: data.menarquia,
+          ritmo_menstrual: data.ritmo_menstrual,
+          metodo_anticonceptivo: data.metodo_anticonceptivo,
+          fecha_ultimo_papanicolau: data.fecha_ultimo_papanicolau ? format(parseISO(data.fecha_ultimo_papanicolau), 'yyyy-MM-dd') : '',
+          resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
+          mamografia: data.mamografia ? format(parseISO(data.mamografia), 'yyyy-MM-dd') : '',
+          resultado_mamografia: data.resultado_mamografia,
+          notas_adicionales: data.notas_adicionales,
+        };
+        reset(formattedData); // Pasa el objeto formattedData completo
         });
       } else {
         // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
