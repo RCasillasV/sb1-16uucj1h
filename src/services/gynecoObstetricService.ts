@@ -46,7 +46,7 @@ export const gynecoObstetricHistory = {
     console.log('GYNECO_SERVICE: Raw Supabase data:', data);
     console.log('GYNECO_SERVICE: Raw Supabase error:', error);
 
-    if (error && error.code !== 'PGRST116') {
+    if (error ) {
       throw error;
     }
 
