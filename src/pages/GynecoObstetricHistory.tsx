@@ -314,7 +314,7 @@ export function GynecoObstetricHistory() {
             </button>
           )}
           <button
-            onClick={handleSubmit(onSubmit)}
+            type="submit"
             disabled={saving}
             className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
             style={buttonStyle.primary}
