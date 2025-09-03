@@ -71,6 +71,10 @@ export const gynecoObstetricHistory = {
       .select()
       .single();
 
+    console.log('GYNECO_SERVICE: create - Supabase response data:', data); // Log de la respuesta de Supabase
+    console.log('GYNECO_SERVICE: create - Supabase response error:', error); // Log de errores de Supabase
+
+
     if (error) throw error;
     cache.clear(); // Limpiar caché al crear un nuevo registro
     return data;
@@ -86,6 +90,7 @@ export const gynecoObstetricHistory = {
     const user = await requireSession();
     const idbu = await requireBusinessUnit(user.id);
 
+    console.log('GYNECO_SERVICE: update - Function entered.'); 
     console.log('GYNECO_SERVICE: update - Targeting patientId:', patientId);
     console.log('GYNECO_SERVICE: update - Payload received:', payload);
  
