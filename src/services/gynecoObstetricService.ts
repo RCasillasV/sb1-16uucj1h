@@ -28,6 +28,13 @@ export const gynecoObstetricHistory = {
     const cached = cache.get(key);
     if (cached) return cached;
 
+    // Force session refresh to ensure uid() is up-to-date for RLS
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      console.error('GYNECO_SERVICE: Session not found or error during refresh:', sessionError);
+      throw new Error('User session not found or could not be refreshed.');
+    }
+
     const user = await requireSession();
     const user_idbu = await requireBusinessUnit(user.id);
 
