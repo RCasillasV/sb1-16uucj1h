@@ -134,19 +134,19 @@ export function GynecoObstetricHistory() {
       if (data) {
         setExistingRecordId(data.id);
         reset({
-          gestas: data.gestas,
-          paras: data.paras,
-          abortos: data.abortos,
-          cesareas: data.cesareas,
-          fum: data.fum || null,
-          menarquia: data.menarquia,
-          ritmo_menstrual: data.ritmo_menstrual,
-          metodo_anticonceptivo: data.metodo_anticonceptivo,
-          fecha_ultimo_papanicolau: data.fecha_ultimo_papanicolau || null,
-          resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
-          mamografia: data.mamografia || null,
-          resultado_mamografia: data.resultado_mamografia,
-          notas_adicionales: data.notas_adicionales,
+          gestas: formattedData.gestas,
+          paras: formattedData.paras,
+          abortos: formattedData.abortos,
+          cesareas: formattedData.cesareas,
+          fum: formattedData.fum,
+          menarquia: formattedData.menarquia,
+          ritmo_menstrual: formattedData.ritmo_menstrual,
+          metodo_anticonceptivo: formattedData.metodo_anticonceptivo,
+          fecha_ultimo_papanicolau: formattedData.fecha_ultimo_papanicolau,
+          resultado_ultimo_papanicolau: formattedData.resultado_ultimo_papanicolau,
+          mamografia: formattedData.mamografia,
+          resultado_mamografia: formattedData.resultado_mamografia,
+          notas_adicionales: formattedData.notas_adicionales,
         });
       } else {
         // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
