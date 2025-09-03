@@ -169,6 +169,7 @@ export function GynecoObstetricHistory() {
   };
 
   const onSubmit = async (data: GynecoObstetricFormData) => {
+  console.log('GYNECO_HISTORY: onSubmit - Function started.'); // Log al inicio de onSubmit
     if (!selectedPatient || !user) return;
 
     setSaving(true);
@@ -184,6 +185,8 @@ export function GynecoObstetricHistory() {
       };
 
       if (gynecoObstetricRecord) {
+        console.log('GYNECO_HISTORY: onSubmit - Attempting to UPDATE record with patient_id:', selectedPatient.id, 'and payload:', payload);
+
         const result = await api.gynecoObstetricHistory.update(selectedPatient.id, payload);
         console.log('onSubmit: Update successful, result:', result);
       } else {
@@ -195,7 +198,7 @@ export function GynecoObstetricHistory() {
       await fetchGynecoObstetricHistory(); // Re-fetch data to update form and report immediately
       console.log('onSubmit: Data saved successfully and form reloaded.');
     } catch (err) {
-      console.error('Error saving gyneco-obstetric history:', err);
+      console.error('GYNECO_HISTORY: onSubmit - FATAL ERROR saving gyneco-obstetric history:', err);
       setError(err instanceof Error ? err.message : 'Error al guardar los antecedentes gineco-obstétricos.');
     } finally {
       setSaving(false);
