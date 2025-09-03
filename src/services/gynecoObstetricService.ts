@@ -8,11 +8,6 @@ import { requireSession, requireBusinessUnit } from '../lib/apiHelpers';
 // Define un tipo para la tabla para mejor tipado
 type GynecoObstetricHistoryTable = 'tpPacienteHistGineObst';
 
-// Crea una instancia del servicio CRUD genérico para esta tabla
-// Asume que 'user_id' es la columna que relaciona el registro con el usuario
-// y que 'idbu' también se maneja automáticamente.
-const svc = createService<GynecoObstetricHistoryTable>('tpPacienteHistGineObst', 'user_id', true);
-
 // Crea una instancia de caché específica para este servicio
 const cache = new Cache<any[]>(5 * 60 * 1000, 'gyneco_obstetric_'); // Cache por 5 minutos
 
@@ -41,22 +36,21 @@ export const gynecoObstetricHistory = {
     console.log('GYNECO_SERVICE: Fetching for patientId:', patientId, 'and user_idbu (from app):', user_idbu); // LOG 1
     console.log('GYNECO_SERVICE: Current authenticated user ID:', user.id); // Log the UID
 
-    // Usamos .limit(1) y .single() para manejar el caso de 0 o 1 fila,
-    // pero si hubiera más de 1, solo tomaría la primera.
-    // Para este caso, asumimos que solo habrá un registro por paciente.
-    const { data, error } = await handle(
-      supabase
-        .from('tpPacienteHistGineObst')
-        .select('*')
-        .eq('patient_id', patientId)
-        .eq('idbu', user_idbu) // Añadir filtro explícito por idbu
-        .limit(1), // Limita a 1 resultado
-      [] // Valor por defecto si no hay datos
-    );
+    const { data, error } = await supabase
+      .from('tpPacienteHistGineObst')
+      .select('*')
+      .eq('patient_id', patientId)
+      .eq('idbu', user_idbu) // Añadir filtro explícito por idbu
+      .single(); // Since patient_id is now unique, we can use .single()
 
-    if (error) throw error;
+    console.log('GYNECO_SERVICE: Raw Supabase data:', data);
+    console.log('GYNECO_SERVICE: Raw Supabase error:', error);
 
-    const record = data && data.length > 0 ? data[0] : null;
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+
+    const record = data || null;
     if (record) cache.set(key, record);
     return record;
   },
@@ -67,36 +61,53 @@ export const gynecoObstetricHistory = {
    * @returns El registro creado.
    */
   async create(payload: any) {
-    const result = await svc.create(payload);
+    const user = await requireSession();
+    const idbu = await requireBusinessUnit(user.id);
+
+    const { data, error } = await supabase
+      .from('tpPacienteHistGineObst')
+      .insert([{ ...payload, user_id: user.id, idbu: idbu }])
+      .select()
+      .single();
+
+    if (error) throw error;
     cache.clear(); // Limpiar caché al crear un nuevo registro
-    return result;
+    return data;
   },
 
   /**
    * Actualiza un registro de historial gineco-obstétrico existente.
-   * @param id El ID del registro a actualizar.
+   * @param patientId El ID del paciente (ahora identificador único).
    * @param payload Los datos a actualizar.
    * @returns El registro actualizado.
    */
-  async update(id: string, payload: any) {
-    const result = await svc.update(id, payload);
+  async update(patientId: string, payload: any) {
+    const user = await requireSession();
+    const idbu = await requireBusinessUnit(user.id);
+
+    const { data, error } = await supabase
+      .from('tpPacienteHistGineObst')
+      .update({ ...payload, user_id: user.id, idbu: idbu, updated_at: new Date().toISOString() })
+      .eq('patient_id', patientId)
+      .select()
+      .single();
+
+    if (error) throw error;
     cache.clear(); // Limpiar caché al actualizar un registro
-    return result;
+    return data;
   },
 
   /**
    * Elimina un registro de historial gineco-obstétrico.
-   * @param id El ID del registro a eliminar.
+   * @param patientId El ID del paciente.
    */
-  async delete(id: string) {
-    const result = await handle(
-      supabase
-        .from('tpPacienteHistGineObst')
-        .delete()
-        .eq('id', id),
-      null
-    );
+  async deleteByPatientId(patientId: string) {
+    const { error } = await supabase
+      .from('tpPacienteHistGineObst')
+      .delete()
+      .eq('patient_id', patientId);
+
+    if (error) throw error;
     cache.clear(); // Limpiar caché al eliminar un registro
-    return result;
   },
 };

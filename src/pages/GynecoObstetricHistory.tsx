@@ -60,7 +60,7 @@ export function GynecoObstetricHistory() {
   const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
   const [showGenderWarningModal, setShowGenderWarningModal] = useState(false);
-  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [gynecoObstetricRecord, setGynecoObstetricRecord] = useState<any | null>(null);
   const [showReportModal, setShowReportModal] = useState(false); // Estado para el modal de informe
 
   const {
@@ -134,7 +134,7 @@ export function GynecoObstetricHistory() {
       const data = await api.gynecoObstetricHistory.getByPatientId(selectedPatient.id);
       console.log('GYNECO_HISTORY: Datos recibidos de la API:', data);
       if (data) {
-        setExistingRecordId(data.id);
+        setGynecoObstetricRecord(data);
         // Formatear las fechas a YYYY-MM-DD y asegurar valores no nulos para el formulario
       const formattedData = {
           gestas: data.gestas,
@@ -157,7 +157,7 @@ export function GynecoObstetricHistory() {
          console.log('GYNECO_HISTORY: No se encontró registro existente. Reseteando formulario.');
 
         // Si no hay datos, resetear el formulario a valores por defecto y asegurar que no hay ID de registro existente
-        setExistingRecordId(null);
+        setGynecoObstetricRecord(null);
         reset(); 
       }
     } catch (err) {
@@ -183,12 +183,12 @@ export function GynecoObstetricHistory() {
         ...data,
       };
 
-      if (existingRecordId) {
-        const result = await api.gynecoObstetricHistory.update(existingRecordId, payload);
+      if (gynecoObstetricRecord) {
+        const result = await api.gynecoObstetricHistory.update(selectedPatient.id, payload);
         console.log('onSubmit: Update successful, result:', result);
       } else {
         const newRecord = await api.gynecoObstetricHistory.create(payload);
-        setExistingRecordId(newRecord.id);
+        setGynecoObstetricRecord(newRecord);
         console.log('onSubmit: Create successful, new record:', newRecord);
       }
       
