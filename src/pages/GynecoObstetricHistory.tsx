@@ -591,7 +591,7 @@ export function GynecoObstetricHistory() {
         </form>
 
         {/* Resumen */}
-        <div className="mt-6 pt-4 border-t" style={{ borderColor: currentTheme.colors.border }}>
+        <div className="mt-6 pt-2 border-t" style={{ borderColor: currentTheme.colors.border }}>
           <h4 
             className="text-sm font-medium mb-2"
             style={{ color: currentTheme.colors.text }}
