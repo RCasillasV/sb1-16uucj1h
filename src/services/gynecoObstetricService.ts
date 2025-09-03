@@ -63,7 +63,8 @@ export const gynecoObstetricHistory = {
   async create(payload: any) {
     const user = await requireSession();
     const idbu = await requireBusinessUnit(user.id);
-
+    
+    console.log('GYNECO_SERVICE: create - Payload received:', payload);
     const { data, error } = await supabase
       .from('tpPacienteHistGineObst')
       .insert([{ ...payload, user_id: user.id, idbu: idbu }])
@@ -85,6 +86,9 @@ export const gynecoObstetricHistory = {
     const user = await requireSession();
     const idbu = await requireBusinessUnit(user.id);
 
+    console.log('GYNECO_SERVICE: update - Targeting patientId:', patientId);
+    console.log('GYNECO_SERVICE: update - Payload received:', payload);
+ 
     const { data, error } = await supabase
       .from('tpPacienteHistGineObst')
       .update({ ...payload, user_id: user.id, idbu: idbu, updated_at: new Date().toISOString() })
