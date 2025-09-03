@@ -169,6 +169,7 @@ export function GynecoObstetricHistory() {
   };
 
   const onSubmit = async (data: GynecoObstetricFormData) => {
+    console.log('GYNECO_HISTORY: onSubmit - Function started.'); // Log al inicio de onSubmit
   console.log('GYNECO_HISTORY: onSubmit - Function started.'); // Log al inicio de onSubmit
     if (!selectedPatient || !user) return;
 
@@ -186,10 +187,12 @@ export function GynecoObstetricHistory() {
 
       if (gynecoObstetricRecord) {
         console.log('GYNECO_HISTORY: onSubmit - Attempting to UPDATE record with patient_id:', selectedPatient.id, 'and payload:', payload);
+        console.log('GYNECO_HISTORY: onSubmit - Attempting to UPDATE record with patient_id:', selectedPatient.id, 'and payload:', payload);
 
         const result = await api.gynecoObstetricHistory.update(selectedPatient.id, payload);
         console.log('onSubmit: Update successful, result:', result);
       } else {
+        console.log('GYNECO_HISTORY: onSubmit - Attempting to CREATE new record with payload:', payload);
         const newRecord = await api.gynecoObstetricHistory.create(payload);
         setGynecoObstetricRecord(newRecord);
         console.log('onSubmit: Create successful, new record:', newRecord);
@@ -316,15 +319,6 @@ export function GynecoObstetricHistory() {
               Imprimir Informe
             </button>
           )}
-        </div>
-      </div>
-
-      {error && (
-        <div
-          className="p-4 rounded-md border-l-4"
-          style={{
-            background: '#FEE2E2',
-            borderLeftColor: '#DC2626',
             color: '#DC2626',
           }}
         >
@@ -345,6 +339,24 @@ export function GynecoObstetricHistory() {
           borderColor: currentTheme.colors.border,
         }}
       >
+        {error && (
+          <div
+            className="p-4 rounded-md border-l-4 mb-4"
+            style={{
+              background: '#FEE2E2',
+              borderLeftColor: '#DC2626',
+              color: '#DC2626',
+            }}
+          >
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5" />
+              <div className="ml-3">
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Sección de Gestas, Paras, Abortos, Cesáreas */}
           <div className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-4">

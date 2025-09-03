@@ -64,6 +64,7 @@ export const gynecoObstetricHistory = {
     const user = await requireSession();
     const idbu = await requireBusinessUnit(user.id);
     
+    console.log('GYNECO_SERVICE: create - Function entered.');
     console.log('GYNECO_SERVICE: create - Payload received:', payload);
     const { data, error } = await supabase
       .from('tpPacienteHistGineObst')
@@ -90,6 +91,7 @@ export const gynecoObstetricHistory = {
     const user = await requireSession();
     const idbu = await requireBusinessUnit(user.id);
 
+    console.log('GYNECO_SERVICE: update - Function entered.');
     console.log('GYNECO_SERVICE: update - Function entered.'); 
     console.log('GYNECO_SERVICE: update - Targeting patientId:', patientId);
     console.log('GYNECO_SERVICE: update - Payload received:', payload);
@@ -101,6 +103,8 @@ export const gynecoObstetricHistory = {
       .select()
       .single();
 
+    console.log('GYNECO_SERVICE: update - Supabase response data:', data);
+    console.log('GYNECO_SERVICE: update - Supabase response error:', error);
     if (error) throw error;
     cache.clear(); // Limpiar caché al actualizar un registro
     return data;
