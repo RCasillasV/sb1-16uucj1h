@@ -30,10 +30,8 @@ export const gynecoObstetricHistory = {
 
     const user = await requireSession();
     const user_idbu = await requireBusinessUnit(user.id);
-    const rls_idbu_check = await supabase.rpc('get_useridbu', { user_id: user.id }); // Llama a la función RPC directamente
 
     console.log('GYNECO_SERVICE: Fetching for patientId:', patientId, 'and user_idbu (from app):', user_idbu); // LOG 1
-    console.log('GYNECO_SERVICE: RLS idbu check (from DB RPC):', rls_idbu_check.data); // LOG 2
  
     // Usamos .limit(1) y .single() para manejar el caso de 0 o 1 fila,
     // pero si hubiera más de 1, solo tomaría la primera.
