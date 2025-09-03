@@ -4,7 +4,7 @@ import { Cache } from '../lib/cache';
 import { supabase } from '../lib/supabase';
 import { handle } from '../lib/apiHelpers';
 import { requireSession, requireBusinessUnit } from '../lib/apiHelpers';
- 
+
 // Define un tipo para la tabla para mejor tipado
 type GynecoObstetricHistoryTable = 'tpPacienteHistGineObst';
 
@@ -39,7 +39,8 @@ export const gynecoObstetricHistory = {
     const user_idbu = await requireBusinessUnit(user.id);
 
     console.log('GYNECO_SERVICE: Fetching for patientId:', patientId, 'and user_idbu (from app):', user_idbu); // LOG 1
- 
+    console.log('GYNECO_SERVICE: Current authenticated user ID:', user.id); // Log the UID
+
     // Usamos .limit(1) y .single() para manejar el caso de 0 o 1 fila,
     // pero si hubiera más de 1, solo tomaría la primera.
     // Para este caso, asumimos que solo habrá un registro por paciente.
@@ -48,12 +49,13 @@ export const gynecoObstetricHistory = {
         .from('tpPacienteHistGineObst')
         .select('*')
         .eq('patient_id', patientId)
+        .eq('idbu', user_idbu) // Añadir filtro explícito por idbu
         .limit(1), // Limita a 1 resultado
       [] // Valor por defecto si no hay datos
     );
 
     if (error) throw error;
-    
+
     const record = data && data.length > 0 ? data[0] : null;
     if (record) cache.set(key, record);
     return record;
