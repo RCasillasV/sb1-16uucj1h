@@ -569,7 +569,7 @@ export function GynecoObstetricHistory() {
             <textarea
               id="notas_adicionales"
               {...register('notas_adicionales')}
-              placeholder="Ej: Antecedente familiar de cáncer de mama, problemas de fertilidad..."
+              placeholder="Ej: Enfermedades de transmisión sexual, cirugías ginecológicas, problemas de fertilidad, menopausia..."
               rows={4}
               className="w-full p-2 rounded-md border"
               style={inputStyle}
