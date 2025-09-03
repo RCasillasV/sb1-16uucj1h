@@ -313,15 +313,6 @@ export function GynecoObstetricHistory() {
               Imprimir Informe
             </button>
           )}
-          <button
-            type="submit"
-            disabled={saving}
-            className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
-            style={buttonStyle.primary}
-          >
-            <Save className="h-4 w-4" />
-            {saving ? 'Guardando...' : 'Guardar'}
-          </button>
         </div>
       </div>
 
@@ -558,6 +549,19 @@ export function GynecoObstetricHistory() {
               className="w-full p-2 rounded-md border"
               style={inputStyle}
             />
+          </div>
+
+          {/* Move the Save button inside the form */}
+          <div className="flex justify-end gap-2 pt-6">
+            <button
+              type="submit"
+              disabled={saving}
+              className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
+              style={buttonStyle.primary}
+            >
+              <Save className="h-4 w-4" />
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
           </div>
         </form>
 
