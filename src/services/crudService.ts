@@ -50,7 +50,7 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
           .update(updateData)
           .eq('id', id)
           .select<R>()
-          .single(),
+          .limit(1),
         null
       );
     },
