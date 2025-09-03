@@ -319,6 +319,16 @@ export function GynecoObstetricHistory() {
               Imprimir Informe
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Error Alert */}
+      {error && (
+        <div
+          className="p-4 rounded-md border-l-4 mb-4"
+          style={{
+            background: '#FEE2E2',
+            borderLeftColor: '#DC2626',
             color: '#DC2626',
           }}
         >
