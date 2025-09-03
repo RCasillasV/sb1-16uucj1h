@@ -577,7 +577,7 @@ export function GynecoObstetricHistory() {
           </div>
 
           {/* Move the Save button inside the form */}
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-1">
             <button
               type="submit"
               disabled={saving}
