@@ -563,7 +563,8 @@ export function GynecoObstetricHistory() {
             <label htmlFor="notas_adicionales" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
               Notas Adicionales
               <Tooltip text="Cualquier otra información relevante sobre el historial gineco-obstétrico que no encaje en los campos anteriores (ej. Enfermedades de transmisión sexual, cirugías ginecológicas, problemas de fertilidad, menopausia).">
-                <Info className="h-4 w-2 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                <Info className="h-4 w-4
+                  ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
               </Tooltip>
             </label>
             <textarea
