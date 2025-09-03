@@ -20,8 +20,8 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
       const insertData: any = { ...data, [userIdColumnName]: user.id };
       
       if (includeIdbu) {
-        const idbu = await requireBusinessUnit(user.id);
-        insertData.idBu = idbu;
+        const idbuValue = await requireBusinessUnit(user.id);
+        insertData.idbu = idbuValue;
       }
       
       return handle(
@@ -29,7 +29,7 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
           .from<Table>(table)
           .insert(insertData)
           .select<R>()
-          .single(),
+          .limit(1),
         null
       );
     },
