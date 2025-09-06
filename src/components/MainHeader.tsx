@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family, Stethoscope } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useStyles } from '../hooks/useStyles';
 import { Modal } from './Modal';
 import { PatientReport } from './Informes/PatientReport';
 import { ComprehensiveClinicalHistoryReport } from './Informes/ComprehensiveClinicalHistoryReport';
@@ -28,7 +29,7 @@ interface MainHeaderProps {
   clinicalHistoryCount: number;
   clinicalEvolutionCount: number;
   prescriptionsCount: number;
-  ppatientFilesCount: number; 
+  patientFilesCount: number; 
   gynecoObstetricCount: number;
   
   lastAppointment: {
