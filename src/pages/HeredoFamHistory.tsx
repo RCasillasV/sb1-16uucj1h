@@ -1,4 +1,5 @@
 // src/pages/HeredoFamHistory.tsx
+import { useNavigate, Link } from 'react-router-dom';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,7 +7,6 @@ import * as z from 'zod';
 import { Contact, User, FileText, Plus, Save, AlertCircle, Trash2, X, GripVertical, Printer, Settings } from 'lucide-react';
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, DragStartEvent, useDroppable, useDraggable} from '@dnd-kit/core';
 import clsx from 'clsx';
-import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useAuth } from '../contexts/AuthContext';
