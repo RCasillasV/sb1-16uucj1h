@@ -11,18 +11,6 @@ const baseNavigation: NavigationItem[] = [
   { name: 'Pacientes', href: '/patients', icon: Users, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Citas', href: '/appointments', icon: CalendarDays, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Config. Agenda', href: '/settings/schedule', icon: Clock, roles: ['Administrador', 'Medico', 'Recepcionista'] },
-  { name: 'Antecedentes No Patológicos', href: '/antecedentes-no-patologicos', icon: FileText, roles: ['Administrador', 'Medico'] },
-  { name: 'Antecedentes Heredo-Familiares', href: '/heredo-familial-history', icon: Family, roles: ['Administrador', 'Medico'] },
-  { name: 'Antecedentes Patológicos', href: '/pathological-history', icon: Stethoscope, roles: ['Administrador', 'Medico'] },
-
-/*  
-  { name: 'Ficha Clínica', href: '/clinical-history', icon: FileText, roles: ['Administrador', 'Medico'] },
-  { name: 'Evolución Clínica', href: '/clinical-evolution', icon: Activity, roles: ['Administrador', 'Medico'] },
-  { name: 'Recetas', href: '/prescriptions', icon: FileSpreadsheet, roles: ['Administrador', 'Medico'] },
-  { name: 'Somatometría', href: '/somatometry', icon: RulerSquare, roles: ['Administrador', 'Medico'] },
-  { name: 'Archivos', href: '/patient-files', icon: FolderOpen, roles: ['Administrador', 'Medico'] },
-  { name: 'Catálogos', href: '/cie10', icon: NotebookTabs, roles: ['Administrador', 'Medico'] },
-*/  
 ] as const;
 const bottomNavigation: NavigationItem[] = [
   { name: 'Unidades de Negocio', href: '/clinica', icon: Stethoscope, roles: ['Administrador'] },
