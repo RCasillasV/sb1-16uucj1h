@@ -195,7 +195,7 @@ export function HeredoFamHistory() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
-
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
