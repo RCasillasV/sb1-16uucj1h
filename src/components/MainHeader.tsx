@@ -556,7 +556,7 @@ export function MainHeader({
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium" style={{ color: currentTheme.colors.textSecondary }}>
             Bienvenido:
-          </span>
+          </span> 
           <span className="font-mono" style={{ color: currentTheme.colors.text }}>
             {userInfo?.nombre || 'No identificado'}
           </span>
