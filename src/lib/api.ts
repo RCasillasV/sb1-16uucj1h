@@ -305,8 +305,123 @@ const medications = {
 // Files service
 const files = {
   async getByPatientId(patientId: string) {
-    // This is a placeholder - implement based on your file storage solution
-    return [];
+    const { data, error } = await supabase
+      .from('tpDocPaciente')
+      .select(`
+        id,
+        description,
+        file_path,
+        mime_type,
+        thumbnail_url,
+        created_at,
+        fecha_ultima_consulta,
+        numero_consultas,
+        patient_id,
+        user_id
+      `)
+      .eq('patient_id', patientId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    
+    // Transform the data to match the expected interface
+    const transformedData = (data || []).map(file => ({
+      id: file.id,
+      name: file.description,
+      path: file.file_path,
+      type: file.mime_type,
+      url: file.file_path, // For compatibility with existing interfaces
+      size: 0, // Not stored in DB, can be calculated if needed
+      thumbnail_url: file.thumbnail_url,
+      created_at: file.created_at,
+      fecha_ultima_consulta: file.fecha_ultima_consulta,
+      numero_consultas: file.numero_consultas,
+      patient_id: file.patient_id,
+      user_id: file.user_id
+    }));
+
+    return transformedData;
+  },
+
+  async create(payload: {
+    patient_id: string;
+    description: string;
+    file_path: string;
+    mime_type: string;
+    thumbnail_url?: string | null;
+  }) {
+    const user = await requireSession();
+    const idbu = await requireBusinessUnit(user.id);
+
+    const { data, error } = await supabase
+      .from('tpDocPaciente')
+      .insert([{
+        patient_id: payload.patient_id,
+        description: payload.description,
+        file_path: payload.file_path,
+        mime_type: payload.mime_type,
+        thumbnail_url: payload.thumbnail_url || null,
+        user_id: user.id,
+        idbu: idbu,
+        fecha_creacion: new Date().toISOString(),
+        numero_consultas: 0,
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async remove(fileId: string) {
+    const { error } = await supabase
+      .from('tpDocPaciente')
+      .update({
+        deleted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', fileId);
+
+    if (error) throw error;
+  },
+
+  async trackAccess(fileId: string) {
+    try {
+      // Try using the RPC function first (if it exists)
+      const { error: rpcError } = await supabase.rpc('increment_file_access', {
+        file_id: fileId
+      });
+
+      if (rpcError && rpcError.message?.includes('function increment_file_access')) {
+        // If RPC function doesn't exist, fall back to manual increment
+        // Get current values
+        const { data: currentData, error: selectError } = await supabase
+          .from('tpDocPaciente')
+          .select('numero_consultas')
+          .eq('id', fileId)
+          .single();
+
+        if (selectError) throw selectError;
+
+        // Update with incremented values
+        const { error: updateError } = await supabase
+          .from('tpDocPaciente')
+          .update({
+            numero_consultas: (currentData.numero_consultas || 0) + 1,
+            fecha_ultima_consulta: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', fileId);
+
+        if (updateError) throw updateError;
+      } else if (rpcError) {
+        throw rpcError;
+      }
+    } catch (error) {
+      console.error('Error tracking file access:', error);
+      // Don't throw here to avoid breaking the file viewing experience
+    }
   }
 };
 

@@ -1,48 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { FolderOpen, Upload } from 'lucide-react';
-import { api } from '../lib/api';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { FileUpload } from '../components/FileUpload';
+import { PatientFileGallery } from '../components/PatientFileGallery';
 import { Modal } from '../components/Modal';
+import { api } from '../lib/api';
 import clsx from 'clsx';
 
-interface UploadedFile {
+interface PatientFile {
   id: string;
   name: string;
-  size: number;
   type: string;
   url: string;
   path: string;
+  thumbnail_url: string | null;
+  created_at: string;
+  fecha_ultima_consulta: string | null;
+  numero_consultas: number;
+  patient_id: string;
+  user_id: string;
 }
-
-function areFilesContentEqual(arr1: UploadedFile[], arr2: UploadedFile[]): boolean {
-  if (arr1.length !== arr2.length) {
-    return false;
-  }
-  for (let i = 0; i < arr1.length; i++) {
-    const file1 = arr1[i];
-    const file2 = arr2[i];
-    if (
-      file1.id !== file2.id ||
-      file1.name !== file2.name ||
-      file1.size !== file2.size ||
-      file1.type !== file2.type ||
-      file1.url !== file2.url ||
-      file1.path !== file2.path
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
-
-
-
 
 export function PatientFilesPage() {
   const { currentTheme } = useTheme();
@@ -50,7 +30,7 @@ export function PatientFilesPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [initialFiles, setInitialFiles] = useState<UploadedFile[]>([]);
+  const [patientFiles, setPatientFiles] = useState<PatientFile[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
 
@@ -76,9 +56,7 @@ export function PatientFilesPage() {
     setError(null);
     try {
       const files = await api.files.getByPatientId(selectedPatient.id);
-      if (!areFilesContentEqual(initialFiles, files)) {
-        setInitialFiles(files);
-      }
+      setPatientFiles(files);
     } catch (err) {
       console.error('Error fetching patient files:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar los archivos del paciente. Por favor, intente nuevamente.');
@@ -87,10 +65,18 @@ export function PatientFilesPage() {
     }
   };
 
-  const handleFilesUploaded = (files: UploadedFile[]) => {
-    if (!areFilesContentEqual(initialFiles, files)) {
-      setInitialFiles(files);
-    }
+  const handleFilesUploaded = () => {
+    // Refresh the gallery after files are uploaded
+    fetchPatientFiles();
+  };
+
+  const handleFileRemoved = () => {
+    // Refresh the gallery after a file is removed
+    fetchPatientFiles();
+  };
+
+  const handleFileError = (errorMessage: string) => {
+    setError(errorMessage);
   };
 
   const buttonStyle = {
@@ -148,7 +134,7 @@ export function PatientFilesPage() {
             color: currentTheme.colors.primary,
           }}
         >
-          {initialFiles.length} archivos
+          {patientFiles.length} archivos
         </span>
       </div>
 
@@ -169,40 +155,52 @@ export function PatientFilesPage() {
               <p className="text-sm font-medium">{error}</p>
             </div>
           </div>
+          <button
+            onClick={() => setError(null)}
+            className="mt-2 text-xs underline hover:no-underline"
+          >
+            Cerrar
+          </button>
         </div>
       )}
 
-      <div 
-        className="bg-white rounded-lg shadow-lg p-6"
-        style={{ 
-          background: currentTheme.colors.surface,
-          borderColor: currentTheme.colors.border,
-        }}
-      >
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
-            <span className="ml-3" style={{ color: currentTheme.colors.text }}>
-              {authLoading ? 'Autenticando...' : 'Cargando archivos del paciente...'}
-            </span>
-          </div>
-        ) : (
-          <div>
-            <div className="mb-6">
+            {/* File Upload Section */}
+            <div className="mb-8">
               <h2 
                 className="text-lg font-medium mb-2 flex items-center gap-2"
                 style={{ color: currentTheme.colors.text }}
               >
                 <Upload className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-                Gestión de Archivos
+                Subir Archivos
               </h2>
               <p 
                 className="text-sm mb-4"
                 style={{ color: currentTheme.colors.textSecondary }}
               >
-                Sube y gestiona los archivos médicos del paciente {selectedPatient.Nombre} {selectedPatient.Paterno}
+                Sube documentos médicos para {selectedPatient.Nombre} {selectedPatient.Paterno}
               </p>
+              
+              <FileUpload
+                onFilesUploaded={handleFilesUploaded}
+                maxFiles={20}
+                maxFileSize={15}
+                folder={`patients/${selectedPatient.id}`}
+                className="w-full"
+                enableImageCompression={true}
+                imageCompressionOptions={{
+                  maxSizeMB: 2,
+                  maxWidthOrHeight: 1920,
+                  useWebWorker: true,
+                }}
+              />
             </div>
+
+            {/* File Gallery Section */}
+            <PatientFileGallery
+              files={patientFiles}
+              onFileRemoved={handleFileRemoved}
+              onError={handleFileError}
+            />
 
             <FileUpload
               onFilesUploaded={handleFilesUploaded}

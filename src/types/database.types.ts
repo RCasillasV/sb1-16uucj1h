@@ -725,6 +725,56 @@ export interface Database {
           notas_generales?: string | null
         }
       }
+      tpDocPaciente: {
+        Row: {
+          id: string
+          patient_id: string
+          created_at: string
+          updated_at: string
+          user_id: string
+          idbu: string
+          description: string
+          file_path: string
+          mime_type: string
+          thumbnail_url: string | null
+          fecha_creacion: string
+          fecha_ultima_consulta: string | null
+          numero_consultas: number
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+          idbu?: string
+          description: string
+          file_path: string
+          mime_type: string
+          thumbnail_url?: string | null
+          fecha_creacion?: string
+          fecha_ultima_consulta?: string | null
+          numero_consultas?: number
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          patient_id?: string
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+          idbu?: string
+          description?: string
+          file_path?: string
+          mime_type?: string
+          thumbnail_url?: string | null
+          fecha_creacion?: string
+          fecha_ultima_consulta?: string | null
+          numero_consultas?: number
+          deleted_at?: string | null
+        }
+      }
       // Nueva tabla tpFcHeredoFamiliar
       tpFcHeredoFamiliar: {
         Row: {

@@ -161,6 +161,12 @@ export function FileUpload({
       throw new Error('Usuario no autenticado');
     }
 
+    // Extract patient ID from folder prop
+    const patientId = folder.split('/').pop() || '';
+    if (!patientId || patientId === 'new') {
+      throw new Error('ID de paciente requerido para subir archivos');
+    }
+
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -183,13 +189,70 @@ export function FileUpload({
       .from(bucketName)
       .getPublicUrl(filePath);
 
+    // Generate thumbnail for images
+    let thumbnailUrl = null;
+    if (file.type.startsWith('image/')) {
+      try {
+        // Create a smaller thumbnail for gallery display
+        const thumbnailFile = await imageCompression(file, {
+          maxSizeMB: 0.1,
+          maxWidthOrHeight: 300,
+          useWebWorker: true,
+          fileType: file.type,
+          initialQuality: 0.6
+        });
+
+        // Upload thumbnail to separate subfolder
+        const thumbnailFileName = `thumb_${fileName}`;
+        const thumbnailPath = `thumbnails/${folder}/${thumbnailFileName}`;
+
+        const { data: thumbnailData, error: thumbnailError } = await supabase.storage
+          .from(bucketName)
+          .upload(thumbnailPath, thumbnailFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (!thumbnailError) {
+          const { data: { publicUrl: thumbnailPublicUrl } } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(thumbnailPath);
+          
+          thumbnailUrl = thumbnailPublicUrl;
+        }
+      } catch (thumbnailError) {
+        console.error('Error creating thumbnail:', thumbnailError);
+        // Continue without thumbnail if generation fails
+      }
+    }
+
+    // Save file metadata to database using the new API
+    try {
+      const { api } = await import('../lib/api');
+      await api.files.create({
+        patient_id: patientId,
+        description: file.name,
+        file_path: publicUrl,
+        mime_type: file.type,
+        thumbnail_url: thumbnailUrl
+      });
+    } catch (dbError) {
+      // If database insert fails, remove the uploaded files
+      await supabase.storage.from(bucketName).remove([filePath]);
+      if (thumbnailUrl) {
+        await supabase.storage.from(bucketName).remove([`thumbnails/${folder}/${`thumb_${fileName}`}`]);
+      }
+      throw new Error(`Error guardando metadata del archivo: ${dbError instanceof Error ? dbError.message : 'Error desconocido'}`);
+    }
+
     return {
       id: data.path,
       name: file.name,
       size: file.size,
       type: file.type,
       url: publicUrl,
-      path: filePath
+      path: filePath,
+      thumbnail_url: thumbnailUrl
     };
   };
 
@@ -271,14 +334,9 @@ export function FileUpload({
 
   const removeFile = async (fileToRemove: UploadedFile) => {
     try {
-      // Remove from Supabase storage
-      const { error } = await supabase.storage
-        .from(bucketName)
-        .remove([fileToRemove.path]);
-
-      if (error) {
-        console.error('Error removing file from storage:', error);
-      }
+      // Use logical deletion through API
+      const { api } = await import('../lib/api');
+      await api.files.remove(fileToRemove.id);
 
       // Remove from local state
       const newFiles = uploadedFiles.filter(file => file.id !== fileToRemove.id);
@@ -289,6 +347,7 @@ export function FileUpload({
       }
     } catch (err) {
       console.error('Error removing file:', err);
+      setError(err instanceof Error ? err.message : 'Error al eliminar archivo');
     }
   };
 
@@ -298,6 +357,8 @@ export function FileUpload({
 
   const handleViewFile = (file: UploadedFile) => {
     if (isImageFile(file.type)) {
+      // Track file access
+      import('../lib/api').then(({ api }) => api.files.trackAccess(file.id));
       setPreviewImageUrl(file.url);
       setPreviewImageName(file.name);
       setShowImagePreview(true);
@@ -397,60 +458,6 @@ export function FileUpload({
       )}
 
       {/* Uploaded Files List */}
-      {uploadedFiles.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium" style={{ color: currentTheme.colors.text }}>
-            Archivos subidos ({uploadedFiles.length})
-          </h4>
-          
-          <div className="space-y-2">
-            {uploadedFiles.map((file) => {
-              const FileIcon = getFileIcon(file.type);
-              return (
-                <div
-                  key={file.id}
-                  className="flex items-center gap-3 p-3 rounded-md border"
-                  style={{
-                    background: currentTheme.colors.surface,
-                    borderColor: currentTheme.colors.border,
-                  }}
-                >
-                  <FileIcon className="h-5 w-5 shrink-0" style={{ color: currentTheme.colors.primary }} />
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: currentTheme.colors.text }}>
-                      {file.name}
-                    </p>
-                    <p className="text-xs" style={{ color: currentTheme.colors.textSecondary }}>
-                      {formatFileSize(file.size)}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    
-                    <button
-                      onClick={() => handleViewFile(file)}
-                      className="text-xs px-2 py-1 rounded hover:bg-black/5 transition-colors"
-                      style={{ color: currentTheme.colors.primary }}
-                    >
-                      Ver
-                    </button>
-                    
-                    <button
-                      onClick={() => removeFile(file)}
-                      className="p-1 rounded-full hover:bg-black/5 transition-colors"
-                      title="Eliminar archivo"
-                    >
-                      <X className="h-4 w-4" style={{ color: currentTheme.colors.textSecondary }} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Image Preview Modal */}
       <ImagePreviewModal
