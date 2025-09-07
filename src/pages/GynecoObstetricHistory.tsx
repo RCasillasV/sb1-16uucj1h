@@ -436,7 +436,7 @@ export function GynecoObstetricHistory() {
                 {...register('cesareas')}
                 placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
-                style={inputStyle, marginBottom: '-0.5rem'}
+                style={{inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
           </div>
