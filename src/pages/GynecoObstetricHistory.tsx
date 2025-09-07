@@ -130,7 +130,7 @@ export function GynecoObstetricHistory() {
     setError(null);
 
     try {
-      console.log('GYNECO_HISTORY: Iniciando fetch para paciente:', selectedPatient.id); 
+      console.log('GYNECO_HISTORY: Iniciando fetch para paciente:', selectedPatient.id,selectedPatient.Sexo); 
       const data = await api.gynecoObstetricHistory.getByPatientId(selectedPatient.id);
       console.log('GYNECO_HISTORY: Datos recibidos de la API:', data);
       if (data) {
