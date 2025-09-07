@@ -455,7 +455,7 @@ export function GynecoObstetricHistory() {
                 id="fum"
                 {...register('fum')}
                 className="w-full  p-2 rounded-md border"
-                style={inputStyle, marginBottom: '-0.5rem'}
+                style={{inputStyle, marginBottom: '-0.5rem'}}
               /> 
             </div>
             <div>
