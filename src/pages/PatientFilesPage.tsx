@@ -164,60 +164,43 @@ export function PatientFilesPage() {
         </div>
       )}
 
-            {/* File Upload Section */}
-            <div className="mb-8">
-              <h2 
-                className="text-lg font-medium mb-2 flex items-center gap-2"
-                style={{ color: currentTheme.colors.text }}
-              >
-                <Upload className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-                Subir Archivos
-              </h2>
-              <p 
-                className="text-sm mb-4"
-                style={{ color: currentTheme.colors.textSecondary }}
-              >
-                Sube documentos médicos para {selectedPatient.Nombre} {selectedPatient.Paterno}
-              </p>
-              
-              <FileUpload
-                onFilesUploaded={handleFilesUploaded}
-                maxFiles={20}
-                maxFileSize={15}
-                folder={`patients/${selectedPatient.id}`}
-                className="w-full"
-                enableImageCompression={true}
-                imageCompressionOptions={{
-                  maxSizeMB: 2,
-                  maxWidthOrHeight: 1920,
-                  useWebWorker: true,
-                }}
-              />
-            </div>
-
-            {/* File Gallery Section */}
-            <PatientFileGallery
-              files={patientFiles}
-              onFileRemoved={handleFileRemoved}
-              onError={handleFileError}
-            />
-
-            <FileUpload
-              onFilesUploaded={handleFilesUploaded}
-              maxFiles={20}
-              maxFileSize={15}
-              folder={`patients/${selectedPatient.id}`}
-              className="w-full"
-              enableImageCompression={true}
-              imageCompressionOptions={{
-                maxSizeMB: 2,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true,
-              }}
-            />
-          </div>
-        )}
+      {/* File Upload Section */}
+      <div className="mb-8">
+        <h2 
+          className="text-lg font-medium mb-2 flex items-center gap-2"
+          style={{ color: currentTheme.colors.text }}
+        >
+          <Upload className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+          Subir Archivos
+        </h2>
+        <p 
+          className="text-sm mb-4"
+          style={{ color: currentTheme.colors.textSecondary }}
+        >
+          Sube documentos médicos para {selectedPatient.Nombre} {selectedPatient.Paterno}
+        </p>
+        
+        <FileUpload
+          onFilesUploaded={handleFilesUploaded}
+          maxFiles={20}
+          maxFileSize={15}
+          folder={`patients/${selectedPatient.id}`}
+          className="w-full"
+          enableImageCompression={true}
+          imageCompressionOptions={{
+            maxSizeMB: 2,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          }}
+        />
       </div>
+
+      {/* File Gallery Section */}
+      <PatientFileGallery
+        files={patientFiles}
+        onFileRemoved={handleFileRemoved}
+        onError={handleFileError}
+      />
     </div>
   );
 }
