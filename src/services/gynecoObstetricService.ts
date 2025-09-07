@@ -40,8 +40,8 @@ export const gynecoObstetricHistory = {
       .from('tpPacienteHistGineObst')
       .select('*')
       .eq('patient_id', patientId)
-      .eq('idbu', user_idbu) // Añadir filtro explícito por idbu
-      .limit(1); // Since patient_id is now unique
+      // .eq('idbu', user_idbu) // Añadir filtro explícito por idbu
+      .single(); // Since patient_id is now unique
 
     console.log('GYNECO_SERVICE: Raw Supabase data:', data);
     console.log('GYNECO_SERVICE: Raw Supabase error:', error);
