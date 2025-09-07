@@ -404,7 +404,7 @@ export function GynecoObstetricHistory() {
                 {...register('paras')}
                 placeholder="Ej: 2"
                 className="w-full p-2 rounded-md border"
-                style={inputStyle, marginBottom: '-0.5rem'}
+                style={{inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
             <div>
@@ -420,7 +420,7 @@ export function GynecoObstetricHistory() {
                 {...register('abortos')}
                 placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
-                style={inputStyle, marginBottom: '-0.5rem'}
+                style={{inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
             <div>
