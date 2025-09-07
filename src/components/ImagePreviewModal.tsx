@@ -175,14 +175,10 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
       <div 
         ref={containerRef}
         className={clsx(
-          console.error('IMAGE URL ANALYSIS:', {
-            urlLength: imageUrl.length,
-            hasToken: imageUrl.includes('token='),
-            isSignedUrl: imageUrl.includes('/object/sign/'),
-            isPublicUrl: imageUrl.includes('/object/public/'),
-            pathStructure: imageUrl.split('/').slice(-4).join('/'), // Last 4 parts of path
-            isValidHttps: imageUrl.startsWith('https://'),
-          });
+          'relative w-full h-full max-w-7xl max-h-full',
+          isFullscreen ? 'w-screen h-screen' : 'w-[90vw] h-[90vh] rounded-lg overflow-hidden'
+        )}
+        style={{
           background: isFullscreen ? 'black' : currentTheme.colors.surface,
         }}
         onClick={e => e.stopPropagation()}
