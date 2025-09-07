@@ -581,7 +581,7 @@ export function GynecoObstetricHistory() {
             <button
               type="submit"
               disabled={saving}
-              className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2', 'py-1')}
+              className={clsx(buttonStyle.base, 'disabled:opacity-50', 'flex items-center gap-2')}
               style={buttonStyle.primary}
             >
               <Save className="h-4 w-4" />
