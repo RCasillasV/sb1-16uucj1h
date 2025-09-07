@@ -33,7 +33,7 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
       setImageLoaded(false);
       setImageError(false);
     }
-  }, [isOpen, imageUrl]);
+  }, [isOpen]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
