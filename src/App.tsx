@@ -1,5 +1,5 @@
 import React, { useEffect, lazy, Suspense, useState } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { PrivateRoute } from './components/PrivateRoute';
 import { AuthProvider } from './contexts/AuthContext';
@@ -282,19 +282,17 @@ function App() {
   //console.log('App component started rendering');
 
   return (
-    
-      <AuthProvider>
-        <ThemeProvider>
-          <SelectedPatientProvider>
-            <UserManagementProvider>
-              <AgendaProvider>
-                <AppContent />
-              </AgendaProvider>
-            </UserManagementProvider>
-          </SelectedPatientProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    
+    <AuthProvider>
+      <ThemeProvider>
+        <SelectedPatientProvider>
+          <UserManagementProvider>
+            <AgendaProvider>
+              <AppContent />
+            </AgendaProvider>
+          </UserManagementProvider>
+        </SelectedPatientProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

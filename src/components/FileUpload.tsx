@@ -187,11 +187,6 @@ export function FileUpload({
       throw new Error(`Error al subir archivo: ${error.message}`);
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(filePath);
-
     // Generate thumbnail for images
     let thumbnailUrl = null;
     if (file.type.startsWith('image/')) {
@@ -217,11 +212,7 @@ export function FileUpload({
           });
 
         if (!thumbnailError) {
-          const { data: { publicUrl: thumbnailPublicUrl } } = supabase.storage
-            .from(bucketName)
-            .getPublicUrl(thumbnailPath);
-          
-          thumbnailUrl = thumbnailPublicUrl;
+          thumbnailUrl = thumbnailPath; // Store path instead of URL
         }
       } catch (thumbnailError) {
         console.error('Error creating thumbnail:', thumbnailError);
@@ -235,7 +226,7 @@ export function FileUpload({
       await api.files.create({
         patient_id: patientId,
         description: description, // Use the provided description instead of file name
-        file_path: publicUrl,
+        file_path: filePath, // Store path instead of URL
         mime_type: file.type,
         thumbnail_url: thumbnailUrl
       });
@@ -243,17 +234,24 @@ export function FileUpload({
       // If database insert fails, remove the uploaded files
       await supabase.storage.from(bucketName).remove([filePath]);
       if (thumbnailUrl) {
-        await supabase.storage.from(bucketName).remove([`thumbnails/${folder}/${`thumb_${fileName}`}`]);
+        await supabase.storage.from(bucketName).remove([thumbnailUrl]);
       }
       throw new Error(`Error guardando metadata del archivo: ${dbError instanceof Error ? dbError.message : 'Error desconocido'}`);
     }
+
+    // Generate signed URL for immediate return (for UI purposes)
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from(bucketName)
+      .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+    const signedUrl = signedError ? filePath : signedData.signedUrl;
 
     return {
       id: data.path,
       name: description, // Use description as the display name
       size: file.size,
       type: file.type,
-      url: publicUrl,
+      url: signedUrl, // Return signed URL for immediate display
       path: filePath,
     };
   };

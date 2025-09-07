@@ -305,6 +305,11 @@ const medications = {
 // Files service
 const files = {
   async getByPatientId(patientId: string) {
+    const BUCKET_NAME = import.meta.env.VITE_BUCKET_NAME;
+    if (!BUCKET_NAME) {
+      throw new Error('VITE_BUCKET_NAME environment variable is required');
+    }
+
     const { data, error } = await supabase
       .from('tpDocPaciente')
       .select(`
@@ -326,20 +331,50 @@ const files = {
 
     if (error) throw error;
     
-    // Transform the data to match the expected interface
-    const transformedData = (data || []).map(file => ({
-      id: file.id,
-      name: file.description,
-      path: file.file_path,
-      type: file.mime_type,
-      url: file.file_path, // For compatibility with existing interfaces
-      size: 0, // Not stored in DB, can be calculated if needed
-      thumbnail_url: file.thumbnail_url,
-      created_at: file.created_at,
-      fecha_ultima_consulta: file.fecha_ultima_consulta,
-      numero_consultas: file.numero_consultas,
-      patient_id: file.patient_id,
-      user_id: file.user_id
+    // Generate signed URLs for each file
+    const transformedData = await Promise.all((data || []).map(async (file) => {
+      let signedUrl = file.file_path;
+      let signedThumbnailUrl = file.thumbnail_url;
+      
+      try {
+        // Generate signed URL for main file (1 hour expiry)
+        const { data: urlData, error: urlError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .createSignedUrl(file.file_path, 3600);
+        
+        if (!urlError && urlData?.signedUrl) {
+          signedUrl = urlData.signedUrl;
+        }
+        
+        // Generate signed URL for thumbnail if it exists
+        if (file.thumbnail_url) {
+          const { data: thumbData, error: thumbError } = await supabase.storage
+            .from(BUCKET_NAME)
+            .createSignedUrl(file.thumbnail_url, 3600);
+          
+          if (!thumbError && thumbData?.signedUrl) {
+            signedThumbnailUrl = thumbData.signedUrl;
+          }
+        }
+      } catch (urlError) {
+        console.error('Error generating signed URL for file:', file.id, urlError);
+        // Fall back to using the stored path
+      }
+      
+      return {
+        id: file.id,
+        name: file.description,
+        path: file.file_path,
+        type: file.mime_type,
+        url: signedUrl, // Now using fresh signed URL
+        size: 0, // Not stored in DB, can be calculated if needed
+        thumbnail_url: signedThumbnailUrl,
+        created_at: file.created_at,
+        fecha_ultima_consulta: file.fecha_ultima_consulta,
+        numero_consultas: file.numero_consultas,
+        patient_id: file.patient_id,
+        user_id: file.user_id
+      };
     }));
 
     console.log('API FILES: Retrieved', transformedData.length, 'files for patient', patientId);

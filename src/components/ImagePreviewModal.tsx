@@ -322,7 +322,11 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
                 currentSrc: (e.target as HTMLImageElement).currentSrc
               });
               console.error('DETAILED IMAGE ERROR: Failed to load image from URL:', imageUrl);
-              console.error('BUCKET ANALYSIS: URL contains bucket name:', imageUrl.includes('00000000-default-bucket') ? '00000000-default-bucket (INCORRECT!)' : 'Correct bucket name');
+              console.error('IMAGE URL ANALYSIS: URL structure:', {
+                hasToken: imageUrl.includes('token='),
+                isSignedUrl: imageUrl.includes('/sign/'),
+                bucketName: imageUrl.includes('00000000-default-bucket') ? '00000000-default-bucket' : 'Unknown bucket'
+              });
               setImageError(true);
             }}
             draggable={false}
