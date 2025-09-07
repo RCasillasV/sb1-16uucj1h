@@ -61,6 +61,12 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
   const handleFileClick = async (file: PatientFile) => {
     try {
       console.log('PATIENT_FILE_GALLERY: Clicking on file:', file.name, 'URL:', file.url);
+      
+      // Check if URL is still valid before trying to access
+      if (!file.url || file.url.includes('error')) {
+        throw new Error('URL del archivo no disponible o expirada');
+      }
+      
       // Track file access
       await api.files.trackAccess(file.id);
       
@@ -83,7 +89,7 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
       }
     } catch (error) {
       console.error('Error tracking file access:', error);
-      onError('Error al registrar acceso al archivo');
+      onError(`Error al acceder al archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
 

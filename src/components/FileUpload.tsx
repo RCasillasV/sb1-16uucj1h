@@ -226,9 +226,9 @@ export function FileUpload({
       await api.files.create({
         patient_id: patientId,
         description: description, // Use the provided description instead of file name
-        file_path: filePath, // Store path instead of URL
+        file_path: filePath, // Store only the path, not the URL
         mime_type: file.type,
-        thumbnail_url: thumbnailUrl
+        thumbnail_url: thumbnailUrl // Store only the path, not the URL
       });
     } catch (dbError) {
       // If database insert fails, remove the uploaded files
@@ -239,19 +239,30 @@ export function FileUpload({
       throw new Error(`Error guardando metadata del archivo: ${dbError instanceof Error ? dbError.message : 'Error desconocido'}`);
     }
 
-    // Generate signed URL for immediate return (for UI purposes)
-    const { data: signedData, error: signedError } = await supabase.storage
-      .from(bucketName)
-      .createSignedUrl(filePath, 3600); // 1 hour expiry
-
-    const signedUrl = signedError ? filePath : signedData.signedUrl;
+    // Generate signed URL for immediate return (for UI purposes) only if upload was successful
+    let signedUrl = filePath; // Default fallback
+    try {
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from(bucketName)
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+      
+      if (signedError) {
+        console.warn('Warning: Could not generate signed URL for uploaded file:', signedError);
+        // Use the path as fallback
+      } else if (signedData?.signedUrl) {
+        signedUrl = signedData.signedUrl;
+      }
+    } catch (urlError) {
+      console.warn('Exception generating signed URL for uploaded file:', urlError);
+      // Use path as fallback
+    }
 
     return {
       id: data.path,
       name: description, // Use description as the display name
       size: file.size,
       type: file.type,
-      url: signedUrl, // Return signed URL for immediate display
+      url: signedUrl, // Return signed URL or path fallback
       path: filePath,
     };
   };

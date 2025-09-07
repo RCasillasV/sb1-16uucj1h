@@ -331,34 +331,81 @@ const files = {
 
     if (error) throw error;
     
-    // Generate signed URLs for each file
+    // Generate signed URLs for each file and verify existence
     const transformedData = await Promise.all((data || []).map(async (file) => {
-      let signedUrl = file.file_path;
-      let signedThumbnailUrl = file.thumbnail_url;
+      let signedUrl = null;
+      let signedThumbnailUrl = null;
+      let fileExists = false;
       
       try {
-        // Generate signed URL for main file (1 hour expiry)
+        // First, check if file exists in storage
+        const { data: fileExistsData, error: fileExistsError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .list(file.file_path.split('/').slice(0, -1).join('/'), {
+            search: file.file_path.split('/').pop()
+          });
+
+        if (!fileExistsError && fileExistsData && fileExistsData.length > 0) {
+          fileExists = true;
+          console.log('FILE API: File exists in storage:', file.file_path);
+        } else {
+          console.warn('FILE API: File not found in storage:', file.file_path);
+          // Skip this file - it doesn't exist in storage
+          return null;
+        }
+        
+        // Generate signed URL for main file only if it exists (1 hour expiry)
         const { data: urlData, error: urlError } = await supabase.storage
           .from(BUCKET_NAME)
           .createSignedUrl(file.file_path, 3600);
         
-        if (!urlError && urlData?.signedUrl) {
+        if (urlError) {
+          console.error('FILE API: Error generating signed URL for file:', file.id, urlError);
+          // Skip this file if we can't generate a signed URL
+          return null;
+        } else if (urlData?.signedUrl) {
           signedUrl = urlData.signedUrl;
+          console.log('FILE API: Generated signed URL for:', file.file_path);
+        } else {
+          console.warn('FILE API: No signed URL returned for:', file.file_path);
+          return null;
         }
         
         // Generate signed URL for thumbnail if it exists
         if (file.thumbnail_url) {
-          const { data: thumbData, error: thumbError } = await supabase.storage
+          // Check if thumbnail exists
+          const { data: thumbExistsData, error: thumbExistsError } = await supabase.storage
             .from(BUCKET_NAME)
-            .createSignedUrl(file.thumbnail_url, 3600);
-          
-          if (!thumbError && thumbData?.signedUrl) {
-            signedThumbnailUrl = thumbData.signedUrl;
+            .list(file.thumbnail_url.split('/').slice(0, -1).join('/'), {
+              search: file.thumbnail_url.split('/').pop()
+            });
+
+          if (thumbExistsError || !thumbExistsData || thumbExistsData.length === 0) {
+            console.warn('FILE API: Thumbnail not found in storage:', file.thumbnail_url);
+            // Continue without thumbnail
+          } else {
+            // Generate signed URL for thumbnail
+            const { data: thumbData, error: thumbError } = await supabase.storage
+              .from(BUCKET_NAME)
+              .createSignedUrl(file.thumbnail_url, 3600);
+            
+            if (thumbError) {
+              console.error('FILE API: Error generating signed URL for thumbnail:', file.id, thumbError);
+            } else if (thumbData?.signedUrl) {
+              signedThumbnailUrl = thumbData.signedUrl;
+              console.log('FILE API: Generated signed URL for thumbnail:', file.thumbnail_url);
+            }
           }
         }
       } catch (urlError) {
-        console.error('Error generating signed URL for file:', file.id, urlError);
-        // Fall back to using the stored path
+        console.error('FILE API: Exception during URL generation for file:', file.id, urlError);
+        return null; // Skip this file completely
+      }
+      
+      // Only return file data if we successfully generated a signed URL
+      if (!signedUrl) {
+        console.warn('FILE API: Skipping file due to missing signed URL:', file.id);
+        return null;
       }
       
       return {
@@ -366,20 +413,24 @@ const files = {
         name: file.description,
         path: file.file_path,
         type: file.mime_type,
-        url: signedUrl, // Now using fresh signed URL
+        url: signedUrl,
         size: 0, // Not stored in DB, can be calculated if needed
         thumbnail_url: signedThumbnailUrl,
         created_at: file.created_at,
         fecha_ultima_consulta: file.fecha_ultima_consulta,
         numero_consultas: file.numero_consultas,
         patient_id: file.patient_id,
-        user_id: file.user_id
+        user_id: file.user_id,
+        fileExists: fileExists
       };
     }));
 
-    console.log('API FILES: Retrieved', transformedData.length, 'files for patient', patientId);
-    console.log('API FILES: Files data:', transformedData);
-    return transformedData;
+    // Filter out null entries (files that don't exist or couldn't generate URLs)
+    const validFiles = transformedData.filter(file => file !== null);
+
+    console.log('API FILES: Retrieved', validFiles.length, 'valid files for patient', patientId);
+    console.log('API FILES: Valid files data:', validFiles);
+    return validFiles;
   },
 
   async create(payload: {
