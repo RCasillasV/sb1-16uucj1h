@@ -60,20 +60,24 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
 
   const handleFileClick = async (file: PatientFile) => {
     try {
+      console.log('PATIENT_FILE_GALLERY: Clicking on file:', file.name, 'URL:', file.url);
       // Track file access
       await api.files.trackAccess(file.id);
       
       // Notify parent component to refresh the file list
       if (onFileAccessed) {
+        console.log('PATIENT_FILE_GALLERY: Notifying parent to refresh file list');
         onFileAccessed();
       }
 
       // Open file based on type
       if (file.type.startsWith('image/')) {
+        console.log('PATIENT_FILE_GALLERY: Opening image preview for:', file.url);
         setPreviewImageUrl(file.url);
         setPreviewImageName(file.name);
         setShowImagePreview(true);
       } else {
+        console.log('PATIENT_FILE_GALLERY: Opening non-image file in new tab:', file.url);
         // For PDFs and documents, open in new tab
         window.open(file.url, '_blank', 'noopener,noreferrer');
       }

@@ -317,7 +317,8 @@ const files = {
         fecha_ultima_consulta,
         numero_consultas,
         patient_id,
-        user_id
+        user_id,
+        deleted_at
       `)
       .eq('patient_id', patientId)
       .is('deleted_at', null)
@@ -341,6 +342,8 @@ const files = {
       user_id: file.user_id
     }));
 
+    console.log('API FILES: Retrieved', transformedData.length, 'files for patient', patientId);
+    console.log('API FILES: Files data:', transformedData);
     return transformedData;
   },
 

@@ -315,8 +315,14 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
                 imageUrl,
                 imageName,
                 error: e,
-                target: e.target
+                target: e.target,
+                naturalWidth: (e.target as HTMLImageElement).naturalWidth,
+                naturalHeight: (e.target as HTMLImageElement).naturalHeight,
+                complete: (e.target as HTMLImageElement).complete,
+                currentSrc: (e.target as HTMLImageElement).currentSrc
               });
+              console.error('DETAILED IMAGE ERROR: Failed to load image from URL:', imageUrl);
+              console.error('BUCKET ANALYSIS: URL contains bucket name:', imageUrl.includes('00000000-default-bucket') ? '00000000-default-bucket (INCORRECT!)' : 'Correct bucket name');
               setImageError(true);
             }}
             draggable={false}
