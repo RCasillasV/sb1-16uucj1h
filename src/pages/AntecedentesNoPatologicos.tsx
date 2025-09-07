@@ -766,7 +766,7 @@ export function AntecedentesNoPatologicos() {
                       Inmunizaciones al día
                     </h3>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-3  gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3  gap-2">
                       {[
                         "COVID-19", "Influenza", "Hepatitis B", "Tétanos",
                         "Sarampión", "Varicela", "HPV", "Neumococo"
@@ -800,7 +800,7 @@ export function AntecedentesNoPatologicos() {
                       Alergias ambientales
                     </h3>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {[
                         "Polen", "Ácaros", "Polvo", "Pelo animal",
                         "Moho", "Látex", "Ninguna", "Otras"
