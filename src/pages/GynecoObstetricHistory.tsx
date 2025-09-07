@@ -404,7 +404,7 @@ export function GynecoObstetricHistory() {
                 {...register('paras')}
                 placeholder="Ej: 2"
                 className="w-full p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
             <div>
@@ -420,7 +420,7 @@ export function GynecoObstetricHistory() {
                 {...register('abortos')}
                 placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
             <div>
@@ -436,7 +436,7 @@ export function GynecoObstetricHistory() {
                 {...register('cesareas')}
                 placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
           </div>
@@ -455,7 +455,7 @@ export function GynecoObstetricHistory() {
                 id="fum"
                 {...register('fum')}
                 className="w-full  p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               /> 
             </div>
             <div>
@@ -471,7 +471,7 @@ export function GynecoObstetricHistory() {
                   {...register('ritmo_menstrual')}
                   placeholder="Ej: 28x5 (ciclo de 28 días, 5 días de sangrado)"
                   className="w-full p-2 rounded-md border"
-                  style={{inputStyle, marginBottom: '-0.5rem'}}
+                  style={{...inputStyle, marginBottom: '-0.5rem'}}
                 />
             </div>
             <div className="col-span-2">
@@ -487,7 +487,7 @@ export function GynecoObstetricHistory() {
                   {...register('metodo_anticonceptivo')}
                   placeholder="Ej: Píldoras, DIU, Condón, Ninguno"
                   className="w-full p-2 rounded-md border"
-                  style={{inputStyle, marginBottom: '-0.5rem'}}
+                  style={{...inputStyle, marginBottom: '-0.5rem'}}
                 />
             </div>
           </div>
@@ -506,7 +506,7 @@ export function GynecoObstetricHistory() {
                 id="fecha_ultimo_papanicolau"
                 {...register('fecha_ultimo_papanicolau')}
                 className="w-full p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
             <div>
@@ -522,7 +522,7 @@ export function GynecoObstetricHistory() {
                 {...register('resultado_ultimo_papanicolau')}
                 placeholder="Ej: Normal, ASCUS, NIC I"
                 className="w-full p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
             <div>
@@ -537,7 +537,7 @@ export function GynecoObstetricHistory() {
                 id="mamografia"
                 {...register('mamografia')}
                 className="w-full p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
             <div>
@@ -553,7 +553,7 @@ export function GynecoObstetricHistory() {
                 {...register('resultado_mamografia')}
                 placeholder="Ej: BIRADS 1, BIRADS 2"
                 className="w-full p-2 rounded-md border"
-                style={{inputStyle, marginBottom: '-0.5rem'}}
+                style={{...inputStyle, marginBottom: '-0.5rem'}}
               />
             </div>
           </div>
