@@ -52,10 +52,12 @@ export function PatientFilesPage() {
       return;
     }
     
+    console.log('PATIENT_FILES_PAGE: Fetching files for patient:', selectedPatient.id);
     setLoading(true);
     setError(null);
     try {
       const files = await api.files.getByPatientId(selectedPatient.id);
+      console.log('PATIENT_FILES_PAGE: Received files from API:', files.length);
       setPatientFiles(files);
     } catch (err) {
       console.error('Error fetching patient files:', err);
@@ -65,19 +67,22 @@ export function PatientFilesPage() {
     }
   };
 
-  const handleFilesUploaded = () => {
+  const handleFilesUploaded = React.useCallback(() => {
+    console.log('PATIENT_FILES_PAGE: handleFilesUploaded called');
     // Refresh the gallery after files are uploaded
     fetchPatientFiles();
-  };
+  }, [selectedPatient?.id]);
 
-  const handleFileRemoved = () => {
+  const handleFileRemoved = React.useCallback(() => {
+    console.log('PATIENT_FILES_PAGE: handleFileRemoved called');
     // Refresh the gallery after a file is removed
     fetchPatientFiles();
-  };
+  }, [selectedPatient?.id]);
 
-  const handleFileError = (errorMessage: string) => {
+  const handleFileError = React.useCallback((errorMessage: string) => {
+    console.log('PATIENT_FILES_PAGE: handleFileError called:', errorMessage);
     setError(errorMessage);
-  };
+  }, []);
 
   const buttonStyle = {
     base: clsx(

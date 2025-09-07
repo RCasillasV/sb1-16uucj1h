@@ -61,12 +61,14 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
   const handleFileClick = async (file: PatientFile) => {
     try {
       console.log('PATIENT_FILE_GALLERY: Clicking on file:', file.name, 'URL:', file.url);
+      console.log('PATIENT_FILE_GALLERY: File path:', file.path, 'Type:', file.type);
       
       // Check if URL is still valid before trying to access
       if (!file.url || file.url.includes('error')) {
         throw new Error('URL del archivo no disponible o expirada');
       }
       
+      console.log('PATIENT_FILE_GALLERY: Tracking file access for file ID:', file.id);
       // Track file access
       await api.files.trackAccess(file.id);
       

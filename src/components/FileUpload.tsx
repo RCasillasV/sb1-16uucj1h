@@ -175,6 +175,14 @@ export function FileUpload({
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
+    // Debug logging for file upload
+    console.log('FILEUPLOAD: Starting upload process');
+    console.log('FILEUPLOAD: Bucket name from env:', bucketName);
+    console.log('FILEUPLOAD: Full file path:', filePath);
+    console.log('FILEUPLOAD: Patient ID:', patientId);
+    console.log('FILEUPLOAD: File name:', fileName);
+    console.log('FILEUPLOAD: File type:', file.type);
+    console.log('FILEUPLOAD: File size:', file.size);
     // Upload file to Supabase storage
     const { data, error } = await supabase.storage
       .from(bucketName)
@@ -183,6 +191,8 @@ export function FileUpload({
         upsert: false
       });
 
+    console.log('FILEUPLOAD: Upload response data:', data);
+    console.log('FILEUPLOAD: Upload response error:', error);
     if (error) {
       throw new Error(`Error al subir archivo: ${error.message}`);
     }
@@ -204,6 +214,7 @@ export function FileUpload({
         const thumbnailFileName = `thumb_${fileName}`;
         const thumbnailPath = `thumbnails/${folder}/${thumbnailFileName}`;
 
+        console.log('FILEUPLOAD: Thumbnail path:', thumbnailPath);
         const { data: thumbnailData, error: thumbnailError } = await supabase.storage
           .from(bucketName)
           .upload(thumbnailPath, thumbnailFile, {
@@ -213,6 +224,7 @@ export function FileUpload({
 
         if (!thumbnailError) {
           thumbnailUrl = thumbnailPath; // Store path instead of URL
+          console.log('FILEUPLOAD: Thumbnail uploaded successfully to:', thumbnailPath);
         }
       } catch (thumbnailError) {
         console.error('Error creating thumbnail:', thumbnailError);
@@ -223,6 +235,7 @@ export function FileUpload({
     // Save file metadata to database using the new API
     try {
       const { api } = await import('../lib/api');
+      console.log('FILEUPLOAD: Saving to database with path:', filePath);
       await api.files.create({
         patient_id: patientId,
         description: description, // Use the provided description instead of file name
@@ -230,8 +243,10 @@ export function FileUpload({
         mime_type: file.type,
         thumbnail_url: thumbnailUrl // Store only the path, not the URL
       });
+      console.log('FILEUPLOAD: Database record created successfully');
     } catch (dbError) {
       // If database insert fails, remove the uploaded files
+      console.error('FILEUPLOAD: Database insert failed, cleaning up storage files:', dbError);
       await supabase.storage.from(bucketName).remove([filePath]);
       if (thumbnailUrl) {
         await supabase.storage.from(bucketName).remove([thumbnailUrl]);
@@ -242,6 +257,7 @@ export function FileUpload({
     // Generate signed URL for immediate return (for UI purposes) only if upload was successful
     let signedUrl = filePath; // Default fallback
     try {
+      console.log('FILEUPLOAD: Generating signed URL for:', filePath);
       const { data: signedData, error: signedError } = await supabase.storage
         .from(bucketName)
         .createSignedUrl(filePath, 3600); // 1 hour expiry
@@ -251,12 +267,14 @@ export function FileUpload({
         // Use the path as fallback
       } else if (signedData?.signedUrl) {
         signedUrl = signedData.signedUrl;
+        console.log('FILEUPLOAD: Generated signed URL:', signedUrl);
       }
     } catch (urlError) {
       console.warn('Exception generating signed URL for uploaded file:', urlError);
       // Use path as fallback
     }
 
+    console.log('FILEUPLOAD: Upload completed successfully');
     return {
       id: data.path,
       name: description, // Use description as the display name
