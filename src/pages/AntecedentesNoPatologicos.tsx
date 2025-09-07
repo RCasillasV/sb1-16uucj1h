@@ -761,7 +761,8 @@ export function AntecedentesNoPatologicos() {
                   <div className="space-y-4">
                     <h3 
                       className="text-lg font-semibold"
-                      style={{ color: currentTheme.colors.primary }}
+                      style={{ color: currentTheme.colors.primary,
+                              borderColor: currentTheme.colors.border }}
                     >
                       Inmunizaciones al día
                     </h3>
