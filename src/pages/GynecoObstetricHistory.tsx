@@ -572,7 +572,7 @@ export function GynecoObstetricHistory() {
               placeholder="Ej: Enfermedades de transmisión sexual, cirugías ginecológicas, problemas de fertilidad, menopausia..."
               rows={2}
               className="w-full p-1 rounded-md border"
-              style={{inputStyle, marginBottom: '-0.5rem'}}
+              style={{...inputStyle, marginBottom: '-0.5rem'}}
             />
           </div>
 
