@@ -387,7 +387,7 @@ export function GynecoObstetricHistory() {
                 style={{
                   ...inputStyle,
                   backgroundColor: currentTheme.colors.background,
-                  opacity: 0.7,
+                  opacity: 0.7, marginBottom: '-0.5rem'
                 }}
               />
             </div>
@@ -404,7 +404,7 @@ export function GynecoObstetricHistory() {
                 {...register('paras')}
                 placeholder="Ej: 2"
                 className="w-full p-2 rounded-md border"
-                style={inputStyle}
+                style={inputStyle, marginBottom: '-0.5rem'}
               />
             </div>
             <div>
@@ -420,7 +420,7 @@ export function GynecoObstetricHistory() {
                 {...register('abortos')}
                 placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
-                style={inputStyle}
+                style={inputStyle, marginBottom: '-0.5rem'}
               />
             </div>
             <div>
@@ -436,7 +436,7 @@ export function GynecoObstetricHistory() {
                 {...register('cesareas')}
                 placeholder="Ej: 1"
                 className="w-full p-2 rounded-md border"
-                style={inputStyle}
+                style={inputStyle, marginBottom: '-0.5rem'}
               />
             </div>
           </div>
@@ -455,7 +455,7 @@ export function GynecoObstetricHistory() {
                 id="fum"
                 {...register('fum')}
                 className="w-full  p-2 rounded-md border"
-                style={inputStyle}
+                style={inputStyle, marginBottom: '-0.5rem'}
               /> 
             </div>
             <div>
