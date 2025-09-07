@@ -79,6 +79,9 @@ export function FileUpload({
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
   const [previewImageName, setPreviewImageName] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [pendingDescriptions, setPendingDescriptions] = useState<{ [key: string]: string }>({});
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Update uploaded files when initialFiles changes
@@ -155,7 +158,7 @@ export function FileUpload({
     return null;
   };
 
-  const uploadFile = async (file: File): Promise<UploadedFile> => {
+  const uploadFile = async (file: File, description: string): Promise<UploadedFile> => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       throw new Error('Usuario no autenticado');
@@ -231,7 +234,7 @@ export function FileUpload({
       const { api } = await import('../lib/api');
       await api.files.create({
         patient_id: patientId,
-        description: file.name,
+        description: description, // Use the provided description instead of file name
         file_path: publicUrl,
         mime_type: file.type,
         thumbnail_url: thumbnailUrl
@@ -247,19 +250,16 @@ export function FileUpload({
 
     return {
       id: data.path,
-      name: file.name,
+      name: description, // Use description as the display name
       size: file.size,
       type: file.type,
       url: publicUrl,
       path: filePath,
-      thumbnail_url: thumbnailUrl
     };
   };
 
   const handleFiles = async (files: FileList) => {
     setError(null);
-    setUploading(true);
-    setCompressing(true);
 
     const filesToUpload = Array.from(files);
     const validationErrors: string[] = [];
@@ -274,15 +274,28 @@ export function FileUpload({
 
     if (validationErrors.length > 0) {
       setError(validationErrors.join(', '));
-      setUploading(false);
-      setCompressing(false);
       return;
     }
+
+    // Set pending files and show description modal
+    setPendingFiles(filesToUpload);
+    const initialDescriptions: { [key: string]: string } = {};
+    filesToUpload.forEach(file => {
+      initialDescriptions[file.name] = ''; // Start with empty descriptions
+    });
+    setPendingDescriptions(initialDescriptions);
+    setShowDescriptionModal(true);
+  };
+
+  const handleUploadWithDescriptions = async () => {
+    setError(null);
+    setUploading(true);
+    setCompressing(true);
 
     try {
       // Compress images if needed
       const processedFiles: File[] = [];
-      for (const file of filesToUpload) {
+      for (const file of pendingFiles) {
         const processedFile = await compressImageIfNeeded(file);
         processedFiles.push(processedFile);
       }
@@ -290,7 +303,10 @@ export function FileUpload({
       setCompressing(false);
 
       // Upload files sequentially to avoid overwhelming the server
-      const uploadPromises = processedFiles.map(file => uploadFile(file));
+      const uploadPromises = processedFiles.map(file => {
+        const description = pendingDescriptions[file.name] || file.name;
+        return uploadFile(file, description);
+      });
       const uploadedFileResults = await Promise.all(uploadPromises);
 
       const newUploadedFiles = [...uploadedFiles, ...uploadedFileResults];
@@ -299,6 +315,11 @@ export function FileUpload({
       if (onFilesUploaded) {
         onFilesUploaded(newUploadedFiles);
       }
+
+      // Clear pending state
+      setPendingFiles([]);
+      setPendingDescriptions({});
+      setShowDescriptionModal(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al subir archivos');
     } finally {
@@ -457,7 +478,120 @@ export function FileUpload({
         </div>
       )}
 
-      {/* Uploaded Files List */}
+      {/* File Description Modal */}
+      {showDescriptionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div 
+            className="w-full max-w-2xl rounded-lg shadow-xl"
+            style={{ 
+              background: currentTheme.colors.surface,
+              borderColor: currentTheme.colors.border,
+            }}
+          >
+            <div className="p-6">
+              <h3 
+                className="text-lg font-medium mb-4"
+                style={{ color: currentTheme.colors.text }}
+              >
+                Describe los archivos a subir
+              </h3>
+              <p 
+                className="text-sm mb-6"
+                style={{ color: currentTheme.colors.textSecondary }}
+              >
+                Proporciona una descripción clara para cada archivo que ayude a identificar su contenido médico.
+              </p>
+              
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {pendingFiles.map((file, index) => (
+                  <div 
+                    key={`${file.name}-${index}`}
+                    className="p-4 border rounded-lg"
+                    style={{
+                      background: currentTheme.colors.background,
+                      borderColor: currentTheme.colors.border,
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        {(() => {
+                          const Icon = getFileIcon(file.type);
+                          return <Icon className="h-8 w-8" style={{ color: currentTheme.colors.primary }} />;
+                        })()}
+                      </div>
+                      <div className="flex-1">
+                        <p 
+                          className="font-medium mb-1"
+                          style={{ color: currentTheme.colors.text }}
+                        >
+                          {file.name}
+                        </p>
+                        <p 
+                          className="text-sm mb-2"
+                          style={{ color: currentTheme.colors.textSecondary }}
+                        >
+                          {formatFileSize(file.size)} • {file.type.split('/').pop()?.toUpperCase()}
+                        </p>
+                        <div>
+                          <label 
+                            className="block text-sm font-medium mb-1"
+                            style={{ color: currentTheme.colors.text }}
+                          >
+                            Descripción del documento:
+                          </label>
+                          <input
+                            type="text"
+                            value={pendingDescriptions[file.name] || ''}
+                            onChange={(e) => {
+                              setPendingDescriptions(prev => ({
+                                ...prev,
+                                [file.name]: e.target.value
+                              }));
+                            }}
+                            placeholder="Ej: Rayos X de rodilla, Análisis de sangre, Tomografía..."
+                            className="w-full p-2 text-sm rounded-md border"
+                            style={{
+                              background: currentTheme.colors.surface,
+                              borderColor: currentTheme.colors.border,
+                              color: currentTheme.colors.text,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t" style={{ borderColor: currentTheme.colors.border }}>
+                <button
+                  onClick={() => {
+                    setShowDescriptionModal(false);
+                    setPendingFiles([]);
+                    setPendingDescriptions({});
+                  }}
+                  className={clsx(buttonStyle.base, 'border')}
+                  style={{
+                    background: 'transparent',
+                    borderColor: currentTheme.colors.border,
+                    color: currentTheme.colors.text,
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleUploadWithDescriptions}
+                  disabled={isProcessing}
+                  className={clsx(buttonStyle.base, 'disabled:opacity-50')}
+                  style={buttonStyle.primary}
+                >
+                  {isProcessing ? (compressing ? 'Comprimiendo...' : 'Subiendo...') : 'Subir Archivos'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Image Preview Modal */}
       <ImagePreviewModal

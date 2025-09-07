@@ -310,7 +310,15 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
               transformOrigin: 'center center',
             }}
             onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
+            onError={(e) => {
+              console.error('Image loading error:', {
+                imageUrl,
+                imageName,
+                error: e,
+                target: e.target
+              });
+              setImageError(true);
+            }}
             draggable={false}
           />
         </div>

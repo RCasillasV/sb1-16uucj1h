@@ -200,6 +200,7 @@ export function PatientFilesPage() {
         files={patientFiles}
         onFileRemoved={handleFileRemoved}
         onError={handleFileError}
+        onFileAccessed={fetchPatientFiles} // Pass the fetch function to update access counts in real-time
       />
     </div>
   );

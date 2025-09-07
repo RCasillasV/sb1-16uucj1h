@@ -25,9 +25,10 @@ interface PatientFileGalleryProps {
   files: PatientFile[];
   onFileRemoved: () => void;
   onError: (error: string) => void;
+  onFileAccessed?: () => void; // New prop to trigger refresh when file is accessed
 }
 
-export function PatientFileGallery({ files, onFileRemoved, onError }: PatientFileGalleryProps) {
+export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccessed }: PatientFileGalleryProps) {
   const { currentTheme } = useTheme();
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
@@ -61,6 +62,11 @@ export function PatientFileGallery({ files, onFileRemoved, onError }: PatientFil
     try {
       // Track file access
       await api.files.trackAccess(file.id);
+      
+      // Notify parent component to refresh the file list
+      if (onFileAccessed) {
+        onFileAccessed();
+      }
 
       // Open file based on type
       if (file.type.startsWith('image/')) {

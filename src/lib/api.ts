@@ -395,6 +395,7 @@ const files = {
 
       if (rpcError && (rpcError.code === 'PGRST202' || rpcError.message?.includes('function increment_file_access'))) {
         // If RPC function doesn't exist, fall back to manual increment
+        console.log('RPC function not found, using fallback method for file access tracking');
         // Get current values
         const { data: currentData, error: selectError } = await supabase
           .from('tpDocPaciente')
@@ -415,8 +416,12 @@ const files = {
           .eq('id', fileId);
 
         if (updateError) throw updateError;
+        console.log('File access tracked successfully via fallback method');
       } else if (rpcError) {
+        console.error('RPC function exists but failed:', rpcError);
         throw rpcError;
+      } else {
+        console.log('File access tracked successfully via RPC function');
       }
     } catch (error) {
       console.error('Error tracking file access:', error);
