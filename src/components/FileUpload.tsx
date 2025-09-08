@@ -71,6 +71,7 @@ export function FileUpload({
   const [uploading, setUploading] = useState(false);
   const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
   const [previewImageName, setPreviewImageName] = useState('');
