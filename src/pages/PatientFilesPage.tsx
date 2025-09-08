@@ -182,8 +182,8 @@ export function PatientFilesPage() {
         
         <FileUpload
           onFilesUploaded={handleFilesUploaded}
-          maxFiles={20}
-          maxFileSize={15}
+          maxFiles={10}
+          maxFileSize={5}
           folder={`patients/${selectedPatient.id}`}
           className="w-full"
           enableImageCompression={true}
