@@ -310,11 +310,13 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
             }}
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
-              console.error('Image loading error:', {
-                imageUrl,
-                imageName,
-                error: e,
-                target: e.target
+              console.error('IMAGE URL ANALYSIS:', {
+                urlLength: imageUrl.length,
+                hasToken: imageUrl.includes('token='),
+                isSignedUrl: imageUrl.includes('/object/sign/'),
+                isPublicUrl: imageUrl.includes('/object/public/'),
+                pathStructure: imageUrl.split('/').slice(-4).join('/'), // Last 4 parts of path
+                isValidHttps: imageUrl.startsWith('https://'),
               });
               console.error('Image loading error:', {
                 imageUrl,
@@ -331,14 +333,6 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
                 hasToken: imageUrl.includes('token='),
                 isSignedUrl: imageUrl.includes('/sign/'),
                 bucketName: imageUrl.includes('almacen-doctorsoft') ? 'almacen-doctorsoft' : 'Unknown bucket'
-              });
-              console.error('IMAGE URL ANALYSIS:', {
-                urlLength: imageUrl.length,
-                hasToken: imageUrl.includes('token='),
-                isSignedUrl: imageUrl.includes('/object/sign/'),
-                isPublicUrl: imageUrl.includes('/object/public/'),
-                pathStructure: imageUrl.split('/').slice(-4).join('/'), // Last 4 parts of path
-                isValidHttps: imageUrl.startsWith('https://'),
               });
               setImageError(true);
             }}
