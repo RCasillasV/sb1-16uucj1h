@@ -324,7 +324,7 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
               console.error('IMAGE URL ANALYSIS: URL structure:', {
                 hasToken: imageUrl.includes('token='),
                 isSignedUrl: imageUrl.includes('/sign/'),
-                bucketName: imageUrl.includes('00000000-default-bucket') ? '00000000-default-bucket' : 'Unknown bucket'
+                bucketName: imageUrl.includes('almacen-doctorsoft') ? 'almacen-doctorsoft' : 'Unknown bucket'
               });
               setImageError(true);
             }}
