@@ -366,6 +366,7 @@ export function Appointments() {
                         isPast && 'opacity-70'
                       )}
                       style={{ color: currentTheme.colors.text }}
+                       style={{ color: currentTheme.colors.text, backgroundColor: isPast ? currentTheme.colors.background : 'transparent' }}
                     >
                       <td className="px-6 py-1 whitespace-nowrap">
                         {formatAppointmentDate(appointment.fecha_cita, appointment.hora_cita)}
