@@ -371,8 +371,7 @@ export function FileUpload({
 
 
   const buttonStyle = {
-    e.preventDefault();
-    primary: {
+      primary: {
       background: currentTheme.colors.buttonPrimary,
       color: currentTheme.colors.buttonText,
     },
