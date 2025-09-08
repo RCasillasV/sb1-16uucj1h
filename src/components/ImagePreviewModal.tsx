@@ -179,14 +179,6 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
           !isFullscreen && 'mx-4 my-4 rounded-lg overflow-hidden'
         )}
         style={{
-          console.error('IMAGE URL ANALYSIS:', {
-            urlLength: imageUrl.length,
-            hasToken: imageUrl.includes('token='),
-            isSignedUrl: imageUrl.includes('/object/sign/'),
-            isPublicUrl: imageUrl.includes('/object/public/'),
-            pathStructure: imageUrl.split('/').slice(-4).join('/'), // Last 4 parts of path
-            isValidHttps: imageUrl.startsWith('https://'),
-          }),
           background: isFullscreen ? 'black' : currentTheme.colors.surface,
         }}
         onClick={e => e.stopPropagation()}
@@ -322,6 +314,12 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
                 imageUrl,
                 imageName,
                 error: e,
+                target: e.target
+              });
+              console.error('Image loading error:', {
+                imageUrl,
+                imageName,
+                error: e,
                 target: e.target,
                 naturalWidth: (e.target as HTMLImageElement).naturalWidth,
                 naturalHeight: (e.target as HTMLImageElement).naturalHeight,
@@ -333,6 +331,14 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
                 hasToken: imageUrl.includes('token='),
                 isSignedUrl: imageUrl.includes('/sign/'),
                 bucketName: imageUrl.includes('almacen-doctorsoft') ? 'almacen-doctorsoft' : 'Unknown bucket'
+              });
+              console.error('IMAGE URL ANALYSIS:', {
+                urlLength: imageUrl.length,
+                hasToken: imageUrl.includes('token='),
+                isSignedUrl: imageUrl.includes('/object/sign/'),
+                isPublicUrl: imageUrl.includes('/object/public/'),
+                pathStructure: imageUrl.split('/').slice(-4).join('/'), // Last 4 parts of path
+                isValidHttps: imageUrl.startsWith('https://'),
               });
               setImageError(true);
             }}
