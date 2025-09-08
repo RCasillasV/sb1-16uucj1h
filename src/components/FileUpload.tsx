@@ -83,12 +83,6 @@ export function FileUpload({
   const [pendingDescriptions, setPendingDescriptions] = useState<{ [key: string]: string }>({});
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Update uploaded files when initialFiles changes
-  useEffect(() => {
-    setUploadedFiles(initialFiles);
-  }, [initialFiles]);
-
   const getFileIcon = (type: string) => {
     if (type.startsWith('image/')) return Image;
     if (type === 'application/pdf') return FileText;
