@@ -16,9 +16,8 @@ interface UploadedFile {
 }
 
 interface FileUploadProps {
-  onFilesUploaded?: (files: UploadedFile[]) => void;
-  initialFiles?: UploadedFile[];
-  maxFiles?: number;
+  onFilesUploaded?: (newlyUploadedFile: UploadedFile) => void; // Callback for each newly uploaded file
+  onUploadError?: (errorMessage: string) => void; // Callback for upload errors
   maxFileSize?: number; // in MB
   acceptedTypes?: string[];
   bucketName?: string;
@@ -55,9 +54,8 @@ if (!BUCKET_NAME) {
 }
 
 export function FileUpload({
-  onFilesUploaded,
-  initialFiles = [],
-  maxFiles = 5,
+  onFilesUploaded, // Callback for each newly uploaded file
+  onUploadError, // Callback for upload errors
   maxFileSize = MAX_FILE_SIZE_MB,
   acceptedTypes = DEFAULT_ACCEPTED_TYPES,
   bucketName = BUCKET_NAME,
@@ -67,27 +65,15 @@ export function FileUpload({
   imageCompressionOptions = {
     maxSizeMB: 1,
     maxWidthOrHeight: 1920,
-    useWebWorker: true,
   }
 }: FileUploadProps) {
   const { currentTheme } = useTheme();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(initialFiles);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [dragActive, setDragActive] = useState(false);
   const [compressing, setCompressing] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
   const [previewImageName, setPreviewImageName] = useState('');
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
-  const [pendingDescriptions, setPendingDescriptions] = useState<{ [key: string]: string }>({});
-  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Update uploaded files when initialFiles changes
-  useEffect(() => {
-    setUploadedFiles(initialFiles);
-  }, [initialFiles]);
 
   const getFileIcon = (type: string) => {
     if (type.startsWith('image/')) return Image;
@@ -150,10 +136,6 @@ export function FileUpload({
       return `Tipo de archivo no permitido: ${file.type}`;
     }
 
-    // Check total files limit
-    if (uploadedFiles.length >= maxFiles) {
-      return `Máximo ${maxFiles} archivos permitidos`;
-    }
 
     return null;
   };
@@ -301,6 +283,9 @@ export function FileUpload({
 
     if (validationErrors.length > 0) {
       setError(validationErrors.join(', '));
+      if (onUploadError) {
+        onUploadError(validationErrors.join(', '));
+      }
       return;
     }
 
@@ -329,18 +314,15 @@ export function FileUpload({
       
       setCompressing(false);
 
-      // Upload files sequentially to avoid overwhelming the server
-      const uploadPromises = processedFiles.map(file => {
+      // Upload files sequentially and notify parent for each upload
+      for (const file of processedFiles) {
         const description = pendingDescriptions[file.name] || file.name;
-        return uploadFile(file, description);
-      });
-      const uploadedFileResults = await Promise.all(uploadPromises);
-
-      const newUploadedFiles = [...uploadedFiles, ...uploadedFileResults];
-      setUploadedFiles(newUploadedFiles);
-      
-      if (onFilesUploaded) {
-        onFilesUploaded(newUploadedFiles);
+        const uploadedFile = await uploadFile(file, description);
+        
+        // Call onFilesUploaded for each newly uploaded file
+        if (onFilesUploaded) {
+          onFilesUploaded(uploadedFile);
+        }
       }
 
       // Clear pending state
@@ -349,6 +331,9 @@ export function FileUpload({
       setShowDescriptionModal(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al subir archivos');
+      if (onUploadError) {
+        onUploadError(err instanceof Error ? err.message : 'Error al subir archivos');
+      }
     } finally {
       setUploading(false);
       setCompressing(false);
@@ -380,50 +365,13 @@ export function FileUpload({
     setDragActive(false);
   };
 
-  const removeFile = async (fileToRemove: UploadedFile) => {
-    try {
-      // Use logical deletion through API
-      const { api } = await import('../lib/api');
-      await api.files.remove(fileToRemove.id);
-
-      // Remove from local state
-      const newFiles = uploadedFiles.filter(file => file.id !== fileToRemove.id);
-      setUploadedFiles(newFiles);
-      
-      if (onFilesUploaded) {
-        onFilesUploaded(newFiles);
-      }
-    } catch (err) {
-      console.error('Error removing file:', err);
-      setError(err instanceof Error ? err.message : 'Error al eliminar archivo');
-    }
-  };
-
   const isImageFile = (type: string): boolean => {
     return type === 'image/jpeg' || type === 'image/png';
   };
 
-  const handleViewFile = (file: UploadedFile) => {
-    if (isImageFile(file.type)) {
-      // Track file access
-      import('../lib/api').then(({ api }) => api.files.trackAccess(file.id));
-      setPreviewImageUrl(file.url);
-      setPreviewImageName(file.name);
-      setShowImagePreview(true);
-    } else {
-      // For non-image files, open in new tab
-      window.open(file.url, '_blank', 'noopener,noreferrer');
-    }
-  };
 
   const buttonStyle = {
-    base: clsx(
-      'px-4 py-2 transition-colors',
-      currentTheme.buttons.style === 'pill' && 'rounded-full',
-      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
-      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
-      currentTheme.buttons.animation && 'hover:scale-105'
-    ),
+    e.preventDefault();
     primary: {
       background: currentTheme.colors.buttonPrimary,
       color: currentTheme.colors.buttonText,
@@ -435,61 +383,6 @@ export function FileUpload({
   return (
     <div className={clsx('space-y-4', className)}>
       {/* Upload Area */}
-      <div
-        className={clsx(
-          'border-2 border-dashed rounded-lg p-3 text-center transition-colors cursor-pointer',
-          dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400',
-          isProcessing && 'pointer-events-none opacity-50'
-        )}
-        style={{
-          borderColor: dragActive ? currentTheme.colors.primary : currentTheme.colors.border,
-          backgroundColor: dragActive ? `${currentTheme.colors.primary}10` : currentTheme.colors.surface,
-        }}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept={acceptedTypes.join(',')}
-          onChange={handleFileInput}
-          className="hidden"
-          disabled={isProcessing}
-        />
-        
-        <div className="flex flex-col items-center">
-          {isProcessing ? (
-            <Loader2 className="h-12 w-12 animate-spin mb-4" style={{ color: currentTheme.colors.primary }} />
-          ) : (
-            <Upload className="h-12 w-12 mb-4" style={{ color: currentTheme.colors.primary }} />
-          )}
-          
-          <h3 className="text-lg font-medium mb-2" style={{ color: currentTheme.colors.text }}>
-            {compressing ? 'Comprimiendo imágenes...' : uploading ? 'Subiendo archivos...' : 'Subir archivos'}
-          </h3>
-          
-          <p className="text-sm mb-2" style={{ color: currentTheme.colors.textSecondary }}>
-            Arrastra archivos aquí o haz clic para seleccionar
-          </p>
-          
-          <p className="text-xs" style={{ color: currentTheme.colors.textSecondary }}>
-            Máximo {maxFiles} archivos, {maxFileSize}MB cada uno
-          </p>
-          
-          <p className="text-xs mt-1" style={{ color: currentTheme.colors.textSecondary }}>
-            Tipos permitidos: PDF, DOC, DOCX, TXT, JPG, PNG, GIF
-          </p>
-          
-          {enableImageCompression && (
-            <p className="text-xs mt-1" style={{ color: currentTheme.colors.primary }}>
-              Las imágenes JPG/PNG se comprimen automáticamente
-            </p>
-          )}
-        </div>
-      </div>
 
       {/* Error Message */}
       {error && (
@@ -620,13 +513,6 @@ export function FileUpload({
         </div>
       )}
 
-      {/* Image Preview Modal */}
-      <ImagePreviewModal
-        isOpen={showImagePreview}
-        onClose={() => setShowImagePreview(false)}
-        imageUrl={previewImageUrl}
-        imageName={previewImageName}
-      />
     </div>
   );
 }

@@ -10,19 +10,6 @@ import { Modal } from '../components/Modal';
 import { api } from '../lib/api';
 import clsx from 'clsx';
 
-interface PatientFile {
-  id: string;
-  name: string;
-  type: string;
-  url: string;
-  path: string;
-  thumbnail_url: string | null;
-  created_at: string;
-  fecha_ultima_consulta: string | null;
-  numero_consultas: number;
-  patient_id: string;
-  user_id: string;
-}
 
 export function PatientFilesPage() {
   const { currentTheme } = useTheme();
@@ -30,10 +17,9 @@ export function PatientFilesPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [patientFiles, setPatientFiles] = useState<PatientFile[]>([]);
+  const [patientFiles, setPatientFiles] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
-
   useEffect(() => {
     if (!selectedPatient) {
       setShowWarningModal(true);
@@ -69,9 +55,8 @@ export function PatientFilesPage() {
 
   const handleFilesUploaded = React.useCallback(() => {
     console.log('PATIENT_FILES_PAGE: handleFilesUploaded called');
-    // Refresh the gallery after files are uploaded
-    fetchPatientFiles();
-  }, [selectedPatient?.id]);
+    // Re-fetch all files to ensure the list is up-to-date with the backend
+  }, [fetchPatientFiles]);
 
   const handleFileRemoved = React.useCallback(() => {
     console.log('PATIENT_FILES_PAGE: handleFileRemoved called');
@@ -187,10 +172,8 @@ export function PatientFilesPage() {
         
         <FileUpload
           onFilesUploaded={handleFilesUploaded}
-          maxFiles={20}
-          maxFileSize={15}
+          onUploadError={handleFileError}
           folder={`patients/${selectedPatient.id}`}
-          className="w-full"
           enableImageCompression={true}
           imageCompressionOptions={{
             maxSizeMB: 2,

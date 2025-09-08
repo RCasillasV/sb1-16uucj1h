@@ -7,22 +7,9 @@ import { es } from 'date-fns/locale';
 import { api } from '../lib/api';
 import clsx from 'clsx';
 
-interface PatientFile {
-  id: string;
-  name: string;
-  path: string;
-  type: string;
-  url: string;
-  thumbnail_url: string | null;
-  created_at: string;
-  fecha_ultima_consulta: string | null;
-  numero_consultas: number;
-  patient_id: string;
-  user_id: string;
-}
 
 interface PatientFileGalleryProps {
-  files: PatientFile[];
+  files: any[];
   onFileRemoved: () => void;
   onError: (error: string) => void;
   onFileAccessed?: () => void; // New prop to trigger refresh when file is accessed
@@ -58,7 +45,7 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
     }
   };
 
-  const handleFileClick = async (file: PatientFile) => {
+  const handleFileClick = async (file: any) => {
     try {
       console.log('PATIENT_FILE_GALLERY: Clicking on file:', file.name, 'URL:', file.url);
       console.log('PATIENT_FILE_GALLERY: File path:', file.path, 'Type:', file.type);
@@ -95,7 +82,7 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
     }
   };
 
-  const handleRemoveFile = async (file: PatientFile, event: React.MouseEvent) => {
+  const handleRemoveFile = async (file: any, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent triggering file click
     
     if (!confirm(`¿Está seguro de eliminar "${file.name}"? Esta acción no se puede deshacer.`)) {
@@ -114,7 +101,7 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
     }
   };
 
-  const getThumbnailDisplay = (file: PatientFile) => {
+  const getThumbnailDisplay = (file: any) => {
     if (file.thumbnail_url) {
       return (
         <img
