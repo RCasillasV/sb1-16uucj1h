@@ -68,6 +68,7 @@ export function FileUpload({
   }
 }: FileUploadProps) {
   const { currentTheme } = useTheme();
+  const [uploading, setUploading] = useState(false);
   const [compressing, setCompressing] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
