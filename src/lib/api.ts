@@ -305,13 +305,6 @@ const medications = {
 // Files service
 const files = {
   async getByPatientId(patientId: string) {
-    const BUCKET_NAME = import.meta.env.VITE_BUCKET_NAME;
-    if (!BUCKET_NAME) {
-      throw new Error('VITE_BUCKET_NAME environment variable is required');
-    }
-
-    console.log('API FILES: Starting getByPatientId for patient:', patientId);
-    console.log('API FILES: Using bucket name:', BUCKET_NAME);
     const { data, error } = await supabase
       .from('tpDocPaciente')
       .select(`
@@ -333,125 +326,25 @@ const files = {
 
     if (error) throw error;
     
-    console.log('API FILES: Found', (data || []).length, 'database records');
-    
-    // Generate signed URLs for each file and verify existence
-    const transformedData = await Promise.all((data || []).map(async (file) => {
-      console.log('API FILES: Processing file:', file.description, 'at path:', file.file_path);
-      
-      let signedUrl = null;
-      let signedThumbnailUrl = null;
-      let fileExists = false;
-      
-      try {
-        // First, check if file exists in storage
-        const parentPath = file.file_path.split('/').slice(0, -1).join('/');
-        const fileName = file.file_path.split('/').pop();
-        console.log('API FILES: Checking existence - parent path:', parentPath, 'file name:', fileName);
-        
-        const { data: fileExistsData, error: fileExistsError } = await supabase.storage
-          .from(BUCKET_NAME)
-          .list(parentPath || '', {
-            search: fileName
-          });
-
-        console.log('API FILES: File existence check result:', fileExistsData, 'error:', fileExistsError);
-        if (!fileExistsError && fileExistsData && fileExistsData.length > 0) {
-          fileExists = true;
-          console.log('FILE API: File exists in storage:', file.file_path);
-        } else {
-          console.warn('FILE API: File not found in storage:', file.file_path);
-          console.warn('API FILES: File existence check failed - file not found at path:', file.file_path);
-          // Skip this file - it doesn't exist in storage
-          return null;
-        }
-        
-        // Generate signed URL for main file only if it exists (1 hour expiry)
-        console.log('API FILES: Creating signed URL for path:', file.file_path);
-        const { data: urlData, error: urlError } = await supabase.storage
-          .from(BUCKET_NAME)
-          .createSignedUrl(file.file_path, 3600);
-        
-        console.log('API FILES: Signed URL response - data:', urlData, 'error:', urlError);
-        
-        if (urlError) {
-          console.error('FILE API: Error generating signed URL for file:', file.id, urlError);
-          // Skip this file if we can't generate a signed URL
-          return null;
-        } else if (urlData?.signedUrl) {
-          signedUrl = urlData.signedUrl;
-          console.log('FILE API: Generated signed URL for:', file.file_path);
-        } else {
-          console.warn('FILE API: No signed URL returned for:', file.file_path);
-          return null;
-        }
-        
-        // Generate signed URL for thumbnail if it exists
-        if (file.thumbnail_url) {
-          const thumbParentPath = file.thumbnail_url.split('/').slice(0, -1).join('/');
-          const thumbFileName = file.thumbnail_url.split('/').pop();
-          console.log('API FILES: Checking thumbnail existence - path:', thumbParentPath, 'name:', thumbFileName);
-          
-          // Check if thumbnail exists
-          const { data: thumbExistsData, error: thumbExistsError } = await supabase.storage
-            .from(BUCKET_NAME)
-            .list(thumbParentPath || '', {
-              search: thumbFileName
-            });
-
-          if (thumbExistsError || !thumbExistsData || thumbExistsData.length === 0) {
-            console.warn('FILE API: Thumbnail not found in storage:', file.thumbnail_url);
-            // Continue without thumbnail
-          } else {
-            // Generate signed URL for thumbnail
-            console.log('API FILES: Creating signed URL for thumbnail:', file.thumbnail_url);
-            const { data: thumbData, error: thumbError } = await supabase.storage
-              .from(BUCKET_NAME)
-              .createSignedUrl(file.thumbnail_url, 3600);
-            
-            if (thumbError) {
-              console.error('FILE API: Error generating signed URL for thumbnail:', file.id, thumbError);
-            } else if (thumbData?.signedUrl) {
-              signedThumbnailUrl = thumbData.signedUrl;
-              console.log('FILE API: Generated signed URL for thumbnail:', file.thumbnail_url);
-            }
-          }
-        }
-      } catch (urlError) {
-        console.error('FILE API: Exception during URL generation for file:', file.id, urlError);
-        return null; // Skip this file completely
-      }
-      
-      // Only return file data if we successfully generated a signed URL
-      if (!signedUrl) {
-        console.warn('FILE API: Skipping file due to missing signed URL:', file.id);
-        return null;
-      }
-      
-      console.log('API FILES: Successfully processed file:', file.description);
-      return {
-        id: file.id,
-        name: file.description,
-        path: file.file_path,
-        type: file.mime_type,
-        url: signedUrl,
-        size: 0, // Not stored in DB, can be calculated if needed
-        thumbnail_url: signedThumbnailUrl,
-        created_at: file.created_at,
-        fecha_ultima_consulta: file.fecha_ultima_consulta,
-        numero_consultas: file.numero_consultas,
-        patient_id: file.patient_id,
-        user_id: file.user_id,
-        fileExists: fileExists
-      };
+    // Transform the data to match the expected interface
+    const transformedData = (data || []).map(file => ({
+      id: file.id,
+      name: file.description,
+      path: file.file_path,
+      type: file.mime_type,
+      url: file.file_path, // For compatibility with existing interfaces
+      size: 0, // Not stored in DB, can be calculated if needed
+      thumbnail_url: file.thumbnail_url,
+      created_at: file.created_at,
+      fecha_ultima_consulta: file.fecha_ultima_consulta,
+      numero_consultas: file.numero_consultas,
+      patient_id: file.patient_id,
+      user_id: file.user_id
     }));
 
-    // Filter out null entries (files that don't exist or couldn't generate URLs)
-    const validFiles = transformedData.filter(file => file !== null);
-
-    console.log('API FILES: Retrieved', validFiles.length, 'valid files for patient', patientId);
-    console.log('API FILES: Valid files summary:', validFiles.map(f => ({ id: f?.id, name: f?.name, path: f?.path })));
-    return validFiles;
+    console.log('API FILES: Retrieved', transformedData.length, 'files for patient', patientId);
+    console.log('API FILES: Files data:', transformedData);
+    return transformedData;
   },
 
   async create(payload: {

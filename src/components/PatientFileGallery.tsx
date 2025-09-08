@@ -7,9 +7,22 @@ import { es } from 'date-fns/locale';
 import { api } from '../lib/api';
 import clsx from 'clsx';
 
+interface PatientFile {
+  id: string;
+  name: string;
+  path: string;
+  type: string;
+  url: string;
+  thumbnail_url: string | null;
+  created_at: string;
+  fecha_ultima_consulta: string | null;
+  numero_consultas: number;
+  patient_id: string;
+  user_id: string;
+}
 
 interface PatientFileGalleryProps {
-  files: any[];
+  files: PatientFile[];
   onFileRemoved: () => void;
   onError: (error: string) => void;
   onFileAccessed?: () => void; // New prop to trigger refresh when file is accessed
@@ -45,17 +58,9 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
     }
   };
 
-  const handleFileClick = async (file: any) => {
+  const handleFileClick = async (file: PatientFile) => {
     try {
       console.log('PATIENT_FILE_GALLERY: Clicking on file:', file.name, 'URL:', file.url);
-      console.log('PATIENT_FILE_GALLERY: File path:', file.path, 'Type:', file.type);
-      
-      // Check if URL is still valid before trying to access
-      if (!file.url || file.url.includes('error')) {
-        throw new Error('URL del archivo no disponible o expirada');
-      }
-      
-      console.log('PATIENT_FILE_GALLERY: Tracking file access for file ID:', file.id);
       // Track file access
       await api.files.trackAccess(file.id);
       
@@ -78,11 +83,11 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
       }
     } catch (error) {
       console.error('Error tracking file access:', error);
-      onError(`Error al acceder al archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      onError('Error al registrar acceso al archivo');
     }
   };
 
-  const handleRemoveFile = async (file: any, event: React.MouseEvent) => {
+  const handleRemoveFile = async (file: PatientFile, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent triggering file click
     
     if (!confirm(`¿Está seguro de eliminar "${file.name}"? Esta acción no se puede deshacer.`)) {
@@ -101,7 +106,7 @@ export function PatientFileGallery({ files, onFileRemoved, onError, onFileAccess
     }
   };
 
-  const getThumbnailDisplay = (file: any) => {
+  const getThumbnailDisplay = (file: PatientFile) => {
     if (file.thumbnail_url) {
       return (
         <img

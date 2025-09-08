@@ -11,8 +11,6 @@ const requiredEnvVars = [
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.warn(`Warning: ${envVar} is not set in environment variables`);
-  } else {
-    console.log(`Vite Config: ${envVar} =`, process.env[envVar]);
   }
 }
 

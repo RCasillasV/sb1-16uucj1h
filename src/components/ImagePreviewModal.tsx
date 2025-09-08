@@ -33,7 +33,7 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
       setImageLoaded(false);
       setImageError(false);
     }
-  }, [isOpen]);
+  }, [isOpen, imageUrl]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -175,10 +175,11 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
       <div 
         ref={containerRef}
         className={clsx(
-          'relative w-full h-full max-w-7xl max-h-screen',
-          !isFullscreen && 'mx-4 my-4 rounded-lg overflow-hidden'
+          'relative max-w-full max-h-full overflow-hidden',
+          isFullscreen ? 'w-full h-full' : 'w-[90vw] h-[90vh] rounded-lg',
+          !isFullscreen && 'shadow-2xl'
         )}
-        style={{
+        style={{ 
           background: isFullscreen ? 'black' : currentTheme.colors.surface,
         }}
         onClick={e => e.stopPropagation()}
@@ -314,12 +315,6 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
                 imageUrl,
                 imageName,
                 error: e,
-                target: e.target
-              });
-              console.error('Image loading error:', {
-                imageUrl,
-                imageName,
-                error: e,
                 target: e.target,
                 naturalWidth: (e.target as HTMLImageElement).naturalWidth,
                 naturalHeight: (e.target as HTMLImageElement).naturalHeight,
@@ -327,19 +322,7 @@ export function ImagePreviewModal({ isOpen, onClose, imageUrl, imageName }: Imag
                 currentSrc: (e.target as HTMLImageElement).currentSrc
               });
               console.error('DETAILED IMAGE ERROR: Failed to load image from URL:', imageUrl);
-              console.error('IMAGE URL ANALYSIS: URL structure:', {
-                hasToken: imageUrl.includes('token='),
-                isSignedUrl: imageUrl.includes('/sign/'),
-                bucketName: imageUrl.includes('almacen-doctorsoft') ? 'almacen-doctorsoft' : 'Unknown bucket'
-              });
-              console.error('IMAGE URL ANALYSIS:', {
-                urlLength: imageUrl.length,
-                hasToken: imageUrl.includes('token='),
-                isSignedUrl: imageUrl.includes('/object/sign/'),
-                isPublicUrl: imageUrl.includes('/object/public/'),
-                pathStructure: imageUrl.split('/').slice(-4).join('/'), // Last 4 parts of path
-                isValidHttps: imageUrl.startsWith('https://'),
-              });
+              console.error('BUCKET ANALYSIS: URL contains bucket name:', imageUrl.includes('00000000-default-bucket') ? '00000000-default-bucket (INCORRECT!)' : 'Correct bucket name');
               setImageError(true);
             }}
             draggable={false}
