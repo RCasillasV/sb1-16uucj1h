@@ -10,7 +10,7 @@ type UserWithAttributes = User & {
   nombre?: string | null;
   estado?: string | null;
   deleted_at?: string | null;
-};
+}; 
 
 interface AuthContextType {
   user: UserWithAttributes | null;
