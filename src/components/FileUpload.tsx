@@ -439,7 +439,7 @@ export function FileUpload({
           </h3>
           
           <p className="text-sm mb-1" style={{ color: currentTheme.colors.textSecondary }}>
-            Arrastra archivos para {selectedPatient.Nombre} {selectedPatient.Paterno}aquí o haz clic para seleccionar
+            Arrastra archivos para {selectedPatient.Nombre} {selectedPatient.Paterno} aquí o haz clic para seleccionar
           </p>
           <p className="text-xs" style={{ color: currentTheme.colors.textSecondary }}>
             Máximo {maxFiles} archivos, {maxFileSize}MB cada uno
