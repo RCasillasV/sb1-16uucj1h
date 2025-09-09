@@ -2,7 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { DEFAULT_BU } from '../utils/constants';
-import { User, AuthError, AuthApiError } from '@supabase/supabase-js';
+import { AuthApiError } from '@supabase/supabase-js';
+import type { User, AuthError } from '@supabase/supabase-js';
+ 
 
 type UserWithAttributes = User & {
   userRole?: string | null;
@@ -69,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('idusuario', userId)
           .single(),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout')), 3000)
+          setTimeout(() => reject(new Error('Query timeout')), 10000)
         )
       ]) as any;
 
@@ -113,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Get session with timeout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 5000)
+          setTimeout(() => reject(new Error('Session timeout')), 15000)
         );
         
         const { data, error } = await Promise.race([
@@ -146,17 +148,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.log('AuthProvider: Init error:', error);
-        
-        // Check for the specific refresh token error
-        if (error instanceof AuthApiError && error.message.includes('Invalid Refresh Token')) {
-          console.error('AuthProvider: Invalid Refresh Token detected during init. Forcing logout.');
+        // Si ya hay user previo, no lo borres por un timeout transitorio
+        if (!(error instanceof AuthApiError)) {
+          // Mantener user existente y quizás programar reintento
+          return;
+        }
+        if (error.message.includes('Invalid Refresh Token')) {
           await signOut();
           return;
         }
-        
-        if (isMounted) {
-          setUser(null);
-        }
+        // En errores reales, limpia:
+        setUser(null);
       } finally {
         if (isMounted) {
           console.log('AuthProvider: Setting loading to false');
@@ -171,11 +173,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!isMounted) return;
 
-      // Handle specific auth errors
-      if (event === 'TOKEN_REFRESHED' && !session) {
-        console.error('AuthProvider: Token refresh failed, likely invalid refresh token.');
-        await signOut();
-        return;
+      // Handle specific auth events
+      if (event === 'TOKEN_REFRESHED') {
+        // No forzar logout aquí. Opcionalmente se puede refrescar user info.
+        // Dejamos que el flujo normal abajo actualice el usuario si session existe.
       }
 
       if (session?.user) {
@@ -184,6 +185,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const userInfo = await getBasicUserInfo(session.user.id);
           if (isMounted) {
             setUser({ ...session.user, ...userInfo });
+            // Persist last user info safely for UX improvements (non-critical)
+            try {
+              localStorage.setItem(
+                'ds.lastUser',
+                JSON.stringify({ ...session.user, ...userInfo })
+              );
+            } catch {
+              // no-op if storage is unavailable (e.g., privacy mode)
+            }
           }
         } catch (error) {
           console.log('AuthProvider: Auth change error:', error);
