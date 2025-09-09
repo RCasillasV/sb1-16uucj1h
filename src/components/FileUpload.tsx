@@ -434,11 +434,11 @@ export function FileUpload({
             <Upload className="h-12 w-12 mb-2" style={{ color: currentTheme.colors.primary }} />
           )}
           
-          <h3 className="text-lg font-medium mb-2" style={{ color: currentTheme.colors.text }}>
+          <h3 className="text-lg font-medium mb-1" style={{ color: currentTheme.colors.text }}>
             {compressing ? 'Comprimiendo imágenes...' : uploading ? 'Subiendo archivos...' : 'Subir archivos'}
           </h3>
           
-          <p className="text-sm mb-2" style={{ color: currentTheme.colors.textSecondary }}>
+          <p className="text-sm mb-1" style={{ color: currentTheme.colors.textSecondary }}>
             Arrastra archivos aquí o haz clic para seleccionar
           </p>
           
