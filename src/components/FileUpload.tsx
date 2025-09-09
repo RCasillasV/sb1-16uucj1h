@@ -404,7 +404,7 @@ export function FileUpload({
       {/* Upload Area */}
       <div
         className={clsx(
-          'border-2 border-dashed rounded-lg p-3 text-center transition-colors cursor-pointer',
+          'border-2 border-dashed rounded-lg p-2 text-center transition-colors cursor-pointer',
           dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400',
           isProcessing && 'pointer-events-none opacity-50'
         )}
@@ -431,7 +431,7 @@ export function FileUpload({
           {isProcessing ? (
             <Loader2 className="h-12 w-12 animate-spin mb-4" style={{ color: currentTheme.colors.primary }} />
           ) : (
-            <Upload className="h-12 w-12 mb-4" style={{ color: currentTheme.colors.primary }} />
+            <Upload className="h-12 w-12 mb-2" style={{ color: currentTheme.colors.primary }} />
           )}
           
           <h3 className="text-lg font-medium mb-2" style={{ color: currentTheme.colors.text }}>
