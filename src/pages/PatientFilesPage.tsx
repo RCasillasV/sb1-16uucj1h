@@ -165,21 +165,7 @@ export function PatientFilesPage() {
       )}
 
       {/* File Upload Section */}
-      <div className="mb-8">
-        <h2 
-          className="text-lg font-medium mb-2 flex items-center gap-2"
-          style={{ color: currentTheme.colors.text }}
-        >
-          <Upload className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-          Subir Archivos
-        </h2>
-        <p 
-          className="text-sm mb-4"
-          style={{ color: currentTheme.colors.textSecondary }}
-        >
-          Sube documentos médicos para {selectedPatient.Nombre} {selectedPatient.Paterno}
-        </p>
-        
+      <div className="mb-8">       
         <FileUpload
           onFilesUploaded={handleFilesUploaded}
           maxFiles={10}
