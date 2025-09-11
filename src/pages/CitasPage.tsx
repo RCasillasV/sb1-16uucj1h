@@ -482,8 +482,8 @@ export function CitasPage() {
         // Verificar cache primero
         if (cachedUserDataRef.current && Date.now() - cacheTimestampRef.current < CACHE_DURATION) {
           console.log('fetchSymptoms: Using cached user data');
-          const specialty = cachedUserData.specialty;
-          
+         const specialty = cachedUserDataRef.current.specialty;
+           
           const formattedBirthDate = format(new Date(selectedPatient.FechaNacimiento), 'yyyy/MM/dd');
           console.log('fetchSymptoms: Patient Birth Date (formatted):', formattedBirthDate);
 
