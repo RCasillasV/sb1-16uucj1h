@@ -78,6 +78,9 @@ export class ErrorBoundary extends Component<Props, State> {
             <h2 className="text-2xl font-bold text-red-600 mb-4">Algo salió mal</h2>
             <div className="bg-red-50 p-4 rounded-md mb-4">
               <p className="text-red-800 font-medium">Error: {this.state.error?.message || 'Error desconocido'}</p>
+              {this.state.retryCount >= MAX_RETRIES && (
+                <p className="text-red-800 font-medium mt-2">Se agotaron los intentos de reconexión automática.</p>
+              )}
             </div>
             <p className="text-gray-600 mb-4">
               Por favor, intenta recargar la página. Si el problema persiste, contacta al soporte técnico.
@@ -93,6 +96,9 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    // Render children with the key to force remount on retry
+    return React.cloneElement(this.props.children as React.ReactElement, {
+      key: this.state.resetKey,
+    });
   }
 }
