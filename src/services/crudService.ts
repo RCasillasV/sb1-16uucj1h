@@ -29,6 +29,7 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
           .from<Table>(table)
           .insert(insertData)
           .select<R>()
+          .order('id')
           .limit(1),
         null
       );
@@ -50,6 +51,7 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
           .update(updateData)
           .eq('id', id)
           .select<R>()
+          .order('id')
           .limit(1),
         null
       );
