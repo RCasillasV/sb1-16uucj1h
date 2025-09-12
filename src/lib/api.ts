@@ -295,6 +295,7 @@ const medications = {
       .from('medications')
       .select('id, name as nombreComercial, concentration as concentracion, presentation as presentacion')
       .ilike('name', `%${searchTerm}%`)
+      .order('name')
       .limit(10);
 
     if (error) throw error;
