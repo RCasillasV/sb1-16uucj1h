@@ -9,7 +9,7 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
 
     getById<R = any>(select: string, id: string, fallback: R | null = null) {
       return handle(
-        supabase.from<Table>(table).select<R>(select).eq('id', id).single(),
+        supabase.from<Table>(table).select<R>(select).eq('id', id).order('id').single(),
         fallback
       );
     },
