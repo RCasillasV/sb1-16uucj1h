@@ -198,7 +198,7 @@ export const appointments = {
 
     return handle(
       supabase.rpc('verificar_slot', {
-        p_fecha: fecha,
+        p_fecha_cita: fecha,
         p_hora_cita: hora_inicio,
         p_duracion_minutos: duracion_minutos,
         p_consultorio: consultorio,
