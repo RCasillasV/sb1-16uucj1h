@@ -60,8 +60,10 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
   const [reason, setReason] = useState(appointment?.motivo || '');
   const [notes, setNotes] = useState(appointment?.notas || '');
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<"programada" | "completada" | "cancelada">(appointment?.estado || 'programada');
-
+  const [status, setStatus] = useState<"Programada" |  "Confirmada" |  "En Progreso" | 
+ "Atendida" |  "No se Presentó" |  "Cancelada x Paciente" |  "Cancelada x Médico" |  "Reprogramada x Paciente" |  "Reprogramada x Médico" |  "En Espera" | 
+ "Urgencia"> (appointment?.estado || 'Programada');
+  
   useEffect(() => {
     if (!selectedPatient && !appointment) {
       onCancel();
@@ -371,7 +373,8 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
             name="status"
             id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as "programada" | "completada" | "cancelada")}
+            onChange={(e) => setStatus(e.target.value as "Programada" |  "Confirmada" |  "En Progreso" | "Atendida" |  "No se Presentó" |  "Cancelada x Paciente" |  "Cancelada x Médico" |  "Reprogramada x Paciente" |  "Reprogramada x Médico" |  "En Espera" | 
+ "Urgencia")}
             className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             style={{
               backgroundColor: currentTheme.colors.surface,
