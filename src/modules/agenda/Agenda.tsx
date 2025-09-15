@@ -1,3 +1,4 @@
+// src/modules/agenda/Agenda.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -20,6 +21,8 @@ import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg, DayCellMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
 import { useIdleTimer } from '../../hooks/useIdleTimer';
+// Importar las nuevas constantes
+import { getStatusColor, DetailedAppointmentStatus } from '../../utils/appointmentStatuses';
 
 interface AppointmentFormData {
   fecha_cita: string;
@@ -197,7 +200,8 @@ export function Agenda() {
           title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
           start: appointmentDateTime,
           end: appointment.hora_fin ? parseISO(`${appointment.fecha_cita}T${appointment.hora_fin}`) : addMinutes(appointmentDateTime, appointment.duracion_minutos || 15),
-          backgroundColor: isPastEvent ? '#9CA3AF' : getEventColor(appointment.estado), // Assign a different color for past events 
+          // Usar getStatusColor para el color del evento
+          backgroundColor: isPastEvent ? '#9CA3AF' : getStatusColor(appointment.estado as DetailedAppointmentStatus), 
           extendedProps: {
             status: appointment.estado, 
             patient: appointment.patients,
@@ -214,18 +218,6 @@ export function Agenda() {
       setEvents(calendarEvents);
     } catch (error) {
       console.error('Error al cargar las citas en Agenda:', error);
-    }
-  };
-
-  const getEventColor = (estado: string) => {
-    switch (estado) {
-      case 'completada':
-        return '#10B981';
-      case 'cancelada':
-        return '#EF4444';
-      case 'programada':
-      default:
-        return currentTheme.colors.primary;
     }
   };
 
