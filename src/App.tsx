@@ -22,7 +22,7 @@ const CIE10 = lazy(() => import('./pages/CIE10').then(module => ({ default: modu
 const CitasPage = lazy(() => import('./pages/CitasPage').then(module => ({ default: module.CitasPage })));
 const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default: module.Calendar })));
 const Agenda = lazy(() => import('./modules/agenda/Agenda').then(module => ({ default: module.Agenda })));
-const ClinicalEvolution = lazy(() => import('./pages/ClinicalEvolution').then(module => ({ default: module.ClinicalEvolution })));
+const ClinicalEvolution = lazy(() => import('./pages/ClinicalEvolution'));
 const Prescriptions = lazy(() => import('./pages/Prescriptions').then(module => ({ default: module.Prescriptions })));
 const Somatometry = lazy(() => import('./pages/Somatometry').then(module => ({ default: module.Somatometry })));
 const PatientFilesPage = lazy(() => import('./pages/PatientFilesPage').then(module => ({ default: module.PatientFilesPage })));
