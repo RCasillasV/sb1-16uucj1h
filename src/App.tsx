@@ -11,6 +11,8 @@ import { AgendaProvider } from './contexts/AgendaContext';
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
+const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
+/*
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })));
 const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })));
 const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })));
@@ -34,11 +36,10 @@ const Users = lazy(() => import('./pages/Users').then(module => ({ default: modu
 const BusinessUnits = lazy(() => import('./modules/clinica/BusinessUnits').then(module => ({ default: module.BusinessUnits })));
 const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').then(module => ({ default: module.InsuranceManagement })));
-const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
 const PatientReportPage = lazy(() => import('./pages/PatientReportPage').then(module => ({ default: module.PatientReportPage })));
 const ScheduleConfiguration = lazy(() => import('./pages/ScheduleConfiguration').then(module => ({ default: module.ScheduleConfiguration })));
 const PatologiesManagement = lazy(() => import('./pages/PatologiesManagement').then(module => ({ default: module.PatologiesManagement })));
-
+*/
 // Loading fallback
 const PageLoader = () => {
   return (
