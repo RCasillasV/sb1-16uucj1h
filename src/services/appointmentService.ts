@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 
 const cache = new Cache<any[]>(20 * 60 * 1000, 'appts_');
 // CAMBIO AQUÍ: Especificar 'id_user' como el nombre de la columna de usuario
-const svc = createService<'tcCitas'>('tcCitas', 'id_user');
+const svc = createService<'tcCitas'>('tcCitas', 'id_user', false);
 
 // Nueva función auxiliar interna para consultas de citas
 async function _fetchAppointments(patientId?: string) {
