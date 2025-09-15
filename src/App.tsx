@@ -17,7 +17,9 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module =
 const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })));
 const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })));
 const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: module.Privacy })));
+*/
 const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
+/*)
 const Patients = lazy(() => import('./pages/Patients').then(module => ({ default: module.Patients })));
 const Appointments = lazy(() => import('./pages/Appointments').then(module => ({ default: module.Appointments })));
 const CIE10 = lazy(() => import('./pages/CIE10').then(module => ({ default: module.CIE10 })));
