@@ -85,6 +85,7 @@ function AppContent() {
       <Routes>
         <Route path="/logout-test" element={<LogoutTestPage />} />
         <Route path="/login" element={<Login />} />
+        {/*
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/terms" element={<Terms />} />
@@ -262,6 +263,7 @@ function AppContent() {
             </Layout>
           </PrivateRoute>
         } />
+         */}
             
 
         <Route path="*" element={<Navigate to="/" replace />} />
