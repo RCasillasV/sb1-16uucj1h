@@ -87,6 +87,13 @@ function AppContent() {
       <Routes>
         <Route path="/logout-test" element={<LogoutTestPage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={
+          <PrivateRoute>
+            <Layout>
+              <Dashboard/>
+            </Layout>
+          </PrivateRoute>
+         } />
         {/*
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
@@ -97,13 +104,7 @@ function AppContent() {
             <PatientReportPage />
           </PrivateRoute>
         } />
-         <Route path="/" element={
-          <PrivateRoute>
-            <Layout>
-              <Dashboard/>
-            </Layout>
-          </PrivateRoute>
-         } />
+
            
         <Route path="/pathological-history" element={
           <PrivateRoute>
