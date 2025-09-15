@@ -22,7 +22,6 @@ const CIE10 = lazy(() => import('./pages/CIE10').then(module => ({ default: modu
 const CitasPage = lazy(() => import('./pages/CitasPage').then(module => ({ default: module.CitasPage })));
 const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default: module.Calendar })));
 const Agenda = lazy(() => import('./modules/agenda/Agenda').then(module => ({ default: module.Agenda })));
-const ClinicalHistory = lazy(() => import('./pages/ClinicalHistory').then(module => ({ default: module.ClinicalHistory })));
 const ClinicalEvolution = lazy(() => import('./pages/ClinicalEvolution').then(module => ({ default: module.ClinicalEvolution })));
 const Prescriptions = lazy(() => import('./pages/Prescriptions').then(module => ({ default: module.Prescriptions })));
 const Somatometry = lazy(() => import('./pages/Somatometry').then(module => ({ default: module.Somatometry })));
@@ -163,14 +162,6 @@ function AppContent() {
           <PrivateRoute>
             <Layout>
               <Agenda />
-            </Layout>
-          </PrivateRoute>
-        } />
-            
-        <Route path="/clinical-history" element={
-          <PrivateRoute>
-            <Layout>
-              <ClinicalHistory />
             </Layout>
           </PrivateRoute>
         } />
