@@ -11,7 +11,7 @@ import { ReadOnlyRichText } from '../components/ReadOnlyRichText';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 
-export function ClinicalEvolution() {
+export default function ClinicalEvolution() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
