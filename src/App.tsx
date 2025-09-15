@@ -12,15 +12,15 @@ import { AgendaProvider } from './contexts/AgendaContext';
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
 const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
-/*
+
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })));
 const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })));
 const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })));
 const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: module.Privacy })));
-*/
+
 const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
 const CitasPage = lazy(() => import('./pages/CitasPage').then(module => ({ default: module.CitasPage })));
-/*)
+
 const Patients = lazy(() => import('./pages/Patients').then(module => ({ default: module.Patients })));
 const Appointments = lazy(() => import('./pages/Appointments').then(module => ({ default: module.Appointments })));
 const CIE10 = lazy(() => import('./pages/CIE10').then(module => ({ default: module.CIE10 })));
@@ -42,7 +42,7 @@ const InsuranceManagement = lazy(() => import('./pages/InsuranceManagement').the
 const PatientReportPage = lazy(() => import('./pages/PatientReportPage').then(module => ({ default: module.PatientReportPage })));
 const ScheduleConfiguration = lazy(() => import('./pages/ScheduleConfiguration').then(module => ({ default: module.ScheduleConfiguration })));
 const PatologiesManagement = lazy(() => import('./pages/PatologiesManagement').then(module => ({ default: module.PatologiesManagement })));
-*/
+
 // Loading fallback
 const PageLoader = () => {
   return (
@@ -103,7 +103,7 @@ function AppContent() {
           </PrivateRoute>
         } />
            
-        {/*
+        
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/terms" element={<Terms />} />
@@ -268,7 +268,7 @@ function AppContent() {
             </Layout>
           </PrivateRoute>
         } />
-         */}
+         
             
 
         <Route path="*" element={<Navigate to="/" replace />} />
