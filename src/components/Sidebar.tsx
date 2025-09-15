@@ -9,7 +9,7 @@ const baseNavigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Agenda', href: '/agenda/agenda', icon: Calendar, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Pacientes', href: '/patients', icon: Users, roles: ['Administrador', 'Medico', 'Recepcionista'] },
-  { name: 'Citas', href: '/appointments', icon: CalendarDays, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Citas', href: '/citas', icon: CalendarDays, roles: ['Administrador', 'Medico', 'Recepcionista'] },
 ] as const;
 const bottomNavigation: NavigationItem[] = [
   { name: 'Unidades de Negocio', href: '/clinica', icon: Stethoscope, roles: ['Administrador'] },
