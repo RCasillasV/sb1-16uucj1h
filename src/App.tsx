@@ -19,11 +19,12 @@ const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: modu
 const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: module.Privacy })));
 */
 const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
+const CitasPage = lazy(() => import('./pages/CitasPage').then(module => ({ default: module.CitasPage })));
 /*)
 const Patients = lazy(() => import('./pages/Patients').then(module => ({ default: module.Patients })));
 const Appointments = lazy(() => import('./pages/Appointments').then(module => ({ default: module.Appointments })));
 const CIE10 = lazy(() => import('./pages/CIE10').then(module => ({ default: module.CIE10 })));
-const CitasPage = lazy(() => import('./pages/CitasPage').then(module => ({ default: module.CitasPage })));
+
 const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default: module.Calendar })));
 const Agenda = lazy(() => import('./modules/agenda/Agenda').then(module => ({ default: module.Agenda })));
 const ClinicalEvolution = lazy(() => import('./pages/ClinicalEvolution'));
@@ -94,6 +95,14 @@ function AppContent() {
             </Layout>
           </PrivateRoute>
          } />
+         <Route path="/citas" element={
+          <PrivateRoute>
+            <Layout>
+              <CitasPage />
+            </Layout>
+          </PrivateRoute>
+        } />
+           
         {/*
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
@@ -147,14 +156,7 @@ function AppContent() {
           </PrivateRoute>
         } />
             
-        <Route path="/citas" element={
-          <PrivateRoute>
-            <Layout>
-              <CitasPage />
-            </Layout>
-          </PrivateRoute>
-        } />
-            
+   
         <Route path="/calendar" element={
           <PrivateRoute>
             <Layout>
