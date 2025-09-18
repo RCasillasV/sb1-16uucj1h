@@ -22,7 +22,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ defau
 const CitasPage = lazy(() => import('./pages/CitasPage').then(module => ({ default: module.CitasPage })));
 
 const Patients = lazy(() => import('./pages/Patients').then(module => ({ default: module.Patients })));
-const Appointments = lazy(() => import('./pages/Appointments').then(module => ({ default: module.AppointmentForm})));
+const Appointments = lazy(() => import('./pages/Appointments').then(module => ({ default: module.Appointments}))); 
 const CIE10 = lazy(() => import('./pages/CIE10').then(module => ({ default: module.CIE10 })));
 
 const Calendar = lazy(() => import('./pages/Calendar').then(module => ({ default: module.Calendar })));
@@ -142,7 +142,7 @@ function AppContent() {
        <Route path="/appointments" element={
           <PrivateRoute>
             <Layout>
-            <Appointments onSuccess={() => {}} onCancel={() => {}} />
+              <Appointments/>
             </Layout>
           </PrivateRoute>
         } />
