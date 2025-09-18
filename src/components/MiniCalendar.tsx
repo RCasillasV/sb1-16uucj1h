@@ -2,6 +2,7 @@ import React from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAgenda } from '../contexts/AgendaContext';
 import clsx from 'clsx';
@@ -21,6 +22,7 @@ interface MiniCalendarProps {
 export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDates }: MiniCalendarProps) {
   const { currentTheme } = useTheme();
   const { blockedDates, isDateBlocked, isWorkDay } = useAgenda();
+  const navigate = useNavigate();
   
   // Derivar el mes mostrado directamente de currentViewDates.start
   const displayedMonth = startOfMonth(currentViewDates.start);
@@ -252,7 +254,17 @@ export function MiniCalendar({ selectedDate, onDateSelect, events, currentViewDa
               selectedDateEvents.map((event) => (
                 <div 
                   key={event.id}
-                  className="flex items-start gap-1.5 p-1.5 rounded"
+                  onClick={() => {
+                    navigate('/citas', {
+                      state: {
+                        editMode: true,
+                        appointmentId: event.id,
+                        selectedPatient: event.extendedProps?.patient,
+                        viewOnly: event.extendedProps?.isPastEvent
+                      }
+                    });
+                  }}
+                  className="flex items-start gap-1.5 p-1.5 rounded cursor-pointer hover:bg-opacity-80 transition-colors"
                   style={{ 
                     background: `${currentTheme.colors.primary}10`,
                   }}
