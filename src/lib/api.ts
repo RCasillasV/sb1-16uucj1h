@@ -293,7 +293,7 @@ const medications = {
   async search(searchTerm: string) {
     const { data, error } = await supabase
       .from('medications')
-      .select('id, name as nombreComercial, concentration as concentracion, presentation as presentacion')
+      .select('id, name:nombreComercial, concentration:concentracion, presentation:presentacion')
       .ilike('name', `%${searchTerm}%`)
       .order('name')
       .limit(10);
