@@ -142,7 +142,7 @@ function AppContent() {
        <Route path="/appointments" element={
           <PrivateRoute>
             <Layout>
-              <Appointments/>
+            <Appointments onSuccess={() => {}} onCancel={() => {}} />
             </Layout>
           </PrivateRoute>
         } />
