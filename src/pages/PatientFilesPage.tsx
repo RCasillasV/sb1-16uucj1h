@@ -164,8 +164,16 @@ export function PatientFilesPage() {
         </div>
       )}
 
+      {/* File Gallery Section */}
+      <PatientFileGallery
+        files={patientFiles}
+        onFileRemoved={handleFileRemoved}
+        onError={handleFileError}
+        onFileAccessed={fetchPatientFiles} // Pass the fetch function to update access counts in real-time
+      />
+
       {/* File Upload Section */}
-      <div className="mb-8">       
+      <div className="mt-8">       
         <FileUpload
           onFilesUploaded={handleFilesUploaded}
           maxFiles={10}
@@ -180,14 +188,6 @@ export function PatientFilesPage() {
           }}
         />
       </div>
-
-      {/* File Gallery Section */}
-      <PatientFileGallery
-        files={patientFiles}
-        onFileRemoved={handleFileRemoved}
-        onError={handleFileError}
-        onFileAccessed={fetchPatientFiles} // Pass the fetch function to update access counts in real-time
-      />
     </div>
   );
 }
