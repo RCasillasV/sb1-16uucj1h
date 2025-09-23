@@ -1,4 +1,4 @@
-```typescript
+// typescript
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Plus, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
