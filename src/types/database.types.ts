@@ -633,10 +633,9 @@ export interface Database {
       }
       tpPacienteHistPatologica: {
         Row: {
-          id: string
+          patient_id: string
           created_at: string
           updated_at: string
-          id_paciente: string
           id_usuario: string
           enfermedades_cronicas: Json
           otras_enfermedades_cronicas: string | null
@@ -652,10 +651,9 @@ export interface Database {
           notas_generales: string | null
         }
         Insert: {
-          id?: string
+          patient_id: string
           created_at?: string
           updated_at?: string
-          id_paciente: string
           id_usuario: string
           enfermedades_cronicas?: Json
           otras_enfermedades_cronicas?: string | null
@@ -671,10 +669,9 @@ export interface Database {
           notas_generales?: string | null
         }
         Update: {
-          id?: string
           created_at?: string
           updated_at?: string
-          id_paciente?: string
+          patient_id?: string
           id_usuario?: string
           enfermedades_cronicas?: Json
           otras_enfermedades_cronicas?: string | null

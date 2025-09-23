@@ -799,7 +799,7 @@ export const api = {
       const { data, error } = await supabase
         .from('tpPacienteHistPatologica')
         .select('*')
-        .eq('id_paciente', patientId)
+        .eq('patient_id', patientId)
         .order('created_at', { ascending: false }) 
         .limit(1);
 
@@ -817,26 +817,25 @@ export const api = {
         .from('tpPacienteHistPatologica')
         .insert([payload])
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      return data;
+      return data && data.length > 0 ? data[0] : null;
     },
 
-    async update(id: string, payload: any) {
+    async update(patientId: string, payload: any) {
       const { data, error } = await supabase
         .from('tpPacienteHistPatologica')
         .update({
           ...payload,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id)
+        .eq('patient_id', patientId)
         .select()
-        .order('id')
         .limit(1);
 
       if (error) throw error;
-      return data;
+      return data && data.length > 0 ? data[0] : null;
     }
   },
 };

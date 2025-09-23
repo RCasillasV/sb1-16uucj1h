@@ -48,7 +48,7 @@ export function PathologicalHistory() {
   const [error, setError] = useState<string | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(!selectedPatient);
   const [activeTab, setActiveTab] = useState<TabType>('enfermedades');
-  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [existingRecordPatientId, setExistingRecordPatientId] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [allActivePatologies, setAllActivePatologies] = useState<AppPatology[]>([]);
   const [customPatologyInput, setCustomPatologyInput] = useState('');
@@ -170,7 +170,7 @@ export function PathologicalHistory() {
       console.log('PathologicalHistory: Data received from API:', data);
 
       if (data) {
-        setExistingRecordId(data.id);
+        setExistingRecordPatientId(selectedPatient.id);
         console.log('PathologicalHistory: Resetting form with existing record data:', data);
         reset({
           enfermedades_cronicas: (data.enfermedades_cronicas as string[]) || [],
@@ -186,7 +186,7 @@ export function PathologicalHistory() {
         });
       } else {
         console.log('PathologicalHistory: No existing record found, resetting form to default values.');
-        setExistingRecordId(null);
+        setExistingRecordPatientId(null);
         reset(); // Reset to default values if no data
       }
     } catch (err) {
@@ -207,7 +207,7 @@ export function PathologicalHistory() {
     try {
       console.log('PathologicalHistory: Submitting form data:', data);
       const payload = {
-        id_paciente: selectedPatient.id,
+        patient_id: selectedPatient.id,
         id_usuario: user.id,
         enfermedades_cronicas: data.enfermedades_cronicas,
         otras_enfermedades_cronicas: data.otras_enfermedades_cronicas || null,
@@ -221,15 +221,15 @@ export function PathologicalHistory() {
         notas_generales: data.notas_generales || null,
       };
 
-      if (existingRecordId) {
-        console.log('PathologicalHistory: Updating existing record with ID:', existingRecordId, 'Payload:', payload);
-        await api.pathologicalHistory.update(existingRecordId, payload);
+      if (existingRecordPatientId) {
+        console.log('PathologicalHistory: Updating existing record with patient_id:', existingRecordPatientId, 'Payload:', payload);
+        await api.pathologicalHistory.update(existingRecordPatientId, payload);
         console.log('PathologicalHistory: Record updated successfully.');
       } else {
         console.log('PathologicalHistory: Creating new record with payload:', payload);
         const newRecord = await api.pathologicalHistory.create(payload);
         console.log('PathologicalHistory: New record created:', newRecord);
-        setExistingRecordId(newRecord.id);
+        setExistingRecordPatientId(selectedPatient.id);
       }
     } catch (err) {
       console.error('Error saving pathological history:', err);
