@@ -832,6 +832,7 @@ export const api = {
         })
         .eq('id', id)
         .select()
+        .order('id')
         .limit(1);
 
       if (error) throw error;
