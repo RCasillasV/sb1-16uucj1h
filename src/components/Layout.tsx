@@ -8,7 +8,6 @@ import { api } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { Sidebar } from './Sidebar'; // Re-añadir esta línea
 import { MainHeader } from './MainHeader'; // Re-añadir esta línea
-import { format, parseISO } from 'date-fns';
 import { format, parseISO, isValid } from 'date-fns';
 import packageJson from '../../package.json';
 import clsx from 'clsx';
