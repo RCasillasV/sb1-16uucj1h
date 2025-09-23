@@ -88,7 +88,7 @@ function Switch({ checked, onCheckedChange, disabled = false }: SwitchProps) {
 export function AntecedentesNoPatologicos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
+  const [existingRecordPatientId, setExistingRecordPatientId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('habitos');
   const { currentTheme } = useTheme();
@@ -162,13 +162,15 @@ export function AntecedentesNoPatologicos() {
       const data = await api.antecedentesNoPatologicos.getByPatientId(selectedPatient.id);
       
       if (data) {
-        setExistingRecordId(data.id);
+        setExistingRecordPatientId(selectedPatient.id);
         reset({
           habitos_estilo_vida: data.habitos_estilo_vida as any || {},
           entorno_social: data.entorno_social as any || {},
           historial_adicional: data.historial_adicional as any || {},
           notas_generales: data.notas_generales || '',
         });
+      } else {
+        setExistingRecordPatientId(null);
       }
     } catch (err) {
       console.error('Error fetching non-pathological history:', err);

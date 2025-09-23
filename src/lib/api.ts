@@ -652,7 +652,6 @@ const antecedentesNoPatologicos = {
       .from('tpPacienteHistNoPatol')
       .select('*')
       .eq('patient_id', patientId)
-      .order('created_at', { ascending: false })
       .limit(1);
 
     if (error) {
@@ -671,10 +670,10 @@ const antecedentesNoPatologicos = {
         .from('tpPacienteHistNoPatol')
         .insert([payload])
         .select()
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      return data;
+      return data?.[0] || null;
     } catch (error: any) {
       // Si es un error de restricción de unicidad para esta tabla específica
       if (error.code === '23505' && error.message?.includes('unique_patient_non_path_history')) {
@@ -685,7 +684,7 @@ const antecedentesNoPatologicos = {
         
         if (existingRecord) {
           // Actualizar el registro existente
-          return await this.update(existingRecord.id, payload);
+          return await this.update(payload.patient_id, payload);
         } else {
           // Si no encontramos el registro existente, relanzar el error original
           console.error('Unique constraint error but no existing record found');
@@ -698,19 +697,19 @@ const antecedentesNoPatologicos = {
     }
   },
 
-  async update(id: string, payload: any) {
+  async update(patientId: string, payload: any) {
     const { data, error } = await supabase
       .from('tpPacienteHistNoPatol')
       .update({
         ...payload,
         updated_at: new Date().toISOString()
       })
-      .eq('id', id)
+      .eq('patient_id', patientId)
       .select()
-      .single();
+      .limit(1);
 
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   }
 };
 
