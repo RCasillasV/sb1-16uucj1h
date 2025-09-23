@@ -84,7 +84,7 @@ export function Appointments() {
         const now = new Date();
         data = data.filter(app => {
           const appDate = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
-          return !isBefore(appDate, now) && app.estado === 'programada';
+          return !isBefore(appDate, now) && app.estado === 'Programada';
         });
       }
       
