@@ -98,7 +98,7 @@ export function PatologySearchAndSelect({
               key={patologyName}
               className="flex items-center gap-1 px-2 py-1 text-sm rounded-md"
               style={{
-                background: `${currentTheme.colors.primary}20`,
+                background: `${currentTheme.colors.primary}20`, 
                 color: currentTheme.colors.primary,
               }}
             >
