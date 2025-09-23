@@ -46,11 +46,12 @@ export const gynecoObstetricHistory = {
     console.log('GYNECO_SERVICE: Raw Supabase data:', data);
     console.log('GYNECO_SERVICE: Raw Supabase error:', error);
 
-    if (error ) {
+    if (error && error.code !== 'PGRST116') {
       throw error;
     }
 
-    const record = data || null;
+    // If error code is PGRST116, it means no rows found, return null
+    const record = error?.code === 'PGRST116' ? null : data || null;
     if (record) cache.set(key, record);
     return record;
   },
