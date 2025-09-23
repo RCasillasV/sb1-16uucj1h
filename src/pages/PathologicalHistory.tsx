@@ -11,29 +11,8 @@ import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
 import { PathologicalHistoryReport } from '../components/Informes/PathologicalHistoryReport';
 import clsx from 'clsx';
-
-// Esquemas de validación por sección
-const enfermedadesCronicasSchema = z.object({
-  enfermedades_cronicas: z.array(z.string()).default([]),
-  otras_enfermedades_cronicas: z.string().optional(),
-});
-
-const historialQuirurgicoSchema = z.object({
-  cirugias: z.array(z.string()).default([]),
-  hospitalizaciones: z.array(z.string()).default([]),
-});
-
-const alergiasInmunizacionesSchema = z.object({
-  alergias: z.string().optional(),
-  transfusiones: z.string().optional(),
-  estado_inmunizacion: z.string().optional(),
-  detalles_inmunizacion: z.string().optional(),
-});
-
-const medicamentosNotasSchema = z.object({
-  medicamentos_actuales: z.string().optional(),
-  notas_generales: z.string().optional(),
-});
+import { PatologySearchAndSelect } from '../components/PatologySearchAndSelect'; // Import new component
+import { DynamicListInput } from '../components/DynamicListInput'; // Import extracted component
 
 // Esquema principal del formulario
 const pathologicalHistorySchema = z.object({
@@ -52,99 +31,6 @@ const pathologicalHistorySchema = z.object({
 type PathologicalHistoryFormData = z.infer<typeof pathologicalHistorySchema>;
 
 type TabType = 'enfermedades' | 'quirurgico' | 'alergias' | 'medicamentos';
-
-interface DynamicListInputProps {
-  items: string[];
-  onAdd: (item: string) => void;
-  onRemove: (index: number) => void;
-  placeholder: string;
-  itemType: string;
-}
-
-function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType }: DynamicListInputProps) {
-  const { currentTheme } = useTheme();
-  const [newItem, setNewItem] = useState('');
-
-  const handleAdd = () => {
-    if (newItem.trim() && !items.includes(newItem.trim())) {
-      onAdd(newItem.trim());
-      setNewItem('');
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAdd();
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder={placeholder}
-          className="flex-1 p-2 rounded-md border text-sm"
-          style={{
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-            color: currentTheme.colors.text,
-          }}
-        />
-        <button
-          type="button"
-          onClick={handleAdd}
-          disabled={!newItem.trim()}
-          className={clsx(
-            'px-3 py-2 rounded-md transition-colors text-sm',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
-          )}
-          style={{
-            background: currentTheme.colors.primary,
-            color: currentTheme.colors.buttonText,
-          }}
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-      </div>
-
-      {items.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium" style={{ color: currentTheme.colors.textSecondary }}>
-            {itemType} registrados ({items.length}):
-          </p>
-          <div className="space-y-1 max-h-32 overflow-y-auto">
-            {items.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 rounded border"
-                style={{
-                  background: currentTheme.colors.background,
-                  borderColor: currentTheme.colors.border,
-                }}
-              >
-                <span className="text-sm flex-1" style={{ color: currentTheme.colors.text }}>
-                  {item}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onRemove(index)}
-                  className="p-1 rounded-full hover:bg-red-100 transition-colors"
-                >
-                  <X className="h-3 w-3 text-red-500" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function PathologicalHistory() {
   const { currentTheme } = useTheme();
@@ -184,15 +70,6 @@ export function PathologicalHistory() {
   });
 
   const watchedValues = watch();
-
-  const {
-    fields: enfermedadesFields,
-    append: appendEnfermedad,
-    remove: removeEnfermedad,
-  } = useFieldArray({
-    control,
-    name: 'enfermedades_cronicas',
-  });
 
   const {
     fields: cirugiasFields,
@@ -448,18 +325,18 @@ export function PathologicalHistory() {
                     Enfermedades Crónicas Diagnosticadas
                   </h3>
                   
-                  <DynamicListInput
-                    items={watchedValues.enfermedades_cronicas || []}
-                    onAdd={(item) => {
-                      const current = watchedValues.enfermedades_cronicas || [];
-                      setValue('enfermedades_cronicas', [...current, item]);
-                    }}
-                    onRemove={(index) => {
-                      const current = watchedValues.enfermedades_cronicas || [];
-                      setValue('enfermedades_cronicas', current.filter((_, i) => i !== index));
-                    }}
-                    placeholder="Ej: Diabetes tipo 2, Hipertensión arterial..."
-                    itemType="Enfermedades"
+                  {/* Reemplazar DynamicListInput con PatologySearchAndSelect */}
+                  <Controller
+                    name="enfermedades_cronicas"
+                    control={control}
+                    render={({ field }) => (
+                      <PatologySearchAndSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Ej: Diabetes tipo 2, Hipertensión arterial..."
+                        itemType="Enfermedades"
+                      />
+                    )}
                   />
                 </div>
 
