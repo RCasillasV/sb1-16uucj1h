@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { Sidebar } from './Sidebar'; // Re-añadir esta línea
 import { MainHeader } from './MainHeader'; // Re-añadir esta línea
 import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import packageJson from '../../package.json';
 import clsx from 'clsx';
 
@@ -151,9 +152,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const fetchAppointments = useCallback(async () => {
     if (!selectedPatient) return;
 
+    console.log('Layout: fetchAppointments - Fetching appointments for patient:', selectedPatient.id);
+
     try {
       // Fetch appointments specifically for the selected patient
       const patientAppointments = await api.appointments.getByPatientId(selectedPatient.id);
+      console.log('Layout: fetchAppointments - Raw patient appointments:', patientAppointments);
 
       // Sort appointments by date and time in ascending order
       const sortedAppointments = [...patientAppointments].sort((a, b) => {
@@ -161,8 +165,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
         const dateTimeB = parseISO(`${b.fecha_cita}T${b.hora_cita}`);
         return dateTimeA.getTime() - dateTimeB.getTime();
       });
+      console.log('Layout: fetchAppointments - Sorted appointments:', sortedAppointments);
 
       const now = new Date();
+      console.log('Layout: fetchAppointments - Current time (now):', now.toISOString());
+
+      // Definir los estados que se consideran "próximos" o "activos"
+      const UPCOMING_ACTIVE_STATUSES = [
+        'Programada',
+        'Confirmada', 
+        'Reprogramada x Paciente',
+        'Reprogramada x Médico',
+        'En Espera',
+        'Urgencia'
+      ];
+
       let last: { date: Date; status: string } | null = null;
       let next: Date | null = null;
 
@@ -170,11 +187,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       for (let i = sortedAppointments.length - 1; i >= 0; i--) {
         const app = sortedAppointments[i];
         const appDateTime = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
+        if (!isValid(appDateTime)) {
+          console.warn(`Layout: Invalid date/time for appointment ID ${app.id}: ${app.fecha_cita}T${app.hora_cita}`);
+          continue;
+        }
         if (appDateTime <= now) {
           last = {
             date: appDateTime,
-            status: app.estado === 'completada' ? 'COMPLETA' : 'PROGRAMADA' // Use 'PROGRAMADA' for past but not completed
+            status: app.estado === 'Atendida' ? 'COMPLETA' : 'PROGRAMADA'
           };
+          console.log('Layout: fetchAppointments - Found last appointment:', last);
           break;
         }
       }
@@ -182,14 +204,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
       // Find the next upcoming scheduled appointment
       for (const app of sortedAppointments) {
         const appDateTime = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
-        if (appDateTime > now && app.estado === 'programada') {
+        if (!isValid(appDateTime)) {
+          console.warn(`Layout: Invalid date/time for appointment ID ${app.id}: ${app.fecha_cita}T${app.hora_cita}`);
+          continue;
+        }
+        console.log(`Layout: Checking appointment ID ${app.id}: appDateTime=${appDateTime.toISOString()}, now=${now.toISOString()}, app.estado=${app.estado}`);
+        if (appDateTime > now && UPCOMING_ACTIVE_STATUSES.includes(app.estado)) {
           next = appDateTime;
+          console.log('Layout: fetchAppointments - Found next appointment:', next);
           break;
         }
       }
 
       setLastAppointment(last);
       setNextAppointment(next);
+      console.log('Layout: fetchAppointments - Final lastAppointment:', last);
+      console.log('Layout: fetchAppointments - Final nextAppointment:', next);
     } catch (err) {
       console.error('Error fetching appointments:', err);
     }

@@ -202,7 +202,7 @@ export interface Database {
           fecha_cita: string
           hora_cita: string
           motivo: string
-          estado: 'programada' | 'completada' | 'cancelada'
+          estado: 'Programada' | 'Confirmada' | 'En Progreso' | 'Atendida' | 'No se Presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En Espera' | 'Urgencia'
           notas: string | null
           urgente: boolean
           consultorio: number
@@ -225,7 +225,7 @@ export interface Database {
           fecha_cita: string
           hora_cita: string
           motivo: string
-          estado?: 'programada' | 'completada' | 'cancelada'
+          estado?: 'Programada' | 'Confirmada' | 'En Progreso' | 'Atendida' | 'No se Presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En Espera' | 'Urgencia'
           notas?: string | null
           urgente?: boolean
           consultorio: number
@@ -248,7 +248,7 @@ export interface Database {
           fecha_cita?: string
           hora_cita?: string
           motivo?: string
-          estado?: 'programada' | 'completada' | 'cancelada'
+          estado?: 'Programada' | 'Confirmada' | 'En Progreso' | 'Atendida' | 'No se Presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En Espera' | 'Urgencia'
           notas?: string | null
           urgente?: boolean
           consultorio?: number
