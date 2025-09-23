@@ -54,7 +54,7 @@ export function NonPathologicalHistoryReport({
     try {
       let fetchedPatient: Patient | null = patientData || null;
       if (!fetchedPatient) {
-      const modalContent = document.getElementById('modal-content-print-target');
+        fetchedPatient = await api.patients.getById(patientId);
         if (!fetchedPatient) throw new Error('Paciente no encontrado');
         setPatient(fetchedPatient);
       }

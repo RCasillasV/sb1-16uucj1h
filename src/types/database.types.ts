@@ -689,7 +689,6 @@ export interface Database {
       }
       tpPacienteHistNoPatol: {
         Row: {
-          id: string
           created_at: string
           updated_at: string
           patient_id: string
@@ -700,7 +699,6 @@ export interface Database {
           notas_generales: string | null
         }
         Insert: {
-          id?: string
           created_at?: string
           updated_at?: string
           patient_id: string
@@ -711,7 +709,6 @@ export interface Database {
           notas_generales?: string | null
         }
         Update: {
-          id?: string
           created_at?: string
           updated_at?: string
           patient_id?: string

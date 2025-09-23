@@ -196,11 +196,11 @@ export function AntecedentesNoPatologicos() {
         notas_generales: data.notas_generales || null,
       };
 
-      if (existingRecordId) {
-        await api.antecedentesNoPatologicos.update(existingRecordId, payload);
+      if (existingRecordPatientId) {
+        await api.antecedentesNoPatologicos.update(existingRecordPatientId, payload);
       } else {
         const newRecord = await api.antecedentesNoPatologicos.create(payload);
-        setExistingRecordId(newRecord.id);
+        setExistingRecordPatientId(selectedPatient.id);
       }
       
       // Mostrar mensaje de éxito brevemente
