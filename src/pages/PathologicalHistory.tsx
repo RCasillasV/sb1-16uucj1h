@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,7 +11,6 @@ import { api } from '../lib/api';
 import { Modal } from '../components/Modal';
 import { PathologicalHistoryReport } from '../components/Informes/PathologicalHistoryReport';
 import clsx from 'clsx';
-import { PatologySearchAndSelect } from '../components/PatologySearchAndSelect'; // Import new component
 import { DynamicListInput } from '../components/DynamicListInput'; // Import extracted component
 
 // Esquema principal del formulario
@@ -32,6 +31,13 @@ type PathologicalHistoryFormData = z.infer<typeof pathologicalHistorySchema>;
 
 type TabType = 'enfermedades' | 'quirurgico' | 'alergias' | 'medicamentos';
 
+interface AppPatology {
+  id: string;
+  nombre: string;
+  especialidad: string | null;
+  sexo: 'Masculino' | 'Femenino' | 'Indistinto';
+}
+
 export function PathologicalHistory() {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
@@ -44,6 +50,10 @@ export function PathologicalHistory() {
   const [activeTab, setActiveTab] = useState<TabType>('enfermedades');
   const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [allActivePatologies, setAllActivePatologies] = useState<AppPatology[]>([]);
+  const [customPatologyInput, setCustomPatologyInput] = useState('');
+  const [isLoadingPatologies, setIsLoadingPatologies] = useState(false);
+  const [patologiesError, setPatologiesError] = useState<string | null>(null);
 
   const {
     control,
@@ -98,6 +108,55 @@ export function PathologicalHistory() {
       fetchPathologicalHistory();
     }
   }, [selectedPatient, user, authLoading]);
+
+  useEffect(() => {
+    const fetchAllPatologies = async () => {
+      setIsLoadingPatologies(true);
+      setPatologiesError(null);
+      try {
+        const data = await api.patologies.getAllActive();
+        setAllActivePatologies(data);
+      } catch (err) {
+        console.error('Error fetching all active patologies:', err);
+        setPatologiesError(err instanceof Error ? err.message : 'Error al cargar patologías');
+      } finally {
+        setIsLoadingPatologies(false);
+      }
+    };
+
+    if (user) {
+      fetchAllPatologies();
+    }
+  }, [user]);
+
+  const filteredAvailablePatologies = useMemo(() => {
+    if (!allActivePatologies || !selectedPatient) return [];
+    
+    const patientSex = selectedPatient.Sexo?.toLowerCase();
+    return allActivePatologies.filter(patology => {
+      const patologySex = patology.sexo?.toLowerCase();
+      return patologySex === 'indistinto' || patologySex === patientSex;
+    });
+  }, [allActivePatologies, selectedPatient]);
+
+  const handlePatologyToggle = (patologyName: string) => {
+    const current = watchedValues.enfermedades_cronicas || [];
+    if (current.includes(patologyName)) {
+      setValue('enfermedades_cronicas', current.filter(item => item !== patologyName));
+    } else {
+      setValue('enfermedades_cronicas', [...current, patologyName]);
+    }
+  };
+
+  const handleAddCustomPatology = () => {
+    if (!customPatologyInput.trim()) return;
+    
+    const current = watchedValues.enfermedades_cronicas || [];
+    if (!current.includes(customPatologyInput.trim())) {
+      setValue('enfermedades_cronicas', [...current, customPatologyInput.trim()]);
+      setCustomPatologyInput('');
+    }
+  };
 
   const fetchPathologicalHistory = async () => {
     if (!selectedPatient) return;
@@ -325,19 +384,108 @@ export function PathologicalHistory() {
                     Enfermedades Crónicas Diagnosticadas
                   </h3>
                   
-                  {/* Reemplazar DynamicListInput con PatologySearchAndSelect */}
-                  <Controller
-                    name="enfermedades_cronicas"
-                    control={control}
-                    render={({ field }) => (
-                      <PatologySearchAndSelect
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Ej: Diabetes tipo 2, Hipertensión arterial..."
-                        itemType="Enfermedades"
-                      />
+                  <div className="space-y-4">
+                    <p 
+                      className="text-sm mb-4"
+                      style={{ color: currentTheme.colors.textSecondary }}
+                    >
+                      Seleccione las patologías del catálogo que aplican a este paciente
+                    </p>
+                    
+                    {isLoadingPatologies ? (
+                      <div className="flex items-center gap-2 text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
+                        Cargando patologías...
+                      </div>
+                    ) : patologiesError ? (
+                      <p className="text-sm text-red-500">Error al cargar patologías: {patologiesError}</p>
+                    ) : (
+                      <>
+                        {/* Mostrar patologías del catálogo como botones seleccionables */}
+                        <div className="flex flex-wrap gap-2 min-h-[40px]">
+                          {filteredAvailablePatologies.map(patology => {
+                            const isSelected = watchedValues.enfermedades_cronicas?.includes(patology.nombre) || false;
+                            return (
+                              <button
+                                key={patology.id}
+                                type="button"
+                                onClick={() => handlePatologyToggle(patology.nombre)}
+                                className={clsx(
+                                  'px-3 py-1 rounded-md text-sm transition-colors border',
+                                  isSelected && 'bg-slate-800 text-white border-slate-900',
+                                  !isSelected && 'bg-white hover:bg-slate-50 border-slate-200'
+                                )}
+                                style={{
+                                  color: isSelected ? '#fff' : currentTheme.colors.text,
+                                  background: isSelected ? currentTheme.colors.primary : currentTheme.colors.surface,
+                                  borderColor: isSelected ? currentTheme.colors.primary : currentTheme.colors.border,
+                                }}
+                              >
+                                {patology.nombre}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Mostrar patologías personalizadas ya seleccionadas */}
+                        {watchedValues.enfermedades_cronicas
+                          ?.filter(patologyName => 
+                            !filteredAvailablePatologies.some(catalogPatology => catalogPatology.nombre === patologyName)
+                          )
+                          .map((customPatology) => (
+                            <div
+                              key={customPatology}
+                              className="inline-flex items-center bg-slate-800 text-white px-2 py-0.5 rounded-md text-xs font-medium border border-slate-900 mr-2 mb-2"
+                            >
+                              {customPatology}
+                              <button
+                                type="button"
+                                className="ml-1 text-white hover:text-slate-200"
+                                onClick={() => {
+                                  const current = watchedValues.enfermedades_cronicas || [];
+                                  setValue('enfermedades_cronicas', current.filter(item => item !== customPatology));
+                                }}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+
+                        {/* Campo para agregar patologías personalizadas */}
+                        <div className="flex gap-2 mt-4">
+                          <input
+                            type="text"
+                            value={customPatologyInput}
+                            onChange={(e) => setCustomPatologyInput(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddCustomPatology();
+                              }
+                            }}
+                            placeholder="Agregar otra patología no listada"
+                            className="flex-1 p-2 rounded-md border"
+                            style={inputStyle}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddCustomPatology}
+                            disabled={!customPatologyInput.trim()}
+                            className={clsx(
+                              'px-3 py-1 rounded-md text-sm transition-colors',
+                              'disabled:opacity-50 disabled:cursor-not-allowed'
+                            )}
+                            style={{
+                              background: currentTheme.colors.primary,
+                              color: currentTheme.colors.buttonText,
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </>
                     )}
-                  />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
