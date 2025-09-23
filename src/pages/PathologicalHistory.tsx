@@ -54,8 +54,6 @@ export function PathologicalHistory() {
   const [customPatologyInput, setCustomPatologyInput] = useState('');
   const [isLoadingPatologies, setIsLoadingPatologies] = useState(false);
   const [patologiesError, setPatologiesError] = useState<string | null>(null);
-  const [isLoadingPatologies, setIsLoadingPatologies] = useState(false);
-  const [patologiesError, setPatologiesError] = useState<string | null>(null);
 
   const {
     control,
