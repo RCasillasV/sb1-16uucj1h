@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * z from 'zod';
+import * as z from 'zod';
 import { FileText, Save, AlertCircle, Plus, X, Printer, Heart, Pill, Stethoscope, Clipboard } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
