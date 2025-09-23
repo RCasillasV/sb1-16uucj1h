@@ -53,6 +53,10 @@ export function PathologicalHistoryReport({
       const record = await api.pathologicalHistory.getByPatientId(patientId);
       setPathologicalRecord(record);
     } catch (err) {
+      setError('Error al cargar los datos del informe.');
+      setLoading(false);
+    }
+  };
 
   const handlePrint = () => {
     setTimeout(() => {
@@ -247,6 +251,33 @@ export function PathologicalHistoryReport({
       )}
 
       {/* Actions for modal view */}
+      {isModalView && onClose && (
+        <div className="flex items-center justify-between mb-4 print:hidden">
+          <h2
+            className="text-xl font-bold"
+            style={{ color: currentTheme.colors.text }}
+          >
+            Informe de Antecedentes Patológicos
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrint}
+              className={buttonStyle.base}
+              style={buttonStyle.primary}
+            >
+              <Printer className="h-5 w-5 mr-2" />
+              Imprimir
+            </button>
+            <button
+              onClick={onClose}
+              className={buttonStyle.base}
+              style={buttonStyle.secondary}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Report content */}
       <div
