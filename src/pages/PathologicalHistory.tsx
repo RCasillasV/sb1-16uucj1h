@@ -438,7 +438,22 @@ export function PathologicalHistory() {
                       <>
                         {/* Mostrar patologías del catálogo como botones seleccionables */}
                         <div className="flex flex-wrap gap-2 min-h-[40px]">
-                          {filteredAvailablePatologies.map(patology => {
+                          {(() => {
+                            // Ordenar patologías: seleccionadas primero, luego no seleccionadas
+                            const sortedPatologies = [...filteredAvailablePatologies].sort((a, b) => {
+                              const aSelected = watchedValues.enfermedades_cronicas?.includes(a.nombre) || false;
+                              const bSelected = watchedValues.enfermedades_cronicas?.includes(b.nombre) || false;
+                              
+                              // Si ambas tienen el mismo estado de selección, ordenar alfabéticamente
+                              if (aSelected === bSelected) {
+                                return a.nombre.localeCompare(b.nombre);
+                              }
+                              
+                              // Las seleccionadas van primero
+                              return bSelected ? 1 : -1;
+                            });
+
+                            return sortedPatologies.map(patology => {
                             const isSelected = watchedValues.enfermedades_cronicas?.includes(patology.nombre) || false;
                             return (
                               <button
@@ -459,7 +474,7 @@ export function PathologicalHistory() {
                                 {patology.nombre}
                               </button>
                             );
-                          })}
+                          })})()}
                         </div>
 
                         {/* Mostrar patologías personalizadas ya seleccionadas */}
