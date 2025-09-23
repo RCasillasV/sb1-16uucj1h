@@ -807,9 +807,9 @@ export const api = {
         if (error.code === 'PGRST116' && error.details === 'The result contains 0 rows') {
           return null; // Devuelve null explícitamente para este caso
         } 
-          throw error; // Lanza cualquier otro tipo de error
+        throw error; // Lanza cualquier otro tipo de error
       }
-      return data; // Si no hay error, devuelve los datos
+      return data && data.length > 0 ? data[0] : null; // Si no hay error, devuelve el primer elemento del array o null
     },
 
     async create(payload: any) {

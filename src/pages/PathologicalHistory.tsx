@@ -54,6 +54,8 @@ export function PathologicalHistory() {
   const [customPatologyInput, setCustomPatologyInput] = useState('');
   const [isLoadingPatologies, setIsLoadingPatologies] = useState(false);
   const [patologiesError, setPatologiesError] = useState<string | null>(null);
+  const [isLoadingPatologies, setIsLoadingPatologies] = useState(false);
+  const [patologiesError, setPatologiesError] = useState<string | null>(null);
 
   const {
     control,
@@ -113,6 +115,8 @@ export function PathologicalHistory() {
     const fetchAllPatologies = async () => {
       setIsLoadingPatologies(true);
       setPatologiesError(null);
+      setIsLoadingPatologies(true);
+      setPatologiesError(null);
       try {
         const data = await api.patologies.getAllActive();
         setAllActivePatologies(data);
@@ -121,9 +125,15 @@ export function PathologicalHistory() {
         setPatologiesError(err instanceof Error ? err.message : 'Error al cargar patologías');
       } finally {
         setIsLoadingPatologies(false);
+        setPatologiesError(err instanceof Error ? err.message : 'Error al cargar patologías');
+      } finally {
+        setIsLoadingPatologies(false);
       }
     };
-
+    
+    if (user) {
+      fetchAllPatologies();
+    }
     if (user) {
       fetchAllPatologies();
     }
@@ -165,10 +175,13 @@ export function PathologicalHistory() {
     setError(null);
 
     try {
+      console.log('PathologicalHistory: Fetching data for patient:', selectedPatient.id);
       const data = await api.pathologicalHistory.getByPatientId(selectedPatient.id);
+      console.log('PathologicalHistory: Data received from API:', data);
 
       if (data) {
         setExistingRecordId(data.id);
+        console.log('PathologicalHistory: Resetting form with existing record data:', data);
         reset({
           enfermedades_cronicas: (data.enfermedades_cronicas as string[]) || [],
           otras_enfermedades_cronicas: data.otras_enfermedades_cronicas || '',
@@ -181,12 +194,17 @@ export function PathologicalHistory() {
           medicamentos_actuales: data.medicamentos_actuales || '',
           notas_generales: data.notas_generales || '',
         });
+      } else {
+        console.log('PathologicalHistory: No existing record found, resetting form to default values.');
+        setExistingRecordId(null);
+        reset(); // Reset to default values if no data
       }
     } catch (err) {
       console.error('Error fetching pathological history:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar los antecedentes patológicos');
     } finally {
       setLoading(false);
+      console.log('PathologicalHistory: Loading completed, form should be ready.');
     }
   };
 
@@ -197,6 +215,7 @@ export function PathologicalHistory() {
     setError(null);
 
     try {
+      console.log('PathologicalHistory: Submitting form data:', data);
       const payload = {
         id_paciente: selectedPatient.id,
         id_usuario: user.id,
@@ -213,9 +232,13 @@ export function PathologicalHistory() {
       };
 
       if (existingRecordId) {
+        console.log('PathologicalHistory: Updating existing record with ID:', existingRecordId, 'Payload:', payload);
         await api.pathologicalHistory.update(existingRecordId, payload);
+        console.log('PathologicalHistory: Record updated successfully.');
       } else {
+        console.log('PathologicalHistory: Creating new record with payload:', payload);
         const newRecord = await api.pathologicalHistory.create(payload);
+        console.log('PathologicalHistory: New record created:', newRecord);
         setExistingRecordId(newRecord.id);
       }
     } catch (err) {
