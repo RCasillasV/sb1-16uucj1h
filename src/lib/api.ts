@@ -799,7 +799,7 @@ export const api = {
       const { data, error } = await supabase
         .from('tpPacienteHistPatologica')
         .select('*')
-        .eq('patient_id', patientId)
+        .eq('id_paciente', patientId)
         .order('created_at', { ascending: false }) 
         .limit(1);
 
@@ -830,7 +830,7 @@ export const api = {
           ...payload,
           updated_at: new Date().toISOString()
         })
-        .eq('patient_id', patientId)
+        .eq('id_paciente', patientId)
         .select()
         .limit(1);
 
