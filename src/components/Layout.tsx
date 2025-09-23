@@ -132,14 +132,48 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const fetchCounts = useCallback(async () => {
     if (!selectedPatient) return;
     try {
-      const [histories, evolutions, prescriptions, files] = await Promise.all([
-        api.clinicalHistories.getByPatientId(selectedPatient.id),
+      const [
+        heredoFamRecords,
+        nonPathRecord,
+        pathRecord,
+        gynecoRecord,
+        evolutions,
+        prescriptions,
+        files
+      ] = await Promise.all([
+        api.heredoFamilialHistory.getAllByPatientId(selectedPatient.id),
+        api.antecedentesNoPatologicos.getByPatientId(selectedPatient.id),
+        api.pathologicalHistory.getByPatientId(selectedPatient.id),
+        api.gynecoObstetricHistory.getByPatientId(selectedPatient.id),
         api.clinicalEvolution.getByPatientId(selectedPatient.id),
         api.prescriptions.getByPatientId(selectedPatient.id),
         api.files.getByPatientId(selectedPatient.id)
       ]);
       
-      setClinicalHistoryCount(histories.length);
+      // Calculate total clinical history count from all four tables
+      let totalClinicalHistoryCount = 0;
+      
+      // Count records from tpFcHeredoFamiliar (array of family member records)
+      if (heredoFamRecords && Array.isArray(heredoFamRecords)) {
+        totalClinicalHistoryCount += heredoFamRecords.length;
+      }
+      
+      // Count records from tpPacienteHistNoPatol (single record per patient)
+      if (nonPathRecord) {
+        totalClinicalHistoryCount += 1;
+      }
+      
+      // Count records from tpPacienteHistPatologica (single record per patient)
+      if (pathRecord) {
+        totalClinicalHistoryCount += 1;
+      }
+      
+      // Count records from tpPacienteHistGineObst (single record per patient)
+      if (gynecoRecord) {
+        totalClinicalHistoryCount += 1;
+      }
+      
+      setClinicalHistoryCount(totalClinicalHistoryCount);
       setClinicalEvolutionCount(evolutions.length);
       setPrescriptionsCount(prescriptions.length);
       setPatientFilesCount(files.length);
