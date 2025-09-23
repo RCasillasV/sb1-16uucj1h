@@ -55,6 +55,11 @@ export function NonPathologicalHistoryReport({
       const record = await api.antecedentesNoPatologicos.getByPatientId(patientId);
       setNonPathologicalRecord(record);
     } catch (err) {
+      setError('Error al cargar los datos del informe.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePrint = () => {
     setTimeout(() => {
@@ -251,6 +256,18 @@ export function NonPathologicalHistoryReport({
       )}
 
       {/* Actions for modal view */}
+      {isModalView && onClose && (
+        <div className="flex justify-end mb-4 print:hidden">
+          <button
+            onClick={onClose}
+            className={clsx(buttonStyle.base)}
+            style={buttonStyle.secondary}
+          >
+            <X className="h-5 w-5 mr-2" />
+            Cerrar
+          </button>
+        </div>
+      )}
 
       {/* Report content */}
       <div
