@@ -113,8 +113,6 @@ export function PathologicalHistory() {
     const fetchAllPatologies = async () => {
       setIsLoadingPatologies(true);
       setPatologiesError(null);
-      setIsLoadingPatologies(true);
-      setPatologiesError(null);
       try {
         const data = await api.patologies.getAllActive();
         setAllActivePatologies(data);
@@ -123,15 +121,9 @@ export function PathologicalHistory() {
         setPatologiesError(err instanceof Error ? err.message : 'Error al cargar patologías');
       } finally {
         setIsLoadingPatologies(false);
-        setPatologiesError(err instanceof Error ? err.message : 'Error al cargar patologías');
-      } finally {
-        setIsLoadingPatologies(false);
       }
     };
     
-    if (user) {
-      fetchAllPatologies();
-    }
     if (user) {
       fetchAllPatologies();
     }
