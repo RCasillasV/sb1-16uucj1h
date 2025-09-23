@@ -533,7 +533,7 @@ export function PathologicalHistory() {
                   <textarea
                     {...register('otras_enfermedades_cronicas')}
                     placeholder="Describa otras enfermedades crónicas relevantes..."
-                    rows={4}
+                    rows={2}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
