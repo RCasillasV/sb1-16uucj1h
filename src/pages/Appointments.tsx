@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
+import { getStatusBadgeInfo, DetailedAppointmentStatus } from '../utils/appointmentStatuses';
 
 type AppointmentWithPatient = {
   id: string;
@@ -135,31 +136,14 @@ export function Appointments() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'programada':
-        return (
-          <span className="flex items-center gap-1 text-blue-600">
-            <Clock className="h-4 w-4" />
-            <span>Programada</span>
-          </span>
-        );
-      case 'completada':
-        return (
-          <span className="flex items-center gap-1 text-green-600">
-            <CheckCircle className="h-4 w-4" />
-            <span>Completada</span>
-          </span>
-        );
-      case 'cancelada':
-        return (
-          <span className="flex items-center gap-1 text-red-600">
-            <XCircle className="h-4 w-4" />
-            <span>Cancelada</span>
-          </span>
-        );
-      default:
-        return <span>{status}</span>;
-    }
+    // Utiliza la función auxiliar para obtener la información del badge
+    const { text, color, icon: Icon } = getStatusBadgeInfo(status as DetailedAppointmentStatus);
+    return (
+      <span className="flex items-center gap-1" style={{ color: color }}>
+        <Icon className="h-4 w-4" />
+        <span>{text}</span>
+      </span>
+    );
   };
 
   const filteredAppointments = appointments.filter(appointment => {
