@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import * z from 'zod';
 import { FileText, Save, AlertCircle, Plus, X, Printer, Heart, Pill, Stethoscope, Clipboard } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSelectedPatient } from '../contexts/SelectedPatientContext';
@@ -56,6 +56,7 @@ export function PathologicalHistory() {
   const [customHospitalizationInput, setCustomHospitalizationInput] = useState('');
   const [isLoadingPatologies, setIsLoadingPatologies] = useState(false);
   const [patologiesError, setPatologiesError] = useState<string | null>(null);
+  const [initialSortedPatologies, setInitialSortedPatologies] = useState<AppPatology[]>([]);
 
   const {
     control,
@@ -109,7 +110,7 @@ export function PathologicalHistory() {
     if (!authLoading && user) {
       fetchPathologicalHistory();
     }
-  }, [selectedPatient, user, authLoading]);
+  }, [selectedPatient, user, authLoading, allActivePatologies]);
 
   useEffect(() => {
     const fetchAllPatologies = async () => {
@@ -194,7 +195,7 @@ export function PathologicalHistory() {
       if (data) {
         setExistingRecordPatientId(selectedPatient.id);
         console.log('PathologicalHistory: Resetting form with existing record data:', data);
-        reset({
+        const formattedData = {
           enfermedades_cronicas: (data.enfermedades_cronicas as string[]) || [],
           otras_enfermedades_cronicas: data.otras_enfermedades_cronicas || '',
           cirugias: (data.cirugias as string[]) || [],
@@ -205,11 +206,18 @@ export function PathologicalHistory() {
           detalles_inmunizacion: data.detalles_inmunizacion || '',
           medicamentos_actuales: data.medicamentos_actuales || '',
           notas_generales: data.notas_generales || '',
-        });
+        };
+        reset(formattedData);
+        
+        // Calcular el orden inicial de patologías (solo una vez al cargar)
+        calculateInitialPatologiesOrder(formattedData.enfermedades_cronicas);
       } else {
         console.log('PathologicalHistory: No existing record found, resetting form to default values.');
         setExistingRecordPatientId(null);
         reset(); // Reset to default values if no data
+        
+        // Calcular el orden inicial de patologías con lista vacía
+        calculateInitialPatologiesOrder([]);
       }
     } catch (err) {
       console.error('Error fetching pathological history:', err);
@@ -218,6 +226,33 @@ export function PathologicalHistory() {
       setLoading(false);
       console.log('PathologicalHistory: Loading completed, form should be ready.');
     }
+  };
+
+  const calculateInitialPatologiesOrder = (selectedPatologies: string[]) => {
+    if (!allActivePatologies.length || !selectedPatient) return;
+    
+    // Filtrar patologías por sexo del paciente
+    const patientSex = selectedPatient.Sexo?.toLowerCase();
+    const filteredPatologies = allActivePatologies.filter(patology => {
+      const patologySex = patology.sexo?.toLowerCase();
+      return patologySex === 'indistinto' || patologySex === patientSex;
+    });
+    
+    // Ordenar: seleccionadas primero, luego no seleccionadas, alfabéticamente dentro de cada grupo
+    const sortedPatologies = [...filteredPatologies].sort((a, b) => {
+      const aSelected = selectedPatologies.includes(a.nombre);
+      const bSelected = selectedPatologies.includes(b.nombre);
+      
+      // Si ambas tienen el mismo estado de selección, ordenar alfabéticamente
+      if (aSelected === bSelected) {
+        return a.nombre.localeCompare(b.nombre);
+      }
+      
+      // Las seleccionadas van primero
+      return bSelected ? 1 : -1;
+    });
+    
+    setInitialSortedPatologies(sortedPatologies);
   };
 
   const onSubmit = async (data: PathologicalHistoryFormData) => {
@@ -438,22 +473,7 @@ export function PathologicalHistory() {
                       <>
                         {/* Mostrar patologías del catálogo como botones seleccionables */}
                         <div className="flex flex-wrap gap-2 min-h-[40px]">
-                          {(() => {
-                            // Ordenar patologías: seleccionadas primero, luego no seleccionadas
-                            const sortedPatologies = [...filteredAvailablePatologies].sort((a, b) => {
-                              const aSelected = watchedValues.enfermedades_cronicas?.includes(a.nombre) || false;
-                              const bSelected = watchedValues.enfermedades_cronicas?.includes(b.nombre) || false;
-                              
-                              // Si ambas tienen el mismo estado de selección, ordenar alfabéticamente
-                              if (aSelected === bSelected) {
-                                return a.nombre.localeCompare(b.nombre);
-                              }
-                              
-                              // Las seleccionadas van primero
-                              return bSelected ? 1 : -1;
-                            });
-
-                            return sortedPatologies.map(patology => {
+                          {initialSortedPatologies.map(patology => {
                             const isSelected = watchedValues.enfermedades_cronicas?.includes(patology.nombre) || false;
                             return (
                               <button
@@ -474,13 +494,13 @@ export function PathologicalHistory() {
                                 {patology.nombre}
                               </button>
                             );
-                          })})()}
+                          })}
                         </div>
 
                         {/* Mostrar patologías personalizadas ya seleccionadas */}
                         {watchedValues.enfermedades_cronicas
                           ?.filter(patologyName => 
-                            !filteredAvailablePatologies.some(catalogPatology => catalogPatology.nombre === patologyName)
+                            !initialSortedPatologies.some(catalogPatology => catalogPatology.nombre === patologyName)
                           )
                           .map((customPatology) => (
                             <div
