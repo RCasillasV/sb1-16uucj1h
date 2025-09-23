@@ -370,6 +370,17 @@ export function MainHeader({
               <ChevronDown className="h-3 w-3" />
             )}
             {/* Clinical History Count Badge */}
+            {clinicalHistoryCount !== null && clinicalHistoryCount > 0 && (
+              <span 
+                className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
+                style={{
+                  background: currentTheme.colors.primary,
+                  color: currentTheme.colors.buttonText
+                }}
+              >
+                {clinicalHistoryCount}
+              </span>
+            )}
           </button>
           
           {showClinicalHistorySubmenu && (
