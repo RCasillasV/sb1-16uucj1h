@@ -534,7 +534,7 @@ export function PathologicalHistory() {
                     {...register('otras_enfermedades_cronicas')}
                     placeholder="Describa otras enfermedades crónicas relevantes..."
                     rows={2}
-                    className="w-full p-1 rounded-md border"
+                    className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
                 </div>
