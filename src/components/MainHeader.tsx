@@ -163,7 +163,7 @@ export function MainHeader({
 
     const InfoItem = ({ icon: Icon, text, status }: { icon: typeof Mail; text: string; status?: string }) => (
       <div className="flex items-center gap-1">
-        <Icon className="h-4 w-4" style={{ color: currentTheme.colors.textSecondary }} />
+        <Icon className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
         <span style={{ color: currentTheme.colors.textSecondary }}>
           {text}
           {status && (
