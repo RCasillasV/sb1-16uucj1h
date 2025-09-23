@@ -652,6 +652,7 @@ const antecedentesNoPatologicos = {
       .from('tpPacienteHistNoPatol')
       .select('*')
       .eq('patient_id', patientId)
+      .order('created_at', { ascending: false })
       .limit(1);
 
     if (error) {
