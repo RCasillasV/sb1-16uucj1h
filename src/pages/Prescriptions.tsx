@@ -500,7 +500,7 @@ export function Prescriptions() {
                       type="button"
                       onClick={() => handleRemoveMedication(index)}
                       className="p-1 rounded-full hover:bg-red-100 transition-colors"
-                    >
+                   date={`${format(new Date(prescription.created_at), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })} - ${prescription.numeroReceta}`}
                       <X className="h-4 w-4 text-red-500" />
                     </button>
                   </div>
