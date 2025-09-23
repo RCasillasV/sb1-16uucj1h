@@ -85,7 +85,7 @@
     max-height: none !important;
     background: white !important;
     color: black !important;
-    padding: 0.5in !important;
+    padding: 0 !important;
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
@@ -109,6 +109,19 @@
     max-height: none !important;
   }
 
+  /* Ensure the main content div inside modal is fully visible */
+  body.is-printing-modal #modal-content-print-target > div {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0.5in !important;
+    margin: 0 !important;
+  }
   /* Display utilities */
   body.is-printing-modal #modal-content-print-target .grid { display: grid !important; }
   body.is-printing-modal #modal-content-print-target .flex { display: flex !important; }
