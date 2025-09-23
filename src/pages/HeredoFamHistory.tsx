@@ -555,7 +555,7 @@ export function HeredoFamHistory() {
             style={buttonStyle.primary}
           >
             <Printer className="h-4 w-4" />
-            Imprimir Informe
+            Ver Informe
           </button>
         )}
       </div>
