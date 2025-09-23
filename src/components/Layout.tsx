@@ -133,52 +133,37 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (!selectedPatient) return;
     try {
       const [
-        heredoFamRecords,
-        nonPathRecord,
-        pathRecord,
-        gynecoRecord,
+        clinicalHistoryRpcResult,
         evolutions,
         prescriptions,
         files
       ] = await Promise.all([
-        api.heredoFamilialHistory.getAllByPatientId(selectedPatient.id),
-        api.antecedentesNoPatologicos.getByPatientId(selectedPatient.id),
-        api.pathologicalHistory.getByPatientId(selectedPatient.id),
-        api.gynecoObstetricHistory.getByPatientId(selectedPatient.id),
+        supabase.rpc('cuenta_fichaclinica', { p_patient_id: selectedPatient.id }),
         api.clinicalEvolution.getByPatientId(selectedPatient.id),
         api.prescriptions.getByPatientId(selectedPatient.id),
         api.files.getByPatientId(selectedPatient.id)
       ]);
       
-      // Calculate total clinical history count from all four tables
-      let totalClinicalHistoryCount = 0;
-      
-      // Count records from tpFcHeredoFamiliar (array of family member records)
-      if (heredoFamRecords && Array.isArray(heredoFamRecords)) {
-        totalClinicalHistoryCount += heredoFamRecords.length;
+      // Handle RPC result - check for errors first
+      if (clinicalHistoryRpcResult.error) {
+        console.error('Error calling cuenta_fichaclinica RPC:', clinicalHistoryRpcResult.error);
+        setClinicalHistoryCount(0); // Fallback to 0 on error
+      } else {
+        // The RPC function returns the total count directly
+        const totalClinicalHistoryCount = clinicalHistoryRpcResult.data || 0;
+        setClinicalHistoryCount(totalClinicalHistoryCount);
       }
       
-      // Count records from tpPacienteHistNoPatol (single record per patient)
-      if (nonPathRecord) {
-        totalClinicalHistoryCount += 1;
-      }
-      
-      // Count records from tpPacienteHistPatologica (single record per patient)
-      if (pathRecord) {
-        totalClinicalHistoryCount += 1;
-      }
-      
-      // Count records from tpPacienteHistGineObst (single record per patient)
-      if (gynecoRecord) {
-        totalClinicalHistoryCount += 1;
-      }
-      
-      setClinicalHistoryCount(totalClinicalHistoryCount);
       setClinicalEvolutionCount(evolutions.length);
       setPrescriptionsCount(prescriptions.length);
       setPatientFilesCount(files.length);
     } catch (error) {
       console.error('Error fetching counts:', error);
+      // Set fallback values on error
+      setClinicalHistoryCount(0);
+      setClinicalEvolutionCount(0);
+      setPrescriptionsCount(0);
+      setPatientFilesCount(0);
     }
   }, [selectedPatient]);
 
