@@ -15,7 +15,7 @@ type AppointmentWithPatient = {
   fecha_cita: string;
   hora_cita: string;
   motivo: string;
-  estado: 'programada' | 'completada' | 'cancelada';
+  estado: 'Programada' | 'Confirmada' | 'En Proceso' |'Atendida'| 'No se presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En espera' | 'Urgencia';
   patients: {
     id: string;
     Nombre: string;
