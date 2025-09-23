@@ -17,7 +17,27 @@ const fetchWithTimeout = (url: string, options: RequestInit = {}) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 60_000);
   const withSignal: RequestInit = { ...options, signal: controller.signal };
-  return fetch(url, withSignal).finally(() => clearTimeout(timeoutId));
+  
+  return fetch(url, withSignal)
+    .catch((error) => {
+      // Provide more detailed error information for debugging
+      console.error('Supabase fetch error details:', {
+        url,
+        error: error.message,
+        supabaseUrl: supabaseUrl,
+        hasValidUrl: !!supabaseUrl && supabaseUrl.startsWith('https://'),
+        hasValidKey: !!supabaseKey && supabaseKey.length > 50,
+        userAgent: navigator.userAgent
+      });
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Conexión a Supabase interrumpida por timeout (60s). Verifique su conexión a internet.');
+      } else if (error.message === 'Failed to fetch') {
+        throw new Error('No se pudo conectar con Supabase. Verifique: 1) Las variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env, 2) Su conexión a internet, 3) Que el proyecto Supabase esté activo.');
+      }
+      throw error;
+    })
+    .finally(() => clearTimeout(timeoutId));
 };
 
 // Storage personalizado para manejar errores de localStorage (SSR-safe)
