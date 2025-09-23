@@ -72,7 +72,7 @@ export function Appointments() {
       
       // Filter by patient if one is selected
       if (selectedPatient) {
-        data = data.filter(app => app.id_paciente === selectedPatient.id);
+        data = data.filter(app => app.patients?.id === selectedPatient.id);
       }
       
       // Apply additional filters
