@@ -50,25 +50,11 @@ export function NonPathologicalHistoryReport({
 
   const fetchReportData = async () => {
     setLoading(true);
-    setError(null);
     try {
-      let fetchedPatient: Patient | null = patientData || null;
-      if (!fetchedPatient) {
-        fetchedPatient = await api.patients.getById(patientId);
-        if (!fetchedPatient) throw new Error('Paciente no encontrado');
-        setPatient(fetchedPatient);
-      }
 
       const record = await api.antecedentesNoPatologicos.getByPatientId(patientId);
       setNonPathologicalRecord(record);
-
     } catch (err) {
-      console.error('Error fetching non-pathological history report data:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los datos del informe');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePrint = () => {
     setTimeout(() => {
