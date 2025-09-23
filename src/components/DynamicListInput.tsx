@@ -1,4 +1,3 @@
-```typescript
 import React, { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -96,4 +95,3 @@ export function DynamicListInput({ items, onAdd, onRemove, placeholder, itemType
     </div>
   );
 }
-```
