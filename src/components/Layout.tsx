@@ -131,6 +131,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const fetchCounts = useCallback(async () => {
     if (!selectedPatient) return;
+    
+    console.log('Layout.fetchCounts: Starting count fetch for patient:', selectedPatient.id);
+    
     try {
       const [
         clinicalHistoryRpcResult,
@@ -147,20 +150,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
       // Handle RPC result - check for errors first
       if (clinicalHistoryRpcResult.error) {
         console.error('Error calling cuenta_fichaclinica RPC:', clinicalHistoryRpcResult.error);
-        setClinicalHistoryCount(0); // Fallback to 0 on error
+        setClinicalHistoryCount(null); // Set to null on error to hide badge
       } else {
         // The RPC function returns the total count directly
         const totalClinicalHistoryCount = clinicalHistoryRpcResult.data || 0;
+        console.log('Layout.fetchCounts: Clinical history count received:', totalClinicalHistoryCount);
         setClinicalHistoryCount(totalClinicalHistoryCount);
       }
       
+      console.log('Layout.fetchCounts: All counts updated - Evolution:', evolutions.length, 'Prescriptions:', prescriptions.length, 'Files:', files.length);
       setClinicalEvolutionCount(evolutions.length);
       setPrescriptionsCount(prescriptions.length);
       setPatientFilesCount(files.length);
     } catch (error) {
       console.error('Error fetching counts:', error);
       // Set fallback values on error
-      setClinicalHistoryCount(0);
+      setClinicalHistoryCount(null);
       setClinicalEvolutionCount(0);
       setPrescriptionsCount(0);
       setPatientFilesCount(0);
