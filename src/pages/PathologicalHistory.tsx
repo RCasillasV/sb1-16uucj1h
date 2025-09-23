@@ -52,6 +52,8 @@ export function PathologicalHistory() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [allActivePatologies, setAllActivePatologies] = useState<AppPatology[]>([]);
   const [customPatologyInput, setCustomPatologyInput] = useState('');
+  const [customSurgeryInput, setCustomSurgeryInput] = useState('');
+  const [customHospitalizationInput, setCustomHospitalizationInput] = useState('');
   const [isLoadingPatologies, setIsLoadingPatologies] = useState(false);
   const [patologiesError, setPatologiesError] = useState<string | null>(null);
 
@@ -155,6 +157,26 @@ export function PathologicalHistory() {
     if (!current.includes(customPatologyInput.trim())) {
       setValue('enfermedades_cronicas', [...current, customPatologyInput.trim()]);
       setCustomPatologyInput('');
+    }
+  };
+
+  const handleAddSurgery = () => {
+    if (!customSurgeryInput.trim()) return;
+    
+    const current = watchedValues.cirugias || [];
+    if (!current.includes(customSurgeryInput.trim())) {
+      setValue('cirugias', [...current, customSurgeryInput.trim()]);
+      setCustomSurgeryInput('');
+    }
+  };
+
+  const handleAddHospitalization = () => {
+    if (!customHospitalizationInput.trim()) return;
+    
+    const current = watchedValues.hospitalizaciones || [];
+    if (!current.includes(customHospitalizationInput.trim())) {
+      setValue('hospitalizaciones', [...current, customHospitalizationInput.trim()]);
+      setCustomHospitalizationInput('');
     }
   };
 
@@ -522,6 +544,7 @@ export function PathologicalHistory() {
             {/* PESTAÑA HISTORIAL QUIRÚRGICO */}
             {activeTab === 'quirurgico' && (
               <div className="space-y-6">
+                {/* Sección de Cirugías con Tags */}
                 <div className="space-y-4">
                   <h3 
                     className="text-lg font-semibold"
@@ -530,21 +553,79 @@ export function PathologicalHistory() {
                     Cirugías Previas
                   </h3>
                   
-                  <DynamicListInput
-                    items={watchedValues.cirugias || []}
-                    onAdd={(item) => {
-                      const current = watchedValues.cirugias || [];
-                      setValue('cirugias', [...current, item]);
-                    }}
-                    onRemove={(index) => {
-                      const current = watchedValues.cirugias || [];
-                      setValue('cirugias', current.filter((_, i) => i !== index));
-                    }}
-                    placeholder="Ej: Apendicectomía (2020), Colecistectomía laparoscópica (2018)..."
-                    itemType="Cirugías"
-                  />
+                  {/* Tags de cirugías seleccionadas */}
+                  {(watchedValues.cirugias || []).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(watchedValues.cirugias || []).map((cirugia, index) => (
+                        <div
+                          key={index}
+                          className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-md"
+                          style={{
+                            background: `${currentTheme.colors.primary}15`,
+                            color: currentTheme.colors.primary,
+                            border: `1px solid ${currentTheme.colors.primary}30`,
+                          }}
+                        >
+                          <span>{cirugia}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const current = watchedValues.cirugias || [];
+                              setValue('cirugias', current.filter((_, i) => i !== index));
+                            }}
+                            className="p-0.5 rounded-full hover:bg-red-100 transition-colors group"
+                            title="Eliminar cirugía"
+                          >
+                            <X className="h-3 w-3 text-red-500 group-hover:text-red-700" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input para agregar nueva cirugía */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customSurgeryInput}
+                      onChange={(e) => setCustomSurgeryInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddSurgery();
+                        }
+                      }}
+                      placeholder="Ej: Apendicectomía (2020), Colecistectomía laparoscópica..."
+                      className="flex-1 p-3 rounded-lg border transition-colors focus:ring-2 focus:ring-offset-2"
+                      style={{
+                        ...inputStyle,
+                        focusRingColor: currentTheme.colors.primary,
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSurgery}
+                      disabled={!customSurgeryInput.trim()}
+                      className={clsx(
+                        'px-4 py-3 rounded-lg transition-all duration-200',
+                        'disabled:opacity-50 disabled:cursor-not-allowed',
+                        'hover:shadow-md active:scale-95'
+                      )}
+                      style={{
+                        background: currentTheme.colors.primary,
+                        color: currentTheme.colors.buttonText,
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  
+                  <p className="text-xs" style={{ color: currentTheme.colors.textSecondary }}>
+                    Presione Enter o haga clic en + para agregar la cirugía
+                  </p>
                 </div>
 
+                {/* Sección de Hospitalizaciones con Tags */}
                 <div className="space-y-4">
                   <h3 
                     className="text-lg font-semibold"
@@ -553,19 +634,76 @@ export function PathologicalHistory() {
                     Hospitalizaciones Previas
                   </h3>
                   
-                  <DynamicListInput
-                    items={watchedValues.hospitalizaciones || []}
-                    onAdd={(item) => {
-                      const current = watchedValues.hospitalizaciones || [];
-                      setValue('hospitalizaciones', [...current, item]);
-                    }}
-                    onRemove={(index) => {
-                      const current = watchedValues.hospitalizaciones || [];
-                      setValue('hospitalizaciones', current.filter((_, i) => i !== index));
-                    }}
-                    placeholder="Ej: Neumonía (2019), Infarto agudo al miocardio (2021)..."
-                    itemType="Hospitalizaciones"
-                  />
+                  {/* Tags de hospitalizaciones seleccionadas */}
+                  {(watchedValues.hospitalizaciones || []).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(watchedValues.hospitalizaciones || []).map((hospitalizacion, index) => (
+                        <div
+                          key={index}
+                          className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-md"
+                          style={{
+                            background: `${currentTheme.colors.secondary}15`,
+                            color: currentTheme.colors.secondary,
+                            border: `1px solid ${currentTheme.colors.secondary}30`,
+                          }}
+                        >
+                          <span>{hospitalizacion}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const current = watchedValues.hospitalizaciones || [];
+                              setValue('hospitalizaciones', current.filter((_, i) => i !== index));
+                            }}
+                            className="p-0.5 rounded-full hover:bg-red-100 transition-colors group"
+                            title="Eliminar hospitalización"
+                          >
+                            <X className="h-3 w-3 text-red-500 group-hover:text-red-700" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Input para agregar nueva hospitalización */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customHospitalizationInput}
+                      onChange={(e) => setCustomHospitalizationInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddHospitalization();
+                        }
+                      }}
+                      placeholder="Ej: Neumonía (2019), Infarto agudo al miocardio (2021)..."
+                      className="flex-1 p-3 rounded-lg border transition-colors focus:ring-2 focus:ring-offset-2"
+                      style={{
+                        ...inputStyle,
+                        focusRingColor: currentTheme.colors.secondary,
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddHospitalization}
+                      disabled={!customHospitalizationInput.trim()}
+                      className={clsx(
+                        'px-4 py-3 rounded-lg transition-all duration-200',
+                        'disabled:opacity-50 disabled:cursor-not-allowed',
+                        'hover:shadow-md active:scale-95'
+                      )}
+                      style={{
+                        background: currentTheme.colors.secondary,
+                        color: currentTheme.colors.buttonText,
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  
+                  <p className="text-xs" style={{ color: currentTheme.colors.textSecondary }}>
+                    Presione Enter o haga clic en + para agregar la hospitalización
+                  </p>
                 </div>
               </div>
             )}
