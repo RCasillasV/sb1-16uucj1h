@@ -370,20 +370,14 @@ export function MainHeader({
               <ChevronDown className="h-3 w-3" />
             )}
             {/* Enhanced Clinical History Count Badge */}
-            {clinicalHistoryCount !== null && clinicalHistoryCount >= 0 && (
+            {clinicalHistoryCount !== null && clinicalHistoryCount > 0 && (
               <span 
                 className={clsx(
-                  "absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5 text-xs font-bold flex items-center justify-center rounded-full",
-                  "transition-all duration-200 transform",
-                  clinicalHistoryCount > 0 ? "scale-100 opacity-100" : "scale-75 opacity-75",
-                  "border-2 shadow-md"
+                  "absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full transition-all duration-200"
                 )}
                 style={{
-                  background: clinicalHistoryCount > 0 ? '#DC2626' : currentTheme.colors.primary,
-                  color: '#FFFFFF',
-                  borderColor: currentTheme.colors.surface,
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  zIndex: 10
+                  background: currentTheme.colors.primary,
+                  color: currentTheme.colors.buttonText
                 }}
                 title={`${clinicalHistoryCount} registro${clinicalHistoryCount !== 1 ? 's' : ''} de ficha clínica`}
               >
