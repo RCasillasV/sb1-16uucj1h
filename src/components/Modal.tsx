@@ -42,7 +42,7 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
       {/* Modal */}
       <div 
         className={clsx(
-          "relative rounded-lg shadow-xl w-full print:shadow-none print:rounded-none print:max-w-none print:p-0 modal-content",
+          "relative rounded-lg shadow-xl w-full print:shadow-none print:rounded-none print:max-w-none print:p-0 print:overflow-visible print:max-h-none modal-content",
           className || "max-w-md"
         )}
         id="modal-content-print-target"
@@ -68,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children, actions, className }: 
 
         {/* Content */}
         <div 
-          className="px-6 py-4 print:p-0 print:overflow-visible print:max-h-none overflow-y-auto max-h-[90vh]"
+          className="px-6 py-4 print:p-0 print:overflow-visible print:max-h-none print:h-auto overflow-y-auto max-h-[90vh]"
           style={{ color: currentTheme.colors.text }}
         >
           {children}
