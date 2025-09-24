@@ -73,12 +73,22 @@ export function PathologicalHistoryReport({
 
   const fetchReportData = async () => {
     setLoading(true);
+    setError(null);
     try {
+      // Fetch patient data if not provided
+      let fetchedPatient: Patient | null = patientData || null;
+      if (!fetchedPatient) {
+        fetchedPatient = await api.patients.getById(patientId);
+        if (!fetchedPatient) throw new Error('Paciente no encontrado');
+        setPatient(fetchedPatient);
+      }
 
       const record = await api.pathologicalHistory.getByPatientId(patientId);
       setPathologicalRecord(record);
     } catch (err) {
-      setError('Error al cargar los datos del informe.');
+      console.error('Error fetching pathological history report data:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar los datos del informe');
+    } finally {
       setLoading(false);
     }
   };
