@@ -11,6 +11,7 @@ import { DEFAULT_BU } from '../utils/constants';
 
 // Cache instances
 const cache = new Cache<any>(5 * 60 * 1000, 'api_');
+const pathologicalHistoryCache = new Cache<any>(10 * 60 * 1000, 'pathological_history_');
 
 // Base service class for common operations
 class BaseService {
@@ -796,6 +797,14 @@ export const api = {
   // Pathological history service
   pathologicalHistory: {
     async getByPatientId(patientId: string) {
+      const cacheKey = `patient_${patientId}`;
+      const cached = pathologicalHistoryCache.get(cacheKey);
+      if (cached) {
+        console.log('PathologicalHistory: Returning cached data for patient:', patientId);
+        return cached;
+      }
+
+      console.log('PathologicalHistory: Fetching fresh data for patient:', patientId);
       const { data, error } = await supabase
         .from('tpPacienteHistPatologica')
         .select('*')
@@ -805,11 +814,15 @@ export const api = {
 
      if (error) {
         if (error.code === 'PGRST116' && error.details === 'The result contains 0 rows') {
+          pathologicalHistoryCache.set(cacheKey, null);
           return null; // Devuelve null explícitamente para este caso
         } 
         throw error; // Lanza cualquier otro tipo de error
       }
-      return data && data.length > 0 ? data[0] : null; // Si no hay error, devuelve el primer elemento del array o null
+      const result = data && data.length > 0 ? data[0] : null;
+      pathologicalHistoryCache.set(cacheKey, result);
+      console.log('PathologicalHistory: Cached and returning data for patient:', patientId);
+      return result;
     },
 
     async create(payload: any) {
@@ -820,7 +833,15 @@ export const api = {
         .limit(1);
 
       if (error) throw error;
-      return data && data.length > 0 ? data[0] : null;
+      const result = data && data.length > 0 ? data[0] : null;
+      
+      // Invalidar caché específica del paciente
+      if (payload.patient_id) {
+        pathologicalHistoryCache.delete(`patient_${payload.patient_id}`);
+        console.log('PathologicalHistory: Cache invalidated for patient after create:', payload.patient_id);
+      }
+      
+      return result;
     },
 
     async update(patientId: string, payload: any) {
@@ -835,7 +856,13 @@ export const api = {
         .limit(1);
 
       if (error) throw error;
-      return data && data.length > 0 ? data[0] : null;
+      const result = data && data.length > 0 ? data[0] : null;
+      
+      // Invalidar caché específica del paciente
+      pathologicalHistoryCache.delete(`patient_${patientId}`);
+      console.log('PathologicalHistory: Cache invalidated for patient after update:', patientId);
+      
+      return result;
     }
   },
 };

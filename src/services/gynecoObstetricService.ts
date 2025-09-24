@@ -78,7 +78,11 @@ export const gynecoObstetricHistory = {
 
 
     if (error) throw error;
-    cache.clear(); // Limpiar caché al crear un nuevo registro
+    // Invalidar caché específica del paciente en lugar de limpiar toda la caché
+    if (payload.patient_id) {
+      cache.delete(`patient_${payload.patient_id}`);
+      console.log('GYNECO_SERVICE: Cache invalidated for patient after create:', payload.patient_id);
+    }
     return data;
   },
 
@@ -107,7 +111,9 @@ export const gynecoObstetricHistory = {
     console.log('GYNECO_SERVICE: update - Supabase response data:', data);
     console.log('GYNECO_SERVICE: update - Supabase response error:', error);
     if (error) throw error;
-    cache.clear(); // Limpiar caché al actualizar un registro
+    // Invalidar caché específica del paciente en lugar de limpiar toda la caché
+    cache.delete(`patient_${patientId}`);
+    console.log('GYNECO_SERVICE: Cache invalidated for patient after update:', patientId);
     return data;
   },
 
@@ -122,6 +128,8 @@ export const gynecoObstetricHistory = {
       .eq('patient_id', patientId);
 
     if (error) throw error;
-    cache.clear(); // Limpiar caché al eliminar un registro
+    // Invalidar caché específica del paciente en lugar de limpiar toda la caché
+    cache.delete(`patient_${patientId}`);
+    console.log('GYNECO_SERVICE: Cache invalidated for patient after delete:', patientId);
   },
 };
