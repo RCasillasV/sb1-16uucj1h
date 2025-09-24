@@ -545,7 +545,7 @@
   }
 
   /* Step 17: DEBUG - Force everything to be visible with red borders */
-  /*
+  
   body.is-printing-modal #modal-content-print-target * {
     border: 1px solid red !important;
     background: yellow !important;
@@ -557,5 +557,5 @@
     width: auto !important;
     overflow: visible !important;
   }
-  */
+  
 }
