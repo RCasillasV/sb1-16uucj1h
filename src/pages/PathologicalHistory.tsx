@@ -756,7 +756,7 @@ export function PathologicalHistory() {
                   <textarea
                     {...register('alergias')}
                     placeholder="Describa alergias a medicamentos, materiales (látex), anestésicos, etc..."
-                    rows={3}
+                    rows={2}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
@@ -772,7 +772,7 @@ export function PathologicalHistory() {
                   <textarea
                     {...register('transfusiones')}
                     placeholder="Fechas, motivos y reacciones a transfusiones sanguíneas..."
-                    rows={3}
+                    rows={2}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
@@ -810,7 +810,7 @@ export function PathologicalHistory() {
                   <textarea
                     {...register('detalles_inmunizacion')}
                     placeholder="Vacunas recibidas, fechas, vacunas pendientes..."
-                    rows={3}
+                    rows={2}
                     className="w-full p-3 rounded-md border"
                     style={inputStyle}
                   />
