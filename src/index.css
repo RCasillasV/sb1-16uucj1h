@@ -26,8 +26,8 @@
 
   /* Utilidades de impresión */
   .print\:hidden,
-  body.is-printing-modal #modal-print-target .print\:hidden,
-  body.is-printing-modal #modal-print-target button {
+  body.is-printing-modal #modal-content-print-target .print\:hidden,
+  body.is-printing-modal #modal-content-print-target button {
     display: none !important;
   }
 
@@ -57,15 +57,13 @@
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
     background: white !important;
     z-index: 9999 !important;
     overflow: visible !important;
     box-sizing: border-box !important;
+    margin: 0 !important;
     padding: 0 !important;
   }
 
@@ -85,7 +83,7 @@
     max-height: none !important;
     background: white !important;
     color: black !important;
-    padding: 0 !important;
+    padding: 0.5in !important;
     margin: 0 !important;
     border: none !important;
     border-radius: 0 !important;
@@ -98,8 +96,7 @@
   body.is-printing-modal #modal-content-print-target * {
     visibility: visible !important;
     opacity: 1 !important;
-    color: black !important;
-    background: transparent !important;
+    color: inherit !important;
     box-shadow: none !important;
     text-shadow: none !important;
     filter: none !important;
@@ -119,8 +116,30 @@
     max-width: none !important;
     max-height: none !important;
     overflow: visible !important;
-    padding: 0.5in !important;
+    padding: 0 !important;
     margin: 0 !important;
+  }
+
+  /* Force visibility for report content */
+  body.is-printing-modal .print-modal-root * {
+    display: inherit !important;
+    visibility: visible !important;
+  }
+
+  /* Ensure tables and content are visible */
+  body.is-printing-modal table,
+  body.is-printing-modal .space-y-6,
+  body.is-printing-modal .space-y-4,
+  body.is-printing-modal .grid,
+  body.is-printing-modal .flex,
+  body.is-printing-modal p,
+  body.is-printing-modal h1,
+  body.is-printing-modal h2,
+  body.is-printing-modal h3,
+  body.is-printing-modal div {
+    display: inherit !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   /* Display utilities */
   body.is-printing-modal #modal-content-print-target .grid { display: grid !important; }

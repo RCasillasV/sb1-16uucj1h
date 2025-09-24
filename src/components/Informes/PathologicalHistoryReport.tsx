@@ -46,6 +46,31 @@ export function PathologicalHistoryReport({
     }
   }, [user, authLoading, patientId, patientData]);
 
+  // Manejar eventos de impresión para aplicar estilos solo cuando sea necesario
+  useEffect(() => {
+    if (!isModalView) return;
+
+    const handleBeforePrint = () => {
+      document.body.classList.add('is-printing-modal');
+    };
+
+    const handleAfterPrint = () => {
+      document.body.classList.remove('is-printing-modal');
+    };
+
+    // Registrar event listeners
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+      // Asegurar que la clase se elimine si el componente se desmonta
+      document.body.classList.remove('is-printing-modal');
+    };
+  }, [isModalView]);
+
   const fetchReportData = async () => {
     setLoading(true);
     try {

@@ -51,12 +51,10 @@ export function GynecoObstetricReport({
     if (!isModalView) return;
 
     const handleBeforePrint = () => {
-      console.log('Before print: añadiendo clase is-printing-modal');
       document.body.classList.add('is-printing-modal');
     };
 
     const handleAfterPrint = () => {
-      console.log('After print: eliminando clase is-printing-modal');
       document.body.classList.remove('is-printing-modal');
     };
 
