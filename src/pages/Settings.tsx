@@ -34,29 +34,31 @@ function SettingsCard({ icon: Icon, title, description, onClick }: SettingsCardP
   return (
     <button
       onClick={onClick}
-      className="group w-full h-full aspect-[3/2] p-5 rounded-lg transition-all duration-100 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]"
+      className="group w-full p-4 rounded-lg transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] min-h-[120px]"
       style={{
         background: currentTheme.colors.surface,
         borderColor: currentTheme.colors.border,
       }}
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col justify-center items-center text-center h-full space-y-3">
         <Icon 
-          className="w-12 h-12 mb-4 transition-transform duration-100 group-hover:scale-110" 
+          className="w-8 h-8 transition-transform duration-200 group-hover:scale-110" 
           style={{ color: currentTheme.colors.primary }}
         />
-        <h3 
-          className="text-lg font-semibold mb-2"
-          style={{ color: currentTheme.colors.text }}
-        >
-          {title}
-        </h3>
-        <p 
-          className="text-sm leading-relaxed"
-          style={{ color: currentTheme.colors.textSecondary }}
-        >
-          {description}
-        </p>
+        <div className="space-y-1">
+          <h3 
+            className="text-base font-semibold"
+            style={{ color: currentTheme.colors.text }}
+          >
+            {title}
+          </h3>
+          <p 
+            className="text-xs leading-tight"
+            style={{ color: currentTheme.colors.textSecondary }}
+          >
+            {description}
+          </p>
+        </div>
       </div>
     </button>
   );
@@ -228,7 +230,7 @@ export function Settings() {
         <AppearanceSettings />
       ) : (
         /* Settings Grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {filteredCards.map((card, index) => (
             <SettingsCard
               key={index}
