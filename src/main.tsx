@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
+import { AgendaProvider } from './contexts/AgendaContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { queryClient } from './lib/react-query';
@@ -18,11 +19,13 @@ if (!root) {
     <StrictMode>
       <BrowserRouter> 
         <QueryClientProvider client={queryClient}>
+          <AgendaProvider>
           <ErrorBoundary>
             <AuthProvider>
               <App />
             </AuthProvider>
           </ErrorBoundary>
+         </AgendaProvider>   
         </QueryClientProvider>
       </BrowserRouter>
     </StrictMode>
