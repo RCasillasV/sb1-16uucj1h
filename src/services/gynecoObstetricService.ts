@@ -36,24 +36,35 @@ export const gynecoObstetricHistory = {
     console.log('GYNECO_SERVICE: Fetching for patientId:', patientId, 'and user_idbu (from app):', user_idbu); // LOG 1
     console.log('GYNECO_SERVICE: Current authenticated user ID:', user.id); // Log the UID
 
-    const { data, error } = await supabase
-      .from('tpPacienteHistGineObst')
-      .select('*')
-      .eq('patient_id', patientId)
-      // .eq('idbu', user_idbu) // Añadir filtro explícito por idbu
-      .single(); // Since patient_id is now unique
+    try {
+      const { data, error } = await supabase
+        .from('tpPacienteHistGineObst')
+        .select('*')
+        .eq('patient_id', patientId)
+        // .eq('idbu', user_idbu) // Añadir filtro explícito por idbu
+        .single(); // Since patient_id is now unique
 
-    console.log('GYNECO_SERVICE: Raw Supabase data:', data);
-    console.log('GYNECO_SERVICE: Raw Supabase error:', error);
+      console.log('GYNECO_SERVICE: Raw Supabase data:', data);
+      console.log('GYNECO_SERVICE: Raw Supabase error:', error);
 
-    if (error && error.code !== 'PGRST116') {
-      throw error;
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      // If error code is PGRST116, it means no rows found, return null
+      const record = error?.code === 'PGRST116' ? null : data || null;
+      if (record) cache.set(key, record);
+      return record;
+    } catch (err: any) {
+      // Handle the case where .single() throws an exception
+      if (err.code === 'PGRST116' || err.message?.includes('JSON object requested')) {
+        console.log('GYNECO_SERVICE: No record found for patient (PGRST116), returning null');
+        return null;
+      }
+      // Re-throw any other error
+      console.error('GYNECO_SERVICE: Unexpected error:', err);
+      throw err;
     }
-
-    // If error code is PGRST116, it means no rows found, return null
-    const record = error?.code === 'PGRST116' ? null : data || null;
-    if (record) cache.set(key, record);
-    return record;
   },
 
   /**

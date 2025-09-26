@@ -649,21 +649,31 @@ const blockedDates = {
 // Antecedentes no patológicos service
 const antecedentesNoPatologicos = {
   async getByPatientId(patientId: string) {
-    const { data, error } = await supabase
-      .from('tpPacienteHistNoPatol')
-      .select('*')
-      .eq('patient_id', patientId)
-      .order('created_at', { ascending: false })
-      .limit(1);
+    try {
+      const { data, error } = await supabase
+        .from('tpPacienteHistNoPatol')
+        .select('*')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-    if (error) {
-      // Si PGRST116 y el resultado contiene 0 filas, significa que no hay registro, lo cual es esperado.
-      if (error.code === 'PGRST116' && error.details === 'No existe información en base de datos') {
-        return null; // Devuelve null explícitamente para este caso
+      if (error) {
+        // Si PGRST116, significa que no hay registro, lo cual es esperado.
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        throw error;
       }
-      throw error; // Lanza cualquier otro tipo de error
+      return data?.[0] || null;
+    } catch (err: any) {
+      // Handle the case where the query throws an exception
+      if (err.code === 'PGRST116' || err.message?.includes('The result contains 0 rows')) {
+        console.log('AntecedentesNoPatologicos: No record found for patient (PGRST116), returning null');
+        return null;
+      }
+      console.error('AntecedentesNoPatologicos: Unexpected error:', err);
+      throw err;
     }
-    return data?.[0] || null; // Devuelve el primer registro o null si no hay datos
    },
 
   async create(payload: any) {
@@ -807,24 +817,35 @@ export const api = {
       }
 
       console.log('PathologicalHistory: Fetching fresh data for patient:', patientId);
-      const { data, error } = await supabase
-        .from('tpPacienteHistPatologica')
-        .select('*')
-        .eq('patient_id', patientId)
-        .order('created_at', { ascending: false }) 
-        .limit(1);
+      try {
+        const { data, error } = await supabase
+          .from('tpPacienteHistPatologica')
+          .select('*')
+          .eq('patient_id', patientId)
+          .order('created_at', { ascending: false }) 
+          .limit(1);
 
-     if (error) {
-        if (error.code === 'PGRST116' && error.details === 'The result contains 0 rows') {
+        if (error) {
+          if (error.code === 'PGRST116') {
+            pathologicalHistoryCache.set(cacheKey, null);
+            return null;
+          } 
+          throw error;
+        }
+        const result = data && data.length > 0 ? data[0] : null;
+        pathologicalHistoryCache.set(cacheKey, result);
+        console.log('PathologicalHistory: Cached and returning data for patient:', patientId);
+        return result;
+      } catch (err: any) {
+        // Handle the case where the query throws an exception
+        if (err.code === 'PGRST116' || err.message?.includes('The result contains 0 rows')) {
+          console.log('PathologicalHistory: No record found for patient (PGRST116), returning null');
           pathologicalHistoryCache.set(cacheKey, null);
-          return null; // Devuelve null explícitamente para este caso
-        } 
-        throw error; // Lanza cualquier otro tipo de error
+          return null;
+        }
+        console.error('PathologicalHistory: Unexpected error:', err);
+        throw err;
       }
-      const result = data && data.length > 0 ? data[0] : null;
-      pathologicalHistoryCache.set(cacheKey, result);
-      console.log('PathologicalHistory: Cached and returning data for patient:', patientId);
-      return result;
     },
 
     async create(payload: any) {
