@@ -433,7 +433,7 @@ export function CitasPage() {
           fecha_cita: data.fecha_cita,
           hora_cita: data.hora_cita,
           motivo: data.motivo,
-          estado: 'programada',
+          estado: 'Programada',
           consultorio: data.consultorio,
           notas: data.notas || null,
           tipo_consulta: data.tipo_consulta,
