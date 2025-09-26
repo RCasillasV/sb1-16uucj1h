@@ -672,6 +672,7 @@ const antecedentesNoPatologicos = {
         .from('tpPacienteHistNoPatol')
         .insert([payload])
         .select()
+        .order('created_at', { ascending: false })
         .limit(1);
 
       if (error) throw error;
@@ -708,6 +709,7 @@ const antecedentesNoPatologicos = {
       })
       .eq('patient_id', patientId)
       .select()
+      .order('updated_at', { ascending: false })
       .limit(1);
 
     if (error) throw error;
