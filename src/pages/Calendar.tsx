@@ -88,11 +88,11 @@ export function Calendar() {
 
   const getEventColor = (status: string) => {
     switch (status) {
-      case 'completada':
+      case 'Completada':
         return '#10B981';
-      case 'cancelada':
+      case 'Cancelada':
         return '#EF4444';
-      case 'programada':
+      case 'Programada':
       default:
         return currentTheme.colors.primary;
     }
@@ -139,7 +139,7 @@ export function Calendar() {
           fecha_cita: appointmentDate,
           hora_cita: formData.time,
           motivo: formData.reason,
-          estado: 'programada',
+          estado: 'Programada',
           consultorio: formData.cubicle,
         });
       } else {
@@ -148,7 +148,7 @@ export function Calendar() {
           fecha_cita: appointmentDate,
           hora_cita: formData.time,
           motivo: formData.reason,
-          estado: 'programada',
+          estado: 'Programada',
           consultorio: formData.cubicle,
           id_user: user.id,
         });
