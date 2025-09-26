@@ -7,7 +7,6 @@ import { useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
 import { UserManagementProvider } from './contexts/UserManagementContext';
-import { AgendaProvider } from './contexts/AgendaContext';
 
 // Lazy load pages
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
@@ -286,9 +285,7 @@ function App() {
         <ThemeProvider>
           <SelectedPatientProvider>
             <UserManagementProvider>
-              <AgendaProvider>
                 <AppContent />
-              </AgendaProvider>
             </UserManagementProvider>
           </SelectedPatientProvider>
         </ThemeProvider>
