@@ -648,12 +648,8 @@ export function Agenda() {
                 editable={true}
                 eventStartEditable={true}
                 eventDurationEditable={true}
-                editable={true}
-                eventStartEditable={true}
-                eventDurationEditable={true}
                   select={handleDateSelect}
                   eventClick={handleEventClick}
-                eventDrop={handleEventDrop}
                 eventDrop={handleEventDrop}
                   datesSet={handleDatesSet}
                   slotDuration={`00:${(agendaSettings.slot_interval ?? 15).toString().padStart(2, '0')}:00`}
