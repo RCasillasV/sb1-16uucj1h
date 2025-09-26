@@ -446,7 +446,7 @@ const stats = {
         supabase.from('tcCitas').select('id', { count: 'exact' })
           .gte('fecha_cita', new Date().toISOString().split('T')[0])
           .eq('estado', 'Programada')
-      ]);
+      ]); 
 
       return {
         totalPatients: patientsCount.count || 0,
