@@ -19,13 +19,13 @@ if (!root) {
     <StrictMode>
       <BrowserRouter> 
         <QueryClientProvider client={queryClient}>
-          <AgendaProvider>
           <ErrorBoundary>
             <AuthProvider>
+             <AgendaProvider>
               <App />
+             </AgendaProvider>  
             </AuthProvider>
-          </ErrorBoundary>
-         </AgendaProvider>   
+          </ErrorBoundary> 
         </QueryClientProvider>
       </BrowserRouter>
     </StrictMode>
