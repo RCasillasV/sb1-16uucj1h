@@ -21,7 +21,7 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
       
       if (includeIdbu) {
         const idbuValue = await requireBusinessUnit(user.id);
-        insertData.idbu = idbuValue;
+        insertData.idBu = idbuValue;
       }
       
       return handle(
@@ -42,7 +42,7 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
       
       if (includeIdbu) {
         const idbu = await requireBusinessUnit(user.id);
-        updateData.idbu = idbu;
+        updateData.idBu = idbu;
       }
       
       return handle(
