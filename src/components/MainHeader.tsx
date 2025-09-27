@@ -321,7 +321,7 @@ export function MainHeader({
                 className="w-full px-4 py-2 text-left text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
                 style={{ color: currentTheme.colors.text }}
               >
-                <FileText className="h-4 w-4" />
+                <FileText className="h-6 w-6" />
                 Informe Clínico Integral
               </button>
             </div>
