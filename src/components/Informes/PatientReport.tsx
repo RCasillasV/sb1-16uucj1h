@@ -31,6 +31,11 @@ export function PatientReport({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Debug logging to track data flow
+  useEffect(() => {
+    console.log('PatientReport: Props received - patientId:', patientId, 'patientData:', patientData, 'isModalView:', isModalView);
+  }, [patientId, patientData, isModalView]);
+
   useEffect(() => {
     // Si se proporciona patientData, usarlo directamente
     if (patientData) {
@@ -39,9 +44,16 @@ export function PatientReport({
       return;
     }
     
+    
     // Si no hay patientData, cargar desde la API
     if (!authLoading && user && patientId) {
       fetchPatient();
+    } else if (!authLoading && !user) {
+      setError('Usuario no autenticado para ver el informe.');
+      setLoading(false);
+    } else if (!authLoading && !patientId) {
+      setError('ID de paciente no proporcionado.');
+      setLoading(false);
     }
   }, [user, authLoading, patientId, patientData]);
 
@@ -234,6 +246,7 @@ export function PatientReport({
 
   const age = patient.FechaNacimiento ? calculateAge(patient.FechaNacimiento) : null;
 
+  console.log('PatientReport: About to render with patient:', patient, 'loading:', loading, 'error:', error);
   return (
     <div className={clsx(
       isModalView 
