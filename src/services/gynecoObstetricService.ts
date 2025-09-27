@@ -21,7 +21,7 @@ export const gynecoObstetricHistory = {
   async getByPatientId(patientId: string) {
     const key = `patient_${patientId}`;
     const cached = cache.get(key);
-    if (cacgetByPatientIdhed) return cached;
+    if (cached) return cached;
 
     // Force session refresh to ensure uid() is up-to-date for RLS
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
