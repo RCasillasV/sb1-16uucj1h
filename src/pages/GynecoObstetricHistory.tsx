@@ -33,23 +33,23 @@ const gynecoObstetricSchema = z.object({
     (val) => (val === '' ? null : Number(val)),
     z.number().int().min(0).nullable().optional()
   ),
-  fum: z.string().nullable().optional(), // Fecha de última menstruación
+  fum: z.string().nullable().optional().transform(e => e === "" ? null : e), // Fecha de última menstruación
   menarquia: z.preprocess(
     (val) => (val === '' ? null : Number(val)),
     z.number().int().min(0).nullable().optional()
   ),
   ritmo_menstrual: z.string().nullable().optional(), // Ej: "28x5"
   metodo_anticonceptivo: z.string().nullable().optional(),
-  fecha_ultimo_papanicolau: z.string().nullable().optional(),
+  fecha_ultimo_papanicolau: z.string().nullable().optional().transform(e => e === "" ? null : e),
   resultado_ultimo_papanicolau: z.string().nullable().optional(),
-  mamografia: z.string().nullable().optional(), // Fecha de última mamografía
+  mamografia: z.string().nullable().optional().transform(e => e === "" ? null : e), // Fecha de última mamografía
   resultado_mamografia: z.string().nullable().optional(),
   notas_adicionales: z.string().nullable().optional(),
 });
 
 type GynecoObstetricFormData = z.infer<typeof gynecoObstetricSchema>;
 
-export function GynecoObstetricHistory() {
+export function GynecoObstetricHistory() { 
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient();
   const { user, loading: authLoading } = useAuth();
