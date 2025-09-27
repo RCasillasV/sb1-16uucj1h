@@ -368,7 +368,7 @@ export function MainHeader({
             {showClinicalHistorySubmenu ? (
               <ChevronUp className="h-3 w-3" style={{ color: currentTheme.colors.headerText }} />
             ) : (
-              <ChevronDown className="h-3 w-3" style={{ color: currentTheme.colors.headerText }}  />
+              <ChevronDown className="h-3 w-3" style={{ color: currentTheme.colors.headerText }} />
             )}
             {/* Enhanced Clinical History Count Badge */}
             {clinicalHistoryCount !== null && clinicalHistoryCount > 0 && (
@@ -441,7 +441,7 @@ export function MainHeader({
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
-                  <Family className="h-4 w-4" />
+                  <Family className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
                   <div>
                     <div className="font-medium">Antecedentes Heredo-Familiares</div>
                     <div className="text-xs opacity-75">Historia familiar de enfermedades</div>
@@ -454,7 +454,7 @@ export function MainHeader({
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
-                  <Stethoscope className="h-4 w-4" />
+                  <Stethoscope className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
                   <div>
                     <div className="font-medium">Antecedentes Patológicos</div>
                     <div className="text-xs opacity-75">Enfermedades, cirugías y hospitalizaciones</div>
@@ -467,7 +467,7 @@ export function MainHeader({
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
-                  <Activity className="h-4 w-4" />
+                  <Activity className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
                   <div>
                     <div className="font-medium">Antecedentes no Patológicos</div>
                     <div className="text-xs opacity-75">Hábitos y estilo de vida</div>
@@ -481,7 +481,7 @@ export function MainHeader({
                     style={{ color: currentTheme.colors.text }}
                     onClick={() => setShowClinicalHistorySubmenu(false)}
                   >
-                    <Heart className="h-4 w-4" />
+                    <Heart className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
                     <div>
                       <div className="font-medium">Antecedentes Gineco-Obstétricos</div>
                       <div className="text-xs opacity-75">Historia ginecológica y obstétrica</div>
@@ -498,7 +498,7 @@ export function MainHeader({
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
           style={{ position: 'relative' }}
         >
-          <Activity className="h-4 w-4" />
+          <Activity className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
           Evolución Clínica
           {clinicalEvolutionCount > 0 && (
             <span 
@@ -517,7 +517,7 @@ export function MainHeader({
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
           style={{ position: 'relative' }}
         >
-          <FileSpreadsheet className="h-4 w-4" />
+          <FileSpreadsheet className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
           Recetas
           {prescriptionsCount > 0 && (
             <span 
@@ -536,7 +536,7 @@ export function MainHeader({
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
           style={{ position: 'relative' }}
         >
-          <FolderOpen className="h-4 w-4" />
+          <FolderOpen className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
           Archivos del Paciente
           {patientFilesCount > 0 && (
             <span 
