@@ -362,12 +362,13 @@ export function MainHeader({
             )}
             style={{ position: 'relative' }}
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4" 
+              style={{ color: currentTheme.colors.headerText }} />
             Ficha Clínica
             {showClinicalHistorySubmenu ? (
-              <ChevronUp className="h-3 w-3" />
+              <ChevronUp className="h-3 w-3" style={{ color: currentTheme.colors.headerText }} />
             ) : (
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="h-3 w-3" style={{ color: currentTheme.colors.headerText }}  />
             )}
             {/* Enhanced Clinical History Count Badge */}
             {clinicalHistoryCount !== null && clinicalHistoryCount > 0 && (
