@@ -1089,20 +1089,9 @@ export function CitasPage() {
                   </div>
 
                   
-                  {/* Nueva columna: Estado de la cita */}
-                  <div>
-                    <label 
-                      className="block text-sm font-medium mb-1"
-                      style={{ color: currentTheme.colors.text }}
-                    >
-                      Estado <span className="text-red-500">*</span>
-                    </label>
-                    <EstadoSelector
-                      value={form.watch('estado')}
-                      onChange={(estadoId) => form.setValue('estado', estadoId)}
-                      disabled={isViewOnlyMode}
-                    />
-                  </div>
+
+
+                  
                   {/* Nueva columna: Hora final */}
                   <div>
                     <label 
@@ -1124,6 +1113,23 @@ export function CitasPage() {
                       }}
                     />
                   </div>
+
+                  {/* Nueva columna: Estado de la cita */}
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Estado <span className="text-red-500">*</span>
+                    </label>
+                    <EstadoSelector
+                      value={form.watch('estado')}
+                      onChange={(estadoId) => form.setValue('estado', estadoId)}
+                      disabled={isViewOnlyMode}
+                    />
+                  </div>
+
+                  
                 </div>
               </div>
 
