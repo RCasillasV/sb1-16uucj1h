@@ -16,7 +16,8 @@ type AppointmentWithPatient = {
   fecha_cita: string;
   hora_cita: string;
   motivo: string;
-  estado: 'Programada' | 'Confirmada' | 'En Proceso' |'Atendida'| 'No se presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En espera' | 'Urgencia';
+  estado: number;
+  estado_nombre?: string;
   patients: {
     id: string;
     Nombre: string;
@@ -84,7 +85,7 @@ export function Appointments() {
         const now = new Date();
         data = data.filter(app => {
           const appDate = parseISO(`${app.fecha_cita}T${app.hora_cita}`);
-          return !isBefore(appDate, now) && app.estado === 'Programada';
+          return !isBefore(appDate, now) && app.estado === 1; // 1 = 'Programada'
         });
       }
       
@@ -135,9 +136,9 @@ export function Appointments() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (statusId: number) => {
     // Utiliza la función auxiliar para obtener la información del badge
-    const { text, color, icon: Icon } = getStatusBadgeInfo(status as DetailedAppointmentStatus);
+    const { text, color, icon: Icon } = getStatusBadgeInfo(statusId);
     return (
       <span className="flex items-center gap-1" style={{ color: color }}>
         <Icon className="h-4 w-4" />

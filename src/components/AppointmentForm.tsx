@@ -61,8 +61,7 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
   const [notes, setNotes] = useState(appointment?.notas || '');
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<"Programada" |  "Confirmada" |  "En Progreso" | 
- "Atendida" |  "No se Presentó" |  "Cancelada x Paciente" |  "Cancelada x Médico" |  "Reprogramada x Paciente" |  "Reprogramada x Médico" |  "En Espera" | 
- "Urgencia"> (appointment?.estado || 'Programada');
+  const [status, setStatus] = useState<number>(appointment?.estado || 1);
   
   useEffect(() => {
     if (!selectedPatient && !appointment) {
@@ -373,8 +372,7 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
             name="status"
             id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as "Programada" |  "Confirmada" |  "En Progreso" | "Atendida" |  "No se Presentó" |  "Cancelada x Paciente" |  "Cancelada x Médico" |  "Reprogramada x Paciente" |  "Reprogramada x Médico" |  "En Espera" | 
- "Urgencia")}
+            onChange={(e) => setStatus(parseInt(e.target.value))}
             className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             style={{
               backgroundColor: currentTheme.colors.surface,
@@ -382,9 +380,9 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
               borderColor: currentTheme.colors.border,
             }}
           >
-            <option value="programada">Programada</option>
-            <option value="completada">Completada</option>
-            <option value="cancelada">Cancelada</option>
+            {Object.entries(DETAILED_APPOINTMENT_STATUSES).map(([id, info]) => (
+              <option key={id} value={id}>
+                {info.display}
           </select>
         </div>
 

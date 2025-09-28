@@ -200,10 +200,11 @@ export function Agenda() {
           title: `${appointment.patients?.Nombre} ${appointment.patients?.Paterno} - ${appointment.motivo}`,
           start: appointmentDateTime,
           end: appointment.hora_fin ? parseISO(`${appointment.fecha_cita}T${appointment.hora_fin}`) : addMinutes(appointmentDateTime, appointment.duracion_minutos || 15),
-          // Usar getStatusColor para el color del evento
-          backgroundColor: isPastEvent ? '#9CA3AF' : getStatusColor(appointment.estado as DetailedAppointmentStatus), 
+          // Usar getStatusColor con el ID numérico del estado
+          backgroundColor: isPastEvent ? '#9CA3AF' : getStatusColor(appointment.estado),
           extendedProps: {
-            status: appointment.estado, 
+            status: appointment.estado,
+            status_name: appointment.estado_nombre,
             patient: appointment.patients,
             reason: appointment.motivo,
             notas: appointment.notas,
@@ -333,6 +334,7 @@ export function Agenda() {
     try {
       await createSecureAppointment({
         id_paciente: selectedPatient.id,
+        estado: 1, // ID para 'Programada'
         ...appointmentForm
       });
       
@@ -347,6 +349,7 @@ export function Agenda() {
         consultorio: 1,
         duracion_minutos: 30,
         tipo_consulta: 'primera',
+        estado: 1,
         tiempo_evolucion: null,
         unidad_tiempo: null,
         sintomas_asociados: [],

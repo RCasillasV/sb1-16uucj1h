@@ -20,8 +20,14 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
       const insertData: any = { ...data, [userIdColumnName]: user.id };
       
       if (includeIdbu) {
-        const idbuValue = await requireBusinessUnit(user.id);
-        insertData.idbu = idbuValue;
+        // Para tcCitas, usar idBu en lugar de idbu
+        if (table === 'tcCitas') {
+          const idbuValue = await requireBusinessUnit(user.id);
+          insertData.idBu = idbuValue;
+        } else {
+          const idbuValue = await requireBusinessUnit(user.id);
+          insertData.idbu = idbuValue;
+        }
       }
       
       return handle(

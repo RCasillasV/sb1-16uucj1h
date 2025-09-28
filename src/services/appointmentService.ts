@@ -34,24 +34,55 @@ export const appointments = {
     const cached = cache.get(key);
     if (cached) return cached;
 
-    const { data, error } = await _fetchAppointments(); // Usar la nueva función auxiliar
+    const { data, error } = await supabase
+      .from('tcCitas')
+      .select(`
+        id, fecha_cita, hora_cita, motivo, notas, urgente, consultorio,
+        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados, 
+        hora_fin, duracion_minutos, idBu,
+        estado_info:estado(id, estado, descripcion),
+        patients:id_paciente(id,Nombre,Paterno,Materno)
+      `)
+      .order('fecha_cita', { ascending: true })
+      .order('hora_cita', { ascending: true });
 
     if (error) {
       throw error;
     }
 
-    cache.set(key, data);
-    return data;
+    // Transform data to include estado as the ID and add estado_nombre
+    const transformedData = (data || []).map(appointment => ({
+      ...appointment,
+      estado: appointment.estado_info?.id || 1,
+      estado_nombre: appointment.estado_info?.estado || 'Programada',
+    }));
+
+    cache.set(key, transformedData);
+    return transformedData;
   },
   
   async getById(id: string) {
-    return svc.getById(
-      `
-      *,
-      patients:id_paciente(id,Nombre,Paterno,Materno)
-      `,
-      id
-    );
+    const { data, error } = await supabase
+      .from('tcCitas')
+      .select(`
+        *,
+        estado_info:estado(id, estado, descripcion),
+        patients:id_paciente(id,Nombre,Paterno,Materno)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    
+    // Transform data to include estado as the ID and add estado_nombre
+    if (data) {
+      return {
+        ...data,
+        estado: data.estado_info?.id || 1,
+        estado_nombre: data.estado_info?.estado || 'Programada',
+      };
+    }
+    return null;
   },
 
   async getByPatientId(patientId: string) {
@@ -59,14 +90,32 @@ export const appointments = {
     const cached = cache.get(key);
     if (cached) return cached;
 
-    const { data, error } = await _fetchAppointments(patientId); // Usar la nueva función auxiliar
+    const { data, error } = await supabase
+      .from('tcCitas')
+      .select(`
+        id, fecha_cita, hora_cita, motivo, notas, urgente, consultorio,
+        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados, 
+        hora_fin, duracion_minutos, idBu,
+        estado_info:estado(id, estado, descripcion),
+        patients:id_paciente(id,Nombre,Paterno,Materno)
+      `)
+      .eq('id_paciente', patientId)
+      .order('fecha_cita', { ascending: true })
+      .order('hora_cita', { ascending: true });
     
     if (error) {
       throw error;
     }
     
-    cache.set(key, data || []);
-    return data || [];
+    // Transform data to include estado as the ID and add estado_nombre
+    const transformedData = (data || []).map(appointment => ({
+      ...appointment,
+      estado: appointment.estado_info?.id || 1,
+      estado_nombre: appointment.estado_info?.estado || 'Programada',
+    }));
+    
+    cache.set(key, transformedData);
+    return transformedData;
   },
 
   async getByDateAndConsultorio(fecha: string, consultorio: number) {
@@ -74,16 +123,40 @@ export const appointments = {
     const cached = cache.get(key);
     if (cached) return cached;
 
+    const { data, error } = await supabase
+      .from('tcCitas')
+      .select(`
+        *,
+        estado_info:estado(id, estado, descripcion),
+        patients:id_paciente(id,Nombre,Paterno,Materno)
+      `)
+      .eq('fecha_cita', fecha)
+      .eq('consultorio', consultorio)
+      .order('hora_cita', { ascending: true });
+
+    if (error) throw error;
+
+    // Transform data to include estado as the ID and add estado_nombre
+    const transformedData = (data || []).map(appointment => ({
+      ...appointment,
+      estado: appointment.estado_info?.id || 1,
+      estado_nombre: appointment.estado_info?.estado || 'Programada',
+    }));
+    
+    cache.set(key, transformedData);
+    return transformedData;
+  },
+
+  async getEstados() {
+    const key = 'estados';
+    const cached = cache.get(key);
+    if (cached) return cached;
+
     const data = await handle(
       supabase
-        .from('tcCitas')
-        .select(`
-          *,
-          patients:id_paciente(id,Nombre,Paterno,Materno)
-        `)
-        .eq('fecha_cita', fecha)
-        .eq('consultorio', consultorio)
-        .order('hora_cita', { ascending: true }),
+        .from('tcCitasEstados')
+        .select('*')
+        .order('id'),
       []
     );
     

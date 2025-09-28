@@ -202,7 +202,7 @@ export interface Database {
           fecha_cita: string
           hora_cita: string
           motivo: string
-          estado: 'Programada' | 'Confirmada' | 'En Progreso' | 'Atendida' | 'No se Presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En Espera' | 'Urgencia'
+          estado: number
           notas: string | null
           urgente: boolean
           consultorio: number
@@ -215,6 +215,7 @@ export interface Database {
           campos_adicionales: Json | null
           hora_fin: string
           duracion_minutos: number | null
+          idBu: string | null
         }
         Insert: {
           id?: string
@@ -225,7 +226,7 @@ export interface Database {
           fecha_cita: string
           hora_cita: string
           motivo: string
-          estado?: 'Programada' | 'Confirmada' | 'En Progreso' | 'Atendida' | 'No se Presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En Espera' | 'Urgencia'
+          estado?: number
           notas?: string | null
           urgente?: boolean
           consultorio: number
@@ -238,6 +239,7 @@ export interface Database {
           campos_adicionales?: Json | null
           hora_fin?: string
           duracion_minutos: number | null
+          idBu?: string | null
         }
         Update: {
           id?: string
@@ -248,7 +250,7 @@ export interface Database {
           fecha_cita?: string
           hora_cita?: string
           motivo?: string
-          estado?: 'Programada' | 'Confirmada' | 'En Progreso' | 'Atendida' | 'No se Presentó' | 'Cancelada x Paciente' | 'Cancelada x Médico' | 'Reprogramada x Paciente' | 'Reprogramada x Médico' | 'En Espera' | 'Urgencia'
+          estado?: number
           notas?: string | null
           urgente?: boolean
           consultorio?: number
@@ -261,6 +263,27 @@ export interface Database {
           campos_adicionales?: Json | null
           hora_fin?: string
           duracion_minutos: number | null
+          idBu?: string | null
+        }
+      }
+      tcCitasEstados: {
+        Row: {
+          id: number
+          estado: string
+          descripcion: string
+          usocita: string
+        }
+        Insert: {
+          id: number
+          estado: string
+          descripcion: string
+          usocita: string
+        }
+        Update: {
+          id?: number
+          estado?: string
+          descripcion?: string
+          usocita?: string
         }
       }
       clinical_histories: {

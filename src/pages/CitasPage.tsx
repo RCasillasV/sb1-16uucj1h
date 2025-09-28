@@ -53,6 +53,7 @@ const formSchema = z.object({
     message: "La duración debe ser 15, 20, 30, 40 o 60 minutos."
   }),
   hora_fin: z.string(),
+  estado: z.number().default(1), // Agregar campo estado como número
 });
 
 export function CitasPage() {
@@ -210,6 +211,7 @@ export function CitasPage() {
               notas: fetchedAppointment.notas || '',
               duracion_minutos: fetchedAppointment.duracion_minutos || 30,
               hora_fin: formattedHoraFin,
+              estado: fetchedAppointment.estado || 1,
             });
             console.log('CitasPage: Fetched Appointment hora_cita (formatted):', formattedHoraCita);
             console.log('CitasPage: Form values after reset:', form.getValues());
@@ -416,6 +418,7 @@ export function CitasPage() {
           fecha_cita: data.fecha_cita,
           hora_cita: data.hora_cita,
           motivo: data.motivo,
+          estado: data.estado,
           consultorio: data.consultorio,
           notas: data.notas || null,
           tipo_consulta: data.tipo_consulta,
@@ -433,7 +436,7 @@ export function CitasPage() {
           fecha_cita: data.fecha_cita,
           hora_cita: data.hora_cita,
           motivo: data.motivo,
-          estado: 'Programada',
+          estado: 1, // ID para 'Programada'
           consultorio: data.consultorio,
           notas: data.notas || null,
           tipo_consulta: data.tipo_consulta,

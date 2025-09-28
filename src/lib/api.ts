@@ -445,7 +445,7 @@ const stats = {
           .eq('fecha_cita', new Date().toISOString().split('T')[0]),
         supabase.from('tcCitas').select('id', { count: 'exact' })
           .gte('fecha_cita', new Date().toISOString().split('T')[0])
-          .eq('estado', 'Programada')
+        .eq('estado', 1) // 1 = 'Programada'
       ]); 
 
       return {
