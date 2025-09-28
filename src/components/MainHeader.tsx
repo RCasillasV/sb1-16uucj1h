@@ -454,7 +454,7 @@ export function MainHeader({
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
-                  <Stethoscope className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
+                  <Stethoscope className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
                   <div>
                     <div className="font-medium">Antecedentes Patológicos</div>
                     <div className="text-xs opacity-75">Enfermedades, cirugías y hospitalizaciones</div>
@@ -467,7 +467,7 @@ export function MainHeader({
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
-                  <Activity className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
+                  <Activity className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
                   <div>
                     <div className="font-medium">Antecedentes no Patológicos</div>
                     <div className="text-xs opacity-75">Hábitos y estilo de vida</div>
@@ -481,7 +481,7 @@ export function MainHeader({
                     style={{ color: currentTheme.colors.text }}
                     onClick={() => setShowClinicalHistorySubmenu(false)}
                   >
-                    <Heart className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
+                    <Heart className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
                     <div>
                       <div className="font-medium">Antecedentes Gineco-Obstétricos</div>
                       <div className="text-xs opacity-75">Historia ginecológica y obstétrica</div>
