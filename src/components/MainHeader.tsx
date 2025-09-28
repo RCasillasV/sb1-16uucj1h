@@ -536,7 +536,7 @@ export function MainHeader({
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
           style={{ position: 'relative' }}
         >
-          <FolderOpen className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
+          <FolderOpen className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
           Archivos del Paciente
           {patientFilesCount > 0 && (
             <span 
