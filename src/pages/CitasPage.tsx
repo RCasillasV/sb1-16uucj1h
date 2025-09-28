@@ -617,33 +617,6 @@ export function CitasPage() {
           p_especialidad: specialty
         });    
         
-        if (error) {
-          throw error;
-        }
-   console.log('fetchSymptoms: Data from sintomasconsulta RPC:', data);
-    
-    // CAMBIO CRÍTICO AQUÍ: Acceder a data.sintomas
-    setDynamicSymptoms(data?.sintomas || []); // Asegúrate de que data.sintomas sea el arreglo
-  } catch (error) {
-    console.error('fetchSymptoms: Error fetching symptoms:', error);
-    setSymptomsError('No se pudieron cargar los síntomas');
-    setDynamicSymptoms([]);
-  } finally {
-    setIsLoadingSymptoms(false);
-  }
-};
-    
-    fetchSymptoms();
-  }, [selectedPatient]);
-
-  const handleAddSymptom = () => {
-    if (!customSymptom.trim()) return;
-    
-    const currentValue = form.getValues('sintomas_asociados') || [];
-    if (!currentValue.includes(customSymptom)) {
-      form.setValue('sintomas_asociados', [...currentValue, customSymptom]);
-      setCustomSymptom('');
-    }
   };
 
   const buttonStyle = {
@@ -675,12 +648,6 @@ export function CitasPage() {
     );
   }
 
-console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms); 
-                  //disabled={isViewOnlyMode}
-
-
-  return (  
-    <div className="max-w-4xl mx-auto p-2">
       <div 
         className="bg-white rounded-lg shadow-lg overflow-hidden"
         style={{ 
@@ -705,6 +672,41 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 {isViewOnlyMode ? 'Ver Cita Médica' : editingAppointment ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
               </h1>
              </div>
+
+              {/* Consultorio */}
+              <div>
+                <label 
+                  htmlFor="consultorio" 
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: currentTheme.colors.text }}
+                >
+                  Consultorio *
+                </label>
+                <select
+                  id="consultorio"
+                  value={formData.consultorio}
+                  onChange={(e) => setFormData(prev => ({ ...prev, consultorio: Number(e.target.value) }))}
+                  required
+                  disabled={isViewOnlyMode}
+                  className="w-full p-2 rounded-md border"
+                  style={{
+                    background: isViewOnlyMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                    borderColor: currentTheme.colors.border,
+                    color: currentTheme.colors.text,
+                  }}
+                >
+                  <option value={1}>Consultorio 1</option>
+                  <option value={2}>Consultorio 2</option>
+                  <option value={3}>Consultorio 3</option>
+                </select>
+              </div>
+
+              {/* Estado */}
+              <EstadoSelector 
+                value={formData.estado}
+                onChange={(value) => setFormData(prev => ({ ...prev, estado: value }))}
+                disabled={isViewOnlyMode}
+              />
           </div>
         </div>
         <div className="p-6">
