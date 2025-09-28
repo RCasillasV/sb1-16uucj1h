@@ -441,7 +441,7 @@ export function MainHeader({
                   style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
-                  <Family className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
+                  <Family className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
                   <div>
                     <div className="font-medium">Antecedentes Heredo-Familiares</div>
                     <div className="text-xs opacity-75">Historia familiar de enfermedades</div>
