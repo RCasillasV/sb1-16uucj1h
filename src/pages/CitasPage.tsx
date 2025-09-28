@@ -883,7 +883,7 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                 >
                   Agenda de Citas
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2"> 
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
                   <div>
                     <label 
                       className="block text-sm font-medium mb-1"
@@ -1031,6 +1031,20 @@ console.log('CitasPage: dynamicSymptoms en render:', dynamicSymptoms);
                     </select>
                   </div>
 
+                  {/* Nueva columna: Estado de la cita */}
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Estado <span className="text-red-500">*</span>
+                    </label>
+                    <EstadoSelector
+                      value={form.watch('estado')}
+                      onChange={(estadoId) => form.setValue('estado', estadoId)}
+                      disabled={isViewOnlyMode}
+                    />
+                  </div>
                   {/* Nueva columna: Hora final */}
                   <div>
                     <label 
