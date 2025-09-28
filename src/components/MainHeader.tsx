@@ -464,7 +464,7 @@ export function MainHeader({
                 <Link
                   to="/antecedentes-no-patologicos"
                   className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
-                  style={{ color: currentTheme.colors.text }}
+                  style={{ color: currentTheme.colors.primary }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
                   <Activity className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
