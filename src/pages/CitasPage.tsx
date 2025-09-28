@@ -1112,7 +1112,7 @@ export function CitasPage() {
                     </select>
                   </div>
 
-                  {/* Nueva columna: Estado de la cita */}
+                  {/* Estado de la cita */}
                   <div>
                     <label 
                       className="block text-sm font-medium mb-1"
