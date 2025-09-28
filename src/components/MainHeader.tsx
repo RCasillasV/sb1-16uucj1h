@@ -149,8 +149,8 @@ export function MainHeader({
 
   const getInitials = (patient: typeof selectedPatient) => {
     if (!patient) return '';
-    return `${patient.Nombre.charAt(0)}${patient.Paterno.charAt(0)}`.toUpperCase();
-  };
+    return `${(patient.Nombre ?? '').charAt(0)}${(patient.Paterno ?? '').charAt(0)}`.toUpperCase();
+   };
 
   const formatPatientInfo = () => {
     if (!selectedPatient) return null;
