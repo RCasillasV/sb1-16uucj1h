@@ -80,12 +80,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           return;
         }
         console.log('fetchSymptoms: User IDBU:', userData.idbu);
+        setUserInfo({
           authId: user?.id || '',
           nombre: user?.nombre || null,
           idbu: user?.idbu || null,
           business_unit: null,
           rol: user?.userRole || null
         });
+      } catch (error) {
+        console.error('Error fetching user info:', error);
       }
     };
     
@@ -270,7 +273,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       console.error('Unexpected error during logout:', error);
       navigate('/login');
     }
-  }, [signOut]);
+  }, [signOut, navigate]);
 
   return (
     <div className="min-h-screen flex" style={{
