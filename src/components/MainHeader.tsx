@@ -464,7 +464,7 @@ export function MainHeader({
                 <Link
                   to="/antecedentes-no-patologicos"
                   className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-black/5 transition-colors border-l-4 border-transparent hover:border-current"
-                  style={{ color: currentTheme.colors.primary }}
+                  style={{ color: currentTheme.colors.text }}
                   onClick={() => setShowClinicalHistorySubmenu(false)}
                 >
                   <Activity className="h-4 w-4" style={{ color: currentTheme.colors.text }} />
@@ -498,7 +498,7 @@ export function MainHeader({
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
           style={{ position: 'relative' }}
         >
-          <Activity className="h-4 w-4" style={{ color: currentTheme.colors.headerText }} />
+          <Activity className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
           Evolución Clínica
           {clinicalEvolutionCount > 0 && (
             <span 
