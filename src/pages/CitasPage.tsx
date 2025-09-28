@@ -617,7 +617,23 @@ export function CitasPage() {
           p_especialidad: specialty
         });    
         
-  };
+        if (error) {
+          throw error;
+        }
+        
+        console.log('fetchSymptoms: Data from sintomasconsulta RPC:', data);
+        setDynamicSymptoms(data?.sintomas || []);
+      } catch (error) {
+        console.error('fetchSymptoms: Error fetching symptoms:', error);
+        setSymptomsError('Error al cargar síntomas');
+        setDynamicSymptoms([]);
+      } finally {
+        setIsLoadingSymptoms(false);
+      }
+    };
+
+    fetchSymptoms();
+  }, [selectedPatient]);
 
   const buttonStyle = {
     base: clsx(
@@ -648,6 +664,8 @@ export function CitasPage() {
     );
   }
 
+  return (
+    <div className="p-6">
       <div 
         className="bg-white rounded-lg shadow-lg overflow-hidden"
         style={{ 
@@ -672,41 +690,6 @@ export function CitasPage() {
                 {isViewOnlyMode ? 'Ver Cita Médica' : editingAppointment ? 'Editar Cita Médica' : 'Agendar Consulta Médica'}
               </h1>
              </div>
-
-              {/* Consultorio */}
-              <div>
-                <label 
-                  htmlFor="consultorio" 
-                  className="block text-sm font-medium mb-1"
-                  style={{ color: currentTheme.colors.text }}
-                >
-                  Consultorio *
-                </label>
-                <select
-                  id="consultorio"
-                  value={formData.consultorio}
-                  onChange={(e) => setFormData(prev => ({ ...prev, consultorio: Number(e.target.value) }))}
-                  required
-                  disabled={isViewOnlyMode}
-                  className="w-full p-2 rounded-md border"
-                  style={{
-                    background: isViewOnlyMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                    borderColor: currentTheme.colors.border,
-                    color: currentTheme.colors.text,
-                  }}
-                >
-                  <option value={1}>Consultorio 1</option>
-                  <option value={2}>Consultorio 2</option>
-                  <option value={3}>Consultorio 3</option>
-                </select>
-              </div>
-
-              {/* Estado */}
-              <EstadoSelector 
-                value={formData.estado}
-                onChange={(value) => setFormData(prev => ({ ...prev, estado: value }))}
-                disabled={isViewOnlyMode}
-              />
           </div>
         </div>
         <div className="p-6">
