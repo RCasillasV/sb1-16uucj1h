@@ -1125,9 +1125,7 @@ export function CitasPage() {
                       onChange={(estadoId) => form.setValue('estado', estadoId)}
                       disabled={isViewOnlyMode}
                     />
-                  </div>
-
-                  
+                  </div>        
                 </div>
               </div>
 
