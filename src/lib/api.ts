@@ -12,6 +12,8 @@ import { DEFAULT_BU } from '../utils/constants';
 // Cache instances
 const cache = new Cache<any>(5 * 60 * 1000, 'api_');
 const pathologicalHistoryCache = new Cache<any>(10 * 60 * 1000, 'pathological_history_');
+// Cache for user attributes (30 minutes TTL, persistent across session)
+const userAttributesCache = new Cache<any>(30 * 60 * 1000, 'user_attributes_');
 
 // Base service class for common operations
 class BaseService {
@@ -56,6 +58,14 @@ class BaseService {
 // Users service
 const users = {
   async getCurrentUserAttributes(userId: string) {
+    // Check cache first
+    const cacheKey = `user_${userId}`;
+    const cached = userAttributesCache.get(cacheKey);
+    if (cached) {
+      console.log('api.users.getCurrentUserAttributes: Returning cached data for userId:', userId);
+      return cached;
+    }
+
     console.log('api.users.getCurrentUserAttributes: Starting for userId:', userId);
     try {
       console.log('api.users.getCurrentUserAttributes: About to query tcUsuarios table');
@@ -69,7 +79,7 @@ const users = {
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user attributes:', error);
         console.log('api.users.getCurrentUserAttributes: Returning null due to error');
-        return {
+        const fallbackData = {
           nombre: null,
           email: null,
           telefono: null,
@@ -78,6 +88,8 @@ const users = {
           idbu: DEFAULT_BU,
           deleted_at: null
         };
+        // Don't cache error responses
+        return fallbackData;
       }
 
       // If data exists, ensure idbu is never null
@@ -87,12 +99,14 @@ const users = {
           idbu: data.idbu || DEFAULT_BU
         };
         console.log('api.users.getCurrentUserAttributes: Returning data with fallback idbu:', result);
+        // Cache the successful result
+        userAttributesCache.set(cacheKey, result);
         return result;
       }
 
       // If no data found, return default structure with DEFAULT_BU
       console.log('api.users.getCurrentUserAttributes: Returning data:', data);
-      return {
+      const defaultData = {
         nombre: null,
         email: null,
         telefono: null,
@@ -101,10 +115,13 @@ const users = {
         idbu: DEFAULT_BU,
         deleted_at: null
       };
+      // Cache the default response
+      userAttributesCache.set(cacheKey, defaultData);
+      return defaultData;
     } catch (error) {
       console.error('Error in getCurrentUserAttributes:', error);
       console.log('api.users.getCurrentUserAttributes: Exception caught, returning null');
-      return {
+      const exceptionData = {
         nombre: null,
         email: null,
         telefono: null,
@@ -113,7 +130,26 @@ const users = {
         idbu: DEFAULT_BU,
         deleted_at: null
       };
+      // Don't cache exception responses
+      return exceptionData;
     }
+  },
+
+  /**
+   * Clear user attributes cache for a specific user
+   */
+  clearUserAttributesCache(userId: string) {
+    const cacheKey = `user_${userId}`;
+    userAttributesCache.delete(cacheKey);
+    console.log('api.users.clearUserAttributesCache: Cache cleared for userId:', userId);
+  },
+
+  /**
+   * Clear all user attributes cache
+   */
+  clearAllUserAttributesCache() {
+    userAttributesCache.clear();
+    console.log('api.users.clearAllUserAttributesCache: All user attributes cache cleared');
   }
 };
 

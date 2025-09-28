@@ -32,6 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Clear user attributes cache before signing out
+      if (user?.id) {
+        const { api } = await import('../lib/api');
+        api.users.clearUserAttributesCache(user.id);
+      }
+
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -54,6 +60,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: error as AuthError | null };
     } catch (error) {
       console.error('Unexpected error during logout:', error);
+      // Clear all user cache on unexpected error
+      try {
+        const { api } = await import('../lib/api');
+        api.users.clearAllUserAttributesCache();
+      } catch (cacheError) {
+        console.error('Error clearing user cache:', cacheError);
+      }
       setUser(null);
       navigate('/login');
       return { error: error as AuthError };
