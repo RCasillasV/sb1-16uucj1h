@@ -72,28 +72,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        // Get business unit information from get_user_idbu
-        const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu', {
-          user_id: user.id
-        });
-
-        if (rpcError) {
-          console.error('Error fetching user business unit:', rpcError);
-          setUserInfo({
-            authId: user.id,
-            nombre: user.nombre,
-            idbu: user.idbu,
-            business_unit: null,
-            rol: user.userRole
-          });
           return;
-        }
+        // Get business unit information using cached API
+        const userData = await api.users.getCurrentUserAttributes(user.id);
 
         setUserInfo({
           authId: user.id,
           nombre: user.nombre,
           idbu: user.idbu,
-          business_unit: userData?.business_unit || null,
+          business_unit: null, // Business unit name will be fetched separately if needed
           rol: user.userRole
         });
       } catch (error) {
