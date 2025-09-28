@@ -742,27 +742,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                 />
               </div>
             </div>
-
-            {/* File Upload Section */}
-            <div className="space-y-4">
-              <h3 
-                className="text-lg font-medium"
-                style={{ 
-                  color: currentTheme.colors.text,
-                  fontFamily: currentTheme.typography.fontFamily,
-                }}
-              >
-                Documentos del Paciente
-              </h3>
-              <FileUpload
-                onFilesUploaded={handleFilesUploaded}
-                maxFiles={10}
-                maxFileSize={10}
-                folder={`patients/${patient?.id || 'new'}`}
-                className="w-full"
-              />
-            </div>
-          </div>
+           </div>
         )}
 
         {activeTab === 'personales' && (
