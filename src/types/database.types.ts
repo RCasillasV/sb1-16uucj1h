@@ -192,6 +192,26 @@ export interface Database {
           deleted_at? : string | null
         }
       }
+      tcCitasEstados: {
+        Row: {
+          id: number
+          estado: string
+          descripcion: string
+          usocita: string
+        }
+        Insert: {
+          id: number
+          estado: string
+          descripcion: string
+          usocita: string
+        }
+        Update: {
+          id?: number
+          estado?: string
+          descripcion?: string
+          usocita?: string
+        }
+      }
       tcCitas: {
         Row: {
           id: string
@@ -208,9 +228,9 @@ export interface Database {
           consultorio: number
           sintomas: string[] | null
           documentos: Json | null
-          tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control'
+          tipo_consulta: string
           tiempo_evolucion: number | null
-          unidad_tiempo: 'horas' | 'dias' | 'semanas' | 'meses' | null
+          unidad_tiempo: string | null
           sintomas_asociados: string[] | null
           campos_adicionales: Json | null
           hora_fin: string
@@ -232,13 +252,13 @@ export interface Database {
           consultorio: number
           sintomas?: string[] | null
           documentos?: Json | null
-          tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control'
+          tipo_consulta?: string
           tiempo_evolucion?: number | null
-          unidad_tiempo?: 'horas' | 'dias' | 'semanas' | 'meses' | null
+          unidad_tiempo?: string | null
           sintomas_asociados?: string[] | null
           campos_adicionales?: Json | null
-          hora_fin?: string
-          duracion_minutos: number | null
+          hora_fin?: string | null
+          duracion_minutos?: number | null
           idBu?: string | null
         }
         Update: {
@@ -256,34 +276,14 @@ export interface Database {
           consultorio?: number
           sintomas?: string[] | null
           documentos?: Json | null
-          tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control'
+          tipo_consulta?: string
           tiempo_evolucion?: number | null
-          unidad_tiempo?: 'horas' | 'dias' | 'semanas' | 'meses' | null
+          unidad_tiempo?: string | null
           sintomas_asociados?: string[] | null
           campos_adicionales?: Json | null
-          hora_fin?: string
+          hora_fin?: string | null
           duracion_minutos: number | null
           idBu?: string | null
-        }
-      }
-      tcCitasEstados: {
-        Row: {
-          id: number
-          estado: string
-          descripcion: string
-          usocita: string
-        }
-        Insert: {
-          id: number
-          estado: string
-          descripcion: string
-          usocita: string
-        }
-        Update: {
-          id?: number
-          estado?: string
-          descripcion?: string
-          usocita?: string
         }
       }
       clinical_histories: {
