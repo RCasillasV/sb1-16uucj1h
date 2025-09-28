@@ -1036,9 +1036,34 @@ export function CitasPage() {
                       </p>
                     )}
                   </div>
-
+                  
+                  {/* Consultorio */}
+                  <div>
+                    <label 
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: currentTheme.colors.text }}
+                    >
+                      Consultorio <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      {...form.register('consultorio', { valueAsNumber: true })}
+                      //disabled={isViewOnlyMode}
+                      className="w-full p-2 rounded-md border"
+                      style={{
+                        background: currentTheme.colors.surface,
+                        borderColor: currentTheme.colors.border,
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      {activeConsultorios.map(consultorio => (
+                        <option key={consultorio.id} value={consultorio.id}>
+                          {consultorio.consultorio}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
  
-                  {/* Nueva columna: Duración estimada */}
+                  {/* Duración estimada */}
                   <div>
                     <label 
                       className="block text-sm font-medium mb-1"
@@ -1063,36 +1088,8 @@ export function CitasPage() {
                       <option value={60}>60 minutos</option>
                     </select>
                   </div>
-                 <div>
-                    <label 
-                      className="block text-sm font-medium mb-1"
-                      style={{ color: currentTheme.colors.text }}
-                    >
-                      Consultorio <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      {...form.register('consultorio', { valueAsNumber: true })}
-                      //disabled={isViewOnlyMode}
-                      className="w-full p-2 rounded-md border"
-                      style={{
-                        background: currentTheme.colors.surface,
-                        borderColor: currentTheme.colors.border,
-                        color: currentTheme.colors.text,
-                      }}
-                    >
-                      {activeConsultorios.map(consultorio => (
-                        <option key={consultorio.id} value={consultorio.id}>
-                          {consultorio.consultorio}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  
-
-
-                  
-                  {/* Nueva columna: Hora final */}
+    
+                  {/* Hora final */}
                   <div>
                     <label 
                       className="block text-sm font-medium mb-1"
