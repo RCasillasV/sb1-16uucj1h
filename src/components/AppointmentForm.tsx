@@ -35,6 +35,14 @@ const INTERVAL_MINUTES = 30;
 const DAYS_TO_SHOW = 6;
 const MAX_DAYS_AHEAD = 60;
 
+const DETAILED_APPOINTMENT_STATUSES = {
+  1: { display: 'Programada' },
+  2: { display: 'Confirmada' },
+  3: { display: 'En Progreso' },
+  4: { display: 'Completada' },
+  5: { display: 'Cancelada' }
+};
+
 export function AppointmentForm({ onSuccess, onCancel, appointment }: AppointmentFormProps) {
   const { currentTheme } = useTheme();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
@@ -60,7 +68,6 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
   const [reason, setReason] = useState(appointment?.motivo || '');
   const [notes, setNotes] = useState(appointment?.notas || '');
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<"Programada" |  "Confirmada" |  "En Progreso" | 
   const [status, setStatus] = useState<number>(appointment?.estado || 1);
   
   useEffect(() => {
@@ -383,6 +390,8 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
             {Object.entries(DETAILED_APPOINTMENT_STATUSES).map(([id, info]) => (
               <option key={id} value={id}>
                 {info.display}
+              </option>
+            ))}
           </select>
         </div>
 
