@@ -56,6 +56,78 @@ const formSchema = z.object({
   estado: z.number().default(1), // Agregar campo estado como número
 });
 
+// Componente para el selector de estado
+interface EstadoSelectorProps {
+  value: number;
+  onChange: (estadoId: number) => void;
+  disabled?: boolean;
+}
+
+function EstadoSelector({ value, onChange, disabled = false }: EstadoSelectorProps) {
+  const { currentTheme } = useTheme();
+  const [estados, setEstados] = useState<Array<{ id: number; estado: string; descripcion: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEstados = async () => {
+      try {
+        const estadosData = await api.appointments.getEstados();
+        setEstados(estadosData);
+      } catch (error) {
+        console.error('Error fetching estados:', error);
+        // Fallback a los estados por defecto
+        setEstados([
+          { id: 1, estado: 'Programada', descripcion: 'Cita programada' },
+          { id: 2, estado: 'Confirmada', descripcion: 'Cita confirmada' },
+          { id: 3, estado: 'En Progreso', descripcion: 'Cita en progreso' },
+          { id: 4, estado: 'Atendida', descripcion: 'Cita completada' },
+          { id: 5, estado: 'Cancelada', descripcion: 'Cita cancelada' },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEstados();
+  }, []);
+
+  if (loading) {
+    return (
+      <select 
+        disabled 
+        className="w-full p-2 rounded-md border"
+        style={{
+          background: currentTheme.colors.surface,
+          borderColor: currentTheme.colors.border,
+          color: currentTheme.colors.textSecondary,
+        }}
+      >
+        <option>Cargando...</option>
+      </select>
+    );
+  }
+
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      disabled={disabled}
+      className="w-full p-2 rounded-md border"
+      style={{
+        background: currentTheme.colors.surface,
+        borderColor: currentTheme.colors.border,
+        color: currentTheme.colors.text,
+      }}
+    >
+      {estados.map(estado => (
+        <option key={estado.id} value={estado.id}>
+          {estado.estado}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function CitasPage() {
   const { currentTheme } = useTheme();
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
