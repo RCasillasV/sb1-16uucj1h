@@ -6,7 +6,7 @@ import { patologies } from '../services/patologyService';
 import { gynecoObstetricHistory } from '../services/gynecoObstetricService';
 import { supabase } from './supabase';
 import { Cache } from './cache';
-import { requireSession, requireBusinessUnit } from './apiHelpers';
+import { requireSession, getUserIdbu } from './supabaseUtils';
 import { DEFAULT_BU } from '../utils/constants';
 
 // Cache instances
@@ -56,7 +56,7 @@ class BaseService {
 // Users service
 const users = {
   async getCurrentUserAttributes(userId: string) {
-    console.log('api.users.getCurrentUserAttributes: Starting for userId:', userId);
+    // console.log('api.users.getCurrentUserAttributes: Starting for userId:', userId);
     try {
       console.log('api.users.getCurrentUserAttributes: About to query tcUsuarios table');
       const { data, error } = await supabase
@@ -65,7 +65,7 @@ const users = {
         .eq('idusuario', userId)
         .single();
 
-      console.log('api.users.getCurrentUserAttributes: Query completed. Error:', error, 'Data:', data);
+      // console.log('api.users.getCurrentUserAttributes: Query completed. Error:', error, 'Data:', data);
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user attributes:', error);
         console.log('api.users.getCurrentUserAttributes: Returning null due to error');
@@ -102,7 +102,7 @@ const users = {
         deleted_at: null
       };
     } catch (error) {
-      console.error('Error in getCurrentUserAttributes:', error);
+      // console.error('Error in getCurrentUserAttributes:', error);
       console.log('api.users.getCurrentUserAttributes: Exception caught, returning null');
       return {
         nombre: null,
@@ -538,8 +538,7 @@ const consultorios = {
 // Agenda settings service
 const agendaSettings = {
   async get() {
-    const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await getUserIdbu();
 
     const { data, error } = await supabase
       .from('tcAgendaSettings')
@@ -557,8 +556,7 @@ const agendaSettings = {
     consultation_days: string[];
     slot_interval: number;
   }) {
-    const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await getUserIdbu();
 
     const { data: existing } = await supabase
       .from('tcAgendaSettings')
@@ -599,8 +597,7 @@ const agendaSettings = {
 // Blocked dates service
 const blockedDates = {
   async getAll() {
-    const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await getUserIdbu();
 
     const { data, error } = await supabase
       .from('tcAgendaBloqueada')
@@ -619,8 +616,7 @@ const blockedDates = {
     reason: string;
     block_type: string;
   }) {
-    const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await getUserIdbu();
 
     const { data, error } = await supabase
       .from('tcAgendaBloqueada')

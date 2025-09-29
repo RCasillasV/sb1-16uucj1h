@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { DEFAULT_BU } from '../utils/constants';
+import { getUserIdbu } from '../lib/supabaseUtils';
 import { AuthApiError } from '@supabase/supabase-js';
 import type { User, AuthError } from '@supabase/supabase-js';
  
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Simple query with timeout
-      const { data, error } = await Promise.race([
+      const { data: tcUserData, error } = await Promise.race([
         supabase
           .from('tcUsuarios')
           .select('nombre, rol, idbu, estado')
@@ -78,10 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]) as any;
 
       if (error) {
-        console.log('AuthProvider: Database query error, using defaults:', error.message);
+        console.log('AuthProvider: Database query error for tcUsuarios, using defaults:', error.message);
+        const idbu = await getUserIdbu(); // Try to get idbu via RPC as fallback
         return {
           userRole: 'Medico',
-          idbu: '00000000-0000-0000-0000-000000000000',
+          idbu: idbu,
           nombre: 'Usuario',
           estado: 'Activo'
         };
@@ -89,10 +91,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('AuthProvider: User info retrieved successfully:', data);
       return {
-        userRole: data.rol,
-        idbu: data.idbu || DEFAULT_BU,
-        nombre: data.nombre,
-        estado: data.estado
+        userRole: tcUserData.rol,
+        idbu: tcUserData.idbu || DEFAULT_BU,
+        nombre: tcUserData.nombre,
+        estado: tcUserData.estado
       };
     } catch (error) {
       console.log('AuthProvider: Error getting user info, using defaults:', error);

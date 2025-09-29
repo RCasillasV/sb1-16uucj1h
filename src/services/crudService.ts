@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { handle, requireSession, requireBusinessUnit } from '../lib/apiHelpers';
+import { handle, requireSession, getUserIdbu } from '../lib/supabaseUtils';
 
 export function createService<Table extends string>(table: Table, userIdColumnName: string = 'user_id', includeIdbu: boolean = true) {
   return {
@@ -22,10 +22,10 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
       if (includeIdbu) {
         // Para tcCitas, usar idBu en lugar de idbu
         if (table === 'tcCitas') {
-          const idbuValue = await requireBusinessUnit(user.id);
+          const idbuValue = await getUserIdbu();
           insertData.idBu = idbuValue;
         } else {
-          const idbuValue = await requireBusinessUnit(user.id);
+          const idbuValue = await getUserIdbu();
           insertData.idbu = idbuValue;
         }
       }

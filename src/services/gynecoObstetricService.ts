@@ -3,8 +3,7 @@ import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 import { supabase } from '../lib/supabase';
 import { handle } from '../lib/apiHelpers';
-import { requireSession, requireBusinessUnit } from '../lib/apiHelpers';
-
+import { requireSession, getUserIdbu } from '../lib/supabaseUtils';
 // Define un tipo para la tabla para mejor tipado
 type GynecoObstetricHistoryTable = 'tpPacienteHistGineObst';
 
@@ -74,7 +73,7 @@ export const gynecoObstetricHistory = {
    */
   async create(payload: any) {
     const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await getUserIdbu();
     
     console.log('GYNECO_SERVICE: create - Function entered.');
     console.log('GYNECO_SERVICE: create - Payload received:', payload);
@@ -105,7 +104,7 @@ export const gynecoObstetricHistory = {
    */
   async update(patientId: string, payload: any) {
     const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await getUserIdbu();
 
     console.log('GYNECO_SERVICE: update - Function entered.');
     console.log('GYNECO_SERVICE: update - Function entered.'); 

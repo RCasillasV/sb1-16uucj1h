@@ -23,7 +23,7 @@ import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountA
 import { useStyles } from '../../hooks/useStyles';
 import { useIdleTimer } from '../../hooks/useIdleTimer';
 // Importar las nuevas constantes
-import { getStatusColor, DetailedAppointmentStatus } from '../../utils/appointmentStatuses';
+import { getStatusColor } from '../../utils/appointmentStatuses';
 
 interface AppointmentFormData {
   fecha_cita: string;
@@ -34,6 +34,7 @@ interface AppointmentFormData {
   tipo_consulta: 'primera' | 'seguimiento' | 'urgencia' | 'revision' | 'control';
   tiempo_evolucion?: number | null;
   unidad_tiempo?: 'horas' | 'dias' | 'semanas' | 'meses' | null;
+  estado?: number; // Add estado to AppointmentFormData
   sintomas_asociados?: string[];
   urgente?: boolean;
   notas?: string;
@@ -97,7 +98,7 @@ export function Agenda() {
     motivo: '',
     consultorio: 1,
     duracion_minutos: 30,
-    tipo_consulta: 'primera',
+    tipo_consulta: 'primera', // Default value
     tiempo_evolucion: null,
     unidad_tiempo: null,
     sintomas_asociados: [],
