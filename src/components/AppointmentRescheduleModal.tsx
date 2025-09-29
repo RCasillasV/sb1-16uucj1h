@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, User, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
 import { Modal } from './Modal';
+import { api } from '../lib/api';
 import clsx from 'clsx';
 
 interface AppointmentRescheduleModalProps {
@@ -19,10 +21,12 @@ interface AppointmentRescheduleModalProps {
   currentStatusId: number;
 }
 
-const RESCHEDULE_STATUS_OPTIONS = [
-  { id: 8, label: 'Reprogramada por Paciente', description: 'El paciente solicitó cambiar la cita' },
-  { id: 9, label: 'Reprogramada por Médico', description: 'El médico solicitó cambiar la cita' },
-];
+interface StatusOption {
+  id: number;
+  estado: string;
+  descripcion: string;
+  usocita: string;
+}
 
 export function AppointmentRescheduleModal({
   isOpen,
@@ -37,7 +41,38 @@ export function AppointmentRescheduleModal({
   currentStatusId,
 }: AppointmentRescheduleModalProps) {
   const { currentTheme } = useTheme();
-  const [selectedStatusId, setSelectedStatusId] = useState<number>(8); // Default to "Reprogramada por Paciente"
+  const [selectedStatusId, setSelectedStatusId] = useState<number>(currentStatusId);
+  const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
+  const [loadingStatuses, setLoadingStatuses] = useState(true);
+  const [statusError, setStatusError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchAllowedStatuses();
+  }, [currentStatusId]);
+
+  const fetchAllowedStatuses = async () => {
+    setLoadingStatuses(true);
+    setStatusError(null);
+    try {
+      const filteredStatuses = await api.appointments.getFilteredStatusOptions(currentStatusId);
+      setStatusOptions(filteredStatuses);
+      
+      // Set default to first allowed transition or current status
+      const allowedTransitions = await api.appointments.getAllowedStatusTransitions(currentStatusId);
+      if (allowedTransitions.length > 0) {
+        // Find the first reprogramming-related status or use the first allowed
+        const reprogrammingStatus = allowedTransitions.find(id => id === 8 || id === 9);
+        setSelectedStatusId(reprogrammingStatus || allowedTransitions[0]);
+      } else {
+        setSelectedStatusId(currentStatusId);
+      }
+    } catch (err) {
+      console.error('Error fetching status options:', err);
+      setStatusError(err instanceof Error ? err.message : 'Error al cargar opciones de estado');
+    } finally {
+      setLoadingStatuses(false);
+    }
+  };
 
   const handleConfirm = () => {
     onConfirm(selectedStatusId);
@@ -156,14 +191,111 @@ export function AppointmentRescheduleModal({
           {/* Reason Selection */}
           <div>
             <h4 className="font-medium mb-3" style={{ color: currentTheme.colors.text }}>
-              Motivo de la Reprogramación
+              Nuevo Estado de la Cita
             </h4>
-            <p className="text-sm mb-4" style={{ color: currentTheme.colors.textSecondary }}>
-              Seleccione quién solicitó el cambio de fecha para actualizar correctamente el estado de la cita:
-            </p>
             
-            <div className="space-y-3">
-              {RESCHEDULE_STATUS_OPTIONS.map((option) => (
+            {loadingStatuses ? (
+              <div className="flex items-center gap-2 text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: currentTheme.colors.primary }} />
+                Cargando opciones de estado...
+              </div>
+            ) : statusError ? (
+              <div 
+                className="p-3 rounded-md text-sm"
+                style={{
+                  background: '#FEE2E2',
+                  color: '#DC2626',
+                }}
+              >
+                {statusError}
+              </div>
+            ) : (
+              <>
+                <p className="text-sm mb-4" style={{ color: currentTheme.colors.textSecondary }}>
+                  Seleccione el nuevo estado que debe tener la cita tras la reprogramación:
+                </p>
+                
+                <div className="space-y-3">
+                  {statusOptions.map((option) => (
+                    <div
+                      key={option.id}
+                      className={clsx(
+                        'p-3 rounded-lg border-2 transition-colors cursor-pointer',
+                        selectedStatusId === option.id 
+                          ? 'border-current' 
+                          : 'border-transparent hover:border-gray-200'
+                      )}
+                      style={{
+                        background: selectedStatusId === option.id 
+                          ? `${currentTheme.colors.primary}10` 
+                          : currentTheme.colors.surface,
+                        borderColor: selectedStatusId === option.id 
+                          ? currentTheme.colors.primary 
+                          : currentTheme.colors.border,
+                      }}
+                      onClick={() => setSelectedStatusId(option.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="radio"
+                          id={`status-${option.id}`}
+                          name="reschedule-status"
+                          value={option.id}
+                          checked={selectedStatusId === option.id}
+                          onChange={() => setSelectedStatusId(option.id)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <label 
+                            htmlFor={`status-${option.id}`}
+                            className="block font-medium cursor-pointer"
+                            style={{ color: currentTheme.colors.text }}
+                          >
+                            {option.estado}
+                          </label>
+                          <p 
+                            className="text-sm mt-1"
+                            style={{ color: currentTheme.colors.textSecondary }}
+                          >
+                            {option.descripcion}
+                          </p>
+                          {option.usocita && (
+                            <p 
+                              className="text-xs mt-1 italic"
+                              style={{ color: currentTheme.colors.textSecondary }}
+                            >
+                              Uso: {option.usocita}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Warning Note */}
+          <div 
+            className="flex items-start gap-2 p-3 rounded-md"
+            style={{
+              background: '#FFFBEB',
+              borderColor: '#FED7AA',
+              color: '#D97706',
+            }}
+          >
+            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium">Nota importante:</p>
+              <p>Esta acción registrará el cambio en el historial de citas y actualizará el estado según la selección.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
                 <div
                   key={option.id}
                   className={clsx(

@@ -804,6 +804,7 @@ export const api = {
   // Patient history services
   antecedentesNoPatologicos,
   heredoFamilialHistory,
+  // TODO: Add gynecoObstetricHistory service here
   gynecoObstetricHistory,
 
   // Pathological history service

@@ -284,6 +284,55 @@ export const appointments = {
     return result;
   },
 
+  async getAllowedStatusTransitions(currentStatusId: number) {
+    const key = `transitions_${currentStatusId}`;
+    const cached = cache.get(key);
+    if (cached) return cached;
+
+    const { data, error } = await supabase
+      .from('tcCitasEdoTrans')
+      .select('estado_destino_id')
+      .eq('estado_origen_id', currentStatusId);
+
+    if (error) throw error;
+    
+    const allowedIds = (data || []).map(item => item.estado_destino_id);
+    cache.set(key, allowedIds);
+    return allowedIds;
+  },
+
+  async getAllStatuses() {
+    const key = 'all_statuses';
+    const cached = cache.get(key);
+    if (cached) return cached;
+
+    const { data, error } = await supabase
+      .from('tcCitasEstados')
+      .select('*')
+      .order('id');
+
+    if (error) throw error;
+    cache.set(key, data || []);
+    return data || [];
+  },
+
+  async getFilteredStatusOptions(currentStatusId?: number) {
+    const allStatuses = await this.getAllStatuses();
+    
+    // Si no hay estado actual (nueva cita), solo mostrar "Programada"
+    if (!currentStatusId) {
+      return allStatuses.filter(status => status.id === 1);
+    }
+    
+    // Para citas existentes, obtener transiciones permitidas
+    const allowedTransitions = await this.getAllowedStatusTransitions(currentStatusId);
+    
+    // Incluir el estado actual y los estados permitidos
+    const validStatusIds = [currentStatusId, ...allowedTransitions];
+    
+    return allStatuses.filter(status => validStatusIds.includes(status.id));
+  },
+
   async checkSlotAvailability(
     fecha: string,
     hora_inicio: string,
