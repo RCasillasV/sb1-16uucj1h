@@ -17,6 +17,7 @@ import { AlertModal } from '../../components/AlertModal';
 import { useNavigate, Link } from 'react-router-dom';
 import { Calendar as CalendarIcon, CalendarPlus, Clock, User, FileText, AlertCircle, MapPin, X, Settings } from 'lucide-react';
 import { MiniCalendar } from '../../components/MiniCalendar';
+import { AppointmentRescheduleModal } from '../../components/AppointmentRescheduleModal';
 import clsx from 'clsx';
 import type { EventInput, DateSelectArg, EventClickArg, DatesSetArg, EventMountArg, DayCellMountArg } from '@fullcalendar/core';
 import { useStyles } from '../../hooks/useStyles';
@@ -77,6 +78,17 @@ export function Agenda() {
   const [showPastSlotWarningModal, setShowPastSlotWarningModal] = useState(false);
   const [showConfigurationErrorModal, setShowConfigurationErrorModal] = useState(false);
   const [configurationErrorMessage, setConfigurationErrorMessage] = useState('');
+
+  // Estados para el modal de reprogramación
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [pendingDropInfo, setPendingDropInfo] = useState<any>(null);
+  const [originalAppointmentData, setOriginalAppointmentData] = useState<{
+    date: string;
+    time: string;
+    patientName: string;
+    reason: string;
+    statusId: number;
+  } | null>(null);
 
   // Estados para el formulario rápido de citas
   const [appointmentForm, setAppointmentForm] = useState<AppointmentFormData>({
@@ -422,25 +434,32 @@ export function Agenda() {
     const durationMinutes = event.extendedProps.duracion_minutos || 30;
     const consultorio = event.extendedProps.consultorio || 1;
 
+    // Datos originales de la cita
+    const originalDate = format(oldEvent.start, 'yyyy-MM-dd');
+    const originalTime = format(oldEvent.start, 'HH:mm');
+    const patientName = `${event.extendedProps?.patient?.Nombre || ''} ${event.extendedProps?.patient?.Paterno || ''}`.trim();
+    const reason = event.extendedProps?.reason || 'Sin motivo especificado';
+    const currentStatusId = event.extendedProps?.status || 1;
+
+    // Revertir inmediatamente el cambio visual
+    revert();
+
     // 1. Validaciones previas al intento de actualización
     if (!agendaSettings) {
       setConfigurationErrorMessage('No se ha cargado la configuración de la agenda. No se puede mover la cita.');
       setShowConfigurationErrorModal(true);
-      revert();
       return;
     }
 
     if (!isWorkDay(newStartDate)) {
       setConfigurationErrorMessage('La nueva fecha no está configurada como día de atención médica.');
       setShowConfigurationErrorModal(true);
-      revert();
       return;
     }
 
     if (isDateBlocked(newStartDate)) {
       setConfigurationErrorMessage('La nueva fecha está bloqueada. No se puede mover la cita aquí.');
       setShowConfigurationErrorModal(true);
-      revert();
       return;
     }
 
@@ -448,7 +467,6 @@ export function Agenda() {
     if (event.start < now) {
       setConfigurationErrorMessage('No se puede mover una cita a un horario en el pasado.');
       setShowConfigurationErrorModal(true);
-      revert();
       return;
     }
 
@@ -458,25 +476,62 @@ export function Agenda() {
       if (!availability.available) {
         setConfigurationErrorMessage(`El slot seleccionado no está disponible: ${availability.reason || 'Conflicto con otra cita.'}`);
         setShowConfigurationErrorModal(true);
-        revert();
         return;
       }
 
-      // 3. Actualizar la cita en la base de datos
-      await api.appointments.update(event.id, {
+      // 3. Almacenar información para el modal de confirmación
+      setPendingDropInfo({
+        eventId: event.id,
         fecha_cita: newStartDate,
         hora_cita: newStartTime,
         hora_fin: newEndTime,
       });
-
-      // 4. Refrescar las citas para asegurar sincronización
-      await fetchAppointments();
+      
+      setOriginalAppointmentData({
+        date: originalDate,
+        time: originalTime,
+        patientName,
+        reason,
+        statusId: currentStatusId,
+      });
+      
+      // 4. Mostrar modal de confirmación
+      setShowRescheduleModal(true);
     } catch (error) {
       console.error('Error al mover la cita:', error);
       setConfigurationErrorMessage('Error al mover la cita. Por favor, inténtelo de nuevo.');
       setShowConfigurationErrorModal(true);
-      revert();
     }
+  };
+
+  const confirmReschedule = async (newStatusId: number) => {
+    if (!pendingDropInfo) return;
+
+    try {
+      // Actualizar la cita con el nuevo estado
+      await api.appointments.update(pendingDropInfo.eventId, {
+        ...pendingDropInfo,
+        estado: newStatusId,
+      }, newStatusId); // Pasar el newStatusId para registrar en historial
+
+      // Refrescar las citas para mostrar los cambios
+      await fetchAppointments();
+      
+      // Limpiar estado y cerrar modal
+      setShowRescheduleModal(false);
+      setPendingDropInfo(null);
+      setOriginalAppointmentData(null);
+    } catch (error) {
+      console.error('Error al confirmar reprogramación:', error);
+      setConfigurationErrorMessage('Error al reprogramar la cita. Por favor, inténtelo de nuevo.');
+      setShowConfigurationErrorModal(true);
+    }
+  };
+
+  const cancelReschedule = () => {
+    setShowRescheduleModal(false);
+    setPendingDropInfo(null);
+    setOriginalAppointmentData(null);
   };
 
   const handleCloseDetailsModal = () => {
@@ -1181,6 +1236,22 @@ export function Agenda() {
         title="Horario no disponible"
         message="Por favor, seleccione un día y horario futuro para continuar con la reserva."
       />
+
+      {/* Modal de Reprogramación */}
+      {originalAppointmentData && (
+        <AppointmentRescheduleModal
+          isOpen={showRescheduleModal}
+          onClose={cancelReschedule}
+          onConfirm={confirmReschedule}
+          originalDate={originalAppointmentData.date}
+          originalTime={originalAppointmentData.time}
+          newDate={pendingDropInfo?.fecha_cita || ''}
+          newTime={pendingDropInfo?.hora_cita || ''}
+          patientName={originalAppointmentData.patientName}
+          reason={originalAppointmentData.reason}
+          currentStatusId={originalAppointmentData.statusId}
+        />
+      )}
 
       {/* Contador de inactividad */}
       {isCountingDown && (
