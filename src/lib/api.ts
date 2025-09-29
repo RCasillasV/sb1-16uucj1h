@@ -142,7 +142,7 @@ const clinicalHistories = {
     return data;
   },
 
-  async update(id: string, payload: any) {
+  async update(id: string, payload: any, newStatusId?: number) {
     const { data, error } = await supabase
       .from('clinical_histories')
       .update(payload)

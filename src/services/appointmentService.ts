@@ -227,7 +227,7 @@ export const appointments = {
     return result;
   },
 
-  async update(id: string, dto: any) {
+  async update(id: string, dto: any, newStatusId?: number) {
     // Obtener datos de la cita original para invalidar cachés correctamente
     const originalAppointment = await this.getById(id);
     
