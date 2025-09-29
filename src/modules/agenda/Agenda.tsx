@@ -508,9 +508,12 @@ export function Agenda() {
     if (!pendingDropInfo) return;
 
     try {
+      // Separate eventId from update fields to avoid sending non-existent column
+      const { eventId, ...updateFields } = pendingDropInfo;
+      
       // Actualizar la cita con el nuevo estado
-      await api.appointments.update(pendingDropInfo.eventId, {
-        ...pendingDropInfo,
+      await api.appointments.update(eventId, {
+        ...updateFields,
         estado: newStatusId,
       }, newStatusId); // Pasar el newStatusId para registrar en historial
 
