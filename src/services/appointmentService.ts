@@ -231,6 +231,30 @@ export const appointments = {
     // Obtener datos de la cita original para invalidar cachés correctamente
     const originalAppointment = await this.getById(id);
     
+    // Si se proporciona newStatusId, registrar el cambio en historial
+    if (newStatusId && originalAppointment) {
+      const user = await requireSession();
+      
+      // Insertar registro en tcCitasHistorial
+      const { error: historialError } = await supabase
+        .from('tcCitasHistorial')
+        .insert([{
+          cita_id: id,
+          estado_anterior: originalAppointment.estado,
+          estado_nuevo: newStatusId,
+          fecha_anterior: originalAppointment.fecha_cita,
+          hora_anterior: originalAppointment.hora_cita,
+          fecha_nueva: dto.fecha_cita || originalAppointment.fecha_cita,
+          hora_nueva: dto.hora_cita || originalAppointment.hora_cita,
+          id_user: user.id,
+        }]);
+
+      if (historialError) {
+        console.error('Error inserting appointment history record:', historialError);
+        throw new Error('Error al registrar el cambio en el historial de citas');
+      }
+    }
+    
     const result = await svc.update(id, dto);
     
     // Invalidar cachés relevantes
