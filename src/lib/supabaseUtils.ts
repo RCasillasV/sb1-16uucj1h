@@ -1,4 +1,3 @@
-```typescript
 import { supabase } from './supabase';
 import { AuthApiError } from '@supabase/supabase-js';
 

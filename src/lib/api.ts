@@ -578,6 +578,7 @@ const agendaSettings = {
       if (error) throw error;
       return data;
     } else {
+      const user = await requireSession();
       const { data, error } = await supabase
         .from('tcAgendaSettings')
         .insert([{
