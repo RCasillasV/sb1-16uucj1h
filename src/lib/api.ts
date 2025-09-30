@@ -357,7 +357,7 @@ const files = {
     thumbnail_url?: string | null;
   }) {
     const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await requireBusinessUnit();
 
     const { data, error } = await supabase
       .from('tpDocPaciente')

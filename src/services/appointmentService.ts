@@ -179,7 +179,7 @@ export const appointments = {
     notas?: string | null;
   }) {
     const user = await requireSession();
-    const idbu = await requireBusinessUnit();
+    // Note: agendar_cita RPC gets user_id and idbu internally via auth.uid()
 
     // Map parameters to match the expected p_ prefixed signature of agendar_cita function
     const rpcPayload = {
@@ -340,7 +340,7 @@ export const appointments = {
     consultorio: number
   ) {
     const user = await requireSession();
-    const idbu = await requireBusinessUnit();
+    // Note: verificar_slot RPC gets user_id and idbu internally via auth.uid()
 
     return handle(
       supabase.rpc('verificar_slot', {

@@ -2,8 +2,7 @@
 import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 import { supabase } from '../lib/supabase';
-import { handle } from '../lib/supabaseUtils';
-import { requireSession, getIdbu } from '../lib/supabaseUtils';
+import { handle, requireSession, getIdbu } from '../lib/supabaseUtils';
 // Define un tipo para la tabla para mejor tipado
 type GynecoObstetricHistoryTable = 'tpPacienteHistGineObst';
 
@@ -30,7 +29,7 @@ export const gynecoObstetricHistory = {
     }
 
     const user = await requireSession();
-    const user_idbu = await requireBusinessUnit(user.id);
+    const user_idbu = await getIdbu();
 
     console.log('GYNECO_SERVICE: Fetching for patientId:', patientId, 'and user_idbu (from app):', user_idbu); // LOG 1
     console.log('GYNECO_SERVICE: Current authenticated user ID:', user.id); // Log the UID

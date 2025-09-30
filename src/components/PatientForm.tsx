@@ -175,7 +175,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
         const { data: userData, error } = await supabase.rpc('get_idbu');
 
         if (error) throw error;
-        setUserInfo({ idbu: userData?.idbu || null });
+        setUserInfo({ idbu: userData || null });
       } catch (error) {
         console.error('Error fetching user info:', error);
         setError('Error al obtener información del usuario');

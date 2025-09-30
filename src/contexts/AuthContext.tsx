@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.log('AuthProvider: Database query error for tcUsuarios, using defaults:', error.message);
-        const idbu = await getUserIdbu(); // Try to get idbu via RPC as fallback
+        const idbu = await getIdbu(); // Try to get idbu via RPC as fallback
         return {
           userRole: 'Medico',
           idbu: idbu,

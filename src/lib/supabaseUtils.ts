@@ -18,7 +18,7 @@ export async function getIdbu(): Promise<string> {
       // Fallback to default BU if RPC fails or returns null
       return '00000000-0000-0000-0000-000000000000'; 
     }
-    return data?.idbu || '00000000-0000-0000-0000-000000000000';
+    return data || '00000000-0000-0000-0000-000000000000';
   } catch (error) {
     console.error('Exception in getIdbu:', error);
     return '00000000-0000-0000-0000-000000000000';
