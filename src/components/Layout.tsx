@@ -57,7 +57,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchUserInfo = async () => {
       // Use user data from AuthContext for rol and nombre
       if (!user?.id) {
@@ -73,6 +73,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       try {
         // Get business unit information from get_user_idbu
+        // La función RPC get_user_idbu() ahora devuelve un objeto { idbu, business_name, role }
         const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu');
 
         if (rpcError) {
@@ -90,9 +91,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         setUserInfo({
           authId: user.id,
           nombre: user.nombre,
-          idbu: user.idbu,
-          business_unit: userData?.business_unit || null,
-          rol: user.userRole
+          idbu: userData?.idbu || user.idbu, // Usar el idbu del RPC si está disponible, sino el del contexto
+          business_unit: userData?.business_name ? { Nombre: userData.business_name } : null, // Mapear business_name a Nombre
+          rol: userData?.role || user.userRole // Usar el rol del RPC si está disponible, sino el del contexto
         });
       } catch (error) {
         console.error('Error in fetchUserInfo:', error);
