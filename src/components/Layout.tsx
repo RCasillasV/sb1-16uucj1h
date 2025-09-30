@@ -73,9 +73,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       try {
         // Get business unit information from get_user_idbu
-        const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu', {
-          user_id: user.id
-        });
+        const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu');
 
         if (rpcError) {
           console.error('Error fetching user business unit:', rpcError);

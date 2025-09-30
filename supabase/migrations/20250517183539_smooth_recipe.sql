@@ -40,4 +40,4 @@ AS $$
 $$;
 
 -- Grant execute permission to authenticated users
-GRANT EXECUTE ON FUNCTION public.get_user_idbu(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_user_idbu() TO authenticated;

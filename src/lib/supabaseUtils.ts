@@ -12,7 +12,7 @@ export async function requireSession() {
 export async function getUserIdbu(): Promise<string> {
   const user = await requireSession();
   try {
-    const { data, error } = await supabase.rpc('get_user_idbu', { user_id: user.id });
+    const { data, error } = await supabase.rpc('get_user_idbu');
     if (error) {
       console.error('Error calling get_user_idbu RPC:', error);
       // Fallback to default BU if RPC fails or returns null

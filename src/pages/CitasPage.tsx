@@ -585,9 +585,7 @@ export function CitasPage() {
           return;
         }
 
-        const { data: userData, error: userError } = await supabase.rpc('get_user_idbu', {
-          user_id: session.user.id
-        });
+        const { data: userData, error: userError } = await supabase.rpc('get_user_idbu');
 
         if (userError || !userData?.idbu) {
           setSymptomsError('No se pudo obtener la unidad de negocio del usuario');
