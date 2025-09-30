@@ -172,7 +172,7 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) return;
 
-        const { data: userData, error } = await supabase.rpc('get_user_idbu');
+        const { data: userData, error } = await supabase.rpc('get_idbu');
 
         if (error) throw error;
         setUserInfo({ idbu: userData?.idbu || null });

@@ -73,8 +73,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       try {
         // Get business unit information from get_user_idbu
-        // La función RPC get_user_idbu() ahora devuelve un objeto { idbu, business_name, role }
-        const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu');
+        // La función RPC get_idbu() ahora devuelve un objeto { idbu, business_name, role }
+        const { data: userData, error: rpcError } = await supabase.rpc('get_idbu');
 
         if (rpcError) {
           console.error('Error fetching user business unit:', rpcError);

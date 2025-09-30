@@ -2,7 +2,7 @@
 
 import { createService } from './crudService';
 import { Cache } from '../lib/cache';
-import { handle, requireSession, requireBusinessUnit } from '../lib/supabaseUtils';
+import { handle, requireSession, requireBusinessUnit, getIdbu } from '../lib/supabaseUtils';
 import { supabase } from '../lib/supabase';
 
 const cache = new Cache<any[]>(20 * 60 * 1000, 'appts_');
@@ -179,7 +179,7 @@ export const appointments = {
     notas?: string | null;
   }) {
     const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await requireBusinessUnit();
 
     // Map parameters to match the expected p_ prefixed signature of agendar_cita function
     const rpcPayload = {
@@ -340,7 +340,7 @@ export const appointments = {
     consultorio: number
   ) {
     const user = await requireSession();
-    const idbu = await requireBusinessUnit(user.id);
+    const idbu = await requireBusinessUnit();
 
     return handle(
       supabase.rpc('verificar_slot', {

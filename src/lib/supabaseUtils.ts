@@ -14,18 +14,18 @@ export async function getIdbu(): Promise<string> {
   try {
     const { data, error } = await supabase.rpc('get_idbu');
     if (error) {
-      console.error('Error calling get_useridbu RPC:', error);
+      console.error('Error calling get_idbu RPC:', error);
       // Fallback to default BU if RPC fails or returns null
       return '00000000-0000-0000-0000-000000000000'; 
     }
-    return data || '00000000-0000-0000-0000-000000000000';
+    return data?.idbu || '00000000-0000-0000-0000-000000000000';
   } catch (error) {
     console.error('Exception in getIdbu:', error);
     return '00000000-0000-0000-0000-000000000000';
   }
 }
 
-export async function requireBusinessUnit(userId: string): Promise<string> {
+export async function requireBusinessUnit(): Promise<string> {
   return await getIdbu();
 }
 export async function handle<T>(

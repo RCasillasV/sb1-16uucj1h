@@ -3,7 +3,7 @@ import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 import { supabase } from '../lib/supabase';
 import { handle } from '../lib/supabaseUtils';
-import { requireSession, getUserIdbu } from '../lib/supabaseUtils';
+import { requireSession, getIdbu } from '../lib/supabaseUtils';
 // Define un tipo para la tabla para mejor tipado
 type GynecoObstetricHistoryTable = 'tpPacienteHistGineObst';
 
