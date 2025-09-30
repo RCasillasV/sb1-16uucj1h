@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import 'quill/dist/quill.snow.css';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface RichTextEditorProps {
@@ -29,23 +29,23 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
 
   const styles = useMemo(() => `
     .rich-text-editor {
-      width: 100%;
+      inline-size: 100%;
     }
     
     .rich-text-editor .ql-container {
-      min-height: 200px;
-      border-bottom-left-radius: 0.5rem;
-      border-bottom-right-radius: 0.5rem;
+      min-block-size: 200px;
+      border-end-start-radius: 0.5rem;
+      border-end-end-radius: 0.5rem;
       background: ${currentTheme.colors.surface};
       color: ${currentTheme.colors.text};
       border-color: ${currentTheme.colors.border};
-      font-family: ${currentTheme.typography.fontFamily};
+      font-family: ${currentTheme.typography.fonts.body};
       font-size: ${currentTheme.typography.baseSize};
     }
     
     .rich-text-editor .ql-toolbar {
-      border-top-left-radius: 0.5rem;
-      border-top-right-radius: 0.5rem;
+      border-start-start-radius: 0.5rem;
+      border-start-end-radius: 0.5rem;
       background: ${currentTheme.colors.background};
       border-color: ${currentTheme.colors.border};
     }
@@ -83,12 +83,12 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     }
 
     .rich-text-editor .ql-editor {
-      font-family: ${currentTheme.typography.fontFamily};
+      font-family: ${currentTheme.typography.fonts.body};
     }
 
     .rich-text-editor .ql-editor img {
-      max-width: 100%;
-      height: auto;
+      max-inline-size: 100%;
+      block-size: auto;
     }
   `, [currentTheme]);
 

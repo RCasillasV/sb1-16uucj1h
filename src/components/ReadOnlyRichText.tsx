@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.bubble.css';
+import 'quill/dist/quill.bubble.css';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface ReadOnlyRichTextProps {
@@ -13,35 +13,35 @@ export function ReadOnlyRichText({ content, className = '' }: ReadOnlyRichTextPr
 
   const styles = useMemo(() => `
     .read-only-editor {
-      width: 100%;
+      inline-size: 100%;
     }
     
     .read-only-editor .ql-container {
       border: none !important;
-      font-family: ${currentTheme.typography.fontFamily};
+      font-family: ${currentTheme.typography.fonts.body};
     }
 
     .read-only-editor .ql-editor {
       padding: 0;
       color: ${currentTheme.colors.text};
-      font-family: ${currentTheme.typography.fontFamily};
+      font-family: ${currentTheme.typography.fonts.body};
     }
 
     .read-only-editor .ql-editor h1,
     .read-only-editor .ql-editor h2 {
       color: ${currentTheme.colors.text};
-      font-family: ${currentTheme.typography.fontFamily};
-      margin-bottom: 0.5rem;
+      font-family: ${currentTheme.typography.fonts.body};
+      margin-block-end: 0.5rem;
     }
 
     .read-only-editor .ql-editor p {
-      margin-bottom: 0.5rem;
+      margin-block-end: 0.5rem;
     }
 
     .read-only-editor .ql-editor ul,
     .read-only-editor .ql-editor ol {
-      padding-left: 1.5rem;
-      margin-bottom: 0.5rem;
+      padding-inline-start: 1.5rem;
+      margin-block-end: 0.5rem;
     }
 
     .read-only-editor .ql-editor a {
@@ -49,15 +49,15 @@ export function ReadOnlyRichText({ content, className = '' }: ReadOnlyRichTextPr
     }
 
     .read-only-editor .ql-editor blockquote {
-      border-left: 4px solid ${currentTheme.colors.border};
-      padding-left: 1rem;
+      border-inline-start: 4px solid ${currentTheme.colors.border};
+      padding-inline-start: 1rem;
       margin: 1rem 0;
       color: ${currentTheme.colors.textSecondary};
     }
 
     .read-only-editor .ql-editor img {
-      max-width: 100%;
-      height: auto;
+      max-inline-size: 100%;
+      block-size: auto;
     }
   `, [currentTheme]);
 
