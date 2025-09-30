@@ -6,7 +6,7 @@ import { patologies } from '../services/patologyService';
 import { gynecoObstetricHistory } from '../services/gynecoObstetricService';
 import { supabase } from './supabase';
 import { Cache } from './cache';
-import { requireSession, getUserIdbu, requireBusinessUnit } from './supabaseUtils';
+import { requireSession, getIdbu, requireBusinessUnit } from './supabaseUtils';
 import { DEFAULT_BU } from '../utils/constants';
 
 // Cache instances
@@ -538,7 +538,7 @@ const consultorios = {
 // Agenda settings service
 const agendaSettings = {
   async get() {
-    const idbu = await getUserIdbu();
+    const idbu = await getIdbu();
 
     const { data, error } = await supabase
       .from('tcAgendaSettings')
@@ -556,7 +556,7 @@ const agendaSettings = {
     consultation_days: string[];
     slot_interval: number;
   }) {
-    const idbu = await getUserIdbu();
+    const idbu = await getIdbu();
 
     const { data: existing } = await supabase
       .from('tcAgendaSettings')
@@ -598,7 +598,7 @@ const agendaSettings = {
 // Blocked dates service
 const blockedDates = {
   async getAll() {
-    const idbu = await getUserIdbu();
+    const idbu = await getIdbu();
 
     const { data, error } = await supabase
       .from('tcAgendaBloqueada')
@@ -617,7 +617,7 @@ const blockedDates = {
     reason: string;
     block_type: string;
   }) {
-    const idbu = await getUserIdbu();
+    const idbu = await getIdbu();
 
     const { data, error } = await supabase
       .from('tcAgendaBloqueada')

@@ -22,10 +22,10 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
       if (includeIdbu) {
         // Para tcCitas, usar idBu en lugar de idbu
         if (table === 'tcCitas') {
-          const idbuValue = await getUserIdbu();
+          const idbuValue = await getIdbu();
           insertData.idBu = idbuValue;
         } else {
-          const idbuValue = await getUserIdbu();
+          const idbuValue = await getIdbu();
           insertData.idbu = idbuValue;
         }
       }

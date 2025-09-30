@@ -9,10 +9,10 @@ export async function requireSession() {
   return session.user;
 }
 
-export async function getUserIdbu(): Promise<string> {
+export async function geIdbu(): Promise<string> {
   const user = await requireSession();
   try {
-    const { data, error } = await supabase.rpc('get_useridbu');
+    const { data, error } = await supabase.rpc('get_idbu');
     if (error) {
       console.error('Error calling get_useridbu RPC:', error);
       // Fallback to default BU if RPC fails or returns null
@@ -20,13 +20,13 @@ export async function getUserIdbu(): Promise<string> {
     }
     return data || '00000000-0000-0000-0000-000000000000';
   } catch (error) {
-    console.error('Exception in getUserIdbu:', error);
+    console.error('Exception in geIdbu:', error);
     return '00000000-0000-0000-0000-000000000000';
   }
 }
 
 export async function requireBusinessUnit(userId: string): Promise<string> {
-  return await getUserIdbu();
+  return await geIdbu();
 }
 export async function handle<T>(
   promise: Promise<{ data: T | null; error: any }>,

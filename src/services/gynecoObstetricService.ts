@@ -73,7 +73,7 @@ export const gynecoObstetricHistory = {
    */
   async create(payload: any) {
     const user = await requireSession();
-    const idbu = await getUserIdbu();
+    const idbu = await getIdbu();
     
     console.log('GYNECO_SERVICE: create - Function entered.');
     console.log('GYNECO_SERVICE: create - Payload received:', payload);
@@ -104,7 +104,7 @@ export const gynecoObstetricHistory = {
    */
   async update(patientId: string, payload: any) {
     const user = await requireSession();
-    const idbu = await getUserIdbu();
+    const idbu = await getIdbu();
 
     console.log('GYNECO_SERVICE: update - Function entered.');
     console.log('GYNECO_SERVICE: update - Function entered.'); 

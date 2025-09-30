@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { DEFAULT_BU } from '../utils/constants';
-import { getUserIdbu } from '../lib/supabaseUtils';
+import { getIdbu } from '../lib/supabaseUtils';
 import { AuthApiError } from '@supabase/supabase-js';
 import type { User, AuthError } from '@supabase/supabase-js';
  
