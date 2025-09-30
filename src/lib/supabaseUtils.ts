@@ -40,5 +40,3 @@ export async function handle<T>(
   }
   return data !== null ? data : fallback;
 }
-
-```
