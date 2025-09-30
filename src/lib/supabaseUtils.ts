@@ -25,6 +25,9 @@ export async function getUserIdbu(): Promise<string> {
   }
 }
 
+export async function requireBusinessUnit(userId: string): Promise<string> {
+  return await getUserIdbu();
+}
 export async function handle<T>(
   promise: Promise<{ data: T | null; error: any }>,
   fallback: T

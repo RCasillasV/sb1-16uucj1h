@@ -1,7 +1,7 @@
 import { createService } from './crudService';
 import { Cache } from '../lib/cache';
 import { supabase } from '../lib/supabase';
-import { handle } from '../lib/apiHelpers';
+import { handle } from '../lib/supabaseUtils';
 
 const cache = new Cache<any[]>(30 * 60 * 1000, 'patologies_');
 const svc = createService<'tcPatologias'>('tcPatologias', 'idusuario');

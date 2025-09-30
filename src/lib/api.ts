@@ -6,7 +6,7 @@ import { patologies } from '../services/patologyService';
 import { gynecoObstetricHistory } from '../services/gynecoObstetricService';
 import { supabase } from './supabase';
 import { Cache } from './cache';
-import { requireSession, getUserIdbu } from './supabaseUtils';
+import { requireSession, getUserIdbu, requireBusinessUnit } from './supabaseUtils';
 import { DEFAULT_BU } from '../utils/constants';
 
 // Cache instances

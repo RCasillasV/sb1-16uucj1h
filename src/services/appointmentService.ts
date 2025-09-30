@@ -2,7 +2,7 @@
 
 import { createService } from './crudService';
 import { Cache } from '../lib/cache';
-import { handle, requireSession, requireBusinessUnit } from '../lib/apiHelpers';
+import { handle, requireSession, requireBusinessUnit } from '../lib/supabaseUtils';
 import { supabase } from '../lib/supabase';
 
 const cache = new Cache<any[]>(20 * 60 * 1000, 'appts_');
