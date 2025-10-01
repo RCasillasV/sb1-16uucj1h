@@ -36,17 +36,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
     authId: string,
     nombre: string | null,
     idbu: string | null,
-    business_unit: { Nombre: string } | null,
+    business_name: string  | null,
     rol: string | null,
   }>({ 
     authId: '', 
     nombre: null,
     idbu: null,
-    business_unit: null,
+    business_name: null,
     rol: null
   });
 
-  useEffect(() => {
+  useEffect(() => { 
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -65,7 +65,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           authId: '',
           nombre: null,
           idbu: null,
-          business_unit: null,
+          business_name: null,
           rol: null
         });
         return;
@@ -82,8 +82,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             authId: user.id,
             nombre: user.nombre,
             idbu: user.idbu,
-            business_unit: null,
-            rol: user.userRole
+            business_unit: userData.business_name,
+            rol: userData.role 
           });
           return;
         }
@@ -92,8 +92,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           authId: user.id,
           nombre: user.nombre,
           idbu: userData?.idbu || user.idbu, // Usar el idbu del RPC si está disponible, sino el del contexto
-          business_unit: userData?.business_name ? { Nombre: userData.business_name } : null, // Mapear business_name a Nombre
-          rol: userData?.role || user.userRole // Usar el rol del RPC si está disponible, sino el del contexto
+          business_unit: userData?.business_name || null, // Mapear business_name a Nombre
+          rol: userData?.role || userData.role // Usar el rol del RPC si está disponible, sino el del contexto
         });
       } catch (error) {
         console.error('Error in fetchUserInfo:', error);
@@ -101,8 +101,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           authId: user?.id || '',
           nombre: user?.nombre || null,
           idbu: user?.idbu || null,
-          business_unit: null,
-          rol: user?.userRole || null
+          business_name: userData?.business_name || null,
+          rol: userData?.role || null
         });
       }
     };

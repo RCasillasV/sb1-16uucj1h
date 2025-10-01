@@ -23,7 +23,7 @@ interface MainHeaderProps {
     authId: string; 
     nombre: string | null;
     idbu: string | null;
-    business_unit: { Nombre: string } | null;
+    business_name: string  | null;
     rol: string | null;
   };
   clinicalHistoryCount: number;
