@@ -623,8 +623,7 @@ const blockedDates = {
       .from('tcAgendaBloqueada')
       .insert([{
         ...payload,
-        idbu,
-        user_id: user.id
+        idbu
       }])
       .select()
       .single();
