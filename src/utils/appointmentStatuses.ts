@@ -1,21 +1,28 @@
 // src/utils/appointmentStatuses.ts   Bolt
 
-import { CheckCircle, XCircle, Clock, RefreshCw, PauseCircle, AlertTriangle, UserX, UserCheck } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, RefreshCw, PauseCircle, AlertTriangle, UserX, UserCheck, FileText, DollarSign, Gift, Lock, LogOut } from 'lucide-react';
 import React from 'react'; // Importar React para los iconos
 
 // Mapeo de IDs numéricos a información de estados
+// Sincronizado con la tabla tcCitasEstados de la base de datos
 export const DETAILED_APPOINTMENT_STATUSES = {
+  0: { display: 'Solicitada', color: '#9CA3AF', icon: Clock, name: 'Solicitada' },
   1: { display: 'Programada', color: '#3B82F6', icon: Clock, name: 'Programada' },
   2: { display: 'Confirmada', color: '#22C55E', icon: CheckCircle, name: 'Confirmada' },
-  3: { display: 'En Progreso', color: '#F59E0B', icon: RefreshCw, name: 'En Progreso' },
-  4: { display: 'Atendida', color: '#10B981', icon: CheckCircle, name: 'Atendida' },
-  5: { display: 'No se Presentó', color: '#EF4444', icon: UserX, name: 'No se Presentó' },
-  6: { display: 'Cancelada x Paciente', color: '#EF4444', icon: XCircle, name: 'Cancelada x Paciente' },
-  7: { display: 'Cancelada x Médico', color: '#EF4444', icon: XCircle, name: 'Cancelada x Médico' },
-  8: { display: 'Reprogramada x Paciente', color: '#6366F1', icon: RefreshCw, name: 'Reprogramada x Paciente' },
-  9: { display: 'Reprogramada x Médico', color: '#6366F1', icon: RefreshCw, name: 'Reprogramada x Médico' },
-  10: { display: 'En Espera', color: '#9CA3AF', icon: PauseCircle, name: 'En Espera' },
+  3: { display: 'En Espera', color: '#9CA3AF', icon: PauseCircle, name: 'En Espera' },
+  4: { display: 'En Progreso', color: '#F59E0B', icon: RefreshCw, name: 'En Progreso' },
+  5: { display: 'Atendida', color: '#10B981', icon: CheckCircle, name: 'Atendida' },
+  6: { display: 'No se Presentó', color: '#EF4444', icon: UserX, name: 'No se Presentó' },
+  7: { display: 'Cancelada x Paciente', color: '#EF4444', icon: XCircle, name: 'Cancelada x Paciente' },
+  8: { display: 'Cancelada x Médico', color: '#EF4444', icon: XCircle, name: 'Cancelada x Médico' },
+  9: { display: 'Reprogramada x Paciente', color: '#6366F1', icon: RefreshCw, name: 'Reprogramada x Paciente' },
+  10: { display: 'Reprogramada x Médico', color: '#6366F1', icon: RefreshCw, name: 'Reprogramada x Médico' },
   11: { display: 'Urgencia', color: '#DC2626', icon: AlertTriangle, name: 'Urgencia' },
+  12: { display: 'Facturada', color: '#8B5CF6', icon: FileText, name: 'Facturada' },
+  13: { display: 'Cortesía', color: '#14B8A6', icon: Gift, name: 'Cortesía' },
+  14: { display: 'Pagada', color: '#10B981', icon: DollarSign, name: 'Pagada' },
+  15: { display: 'Cerrada', color: '#6B7280', icon: Lock, name: 'Cerrada' },
+  16: { display: 'Se Retiró el Paciente', color: '#F97316', icon: LogOut, name: 'Se Retiró el Paciente' },
 };
 
 // Tipo para los IDs numéricos de estados
