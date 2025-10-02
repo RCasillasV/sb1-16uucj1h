@@ -351,22 +351,23 @@ export const appointments = {
         hora_nueva,
         notas,
         created_at,
-        estado_anterior_info:tcCitasEstados!tcCitasHistorial_estado_anterior_fkey(id, estado, descripcion),
-        estado_nuevo_info:tcCitasEstados!tcCitasHistorial_estado_nuevo_fkey(id, estado, descripcion),
-        usuario:tcUsuarios!tcCitasHistorial_id_user_fkey(id, Nombre, Paterno, Materno, Email)
+        estado_anterior_info:tcCitasEstados!fk_historial_estado_anterior(id, estado, descripcion),
+        estado_nuevo_info:tcCitasEstados!fk_historial_estado_nuevo(id, estado, descripcion),
+        usuario:tcUsuarios!fk_user_historial(id, nombre, email)
       `)
       .eq('cita_id', appointmentId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching appointment history:', error);
+      throw error;
+    }
 
     const historyData = (data || []).map(item => ({
       ...item,
       estado_anterior_nombre: item.estado_anterior_info?.estado || 'Desconocido',
       estado_nuevo_nombre: item.estado_nuevo_info?.estado || 'Desconocido',
-      usuario_nombre: item.usuario
-        ? `${item.usuario.Nombre} ${item.usuario.Paterno} ${item.usuario.Materno || ''}`.trim()
-        : 'Sistema',
+      usuario_nombre: item.usuario?.nombre || 'Sistema',
     }));
 
     cache.set(key, historyData, 5 * 60 * 1000); // Cache for 5 minutes
