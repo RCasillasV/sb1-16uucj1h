@@ -103,30 +103,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     fetchUserInfo();
   }, [user?.id]); // Only depend on user id to avoid unnecessary refetches
 
-  useEffect(() => {
-    if (selectedPatient) {
-      setClinicalHistoryCount(null);
-      setClinicalEvolutionCount(null);
-      setPrescriptionsCount(null);
-      setPatientFilesCount(null);
-
-      // Debounce API calls to avoid multiple rapid requests
-      const timeoutId = setTimeout(() => {
-        fetchCounts();
-        fetchAppointments();
-      }, 300);
-
-      return () => clearTimeout(timeoutId);
-    } else {
-      setClinicalHistoryCount(0);
-      setClinicalEvolutionCount(0);
-      setPrescriptionsCount(0);
-      setPatientFilesCount(0);
-      setLastAppointment(null);
-      setNextAppointment(null);
-    }
-  }, [selectedPatient, fetchCounts, fetchAppointments]);
-
   const fetchCounts = useCallback(async () => {
     if (!selectedPatient) return;
     
@@ -245,6 +221,30 @@ export function Layout({ children }: { children: React.ReactNode }) {
       console.error('Error fetching appointments:', err);
     }
   }, [selectedPatient]);
+
+  useEffect(() => {
+    if (selectedPatient) {
+      setClinicalHistoryCount(null);
+      setClinicalEvolutionCount(null);
+      setPrescriptionsCount(null);
+      setPatientFilesCount(null);
+
+      // Debounce API calls to avoid multiple rapid requests
+      const timeoutId = setTimeout(() => {
+        fetchCounts();
+        fetchAppointments();
+      }, 300);
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setClinicalHistoryCount(0);
+      setClinicalEvolutionCount(0);
+      setPrescriptionsCount(0);
+      setPatientFilesCount(0);
+      setLastAppointment(null);
+      setNextAppointment(null);
+    }
+  }, [selectedPatient, fetchCounts, fetchAppointments]);
 
   useEffect(() => {
     const handleClickOutside = () => setShowContextMenu(false);
