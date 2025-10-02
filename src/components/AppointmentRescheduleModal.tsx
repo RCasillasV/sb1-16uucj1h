@@ -55,14 +55,14 @@ export function AppointmentRescheduleModal({
     try {
       const filteredStatuses = await api.appointments.getFilteredStatusOptions(currentStatusId);
       setStatusOptions(filteredStatuses);
-      
-      // Set default to first allowed transition or current status
-      const allowedTransitions = await api.appointments.getAllowedStatusTransitions(currentStatusId);
-      if (allowedTransitions.length > 0) {
-        // Find the first reprogramming-related status or use the first allowed
-        const reprogrammingStatus = allowedTransitions.find(id => id === 8 || id === 9);
-        setSelectedStatusId(reprogrammingStatus || allowedTransitions[0]);
+
+      // Set default to first reprogramming-related status if available, otherwise first allowed
+      if (filteredStatuses.length > 0) {
+        // Buscar estados de reprogramación (9: Reprogramada x Paciente, 10: Reprogramada x Médico)
+        const reprogrammingStatus = filteredStatuses.find(s => s.id === 9 || s.id === 10);
+        setSelectedStatusId(reprogrammingStatus ? reprogrammingStatus.id : filteredStatuses[0].id);
       } else {
+        // Si no hay transiciones permitidas, mantener el estado actual
         setSelectedStatusId(currentStatusId);
       }
     } catch (err) {

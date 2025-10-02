@@ -61,9 +61,11 @@ interface EstadoSelectorProps {
   value: number;
   onChange: (estadoId: number) => void;
   disabled?: boolean;
+  currentStatusId?: number; // Estado actual de la cita para filtrar transiciones
+  isNewAppointment?: boolean; // Si es una cita nueva
 }
 
-function EstadoSelector({ value, onChange, disabled = false }: EstadoSelectorProps) {
+function EstadoSelector({ value, onChange, disabled = false, currentStatusId, isNewAppointment = false }: EstadoSelectorProps) {
   const { currentTheme } = useTheme();
   const [estados, setEstados] = useState<Array<{ id: number; estado: string; descripcion: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -71,30 +73,43 @@ function EstadoSelector({ value, onChange, disabled = false }: EstadoSelectorPro
   useEffect(() => {
     const fetchEstados = async () => {
       try {
-        const estadosData = await api.appointments.getEstados();
+        // Si es una cita nueva, obtener estados iniciales (estado_origen_id = 0)
+        // Si es edición, obtener transiciones permitidas desde el estado actual
+        const statusIdToFilter = isNewAppointment ? undefined : currentStatusId;
+        const estadosData = await api.appointments.getFilteredStatusOptions(statusIdToFilter);
         setEstados(estadosData);
+
+        // Si es una cita nueva y no hay valor seleccionado, establecer el primer estado permitido
+        if (isNewAppointment && !value && estadosData.length > 0) {
+          onChange(estadosData[0].id);
+        }
       } catch (error) {
         console.error('Error fetching estados:', error);
-        // Fallback a los estados por defecto
-        setEstados([
-          { id: 1, estado: 'Programada', descripcion: 'Cita programada' },
-          { id: 2, estado: 'Confirmada', descripcion: 'Cita confirmada' },
-          { id: 3, estado: 'En Progreso', descripcion: 'Cita en progreso' },
-          { id: 4, estado: 'Atendida', descripcion: 'Cita completada' },
-          { id: 5, estado: 'Cancelada', descripcion: 'Cita cancelada' },
-        ]);
+        // Fallback a los estados por defecto solo para citas nuevas
+        if (isNewAppointment) {
+          setEstados([
+            { id: 1, estado: 'Programada', descripcion: 'Cita programada' },
+            { id: 11, estado: 'Urgencia', descripcion: 'Cita de urgencia' },
+          ]);
+        } else {
+          setEstados([
+            { id: 1, estado: 'Programada', descripcion: 'Cita programada' },
+            { id: 2, estado: 'Confirmada', descripcion: 'Cita confirmada' },
+            { id: 3, estado: 'En Espera', descripcion: 'Cita en espera' },
+          ]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchEstados();
-  }, []);
+  }, [currentStatusId, isNewAppointment]);
 
   if (loading) {
     return (
-      <select 
-        disabled 
+      <select
+        disabled
         className="w-full p-2 rounded-md border"
         style={{
           background: currentTheme.colors.surface,
@@ -1175,7 +1190,7 @@ export function CitasPage() {
 
                   {/* Estado de la cita */}
                   <div>
-                    <label 
+                    <label
                       className="block text-sm font-medium mb-1"
                       style={{ color: currentTheme.colors.text }}
                     >
@@ -1185,6 +1200,8 @@ export function CitasPage() {
                       value={form.watch('estado')}
                       onChange={(estadoId) => form.setValue('estado', estadoId)}
                       disabled={isViewOnlyMode}
+                      currentStatusId={editingAppointment?.estado}
+                      isNewAppointment={!editingAppointment}
                     />
                   </div>        
                 </div>

@@ -35,13 +35,11 @@ const INTERVAL_MINUTES = 30;
 const DAYS_TO_SHOW = 6;
 const MAX_DAYS_AHEAD = 60;
 
-const DETAILED_APPOINTMENT_STATUSES = {
-  1: { display: 'Programada' },
-  2: { display: 'Confirmada' },
-  3: { display: 'En Progreso' },
-  4: { display: 'Completada' },
-  5: { display: 'Cancelada' }
-};
+interface AppointmentStatus {
+  id: number;
+  estado: string;
+  descripcion: string;
+}
 
 export function AppointmentForm({ onSuccess, onCancel, appointment }: AppointmentFormProps) {
   const { currentTheme } = useTheme();
@@ -69,20 +67,53 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
   const [notes, setNotes] = useState(appointment?.notas || '');
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<number>(appointment?.estado || 1);
+  const [availableStatuses, setAvailableStatuses] = useState<AppointmentStatus[]>([]);
+  const [loadingStatuses, setLoadingStatuses] = useState(true);
   
   useEffect(() => {
     if (!selectedPatient && !appointment) {
       onCancel();
       return;
     }
-    
+
     // Si hay un appointment, asegúrate de que el paciente esté seleccionado
     if (appointment?.patients && !selectedPatient) {
       setSelectedPatient(appointment.patients);
     }
-    
+
     fetchExistingAppointments();
   }, [selectedDate, appointment, selectedPatient, setSelectedPatient]);
+
+  useEffect(() => {
+    const fetchAvailableStatuses = async () => {
+      setLoadingStatuses(true);
+      try {
+        // Si es una cita nueva, pasar undefined para obtener estados iniciales
+        // Si es edición, pasar el estado actual de la cita
+        const currentStatusId = appointment?.estado;
+        const statuses = await api.appointments.getFilteredStatusOptions(currentStatusId);
+        setAvailableStatuses(statuses);
+
+        // Si es una cita nueva y no hay estado seleccionado, establecer el primer estado permitido
+        if (!appointment && statuses.length > 0 && !status) {
+          setStatus(statuses[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching available statuses:', error);
+        // Fallback a estados por defecto
+        if (!appointment) {
+          setAvailableStatuses([
+            { id: 1, estado: 'Programada', descripcion: 'Cita programada' },
+            { id: 11, estado: 'Urgencia', descripcion: 'Cita de urgencia' },
+          ]);
+        }
+      } finally {
+        setLoadingStatuses(false);
+      }
+    };
+
+    fetchAvailableStatuses();
+  }, [appointment?.estado]);
 
   async function fetchExistingAppointments() {
     try {
@@ -380,6 +411,7 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
             id="status"
             value={status}
             onChange={(e) => setStatus(parseInt(e.target.value))}
+            disabled={loadingStatuses}
             className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             style={{
               backgroundColor: currentTheme.colors.surface,
@@ -387,11 +419,15 @@ export function AppointmentForm({ onSuccess, onCancel, appointment }: Appointmen
               borderColor: currentTheme.colors.border,
             }}
           >
-            {Object.entries(DETAILED_APPOINTMENT_STATUSES).map(([id, info]) => (
-              <option key={id} value={id}>
-                {info.display}
-              </option>
-            ))}
+            {loadingStatuses ? (
+              <option>Cargando estados...</option>
+            ) : (
+              availableStatuses.map((statusOption) => (
+                <option key={statusOption.id} value={statusOption.id}>
+                  {statusOption.estado}
+                </option>
+              ))
+            )}
           </select>
         </div>
 

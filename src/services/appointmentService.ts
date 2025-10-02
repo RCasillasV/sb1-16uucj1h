@@ -318,19 +318,19 @@ export const appointments = {
 
   async getFilteredStatusOptions(currentStatusId?: number) {
     const allStatuses = await this.getAllStatuses();
-    
-    // Si no hay estado actual (nueva cita), solo mostrar "Programada"
-    if (!currentStatusId) {
-      return allStatuses.filter(status => status.id === 1);
+
+    // Si no hay estado actual (nueva cita), usar estado 0 como origen
+    // para obtener los estados iniciales permitidos (1: Programada, 11: Urgencia)
+    if (currentStatusId === undefined || currentStatusId === null) {
+      const allowedInitialTransitions = await this.getAllowedStatusTransitions(0);
+      return allStatuses.filter(status => allowedInitialTransitions.includes(status.id));
     }
-    
-    // Para citas existentes, obtener transiciones permitidas
+
+    // Para citas existentes, obtener transiciones permitidas desde el estado actual
     const allowedTransitions = await this.getAllowedStatusTransitions(currentStatusId);
-    
-    // Incluir el estado actual y los estados permitidos
-    const validStatusIds = [currentStatusId, ...allowedTransitions];
-    
-    return allStatuses.filter(status => validStatusIds.includes(status.id));
+
+    // Filtrar solo los estados destino permitidos (no incluir el estado actual automáticamente)
+    return allStatuses.filter(status => allowedTransitions.includes(status.id));
   },
 
   async checkSlotAvailability(
