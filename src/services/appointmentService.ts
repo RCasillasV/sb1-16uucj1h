@@ -333,6 +333,129 @@ export const appointments = {
     return allStatuses.filter(status => allowedTransitions.includes(status.id));
   },
 
+  async getAppointmentHistory(appointmentId: string) {
+    const key = `history_${appointmentId}`;
+    const cached = cache.get(key);
+    if (cached) return cached;
+
+    const { data, error } = await supabase
+      .from('tcCitasHistorial')
+      .select(`
+        id,
+        cita_id,
+        estado_anterior,
+        estado_nuevo,
+        fecha_anterior,
+        hora_anterior,
+        fecha_nueva,
+        hora_nueva,
+        notas,
+        created_at,
+        estado_anterior_info:tcCitasEstados!tcCitasHistorial_estado_anterior_fkey(id, estado, descripcion),
+        estado_nuevo_info:tcCitasEstados!tcCitasHistorial_estado_nuevo_fkey(id, estado, descripcion),
+        usuario:tcUsuarios!tcCitasHistorial_id_user_fkey(id, Nombre, Paterno, Materno, Email)
+      `)
+      .eq('cita_id', appointmentId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const historyData = (data || []).map(item => ({
+      ...item,
+      estado_anterior_nombre: item.estado_anterior_info?.estado || 'Desconocido',
+      estado_nuevo_nombre: item.estado_nuevo_info?.estado || 'Desconocido',
+      usuario_nombre: item.usuario
+        ? `${item.usuario.Nombre} ${item.usuario.Paterno} ${item.usuario.Materno || ''}`.trim()
+        : 'Sistema',
+    }));
+
+    cache.set(key, historyData, 5 * 60 * 1000); // Cache for 5 minutes
+    return historyData;
+  },
+
+  async getByDateRange(startDate: string, endDate: string) {
+    const key = `range_${startDate}_${endDate}`;
+    const cached = cache.get(key);
+    if (cached) return cached;
+
+    const { data, error } = await supabase
+      .from('tcCitas')
+      .select(`
+        id, fecha_cita, hora_cita, motivo, notas, urgente, consultorio,
+        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados,
+        hora_fin, duracion_minutos, idBu,
+        estado_info:tcCitasEstados!fk_tccitas_estado(id, estado, descripcion),
+        patients:id_paciente(id,Nombre,Paterno,Materno,FechaNacimiento,Sexo,Email,Telefono)
+      `)
+      .gte('fecha_cita', startDate)
+      .lte('fecha_cita', endDate)
+      .order('fecha_cita', { ascending: false })
+      .order('hora_cita', { ascending: false });
+
+    if (error) throw error;
+
+    const transformedData = (data || []).map(appointment => ({
+      ...appointment,
+      estado: appointment.estado_info?.id || 1,
+      estado_nombre: appointment.estado_info?.estado || 'Programada',
+    }));
+
+    cache.set(key, transformedData);
+    return transformedData;
+  },
+
+  async changeStatus(appointmentId: string, newStatusId: number, notas?: string) {
+    const originalAppointment = await this.getById(appointmentId);
+    if (!originalAppointment) {
+      throw new Error('Cita no encontrada');
+    }
+
+    const user = await requireSession();
+
+    // Insert history record
+    const { error: historialError } = await supabase
+      .from('tcCitasHistorial')
+      .insert([{
+        cita_id: appointmentId,
+        estado_anterior: originalAppointment.estado,
+        estado_nuevo: newStatusId,
+        fecha_anterior: originalAppointment.fecha_cita,
+        hora_anterior: originalAppointment.hora_cita,
+        fecha_nueva: originalAppointment.fecha_cita,
+        hora_nueva: originalAppointment.hora_cita,
+        id_user: user.id,
+        notas: notas || null,
+      }]);
+
+    if (historialError) {
+      console.error('Error inserting appointment history:', historialError);
+      throw new Error('Error al registrar el cambio en el historial');
+    }
+
+    // Update appointment status
+    const { error: updateError } = await supabase
+      .from('tcCitas')
+      .update({ estado: newStatusId, updated_at: new Date().toISOString() })
+      .eq('id', appointmentId);
+
+    if (updateError) {
+      console.error('Error updating appointment status:', updateError);
+      throw new Error('Error al actualizar el estado de la cita');
+    }
+
+    // Invalidate caches
+    cache.delete('all');
+    cache.delete(`history_${appointmentId}`);
+    if (originalAppointment.id_paciente) {
+      cache.delete(`patient_${originalAppointment.id_paciente}`);
+    }
+    if (originalAppointment.fecha_cita && originalAppointment.consultorio) {
+      cache.delete(`date_consultorio_${originalAppointment.fecha_cita}_${originalAppointment.consultorio}`);
+    }
+
+    return { success: true };
+  },
+
   async checkSlotAvailability(
     fecha: string,
     hora_inicio: string,
