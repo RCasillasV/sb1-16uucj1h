@@ -515,29 +515,29 @@ export function CitasPage() {
         console.log('Update payload:', JSON.stringify(updatePayload, null, 2));
         await api.appointments.update(editingAppointment.id, updatePayload);
       } else {
-        // Create new appointment - determine estado from form or urgente flag
-        const estadoValue = Number(data.estado) || (data.urgente ? 11 : 1);
-        console.log('CREATING new appointment with estado:', estadoValue);
+        // Create new appointment using createSecure which calls agendar_cita RPC
+        console.log('CREATING new appointment');
+        console.log('Selected patient ID:', selectedPatient.id);
+        console.log('Form data:', JSON.stringify(data, null, 2));
 
         const createPayload = {
           id_paciente: selectedPatient.id,
           fecha_cita: data.fecha_cita,
           hora_cita: data.hora_cita,
           motivo: data.motivo,
-          estado: estadoValue,
           consultorio: data.consultorio,
-          notas: data.notas || null,
-          tipo_consulta: data.tipo_consulta,
-          tiempo_evolucion: parseInt(data.tiempo_evolucion || '0'),
-          unidad_tiempo: data.unidad_tiempo,
-          sintomas_asociados: data.sintomas_asociados,
-          urgente: data.urgente,
-          id_user: userId,
           duracion_minutos: data.duracion_minutos,
-          hora_fin: data.hora_fin,
+          tipo_consulta: data.tipo_consulta,
+          tiempo_evolucion: data.tiempo_evolucion ? parseInt(data.tiempo_evolucion) : null,
+          unidad_tiempo: data.unidad_tiempo || null,
+          sintomas_asociados: data.sintomas_asociados || [],
+          urgente: data.urgente || false,
+          notas: data.notas || null,
         };
-        console.log('Create payload:', JSON.stringify(createPayload, null, 2));
-        await api.appointments.create(createPayload);
+        console.log('Create payload for createSecure:', JSON.stringify(createPayload, null, 2));
+
+        const result = await api.appointments.createSecure(createPayload);
+        console.log('Appointment created successfully:', result);
       }
 
       console.log('=== APPOINTMENT SAVED SUCCESSFULLY ===');
@@ -557,9 +557,30 @@ export function CitasPage() {
       if (error instanceof Error && error.stack) {
         console.error('Stack trace:', error.stack);
       }
-      form.setError('root', {
-        message: editingAppointment ? 'Error al actualizar la cita' : 'Error al crear la cita'
-      });
+
+      // Extract more specific error message from the error object
+      let errorMessage = editingAppointment ? 'Error al actualizar la cita' : 'Error al crear la cita';
+
+      if (error instanceof Error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes('slot') || msg.includes('ocupado')) {
+          errorMessage = 'El horario seleccionado ya está ocupado. Por favor, elija otro horario.';
+        } else if (msg.includes('bloqueada')) {
+          errorMessage = 'La fecha seleccionada está bloqueada. Por favor, elija otra fecha.';
+        } else if (msg.includes('pasado')) {
+          errorMessage = 'No se pueden agendar citas en el pasado.';
+        } else if (msg.includes('horario de atención')) {
+          errorMessage = 'La hora seleccionada está fuera del horario de atención.';
+        } else if (msg.includes('día de consulta')) {
+          errorMessage = 'El día seleccionado no es un día de consulta configurado.';
+        } else if (msg.includes('unidad de negocio')) {
+          errorMessage = 'Error de configuración: usuario sin unidad de negocio asignada.';
+        } else if (error.message) {
+          errorMessage = `${errorMessage}: ${error.message}`;
+        }
+      }
+
+      form.setError('root', { message: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -727,7 +748,21 @@ export function CitasPage() {
             </div>
           ) : (
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              
+
+              {/* Error Display */}
+              {form.formState.errors.root && (
+                <div
+                  className="p-4 rounded-md border-l-4"
+                  style={{
+                    background: '#FEE2E2',
+                    borderLeftColor: '#DC2626',
+                    color: '#DC2626',
+                  }}
+                >
+                  <p className="font-medium">{form.formState.errors.root.message}</p>
+                </div>
+              )}
+
               {/* Tipo de Consulta */}
               <div>
                 <label 
