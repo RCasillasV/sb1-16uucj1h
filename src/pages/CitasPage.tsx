@@ -459,13 +459,23 @@ export function CitasPage() {
 
 
   const onSubmit = async (data: FormData) => {
-    if (!selectedPatient) return;
-    
+    console.log('=== FORM SUBMISSION START ===');
+    console.log('Form Data:', JSON.stringify(data, null, 2));
+    console.log('Selected Patient:', selectedPatient?.id);
+    console.log('Estado value:', data.estado, 'Type:', typeof data.estado);
+    console.log('Urgente value:', data.urgente);
+
+    if (!selectedPatient) {
+      console.error('No patient selected!');
+      return;
+    }
+
     // Validar que la fecha y hora sean futuras
     const selectedDateTime = new Date(`${data.fecha_cita}T${data.hora_cita}:00`);
     const now = new Date();
-    
+
     if (selectedDateTime <= now) {
+      console.log('Date/time is in the past');
       setShowDateTimeErrorModal(true);
       return;
     }
@@ -486,11 +496,12 @@ export function CitasPage() {
 
       if (editingAppointment) {
         // Update existing appointment
-        await api.appointments.update(editingAppointment.id, {
+        console.log('UPDATING appointment:', editingAppointment.id);
+        const updatePayload = {
           fecha_cita: data.fecha_cita,
           hora_cita: data.hora_cita,
           motivo: data.motivo,
-          estado: data.estado,
+          estado: Number(data.estado),
           consultorio: data.consultorio,
           notas: data.notas || null,
           tipo_consulta: data.tipo_consulta,
@@ -500,15 +511,20 @@ export function CitasPage() {
           urgente: data.urgente,
           duracion_minutos: data.duracion_minutos,
           hora_fin: data.hora_fin,
-        });
+        };
+        console.log('Update payload:', JSON.stringify(updatePayload, null, 2));
+        await api.appointments.update(editingAppointment.id, updatePayload);
       } else {
-        // Create new appointment
-        await api.appointments.create({
+        // Create new appointment - determine estado from form or urgente flag
+        const estadoValue = Number(data.estado) || (data.urgente ? 11 : 1);
+        console.log('CREATING new appointment with estado:', estadoValue);
+
+        const createPayload = {
           id_paciente: selectedPatient.id,
           fecha_cita: data.fecha_cita,
           hora_cita: data.hora_cita,
           motivo: data.motivo,
-          estado: 1, // ID para 'Programada'
+          estado: estadoValue,
           consultorio: data.consultorio,
           notas: data.notas || null,
           tipo_consulta: data.tipo_consulta,
@@ -519,22 +535,30 @@ export function CitasPage() {
           id_user: userId,
           duracion_minutos: data.duracion_minutos,
           hora_fin: data.hora_fin,
-        });
+        };
+        console.log('Create payload:', JSON.stringify(createPayload, null, 2));
+        await api.appointments.create(createPayload);
       }
 
+      console.log('=== APPOINTMENT SAVED SUCCESSFULLY ===');
       setSuccess(true);
-      const successTimer = setTimeout(() => { 
+      const successTimer = setTimeout(() => {
         navigate('/agenda/agenda');
       }, 2000);
-      
+
       // Cleanup function is handled by component unmounting
       return () => {
         clearTimeout(successTimer);
       };
     } catch (error) {
-      console.error('Error creating appointment:', error);
-      form.setError('root', { 
-        message: editingAppointment ? 'Error al actualizar la cita' : 'Error al crear la cita' 
+      console.error('=== ERROR SAVING APPOINTMENT ===');
+      console.error('Error object:', error);
+      console.error('Error message:', error instanceof Error ? error.message : String(error));
+      if (error instanceof Error && error.stack) {
+        console.error('Stack trace:', error.stack);
+      }
+      form.setError('root', {
+        message: editingAppointment ? 'Error al actualizar la cita' : 'Error al crear la cita'
       });
     } finally {
       setLoading(false);
@@ -968,8 +992,12 @@ export function CitasPage() {
                       Hora <span className="text-red-500">*</span>
                     </label>
                     <select
-                      {...form.register('hora_cita')}
-                      disabled={loadingAvailableSlots || isViewOnlyMode || agendaLoading || !agendaSettings} // Deshabilitar si la agenda está cargando o no está configurada
+                      value={form.watch('hora_cita') || ''}
+                      onChange={(e) => {
+                        console.log('Hora selected:', e.target.value);
+                        form.setValue('hora_cita', e.target.value, { shouldValidate: true, shouldDirty: true });
+                      }}
+                      disabled={loadingAvailableSlots || isViewOnlyMode || agendaLoading || !agendaSettings}
                       className="w-full p-2 rounded-md border"
                       style={{
                         background: currentTheme.colors.surface,
