@@ -8,12 +8,13 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { SelectedPatientProvider } from './contexts/SelectedPatientContext';
 import { UserManagementProvider } from './contexts/UserManagementContext';
 
-// Lazy load pages
-const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.Login })));
-const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
+// Import Login and auth-related pages directly for immediate load
+import { Login } from './pages/Login';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { Register } from './pages/Register';
 
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then(module => ({ default: module.ForgotPassword })));
-const Register = lazy(() => import('./pages/Register').then(module => ({ default: module.Register })));
+// Lazy load non-critical pages
+const LogoutTestPage = lazy(() => import('./pages/LogoutTestPage'));
 const Terms = lazy(() => import('./pages/Terms').then(module => ({ default: module.Terms })));
 const Privacy = lazy(() => import('./pages/Privacy').then(module => ({ default: module.Privacy })));
 

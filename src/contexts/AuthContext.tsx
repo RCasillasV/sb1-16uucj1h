@@ -66,15 +66,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('AuthProvider: Getting basic user info for:', userId);
     
     try {
-      // Simple query with timeout
+      // Simple query with reduced timeout
       const { data: tcUserData, error } = await Promise.race([
         supabase
           .from('tcUsuarios')
           .select('nombre, rol, idbu, estado')
           .eq('idusuario', userId)
           .single(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout')), 10000)
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Query timeout')), 3000)
         )
       ]) as any;
 
@@ -115,13 +115,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initAuth = async () => {
       try {
         console.log('AuthProvider: Getting initial session');
-        
-        // Get session with timeout
+
+        // Get session with reduced timeout
         const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 15000)
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Session timeout')), 5000)
         );
-        
+
         const { data, error } = await Promise.race([
           sessionPromise,
           timeoutPromise
@@ -138,12 +138,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (data.session?.user) {
           console.log('AuthProvider: Session found, getting user info');
-          const userInfo = await getBasicUserInfo(data.session.user.id);
-          
+
+          // Set user immediately with basic data for faster UI
           if (isMounted) {
-            setUser({ ...data.session.user, ...userInfo });
-            console.log('AuthProvider: User set successfully');
+            setUser({
+              ...data.session.user,
+              userRole: 'Medico',
+              idbu: DEFAULT_BU,
+              nombre: 'Usuario',
+              estado: 'Activo'
+            });
+            setLoading(false);
           }
+
+          // Then fetch complete user info in background
+          getBasicUserInfo(data.session.user.id).then(userInfo => {
+            if (isMounted) {
+              setUser({ ...data.session.user, ...userInfo });
+              console.log('AuthProvider: User info updated');
+            }
+          }).catch(err => {
+            console.log('AuthProvider: Error updating user info:', err);
+          });
         } else {
           console.log('AuthProvider: No session found');
           if (isMounted) {
@@ -171,55 +187,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Auth state change listener
+    // Auth state change listener - only handle significant events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('AuthProvider: Auth state changed:', event);
-      
+
       if (!isMounted) return;
 
-      // Handle specific auth events
-      if (event === 'TOKEN_REFRESHED') {
-        // No forzar logout aquí. Opcionalmente se puede refrescar user info.
-        // Dejamos que el flujo normal abajo actualice el usuario si session existe.
+      // Only process specific events to avoid redundant processing
+      if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+        return; // Already handled by initAuth
       }
 
-      if (session?.user) {
-        console.log('AuthProvider: Auth change - user exists, getting info');
-        try {
-          const userInfo = await getBasicUserInfo(session.user.id);
-          if (isMounted) {
-            setUser({ ...session.user, ...userInfo });
-            // Persist last user info safely for UX improvements (non-critical)
-            try {
-              localStorage.setItem(
-                'ds.lastUser',
-                JSON.stringify({ ...session.user, ...userInfo })
-              );
-            } catch {
-              // no-op if storage is unavailable (e.g., privacy mode)
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        if (session?.user) {
+          console.log('AuthProvider: Auth change - user exists, getting info');
+          getBasicUserInfo(session.user.id).then(userInfo => {
+            if (isMounted) {
+              setUser({ ...session.user, ...userInfo });
             }
-          }
-        } catch (error) {
-          console.log('AuthProvider: Auth change error:', error);
-          if (isMounted) {
-            setUser({ 
-              ...session.user, 
-              userRole: 'Medico',
-              idbu: DEFAULT_BU,
-              nombre: 'Usuario',
-              estado: 'Activo'
-            });
-          }
+          }).catch(error => {
+            console.log('AuthProvider: Auth change error:', error);
+            if (isMounted) {
+              setUser({
+                ...session.user,
+                userRole: 'Medico',
+                idbu: DEFAULT_BU,
+                nombre: 'Usuario',
+                estado: 'Activo'
+              });
+            }
+          });
         }
-      } else {
-        console.log('AuthProvider: Auth change - no user');
+      } else if (event === 'SIGNED_OUT') {
+        console.log('AuthProvider: Auth change - signed out');
         if (isMounted) {
           setUser(null);
         }
-      }
-      
-      if (isMounted) {
-        setLoading(false);
       }
     });
 

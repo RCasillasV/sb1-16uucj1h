@@ -12,10 +12,10 @@ declare global {
 // SSR/embedded safe checks
 const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 
-// Fetch con timeout personalizado (60s)
+// Fetch con timeout personalizado (15s para mejor performance)
 const fetchWithTimeout = (url: string, options: RequestInit = {}) => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60_000);
+  const timeoutId = setTimeout(() => controller.abort(), 15_000);
   const withSignal: RequestInit = { ...options, signal: controller.signal };
   
   return fetch(url, withSignal)
@@ -31,7 +31,7 @@ const fetchWithTimeout = (url: string, options: RequestInit = {}) => {
       });
       
       if (error.name === 'AbortError') {
-        throw new Error('Conexión a Supabase interrumpida por timeout (60s). Verifique su conexión a internet.');
+        throw new Error('Conexión a Supabase interrumpida por timeout (15s). Verifique su conexión a internet.');
       } else if (error.message === 'Failed to fetch') {
         throw new Error('No se pudo conectar con Supabase. Verifique: 1) Las variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env, 2) Su conexión a internet, 3) Que el proyecto Supabase esté activo.');
       }
@@ -73,9 +73,9 @@ const customStorage = {
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const appVersion = import.meta.env.VITE_APP_VERSION || 'dev';
-// Controla detectSessionInUrl por env: VITE_SUPABASE_DETECT_SESSION_IN_URL=true/false
+// detectSessionInUrl deshabilitado por defecto para mejor performance (solo necesario para OAuth)
 const detectSessionInUrlFlag =
-  String(import.meta.env.VITE_SUPABASE_DETECT_SESSION_IN_URL || '').toLowerCase() === 'true';
+  String(import.meta.env.VITE_SUPABASE_DETECT_SESSION_IN_URL || 'false').toLowerCase() === 'true';
 
 // Validación de entorno
 if (!supabaseUrl || !supabaseKey) {
@@ -99,13 +99,18 @@ function getSupabaseClient(): SupabaseClient<Database> {
   const client = createClient<Database>(supabaseUrl, supabaseKey, {
     auth: {
       autoRefreshToken: true,
-      // Activa solo si usas OAuth redirect (regreso con fragment en URL)
+      // Deshabilitado por defecto para mejor performance (solo para OAuth)
       detectSessionInUrl: detectSessionInUrlFlag,
       storage: customStorage,
-      storageKey: 'supabase.auth.session'
+      storageKey: 'supabase.auth.session',
+      persistSession: true,
+      flowType: 'pkce'
     },
     realtime: {
       params: { eventsPerSecond: 2 }
+    },
+    db: {
+      schema: 'public'
     },
     global: {
       fetch: fetchWithTimeout,

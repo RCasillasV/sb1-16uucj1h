@@ -147,13 +147,16 @@ export function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ color: currentTheme.colors.text }}>
-     {/* Fondo dinámico */}
-      <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.5 }}>
-        <source src="/assets/7199220-uhd_1440_2560.mp4" type="video/mp4" />
-      </video>
+     {/* Fondo optimizado con gradiente */}
+      <div
+        className="absolute inset-0 w-full h-full"
+        style={{
+          background: `linear-gradient(135deg, ${currentTheme.colors.primary}15 0%, ${currentTheme.colors.background} 50%, ${currentTheme.colors.primary}10 100%)`,
+          opacity: 0.8
+        }}
+      />
 
-    
-      <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent backdrop-blur-sm" />
       <div className="w-full max-w-md p-8 rounded-lg shadow-xl relative backdrop-blur-md" style={{ background: currentTheme.colors.surface }}>
         {/* Encabezado de marca o logo */}
         <div className="flex flex-col items-center mb-6">

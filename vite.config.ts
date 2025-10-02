@@ -23,18 +23,55 @@ export default defineConfig({
     cssMinify: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-core': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['lucide-react', 'clsx'],
-          'vendor-date': ['date-fns'],
-          'vendor-editor': ['react-quill'],
-          'vendor-calendar': [
-            '@fullcalendar/core',
-            '@fullcalendar/daygrid',
-            '@fullcalendar/interaction',
-            '@fullcalendar/react',
-            '@fullcalendar/timegrid'
-          ],
+        manualChunks: (id) => {
+          // Core React dependencies
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          // Router
+          if (id.includes('node_modules/react-router-dom')) {
+            return 'vendor-router';
+          }
+          // Supabase
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          // React Query
+          if (id.includes('node_modules/@tanstack/react-query')) {
+            return 'vendor-query';
+          }
+          // UI utilities
+          if (id.includes('node_modules/lucide-react') || id.includes('node_modules/clsx')) {
+            return 'vendor-ui';
+          }
+          // Date utilities
+          if (id.includes('node_modules/date-fns')) {
+            return 'vendor-date';
+          }
+          // Forms
+          if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/zod') || id.includes('node_modules/@hookform')) {
+            return 'vendor-forms';
+          }
+          // Rich text editor (lazy loaded)
+          if (id.includes('node_modules/react-quill') || id.includes('node_modules/quill')) {
+            return 'vendor-editor';
+          }
+          // Charts (lazy loaded)
+          if (id.includes('node_modules/chart.js') || id.includes('node_modules/react-chartjs')) {
+            return 'vendor-charts';
+          }
+          // Calendar (lazy loaded)
+          if (id.includes('node_modules/@fullcalendar')) {
+            return 'vendor-calendar';
+          }
+          // DnD Kit
+          if (id.includes('node_modules/@dnd-kit')) {
+            return 'vendor-dnd';
+          }
+          // Other node_modules
+          if (id.includes('node_modules')) {
+            return 'vendor-other';
+          }
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
@@ -44,6 +81,7 @@ export default defineConfig({
     assetsInlineLimit: 4096,
     sourcemap: false,
     reportCompressedSize: false,
+    chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
     include: [

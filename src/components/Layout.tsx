@@ -71,44 +71,37 @@ export function Layout({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // Set basic user info immediately for faster UI
+      setUserInfo({
+        authId: user.id,
+        nombre: user.nombre,
+        idbu: user.idbu,
+        business_name: null,
+        rol: user.userRole
+      });
+
+      // Fetch additional info in background
       try {
-        // Get business unit information from get_user_idbu
-        // La función RPC get_user_idbu() devuelve un objeto { idbu, business_name, role }
         const { data: userData, error: rpcError } = await supabase.rpc('get_user_idbu');
 
         if (rpcError) {
           console.error('Error fetching user business unit:', rpcError);
-          setUserInfo({
-            authId: user.id,
-            nombre: user.nombre,
-            idbu: user.idbu,
-            business_unit: userData.business_name,
-            rol: userData.role 
-          });
           return;
         }
 
-        setUserInfo({
-          authId: user.id,
-          nombre: user.nombre,
-          idbu: userData?.idbu || user.idbu, // Usar el idbu del RPC si está disponible, sino el del contexto
-          business_unit: userData?.business_name || null, // Mapear business_name a Nombre
-          rol: userData?.role || userData.role // Usar el rol del RPC si está disponible, sino el del contexto
-        });
+        setUserInfo(prev => ({
+          ...prev,
+          idbu: userData?.idbu || prev.idbu,
+          business_name: userData?.business_name || null,
+          rol: userData?.role || prev.rol
+        }));
       } catch (error) {
         console.error('Error in fetchUserInfo:', error);
-        setUserInfo({
-          authId: user?.id || '',
-          nombre: user?.nombre || null,
-          idbu: user?.idbu || null,
-          business_name: userData?.business_name || null,
-          rol: userData?.role || null
-        });
       }
     };
-    
+
     fetchUserInfo();
-  }, [user]); // Depend on user from AuthContext
+  }, [user?.id]); // Only depend on user id to avoid unnecessary refetches
 
   useEffect(() => {
     if (selectedPatient) {
@@ -116,8 +109,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
       setClinicalEvolutionCount(null);
       setPrescriptionsCount(null);
       setPatientFilesCount(null);
-      fetchCounts();
-      fetchAppointments();
+
+      // Debounce API calls to avoid multiple rapid requests
+      const timeoutId = setTimeout(() => {
+        fetchCounts();
+        fetchAppointments();
+      }, 300);
+
+      return () => clearTimeout(timeoutId);
     } else {
       setClinicalHistoryCount(0);
       setClinicalEvolutionCount(0);
@@ -126,7 +125,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       setLastAppointment(null);
       setNextAppointment(null);
     }
-  }, [selectedPatient]);
+  }, [selectedPatient, fetchCounts, fetchAppointments]);
 
   const fetchCounts = useCallback(async () => {
     if (!selectedPatient) return;

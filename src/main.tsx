@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -15,19 +15,22 @@ if (!root) {
   document.body.innerHTML =
     '<div style="color: red; padding: 20px;">Error: Root element not found</div>';
 } else {
+  // Use StrictMode only in development to avoid double renders in production
+  const AppWrapper = import.meta.env.DEV ? StrictMode : React.Fragment;
+
   createRoot(root).render(
-    <StrictMode>
-      <BrowserRouter> 
+    <AppWrapper>
+      <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <ErrorBoundary>
             <AuthProvider>
              <AgendaProvider>
               <App />
-             </AgendaProvider>  
+             </AgendaProvider>
             </AuthProvider>
-          </ErrorBoundary> 
+          </ErrorBoundary>
         </QueryClientProvider>
       </BrowserRouter>
-    </StrictMode>
+    </AppWrapper>
   );
 }
