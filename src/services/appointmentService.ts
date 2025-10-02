@@ -38,9 +38,9 @@ export const appointments = {
       .from('tcCitas')
       .select(`
         id, fecha_cita, hora_cita, motivo, notas, urgente, consultorio,
-        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados, 
+        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados,
         hora_fin, duracion_minutos, idBu,
-        estado_info:estado(id, estado, descripcion),
+        estado_info:tcCitasEstados!fk_tccitas_estado(id, estado, descripcion),
         patients:id_paciente(id,Nombre,Paterno,Materno)
       `)
       .order('fecha_cita', { ascending: true })
@@ -66,7 +66,7 @@ export const appointments = {
       .from('tcCitas')
       .select(`
         *,
-        estado_info:estado(id, estado, descripcion),
+        estado_info:tcCitasEstados!fk_tccitas_estado(id, estado, descripcion),
         patients:id_paciente(id,Nombre,Paterno,Materno)
       `)
       .eq('id', id)
@@ -94,9 +94,9 @@ export const appointments = {
       .from('tcCitas')
       .select(`
         id, fecha_cita, hora_cita, motivo, notas, urgente, consultorio,
-        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados, 
+        tipo_consulta, tiempo_evolucion, unidad_tiempo, sintomas_asociados,
         hora_fin, duracion_minutos, idBu,
-        estado_info:estado(id, estado, descripcion),
+        estado_info:tcCitasEstados!fk_tccitas_estado(id, estado, descripcion),
         patients:id_paciente(id,Nombre,Paterno,Materno)
       `)
       .eq('id_paciente', patientId)
@@ -127,7 +127,7 @@ export const appointments = {
       .from('tcCitas')
       .select(`
         *,
-        estado_info:estado(id, estado, descripcion),
+        estado_info:tcCitasEstados!fk_tccitas_estado(id, estado, descripcion),
         patients:id_paciente(id,Nombre,Paterno,Materno)
       `)
       .eq('fecha_cita', fecha)
