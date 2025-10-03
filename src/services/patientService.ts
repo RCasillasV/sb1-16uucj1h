@@ -37,6 +37,11 @@ export const patients = {
     const result = await svc.update(id, payload);
     cache.delete('all');
     cache.delete(`by_${id}`);
+
+    if (!result) {
+      throw new Error('No se pudo actualizar el paciente');
+    }
+
     return result;
   },
 };

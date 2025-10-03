@@ -13,6 +13,7 @@ type Patient = Database['public']['Tables']['tcPacientes']['Row'];
 export function Patients() {
   const [showForm, setShowForm] = useState(false);
   const [selectedPatientForEdit, setSelectedPatientForEdit] = useState<Patient | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { selectedPatient, setSelectedPatient } = useSelectedPatient();
   const { currentTheme } = useTheme();
 
@@ -20,6 +21,7 @@ export function Patients() {
     setShowForm(false);
     setSelectedPatientForEdit(null);
     setSelectedPatient(newPatient);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handlePatientClick = (patient: Patient) => {
@@ -96,7 +98,10 @@ export function Patients() {
           </button>
         </div>
       </div>
-      <PatientListSelector onSelectPatient={handlePatientClick} />
+      <PatientListSelector
+        onSelectPatient={handlePatientClick}
+        refreshTrigger={refreshTrigger}
+      />
     </div>
   );
 }

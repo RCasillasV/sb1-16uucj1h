@@ -21,9 +21,10 @@ interface PatientListSelectorProps {
   onClose?: () => void;
   className?: string;
   isModal?: boolean;
+  refreshTrigger?: number;
 }
 
-export function PatientListSelector({ onSelectPatient, onClose, className = '', isModal = false }: PatientListSelectorProps) {
+export function PatientListSelector({ onSelectPatient, onClose, className = '', isModal = false, refreshTrigger }: PatientListSelectorProps) {
   const { currentTheme } = useTheme();
   const { selectedPatient } = useSelectedPatient(); // Obtén el paciente seleccionado del contexto
   const { user, loading: authLoading } = useAuth();
@@ -43,7 +44,7 @@ export function PatientListSelector({ onSelectPatient, onClose, className = '', 
     if (!authLoading && user) {
       fetchPatients();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, refreshTrigger]);
 
   async function fetchPatients() {
     if (!user) {

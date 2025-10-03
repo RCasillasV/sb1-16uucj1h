@@ -16,9 +16,9 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
 
     async create<R = any>(data: object) {
       const user = await requireSession();
-      
+
       const insertData: any = { ...data, [userIdColumnName]: user.id };
-      
+
       if (includeIdbu) {
         // Para tcCitas, usar idBu en lugar de idbu
         if (table === 'tcCitas') {
@@ -29,31 +29,29 @@ export function createService<Table extends string>(table: Table, userIdColumnNa
           insertData.idbu = idbuValue;
         }
       }
-      
+
       return handle(
         supabase
           .from<Table>(table)
           .insert(insertData)
           .select<R>()
-          .order('id')
-          .limit(1),
+          .single(),
         null
       );
     },
 
     async update<R = any>(id: string, data: object) {
       const user = await requireSession();
-      
+
       const updateData: any = { ...data, [userIdColumnName]: user.id };
-      
+
       return handle(
         supabase
           .from<Table>(table)
           .update(updateData)
           .eq('id', id)
           .select<R>()
-          .order('id')
-          .limit(1),
+          .single(),
         null
       );
     },
