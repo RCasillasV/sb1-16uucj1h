@@ -28,6 +28,7 @@ export function PostalCodeLookup({ value, onChange, onColonySelect, onError, err
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [apiError, setApiError] = useState<string | null>(null);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,13 +46,14 @@ export function PostalCodeLookup({ value, onChange, onColonySelect, onError, err
   }, []);
 
   useEffect(() => {
-    if (value.length === 5) {
+    if (value.length === 5 && hasUserInteracted) {
       fetchPostalCodeData(value);
-    } else {
+    } else if (value.length !== 5) {
       setColonies([]);
       setApiError(null);
+      setShowDropdown(false);
     }
-  }, [value]);
+  }, [value, hasUserInteracted]);
 
   const fetchPostalCodeData = async (postalCode: string) => {
     setIsLoading(true);
@@ -78,6 +80,7 @@ export function PostalCodeLookup({ value, onChange, onColonySelect, onError, err
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.replace(/\D/g, '').slice(0, 5);
+    setHasUserInteracted(true);
     onChange(newValue);
   };
 
@@ -109,7 +112,12 @@ export function PostalCodeLookup({ value, onChange, onColonySelect, onError, err
           type="text"
           value={value}
           onChange={handleInputChange}
-          onFocus={() => value.length === 5 && setShowDropdown(true)}
+          onFocus={() => {
+            setHasUserInteracted(true);
+            if (value.length === 5 && colonies.length > 0) {
+              setShowDropdown(true);
+            }
+          }}
           placeholder="Código Postal (5 dígitos)"
           aria-label="Código Postal"
           aria-invalid={!!error}

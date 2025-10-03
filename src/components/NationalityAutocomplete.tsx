@@ -23,14 +23,15 @@ export function NationalityAutocomplete({
   onChange,
   placeholder = 'Buscar nacionalidad...',
   disabled = false,
-  onSelectCallback, 
+  onSelectCallback,
 }: NationalityAutocompleteProps) {
   const { currentTheme } = useTheme();
   const [searchTerm, setSearchTerm] = useState(value);
   const [suggestions, setSuggestions] = useState<Nationality[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1); // Para navegación con teclado
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const [isUserTyping, setIsUserTyping] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -38,23 +39,28 @@ export function NationalityAutocomplete({
   // Sincroniza el searchTerm interno con la prop 'value' externa
   useEffect(() => {
     setSearchTerm(value);
+    setIsUserTyping(false);
   }, [value]);
 
   // Efecto de búsqueda con debounce
   useEffect(() => {
-    if (searchTerm.length < 2) { // Solo busca si se han escrito al menos 2 caracteres
+    if (!isUserTyping) {
+      return;
+    }
+
+    if (searchTerm.length < 2) {
       setSuggestions([]);
       setIsLoading(false);
+      setShowSuggestions(false);
       return;
     }
 
     const delayDebounceFn = setTimeout(async () => {
       setIsLoading(true);
       try {
-        // Ajusta esta consulta según la estructura real de tu tabla tcNacionalidades
         const { data, error } = await supabase
-          .from('tcNacionalidades') // Asumiendo el nacionalidad de la tabla
-          .select('id, nacionalidad') // Asumiendo las columnas 'id' y 'nacionalidad'
+          .from('tcNacionalidades')
+          .select('id, nacionalidad')
           .ilike('nacionalidad', `%${searchTerm}%`)
           .order('nacionalidad', { ascending: true })
           .limit(15);
@@ -68,12 +74,12 @@ export function NationalityAutocomplete({
       } finally {
         setIsLoading(false);
       }
-    }, 300); // 300ms de retardo para el debounce
+    }, 300);
 
     return () => {
       clearTimeout(delayDebounceFn);
     };
-  }, [searchTerm]);
+  }, [searchTerm, isUserTyping]);
 
   const handleSelectSuggestion = useCallback((nationality: Nationality) => {
     setSearchTerm(nationality.nacionalidad);
@@ -88,7 +94,8 @@ export function NationalityAutocomplete({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setSelectedSuggestionIndex(-1); // Reinicia el índice al cambiar el input
+    setIsUserTyping(true);
+    setSelectedSuggestionIndex(-1);
   };
 
   const handleInputBlur = () => {
@@ -107,7 +114,7 @@ export function NationalityAutocomplete({
   };
 
   const handleInputFocus = () => {
-    if (searchTerm.length >= 2) { // Muestra sugerencias si ya hay suficiente texto
+    if (searchTerm.length >= 2 && suggestions.length > 0 && isUserTyping) {
       setShowSuggestions(true);
     }
   };

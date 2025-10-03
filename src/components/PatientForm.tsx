@@ -589,7 +589,6 @@ export function PatientForm({ onSuccess, onCancel, patient }: PatientFormProps) 
                   <span className="text-xs" style={{ color: currentTheme.colors.textSecondary}}> a 18 posiciones</span>
                 </label>
                 <input
-                  autoFocus 
                   type="text"
                   name="CURP"
                   id="CURP"
