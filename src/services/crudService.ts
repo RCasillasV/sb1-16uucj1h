@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { handle, requireSession, getUserIdbu } from '../lib/supabaseUtils';
+import { handle, requireSession, getIdbu } from '../lib/supabaseUtils';
 
 export function createService<Table extends string>(table: Table, userIdColumnName: string = 'user_id', includeIdbu: boolean = true) {
   return {
