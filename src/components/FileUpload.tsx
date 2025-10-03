@@ -152,7 +152,21 @@ export function FileUpload({
     return null;
   };
 
+  const uploadFileWithTimeout = async (file: File, description: string, timeoutMs: number = 45000): Promise<UploadedFile> => {
+    console.log(`FileUpload: Iniciando upload de ${file.name} con timeout de ${timeoutMs}ms`);
+
+    return Promise.race([
+      uploadFile(file, description),
+      new Promise<UploadedFile>((_, reject) =>
+        setTimeout(() => reject(new Error('La operación de carga tomó demasiado tiempo. Por favor, verifica tu conexión a internet e intenta nuevamente.')), timeoutMs)
+      )
+    ]);
+  };
+
   const uploadFile = async (file: File, description: string): Promise<UploadedFile> => {
+    const startTime = Date.now();
+    console.log(`FileUpload: Iniciando uploadFile para ${file.name}`);
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       throw new Error('Usuario no autenticado');
@@ -224,6 +238,7 @@ export function FileUpload({
     }
 
     // Save file metadata to database using the new API
+    console.log(`FileUpload: Guardando metadata en base de datos para ${file.name}`);
     try {
       const { api } = await import('../lib/api');
       await api.files.create({
@@ -233,7 +248,9 @@ export function FileUpload({
         mime_type: file.type,
         thumbnail_url: thumbnailUrl
       });
+      console.log(`FileUpload: Metadata guardada exitosamente para ${file.name}`);
     } catch (dbError) {
+      console.error(`FileUpload: Error guardando metadata para ${file.name}:`, dbError);
       // If database insert fails, remove the uploaded files
       await supabase.storage.from(bucketName).remove([filePath]);
       if (thumbnailUrl) {
@@ -241,6 +258,9 @@ export function FileUpload({
       }
       throw new Error(`Error guardando metadata del archivo: ${dbError instanceof Error ? dbError.message : 'Error desconocido'}`);
     }
+
+    const elapsedTime = Date.now() - startTime;
+    console.log(`FileUpload: Upload completado para ${file.name} en ${elapsedTime}ms`);
 
     return {
       id: data.path,
@@ -298,6 +318,43 @@ export function FileUpload({
       return;
     }
 
+    // Validar y renovar sesión ANTES de iniciar cualquier operación
+    console.log('FileUpload: Validando sesión antes de subir archivos...');
+    try {
+      const { supabase } = await import('../lib/supabase');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        setError('Tu sesión ha expirado. Por favor, recarga la página para continuar.');
+        return;
+      }
+
+      // Verificar si el token está expirado o próximo a expirar
+      if (session.expires_at) {
+        const now = Math.floor(Date.now() / 1000);
+        const timeUntilExpiry = session.expires_at - now;
+
+        console.log(`FileUpload: Token expira en ${timeUntilExpiry} segundos`);
+
+        // Si está expirado o expirará en menos de 2 minutos, renovar
+        if (timeUntilExpiry < 120) {
+          console.log('FileUpload: Renovando sesión antes de subir...');
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+          if (refreshError || !refreshData.session) {
+            setError('Tu sesión ha expirado. Por favor, recarga la página para continuar.');
+            return;
+          }
+
+          console.log('FileUpload: Sesión renovada exitosamente');
+        }
+      }
+    } catch (sessionValidationError) {
+      console.error('FileUpload: Error validando sesión:', sessionValidationError);
+      setError('Error al validar tu sesión. Por favor, recarga la página.');
+      return;
+    }
+
     setUploading(true);
     setCompressing(true);
 
@@ -318,16 +375,30 @@ export function FileUpload({
       // Mark compression as complete before starting uploads
       setCompressing(false);
 
-      // Upload files one by one with better error handling
+      // Upload files one by one with better error handling and timeout
       const uploadedFileResults: UploadedFile[] = [];
       for (const file of processedFiles) {
         const description = pendingDescriptions[file.name] || file.name;
         try {
-          const result = await uploadFile(file, description);
+          console.log(`FileUpload: Subiendo archivo ${file.name}...`);
+          const result = await uploadFileWithTimeout(file, description, 45000);
           uploadedFileResults.push(result);
+          console.log(`FileUpload: Archivo ${file.name} subido exitosamente`);
         } catch (uploadError) {
           console.error('Error uploading file:', file.name, uploadError);
-          throw new Error(`Error al subir ${file.name}: ${uploadError instanceof Error ? uploadError.message : 'Error desconocido'}`);
+
+          // Verificar si es un error de sesión
+          const errorMessage = uploadError instanceof Error ? uploadError.message : 'Error desconocido';
+          const isSessionError = errorMessage.includes('sesión') ||
+                                 errorMessage.includes('autenticado') ||
+                                 errorMessage.includes('session') ||
+                                 errorMessage.includes('authenticated');
+
+          if (isSessionError) {
+            throw new Error(`Tu sesión ha expirado. Por favor, recarga la página e intenta nuevamente. (Archivo: ${file.name})`);
+          }
+
+          throw new Error(`Error al subir ${file.name}: ${errorMessage}`);
         }
       }
 
@@ -344,7 +415,19 @@ export function FileUpload({
       setShowDescriptionModal(false);
     } catch (err) {
       console.error('Upload process error:', err);
-      setError(err instanceof Error ? err.message : 'Error al subir archivos');
+      const errorMessage = err instanceof Error ? err.message : 'Error al subir archivos';
+
+      // Si es error de sesión, ofrecer botón de recarga
+      const isSessionError = errorMessage.includes('sesión') ||
+                             errorMessage.includes('autenticado') ||
+                             errorMessage.includes('session') ||
+                             errorMessage.includes('authenticated');
+
+      if (isSessionError) {
+        setError(errorMessage + ' (Haz clic en Cancelar y recarga la página)');
+      } else {
+        setError(errorMessage);
+      }
       // Keep modal open on error so user can retry
     } finally {
       setUploading(false);

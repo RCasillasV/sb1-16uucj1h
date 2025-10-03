@@ -193,8 +193,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!isMounted) return;
 
-      // Only process specific events to avoid redundant processing
-      if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+      // Handle token refresh - update user with refreshed session
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('AuthProvider: Token renovado automáticamente');
+        if (session?.user && isMounted) {
+          // Actualizar usuario manteniendo datos previos pero con nueva sesión
+          setUser(prev => prev ? { ...prev, ...session.user } : {
+            ...session.user,
+            userRole: 'Medico',
+            idbu: DEFAULT_BU,
+            nombre: 'Usuario',
+            estado: 'Activo'
+          });
+        }
+        return;
+      }
+
+      if (event === 'INITIAL_SESSION') {
         return; // Already handled by initAuth
       }
 
@@ -229,11 +244,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Initialize
     initAuth();
 
+    // Verificación periódica de sesión (cada 5 minutos)
+    // Renovar preventivamente si el token expirará en menos de 10 minutos
+    const sessionCheckInterval = setInterval(async () => {
+      if (!isMounted) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.expires_at) {
+          const now = Math.floor(Date.now() / 1000);
+          const timeUntilExpiry = session.expires_at - now;
+
+          // Si el token expirará en menos de 10 minutos (600 segundos), renovarlo preventivamente
+          if (timeUntilExpiry < 600 && timeUntilExpiry > 0) {
+            console.log(`AuthProvider: Token expirará en ${Math.floor(timeUntilExpiry / 60)} minutos, renovando preventivamente...`);
+
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+            if (refreshError) {
+              console.error('AuthProvider: Error en renovación preventiva:', refreshError);
+            } else if (refreshData?.session?.user && isMounted) {
+              console.log('AuthProvider: Sesión renovada preventivamente');
+              setUser(prev => prev ? { ...prev, ...refreshData.session.user } : {
+                ...refreshData.session.user,
+                userRole: 'Medico',
+                idbu: DEFAULT_BU,
+                nombre: 'Usuario',
+                estado: 'Activo'
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('AuthProvider: Error en verificación periódica de sesión:', error);
+      }
+    }, 5 * 60 * 1000); // Cada 5 minutos
+
     // Cleanup
     return () => {
       console.log('AuthProvider: Cleanup - unmounting');
       isMounted = false;
       subscription.unsubscribe();
+      clearInterval(sessionCheckInterval);
     };
   }, []);
 
