@@ -255,6 +255,13 @@ export function FileUpload({
   const handleFiles = async (files: FileList) => {
     setError(null);
 
+    // Validate patient ID first, before any file processing
+    const patientId = folder.split('/').pop() || '';
+    if (!patientId || patientId === 'new' || patientId === 'uploads') {
+      setError('Debe seleccionar un paciente antes de subir archivos');
+      return;
+    }
+
     const filesToUpload = Array.from(files);
     const validationErrors: string[] = [];
 
@@ -283,6 +290,14 @@ export function FileUpload({
 
   const handleUploadWithDescriptions = async () => {
     setError(null);
+
+    // Validate patient ID again before starting upload
+    const patientId = folder.split('/').pop() || '';
+    if (!patientId || patientId === 'new' || patientId === 'uploads') {
+      setError('Debe seleccionar un paciente antes de subir archivos');
+      return;
+    }
+
     setUploading(true);
     setCompressing(true);
 
@@ -290,32 +305,47 @@ export function FileUpload({
       // Compress images if needed
       const processedFiles: File[] = [];
       for (const file of pendingFiles) {
-        const processedFile = await compressImageIfNeeded(file);
-        processedFiles.push(processedFile);
+        try {
+          const processedFile = await compressImageIfNeeded(file);
+          processedFiles.push(processedFile);
+        } catch (compressionError) {
+          console.error('Error compressing file:', file.name, compressionError);
+          // If compression fails, use original file
+          processedFiles.push(file);
+        }
       }
-      
+
+      // Mark compression as complete before starting uploads
       setCompressing(false);
 
-      // Upload files sequentially to avoid overwhelming the server
-      const uploadPromises = processedFiles.map(file => {
+      // Upload files one by one with better error handling
+      const uploadedFileResults: UploadedFile[] = [];
+      for (const file of processedFiles) {
         const description = pendingDescriptions[file.name] || file.name;
-        return uploadFile(file, description);
-      });
-      const uploadedFileResults = await Promise.all(uploadPromises);
+        try {
+          const result = await uploadFile(file, description);
+          uploadedFileResults.push(result);
+        } catch (uploadError) {
+          console.error('Error uploading file:', file.name, uploadError);
+          throw new Error(`Error al subir ${file.name}: ${uploadError instanceof Error ? uploadError.message : 'Error desconocido'}`);
+        }
+      }
 
       const newUploadedFiles = [...uploadedFiles, ...uploadedFileResults];
       setUploadedFiles(newUploadedFiles);
-      
+
       if (onFilesUploaded) {
         onFilesUploaded(newUploadedFiles);
       }
 
-      // Clear pending state
+      // Clear pending state and close modal
       setPendingFiles([]);
       setPendingDescriptions({});
       setShowDescriptionModal(false);
     } catch (err) {
+      console.error('Upload process error:', err);
       setError(err instanceof Error ? err.message : 'Error al subir archivos');
+      // Keep modal open on error so user can retry
     } finally {
       setUploading(false);
       setCompressing(false);
