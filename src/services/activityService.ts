@@ -9,7 +9,7 @@ import type {
 } from '../types/activity.types';
 
 class ActivityService {
-  private readonly tableName = 'tcActividadReciente';
+  private readonly tableName = '"tcActividadReciente"';
 
   /**
    * Obtener actividades recientes con paginación
