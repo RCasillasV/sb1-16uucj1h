@@ -7,6 +7,7 @@ import clsx from 'clsx';
 
 const baseNavigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['Administrador', 'Medico', 'Recepcionista'] },
+  { name: 'Actividad', href: '/activity', icon: Activity, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Agenda', href: '/agenda/agenda', icon: Calendar, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Pacientes', href: '/patients', icon: Users, roles: ['Administrador', 'Medico', 'Recepcionista'] },
   { name: 'Citas', href: '/appointments', icon: CalendarDays, roles: ['Administrador', 'Medico', 'Recepcionista'] },

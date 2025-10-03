@@ -4,8 +4,7 @@ import { api } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { RecentActivityList } from '../components/RecentActivityList';
 import clsx from 'clsx'; 
 
 interface StatsCard {
@@ -28,17 +27,11 @@ export function Dashboard() {
     upcomingAppointments: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [recentActivity, setRecentActivity] = useState<{
-    date: Date;
-    type: string;
-    description: string;
-  }[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!authLoading && user) {
       fetchStats();
-      fetchRecentActivity();
     }
   }, [user, authLoading]);
 
@@ -56,28 +49,6 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }
-
-  async function fetchRecentActivity() {
-    // Simulated recent activity data
-    const activity = [
-      {
-        date: new Date(),
-        type: 'appointment',
-        description: 'Nueva cita programada con Juan Pérez',
-      },
-      {
-        date: new Date(Date.now() - 3600000), // 1 hour ago
-        type: 'patient',
-        description: 'Registro de nuevo paciente: María García',
-      },
-      {
-        date: new Date(Date.now() - 7200000), // 2 hours ago
-        type: 'prescription',
-        description: 'Receta emitida para Carlos López',
-      },
-    ];
-    setRecentActivity(activity);
   }
 
   const statsCards: StatsCard[] = [
@@ -216,57 +187,39 @@ export function Dashboard() {
 
       {/* Recent Activity */}
       <div>
-        <div className="flex items-center gap-2 mb-2">
-          <Activity 
-            className="h-5 w-5" 
-            style={{ color: currentTheme.colors.primary }} 
-          />
-          <h2 
-            className="text-xl font-semibold"
-            style={{ color: currentTheme.colors.text }}
-          >
-            Actividad Reciente
-          </h2>
-        </div>
-        <div 
-          className="rounded-lg overflow-hidden"
-          style={{ 
-            background: currentTheme.colors.surface,
-            borderColor: currentTheme.colors.border,
-          }}
-        >
-          {recentActivity.length === 0 ? (
-            <div 
-              className="p-6 text-center"
-              style={{ color: currentTheme.colors.textSecondary }}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Activity
+              className="h-5 w-5"
+              style={{ color: currentTheme.colors.primary }}
+            />
+            <h2
+              className="text-xl font-semibold"
+              style={{ color: currentTheme.colors.text }}
             >
-              No hay actividad reciente
-            </div>
-          ) : (
-            <div className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-              {recentActivity.map((activity, index) => (
-                <div 
-                  key={index}
-                  className="p-4 flex items-center justify-between hover:bg-opacity-50 transition-colors"
-                  style={{ 
-                    color: currentTheme.colors.text,
-                    background: index % 2 === 0 ? 'transparent' : `${currentTheme.colors.background}20`,
-                  }}
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{activity.description}</p>
-                    <p 
-                      className="text-sm"
-                      style={{ color: currentTheme.colors.textSecondary }}
-                    >
-                      {format(activity.date, "d 'de' MMMM 'a las' HH:mm", { locale: es })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+              Actividad Reciente
+            </h2>
+          </div>
+          <button
+            onClick={() => navigate('/activity')}
+            className="text-sm font-medium transition-colors hover:underline"
+            style={{ color: currentTheme.colors.primary }}
+          >
+            Ver todas
+          </button>
         </div>
+        <RecentActivityList
+          limit={5}
+          compact={true}
+          onActivityClick={(activity) => {
+            // Navegación opcional según el tipo de actividad
+            if (activity.id_paciente) {
+              navigate(`/patients`);
+            } else if (activity.tipo_actividad.startsWith('cita_')) {
+              navigate('/agenda/agenda');
+            }
+          }}
+        />
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { patients } from '../services/patientService';
 import { appointments } from '../services/appointmentService';
 import { patologies } from '../services/patologyService';
 import { gynecoObstetricHistory } from '../services/gynecoObstetricService';
+import { activityService } from '../services/activityService';
 import { supabase } from './supabase';
 import { Cache } from './cache';
 import { requireSession, getIdbu, requireBusinessUnit } from './supabaseUtils';
@@ -800,8 +801,10 @@ export const api = {
   // Patient history services
   antecedentesNoPatologicos,
   heredoFamilialHistory,
-  // TODO: Add gynecoObstetricHistory service here
   gynecoObstetricHistory,
+
+  // Activity service
+  activities: activityService,
 
   // Pathological history service
   pathologicalHistory: {
