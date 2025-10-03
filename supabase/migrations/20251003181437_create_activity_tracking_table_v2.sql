@@ -119,10 +119,10 @@ AS $$
 DECLARE
   user_idbu uuid;
 BEGIN
-  SELECT "idBu" INTO user_idbu
+  SELECT idbu INTO user_idbu
   FROM "tcUsuarios"
   WHERE idusuario = auth.uid();
-  
+
   RETURN user_idbu;
 END;
 $$;
