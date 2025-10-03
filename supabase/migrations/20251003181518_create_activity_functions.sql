@@ -113,7 +113,7 @@ BEGIN
   END IF;
   
   -- Insertar la actividad
-  INSERT INTO tcActividadReciente (
+  INSERT INTO "tcActividadReciente" (
     tipo_actividad,
     descripcion,
     descripcion_detalle,
@@ -173,7 +173,7 @@ BEGIN
     fecha_limite := now() - (bu_record.dias_retencion_actividad || ' days')::interval;
     
     -- Eliminar actividades antiguas de este BU
-    DELETE FROM tcActividadReciente
+    DELETE FROM "tcActividadReciente"
     WHERE idbu = bu_record."idBu"
     AND created_at < fecha_limite;
     
