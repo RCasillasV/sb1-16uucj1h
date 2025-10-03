@@ -60,6 +60,7 @@ export function Appointments() {
     }
   }, [selectedPatient, filter, user, authLoading]);
 
+  // Carga todas las citas y aplica filtros según el paciente seleccionado y el filtro activo (hoy/próximas/todas)
   const fetchAppointments = async () => {
     if (!user) {
       setError('Usuario no autenticado');
@@ -71,13 +72,13 @@ export function Appointments() {
     setError(null);
     try {
       let data = await api.appointments.getAll();
-      
-      // Filter by patient if one is selected
+
+      // Filtrar por paciente seleccionado en el contexto global
       if (selectedPatient) {
         data = data.filter(app => app.patients?.id === selectedPatient.id);
       }
-      
-      // Apply additional filters
+
+      // Aplicar filtros temporales
       if (filter === 'today') {
         const today = format(new Date(), 'yyyy-MM-dd');
         data = data.filter(app => app.fecha_cita === today);
@@ -88,7 +89,7 @@ export function Appointments() {
           return !isBefore(appDate, now) && app.estado === 1; // 1 = 'Programada'
         });
       }
-      
+
       setAppointments(data as AppointmentWithPatient[]);
     } catch (err) {
       console.error('Error fetching appointments:', err);
@@ -98,18 +99,17 @@ export function Appointments() {
     }
   };
 
+  // Maneja el clic en una fila de cita. Solo permite editar citas futuras.
   const handleAppointmentClick = (appointment: AppointmentWithPatient) => {
-    // Verificar si la cita ya ha pasado
     const appointmentDateTime = parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`);
     const now = new Date();
-    
-    // Si la cita no ha pasado, seleccionar el paciente y mostrar el formulario de edición
+
+    // Solo permite editar citas que no han pasado
     if (!isBefore(appointmentDateTime, now)) {
-      // Seleccionar el paciente asociado a la cita
       if (appointment.patients) {
         setSelectedPatient(appointment.patients);
       }
-      
+
       navigate('/citas', {
         state: {
           editMode: true,
@@ -136,8 +136,8 @@ export function Appointments() {
     }
   };
 
+  // Renderiza el badge de estado con icono y color según el ID del estado
   const getStatusBadge = (statusId: number) => {
-    // Utiliza la función auxiliar para obtener la información del badge
     const { text, color, icon: Icon } = getStatusBadgeInfo(statusId);
     return (
       <span className="flex items-center gap-1" style={{ color: color }}>
@@ -147,6 +147,7 @@ export function Appointments() {
     );
   };
 
+  // Filtra citas por término de búsqueda (nombre del paciente o motivo)
   const filteredAppointments = appointments.filter(appointment => {
     const searchString = `${appointment.patients?.Nombre || ''} ${appointment.patients?.Paterno || ''} ${appointment.motivo || ''}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
@@ -338,7 +339,8 @@ export function Appointments() {
                 filteredAppointments.map((appointment) => {
                   const appointmentDateTime = parseISO(`${appointment.fecha_cita}T${appointment.hora_cita}`);
                   const isPast = isBefore(appointmentDateTime, new Date());
-                  
+
+                  // Las citas pasadas se muestran con opacidad reducida y sin acciones
                   return (
                     <tr 
                       key={appointment.id}
