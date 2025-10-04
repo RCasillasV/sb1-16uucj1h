@@ -45,7 +45,7 @@ const formSchema = z.object({
   sintomas_asociados: z.array(z.string()).default([]),
   fecha_cita: z.string().min(1, { message: "La fecha es requerida" }),
   hora_cita: z.string().min(1, { message: "La hora es requerida" }),
-  consultorio: z.number().min(1).max(3),
+  consultorio: z.number(),
   urgente: z.boolean().default(false),
   mismo_motivo: z.boolean().default(false), // This field is for UI logic, not directly for DB
   notas: z.string().optional(),
