@@ -90,7 +90,7 @@ export function Calendar() {
     switch (status) {
       case 'Completada':
         return '#10B981';
-      case 'Cancelada':
+      case 'Cancelada': 
         return '#EF4444';
       case 'Programada':
       default:
