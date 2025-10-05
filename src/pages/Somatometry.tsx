@@ -1,525 +1,512 @@
-import React, { useState, useEffect } from 'react';
-import { Ruler, Plus, Calendar } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { useSelectedPatient } from '../contexts/SelectedPatientContext';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Modal } from '../components/Modal';
+import { useAuth } from '../contexts/AuthContext';
+import { somatometryService } from '../services/somatometryService';
+import { somatometryConfigService } from '../services/somatometryConfigService';
+import type { 
+  SomatometryFormData, 
+  SomatometryRecord,
+  SomatometryConfig,
+  WHOPercentiles 
+} from '../types/somatometry';
+import type { Database } from '../types/database.types';
+import { Scale, Ruler, Brain, AlertTriangle, CheckCircle } from 'lucide-react';
 import clsx from 'clsx';
-import { WeightForAge } from '../components/growth-charts/WeightForAge';
-import { HeightForAge } from '../components/growth-charts/HeightForAge';
-import { BMIForAge } from '../components/growth-charts/BMIForAge';
-import { HeadCircumferenceForAge } from '../components/growth-charts/HeadCircumferenceForAge';
 
-interface SomatometryRecord {
-  id: string;
-  measurement_date: string;
-  weight: number;
-  height: number;
-  head_circumference: number | null;
-  bmi: number | null;
-  age_months: number;
-  notes: string | null;
+type Patient = Database['public']['Tables']['tcPacientes']['Row'];
+
+interface SomatometryFormProps {
+  patient: Patient;
+  onSuccess: (somatometry: SomatometryRecord) => void;
+  onCancel: () => void;
+  existingSomatometry?: SomatometryRecord;
 }
 
-interface FormData {
-  measurement_date: string;
-  weight: string;
-  height: string;
-  head_circumference: string;
-  notes: string;
-}
-
-const initialFormData: FormData = {
-  measurement_date: format(new Date(), 'yyyy-MM-dd'),
-  weight: '',
-  height: '',
-  head_circumference: '',
-  notes: '',
-};
-
-export function Somatometry() {
+export function SomatometryForm({ 
+  patient, 
+  onSuccess, 
+  onCancel, 
+  existingSomatometry 
+}: SomatometryFormProps) {
   const { currentTheme } = useTheme();
-  const { selectedPatient } = useSelectedPatient();
-  const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const [records, setRecords] = useState<SomatometryRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const { user } = useAuth();
+  
+  // Estados del formulario
+  const [formData, setFormData] = useState<SomatometryFormData>({
+    patient_id: patient.id,
+    measurement_date: existingSomatometry?.measurement_date || new Date().toISOString().split('T')[0],
+    weight: existingSomatometry?.weight || 0,
+    height: existingSomatometry?.height || 0,
+    head_circumference: existingSomatometry?.head_circumference || undefined,
+    notes: existingSomatometry?.notes || ''
+  });
+  
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [config, setConfig] = useState<SomatometryConfig | null>(null);
+  const [percentiles, setPercentiles] = useState<WHOPercentiles | null>(null);
+
+  // Cálculos automáticos
+  const ageMonths = useMemo(() => {
+    return somatometryService.calculateAgeInMonths(
+      patient.FechaNacimiento, 
+      formData.measurement_date
+    );
+  }, [patient.FechaNacimiento, formData.measurement_date]);
+
+  const detailedAge = useMemo(() => {
+    return somatometryService.calculateDetailedAge(
+      patient.FechaNacimiento, 
+      formData.measurement_date
+    );
+  }, [patient.FechaNacimiento, formData.measurement_date]);
+
+  const bmi = useMemo(() => {
+    if (formData.weight > 0 && formData.height > 0) {
+      return formData.weight / Math.pow(formData.height / 100, 2);
+    }
+    return 0;
+  }, [formData.weight, formData.height]);
+
+  // Cargar configuración y percentiles
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        if (patient.idbu) {
+          const configData = await somatometryConfigService.getOrCreateConfig(patient.idbu);
+          setConfig(configData);
+        }
+      } catch (err) {
+        console.error('Error loading config:', err);
+      }
+    };
+    loadConfig();
+  }, [patient.idbu]);
 
   useEffect(() => {
-    if (!selectedPatient) {
-      return;
-    }
-    if (!authLoading && user) {
-      fetchRecords();
-    }
-  }, [selectedPatient, user, authLoading]);
+    const loadPercentiles = async () => {
+      if (ageMonths > 0) {
+        try {
+          const percentilesData = await somatometryService.getWHOPercentiles(
+            patient.Sexo === 'Masculino' ? 'M' : 'F',
+            ageMonths
+          );
+          setPercentiles(percentilesData);
+        } catch (err) {
+          console.error('Error loading percentiles:', err);
+        }
+      }
+    };
+    loadPercentiles();
+  }, [patient.Sexo, ageMonths]);
 
-  const fetchRecords = async () => {
-    if (!selectedPatient) return;
-    if (!user) {
-      setError('Usuario no autenticado');
-      setLoading(false);
+  // Validaciones
+  const validationErrors = useMemo(() => {
+    const errors: string[] = [];
+    
+    if (formData.weight <= 0 || formData.weight > 200) {
+      errors.push('El peso debe estar entre 0.1 y 200 kg');
+    }
+    
+    if (formData.height <= 0 || formData.height > 250) {
+      errors.push('La talla debe estar entre 1 y 250 cm');
+    }
+    
+    if (formData.head_circumference && (formData.head_circumference <= 0 || formData.head_circumference > 70)) {
+      errors.push('El perímetro cefálico debe estar entre 1 y 70 cm');
+    }
+    
+    if (ageMonths < 0 || ageMonths > 240) {
+      errors.push('La edad debe estar entre 0 y 20 años');
+    }
+    
+    if (config?.require_head_circumference_under_24m && ageMonths < 24 && !formData.head_circumference) {
+      errors.push('El perímetro cefálico es obligatorio para menores de 24 meses');
+    }
+    
+    return errors;
+  }, [formData, ageMonths, config]);
+
+  // Alertas de crecimiento
+  const growthAlerts = useMemo(() => {
+    if (!percentiles || !config) return [];
+    
+    const alerts: string[] = [];
+    
+    // Alertas de peso
+    if (percentiles.weight) {
+      if (formData.weight < percentiles.weight.p3) {
+        alerts.push('⚠️ Peso por debajo del percentil 3 (bajo peso)');
+      } else if (formData.weight > percentiles.weight.p97) {
+        alerts.push('⚠️ Peso por encima del percentil 97');
+      }
+    }
+    
+    // Alertas de talla
+    if (percentiles.height) {
+      if (formData.height < percentiles.height.p3) {
+        alerts.push('⚠️ Talla por debajo del percentil 3 (talla baja)');
+      } else if (formData.height > percentiles.height.p97) {
+        alerts.push('⚠️ Talla por encima del percentil 97');
+      }
+    }
+    
+    // Alertas de BMI
+    if (percentiles.bmi && bmi > 0) {
+      if (bmi < percentiles.bmi.p15) {
+        alerts.push('⚠️ IMC indica bajo peso');
+      } else if (bmi >= percentiles.bmi.p85 && bmi < percentiles.bmi.p97) {
+        alerts.push('⚠️ IMC indica sobrepeso');
+      } else if (bmi >= percentiles.bmi.p97) {
+        alerts.push('🚨 IMC indica obesidad');
+      }
+    }
+    
+    // Alertas de perímetro cefálico
+    if (percentiles.headCircumference && formData.head_circumference) {
+      if (formData.head_circumference < percentiles.headCircumference.p3) {
+        alerts.push('🚨 Perímetro cefálico por debajo del percentil 3 (microcefalia)');
+      } else if (formData.head_circumference > percentiles.headCircumference.p97) {
+        alerts.push('🚨 Perímetro cefálico por encima del percentil 97 (macrocefalia)');
+      }
+    }
+    
+    return alerts;
+  }, [formData, percentiles, config, bmi]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (validationErrors.length > 0) {
+      setError('Por favor corrige los errores antes de continuar');
       return;
     }
     
     setLoading(true);
     setError(null);
+    
     try {
-      const { data, error } = await supabase
-        .from('somatometry_records')
-        .select('*')
-        .eq('patient_id', selectedPatient.id)
-        .order('measurement_date', { ascending: false });
-
-      if (error) throw error;
-      setRecords(data || []);
+      const somatometryData = {
+        ...formData,
+        age_months: ageMonths,
+        measured_by: user?.id || null,
+        idbu: patient.idbu
+      };
+      
+      let result: SomatometryRecord;
+      
+      if (existingSomatometry) {
+        result = await somatometryService.update(existingSomatometry.id, somatometryData);
+      } else {
+        result = await somatometryService.create(somatometryData);
+      }
+      
+      onSuccess(result);
     } catch (err) {
-      console.error('Error fetching somatometry records:', err);
-      setError(err instanceof Error ? err.message : 'Error al cargar los registros de somatometría. Por favor, intente nuevamente.');
+      setError(err instanceof Error ? err.message : 'Error al guardar la somatometría');
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateBMI = (weight: number, height: number): number => {
-    const heightInMeters = height / 100;
-    return Number((weight / (heightInMeters * heightInMeters)).toFixed(1));
+  const inputStyle = {
+    backgroundColor: currentTheme.colors.surface,
+    color: currentTheme.colors.text,
+    borderColor: currentTheme.colors.border,
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPatient) return;
-
-    setError(null);
-    const weight = Number(formData.weight);
-    const height = Number(formData.height);
-    const headCircumference = formData.head_circumference ? Number(formData.head_circumference) : null;
-
-    try {
-      const birthDate = new Date(selectedPatient.FechaNacimiento);
-      const measurementDate = new Date(formData.measurement_date);
-      const ageInMonths = Math.floor((measurementDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
-
-      const { error: insertError } = await supabase
-        .from('somatometry_records')
-        .insert([{
-          patient_id: selectedPatient.id,
-          measurement_date: formData.measurement_date,
-          weight,
-          height,
-          head_circumference: headCircumference,
-          bmi: calculateBMI(weight, height),
-          age_months: ageInMonths,
-          notes: formData.notes || null,
-        }]);
-
-      if (insertError) throw insertError;
-
-      await fetchRecords();
-      setShowModal(false);
-      setFormData(initialFormData);
-    } catch (err) {
-      console.error('Error saving somatometry record:', err);
-      setError(err instanceof Error ? err.message : 'Error al guardar el registro');
-    }
+  const labelStyle = {
+    color: currentTheme.colors.textSecondary,
+    fontSize: `calc(${currentTheme.typography.baseSize} * 0.875)`,
   };
-
-  const buttonStyle = {
-    base: clsx(
-      'px-4 py-2 transition-colors',
-      currentTheme.buttons.style === 'pill' && 'rounded-full',
-      currentTheme.buttons.style === 'rounded' && 'rounded-lg',
-      currentTheme.buttons.shadow && 'shadow-sm hover:shadow-md',
-      currentTheme.buttons.animation && 'hover:scale-105'
-    ),
-    primary: {
-      background: currentTheme.colors.buttonPrimary,
-      color: currentTheme.colors.buttonText,
-    },
-  };
-
-  if (!selectedPatient) {
-    return (
-      <Modal
-        isOpen={true}
-        onClose={() => navigate('/patients')}
-        title="Selección de Paciente Requerida"
-        actions={
-          <button
-            className={buttonStyle.base}
-            style={buttonStyle.primary}
-            onClick={() => navigate('/patients')}
-          >
-            Entendido
-          </button>
-        }
-      >
-        <p>Por favor, seleccione un paciente primero desde la sección de Pacientes.</p>
-      </Modal>
-    );
-  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center mb-6">
+    <div 
+      className="max-w-4xl mx-auto p-6 rounded-lg shadow-lg"
+      style={{ background: currentTheme.colors.surface }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Ruler className="h-6 w-6" style={{ color: currentTheme.colors.primary }} />
-          <h1 
-            className="text-2xl font-bold"
-            style={{ color: currentTheme.colors.text }}
+          <div 
+            className="p-2 rounded-full"
+            style={{ background: currentTheme.colors.primary }}
           >
-            Somatometría
-          </h1>
+            <Scale className="h-6 w-6" style={{ color: currentTheme.colors.buttonText }} />
+          </div>
+          <div>
+            <h2 
+              className="text-2xl font-bold"
+              style={{ 
+                color: currentTheme.colors.text,
+                fontFamily: currentTheme.typography.fonts.headings,
+              }}
+            >
+              {existingSomatometry ? 'Editar' : 'Nueva'} Somatometría
+            </h2>
+            <p style={{ color: currentTheme.colors.textSecondary }}>
+              {patient.Nombre} {patient.Paterno} {patient.Materno}
+            </p>
+          </div>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className={buttonStyle.base}
-          style={buttonStyle.primary}
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Nueva Medición
-        </button>
+        
+        <div className="text-right">
+          <p className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+            Edad: {detailedAge.years} años, {detailedAge.months} meses
+          </p>
+          <p className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+            Sexo: {patient.Sexo}
+          </p>
+        </div>
       </div>
 
+      {/* Errores */}
       {error && (
         <div 
           className="mb-4 p-4 rounded-md border-l-4"
-          style={{
+          style={{ 
             background: '#FEE2E2',
-            borderLeftColor: '#DC2626',
-            color: '#DC2626',
+            borderColor: '#DC2626',
+            color: '#DC2626'
           }}
         >
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Ruler className="h-5 w-5" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium">{error}</p>
-            </div>
+            <AlertTriangle className="h-5 w-5 mr-2" />
+            {error}
           </div>
         </div>
       )}
 
-      <div 
-        className="bg-white rounded-lg shadow-lg overflow-hidden"
-        style={{ 
-          background: currentTheme.colors.surface,
-          borderColor: currentTheme.colors.border,
-        }}
-      >
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y" style={{ borderColor: currentTheme.colors.border }}>
-            <thead>
-              <tr style={{ background: currentTheme.colors.background }}>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Fecha
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Edad (meses)
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Peso (kg)
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  Talla (cm)
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  PC (cm)
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                  style={{ color: currentTheme.colors.textSecondary }}
-                >
-                  IMC
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y" style={{ borderColor: currentTheme.colors.border }}>
-              {(loading || authLoading) ? (
-                <tr>
-                  <td 
-                    colSpan={6} 
-                    className="px-6 py-4 text-center"
-                    style={{ color: currentTheme.colors.textSecondary }}
-                  >
-                    {authLoading ? 'Autenticando...' : 'Cargando registros...'}
-                  </td>
-                </tr>
-              ) : records.length === 0 ? (
-                <tr>
-                  <td 
-                    colSpan={6} 
-                    className="px-6 py-4 text-center"
-                    style={{ color: currentTheme.colors.textSecondary }}
-                  >
-                    No hay registros de somatometría
-                  </td>
-                </tr>
-              ) : (
-                records.map((record) => (
-                  <tr 
-                    key={record.id}
-                    style={{ color: currentTheme.colors.text }}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {format(new Date(record.measurement_date), 'dd/MM/yyyy')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {record.age_months}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {record.weight.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {record.height.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {record.head_circumference?.toFixed(1) || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {record.bmi?.toFixed(1) || '-'}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Errores de validación */}
+      {validationErrors.length > 0 && (
+        <div 
+          className="mb-4 p-4 rounded-md border-l-4"
+          style={{ 
+            background: '#FEF3C7',
+            borderColor: '#F59E0B',
+            color: '#92400E'
+          }}
+        >
+          <h4 className="font-medium mb-2">Errores de validación:</h4>
+          <ul className="list-disc list-inside space-y-1">
+            {validationErrors.map((error, index) => (
+              <li key={index} className="text-sm">{error}</li>
+            ))}
+          </ul>
         </div>
-      </div>
+      )}
 
-      {/* Growth Charts */}
-      {records.length > 0 && (
-        <div className="mt-8 space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div 
-              className="p-4 rounded-lg shadow-lg"
-              style={{ 
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-              }}
-            >
-              <WeightForAge records={records} />
-            </div>
-            <div 
-              className="p-4 rounded-lg shadow-lg"
-              style={{ 
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-              }}
-            >
-              <HeightForAge records={records} />
-            </div>
-            <div 
-              className="p-4 rounded-lg shadow-lg"
-              style={{ 
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-              }}
-            >
-              <BMIForAge records={records} />
-            </div>
-            {records.some(r => r.age_months <= 36) && (
-              <div 
-                className="p-4 rounded-lg shadow-lg"
-                style={{ 
-                  background: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                }}
-              >
-                <HeadCircumferenceForAge records={records} />
+      {/* Alertas de crecimiento */}
+      {growthAlerts.length > 0 && config?.show_growth_alerts && (
+        <div 
+          className="mb-4 p-4 rounded-md border-l-4"
+          style={{ 
+            background: '#FEF3C7',
+            borderColor: '#F59E0B',
+            color: '#92400E'
+          }}
+        >
+          <h4 className="font-medium mb-2">Alertas de crecimiento:</h4>
+          <ul className="space-y-1">
+            {growthAlerts.map((alert, index) => (
+              <li key={index} className="text-sm">{alert}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Fecha de medición */}
+        <div>
+          <label htmlFor="measurement_date" className="block mb-1 font-medium" style={labelStyle}>
+            Fecha de Medición
+          </label>
+          <input
+            type="date"
+            id="measurement_date"
+            value={formData.measurement_date}
+            onChange={(e) => setFormData(prev => ({ ...prev, measurement_date: e.target.value }))}
+            className="w-full p-3 rounded-md border focus:ring-2 focus:ring-offset-2 transition-colors"
+            style={inputStyle}
+            required
+          />
+        </div>
+
+        {/* Mediciones principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Peso */}
+          <div>
+            <label htmlFor="weight" className="block mb-1 font-medium" style={labelStyle}>
+              <div className="flex items-center gap-2">
+                <Scale className="h-4 w-4" />
+                Peso (kg)
               </div>
+            </label>
+            <input
+              type="number"
+              id="weight"
+              step="0.1"
+              min="0.1"
+              max="200"
+              value={formData.weight || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, weight: parseFloat(e.target.value) || 0 }))}
+              className="w-full p-3 rounded-md border focus:ring-2 focus:ring-offset-2 transition-colors"
+              style={inputStyle}
+              placeholder="Ej: 15.5"
+              required
+            />
+            {percentiles?.weight && formData.weight > 0 && (
+              <p className="text-xs mt-1" style={{ color: currentTheme.colors.textSecondary }}>
+                Percentiles OMS: P3={percentiles.weight.p3}kg, P50={percentiles.weight.p50}kg, P97={percentiles.weight.p97}kg
+              </p>
+            )}
+          </div>
+
+          {/* Talla */}
+          <div>
+            <label htmlFor="height" className="block mb-1 font-medium" style={labelStyle}>
+              <div className="flex items-center gap-2">
+                <Ruler className="h-4 w-4" />
+                Talla (cm)
+              </div>
+            </label>
+            <input
+              type="number"
+              id="height"
+              step="0.1"
+              min="1"
+              max="250"
+              value={formData.height || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, height: parseFloat(e.target.value) || 0 }))}
+              className="w-full p-3 rounded-md border focus:ring-2 focus:ring-offset-2 transition-colors"
+              style={inputStyle}
+              placeholder="Ej: 95.0"
+              required
+            />
+            {percentiles?.height && formData.height > 0 && (
+              <p className="text-xs mt-1" style={{ color: currentTheme.colors.textSecondary }}>
+                Percentiles OMS: P3={percentiles.height.p3}cm, P50={percentiles.height.p50}cm, P97={percentiles.height.p97}cm
+              </p>
+            )}
+          </div>
+
+          {/* Perímetro cefálico */}
+          <div>
+            <label htmlFor="head_circumference" className="block mb-1 font-medium" style={labelStyle}>
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                Perímetro Cefálico (cm)
+                {config?.require_head_circumference_under_24m && ageMonths < 24 && (
+                  <span className="text-red-500">*</span>
+                )}
+              </div>
+            </label>
+            <input
+              type="number"
+              id="head_circumference"
+              step="0.1"
+              min="1"
+              max="70"
+              value={formData.head_circumference || ''}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                head_circumference: e.target.value ? parseFloat(e.target.value) : undefined 
+              }))}
+              className="w-full p-3 rounded-md border focus:ring-2 focus:ring-offset-2 transition-colors"
+              style={inputStyle}
+              placeholder="Ej: 47.5"
+              required={config?.require_head_circumference_under_24m && ageMonths < 24}
+            />
+            {percentiles?.headCircumference && formData.head_circumference && (
+              <p className="text-xs mt-1" style={{ color: currentTheme.colors.textSecondary }}>
+                Percentiles OMS: P3={percentiles.headCircumference.p3}cm, P50={percentiles.headCircumference.p50}cm, P97={percentiles.headCircumference.p97}cm
+              </p>
             )}
           </div>
         </div>
-      )}
 
-      {/* Form Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setFormData(initialFormData);
-        }}
-        title="Nueva Medición"
-        actions={
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => {
-                setShowModal(false);
-                setFormData(initialFormData);
-              }}
-              className={clsx(buttonStyle.base, 'border')}
-              style={{
-                background: 'transparent',
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text,
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSubmit}
-              className={buttonStyle.base}
-              style={buttonStyle.primary}
-            >
-              Guardar
-            </button>
-          </div>
-        }
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label 
-              htmlFor="measurement_date" 
-              className="block text-sm font-medium mb-1"
-              style={{ color: currentTheme.colors.text }}
-            >
-              Fecha de Medición
-            </label>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
-              <input
-                type="date"
-                id="measurement_date"
-                value={formData.measurement_date}
-                onChange={(e) => setFormData({ ...formData, measurement_date: e.target.value })}
-                required
-                max={format(new Date(), 'yyyy-MM-dd')}
-                className="flex-1 rounded-md shadow-sm"
-                style={{
-                  background: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                  color: currentTheme.colors.text,
-                }}
-              />
+        {/* IMC calculado */}
+        {bmi > 0 && (
+          <div 
+            className="p-4 rounded-md border"
+            style={{ 
+              background: currentTheme.colors.background,
+              borderColor: currentTheme.colors.border 
+            }}
+          >
+            <h3 className="font-medium mb-2" style={{ color: currentTheme.colors.text }}>
+              Índice de Masa Corporal (IMC)
+            </h3>
+            <div className="flex items-center gap-4">
+              <span className="text-2xl font-bold" style={{ color: currentTheme.colors.primary }}>
+                {bmi.toFixed(1)} kg/m²
+              </span>
+              {percentiles?.bmi && (
+                <span className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                  Percentiles OMS: P15={percentiles.bmi.p15}, P50={percentiles.bmi.p50}, P85={percentiles.bmi.p85}
+                </span>
+              )}
             </div>
           </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label 
-                htmlFor="weight" 
-                className="block text-sm font-medium mb-1"
-                style={{ color: currentTheme.colors.text }}
-              >
-                Peso (kg)
-              </label>
-              <input
-                type="number"
-                id="weight"
-                value={formData.weight}
-                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                required
-                step="0.01"
-                min="0"
-                max="999.99"
-                className="w-full rounded-md shadow-sm"
-                style={{
-                  background: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                  color: currentTheme.colors.text,
-                }}
-              />
-            </div>
+        {/* Notas */}
+        <div>
+          <label htmlFor="notes" className="block mb-1 font-medium" style={labelStyle}>
+            Observaciones
+          </label>
+          <textarea
+            id="notes"
+            rows={3}
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            className="w-full p-3 rounded-md border focus:ring-2 focus:ring-offset-2 transition-colors"
+            style={inputStyle}
+            placeholder="Observaciones adicionales sobre la medición..."
+          />
+        </div>
 
-            <div>
-              <label 
-                htmlFor="height" 
-                className="block text-sm font-medium mb-1"
-                style={{ color: currentTheme.colors.text }}
-              >
-                Talla (cm)
-              </label>
-              <input
-                type="number"
-                id="height"
-                value={formData.height}
-                onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                required
-                step="0.1"
-                min="0"
-                max="999.99"
-                className="w-full rounded-md shadow-sm"
-                style={{
-                  background: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                  color: currentTheme.colors.text,
-                }}
-              />
-            </div>
-
-            <div>
-              <label 
-                htmlFor="head_circumference" 
-                className="block text-sm font-medium mb-1"
-                style={{ color: currentTheme.colors.text }}
-              >
-                Perímetro Cefálico (cm)
-              </label>
-              <input
-                type="number"
-                id="head_circumference"
-                value={formData.head_circumference}
-                onChange={(e) => setFormData({ ...formData, head_circumference: e.target.value })}
-                step="0.1"
-                min="0"
-                max="99.9"
-                className="w-full rounded-md shadow-sm"
-                style={{
-                  background: currentTheme.colors.surface,
-                  borderColor: currentTheme.colors.border,
-                  color: currentTheme.colors.text,
-                }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label 
-              htmlFor="notes" 
-              className="block text-sm font-medium mb-1"
-              style={{ color: currentTheme.colors.text }}
-            >
-              Notas
-            </label>
-            <textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              rows={3}
-              className="w-full rounded-md shadow-sm"
-              style={{
-                background: currentTheme.colors.surface,
-                borderColor: currentTheme.colors.border,
-                color: currentTheme.colors.text,
-              }}
-            />
-          </div>
-        </form>
-      </Modal>
+        {/* Botones */}
+        <div className="flex justify-end space-x-3 pt-6">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 rounded-md border transition-colors"
+            style={{
+              borderColor: currentTheme.colors.border,
+              color: currentTheme.colors.text,
+              background: 'transparent',
+            }}
+          >
+            Cancelar
+          </button>
+          
+          <button
+            type="submit"
+            disabled={loading || validationErrors.length > 0}
+            className={clsx(
+              "px-6 py-2 rounded-md transition-colors flex items-center gap-2",
+              (loading || validationErrors.length > 0) && "opacity-50 cursor-not-allowed"
+            )}
+            style={{
+              background: currentTheme.colors.primary,
+              color: currentTheme.colors.buttonText,
+            }}
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                {existingSomatometry ? 'Actualizar' : 'Guardar'} Somatometría
+              </>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
