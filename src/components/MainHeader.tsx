@@ -550,6 +550,26 @@ export function MainHeader({
             </span>
           )}
         </Link>
+        <Link
+          to="/patient-files"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
+          style={{ position: 'relative' }}
+        >
+          <FolderOpen className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
+          Somatometrías
+          {patientFilesCount > 0 && (
+            <span 
+              className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
+              style={{
+                background: currentTheme.colors.primary,
+                color: currentTheme.colors.buttonText
+              }}
+            >
+              {patientFilesCount}
+            </span>
+          )}
+        </Link>
+        
       </div>
     );
   };
