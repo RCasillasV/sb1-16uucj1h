@@ -24,6 +24,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [clinicalEvolutionCount, setClinicalEvolutionCount] = useState<number | null>(null);
   const [prescriptionsCount, setPrescriptionsCount] = useState<number | null>(null);
   const [patientFilesCount, setPatientFilesCount] = useState<number | null>(null);
+  const [somatometryCount, setSomatometryCount] = useState<number | null>(null);
   const [lastAppointment, setLastAppointment] = useState<{
     date: Date;
     status: string;
@@ -113,12 +114,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         clinicalHistoryRpcResult,
         evolutions,
         prescriptions,
-        files
+        files,
+        somatometries
       ] = await Promise.all([
         supabase.rpc('cuenta_fichaclinica', { p_patient_id: selectedPatient.id }),
         api.clinicalEvolution.getByPatientId(selectedPatient.id),
         api.prescriptions.getByPatientId(selectedPatient.id),
-        api.files.getByPatientId(selectedPatient.id)
+        api.files.getByPatientId(selectedPatient.id),
+        supabase.from('tpSomatometrias').select('id').eq('patient_id', selectedPatient.id)
       ]);
       
       // Handle RPC result - check for errors first
@@ -132,10 +135,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         setClinicalHistoryCount(totalClinicalHistoryCount);
       }
       
-      console.log('Layout.fetchCounts: All counts updated - Evolution:', evolutions.length, 'Prescriptions:', prescriptions.length, 'Files:', files.length);
+      const somatometryCountValue = somatometries?.data?.length || 0;
+      console.log('Layout.fetchCounts: All counts updated - Evolution:', evolutions.length, 'Prescriptions:', prescriptions.length, 'Files:', files.length, 'Somatometry:', somatometryCountValue);
       setClinicalEvolutionCount(evolutions.length);
       setPrescriptionsCount(prescriptions.length);
       setPatientFilesCount(files.length);
+      setSomatometryCount(somatometryCountValue);
     } catch (error) {
       console.error('Error fetching counts:', error);
       // Set fallback values on error
@@ -143,6 +148,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       setClinicalEvolutionCount(0);
       setPrescriptionsCount(0);
       setPatientFilesCount(0);
+      setSomatometryCount(0);
     }
   }, [selectedPatient]);
 
@@ -241,6 +247,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       setClinicalEvolutionCount(0);
       setPrescriptionsCount(0);
       setPatientFilesCount(0);
+      setSomatometryCount(0);
       setLastAppointment(null);
       setNextAppointment(null);
     }
@@ -315,6 +322,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           clinicalEvolutionCount={clinicalEvolutionCount}
           prescriptionsCount={prescriptionsCount}
           patientFilesCount={patientFilesCount}
+          somatometryCount={somatometryCount}
           lastAppointment={lastAppointment}
           nextAppointment={nextAppointment}
           showContextMenu={showContextMenu}

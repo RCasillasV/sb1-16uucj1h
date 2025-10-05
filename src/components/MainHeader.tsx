@@ -1,7 +1,7 @@
 import React from 'react';  
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family, Stethoscope } from 'lucide-react';
+import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family, Stethoscope, Scale } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useStyles } from '../hooks/useStyles';
 import { Modal } from './Modal';
@@ -29,7 +29,8 @@ interface MainHeaderProps {
   clinicalHistoryCount: number;
   clinicalEvolutionCount: number;
   prescriptionsCount: number;
-  patientFilesCount: number; 
+  patientFilesCount: number;
+  somatometryCount: number; 
   
   lastAppointment: {
     date: Date;
@@ -49,6 +50,7 @@ export function MainHeader({
   clinicalEvolutionCount,
   prescriptionsCount,
   patientFilesCount,
+  somatometryCount,
   lastAppointment,
   nextAppointment,
   showContextMenu,
@@ -551,21 +553,21 @@ export function MainHeader({
           )}
         </Link>
         <Link
-          to="/patient-files"
+          to="/somatometry"
           className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
           style={{ position: 'relative' }}
         >
-          <FolderOpen className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
+          <Scale className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
           Somatometrías
-          {patientFilesCount > 0 && (
-            <span 
+          {somatometryCount > 0 && (
+            <span
               className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
               style={{
                 background: currentTheme.colors.primary,
                 color: currentTheme.colors.buttonText
               }}
             >
-              {patientFilesCount}
+              {somatometryCount}
             </span>
           )}
         </Link>
