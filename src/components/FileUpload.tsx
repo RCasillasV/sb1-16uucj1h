@@ -42,16 +42,20 @@ const DEFAULT_ACCEPTED_TYPES = [
   'text/plain'
 ];
 
-// Validate required environment variables
-const MAX_FILE_SIZE_MB = Number(import.meta.env.VITE_MAX_FILE_SIZE_MB);
-const BUCKET_NAME = import.meta.env.VITE_BUCKET_NAME;
+// Validate required environment variables with fallbacks
+const MAX_FILE_SIZE_MB = Number(import.meta.env.VITE_MAX_FILE_SIZE_MB) || 10;
+const BUCKET_NAME = import.meta.env.VITE_BUCKET_NAME || '00000000-default-bucket';
 
-if (!MAX_FILE_SIZE_MB || isNaN(MAX_FILE_SIZE_MB)) {
-  throw new Error('VITE_MAX_FILE_SIZE_MB environment variable is required and must be a valid number');
+if (!import.meta.env.VITE_MAX_FILE_SIZE_MB) {
+  console.warn('VITE_MAX_FILE_SIZE_MB not set, using default: 10MB');
 }
 
-if (!BUCKET_NAME) {
-  throw new Error('VITE_BUCKET_NAME environment variable is required');
+if (!import.meta.env.VITE_BUCKET_NAME) {
+  console.warn('VITE_BUCKET_NAME not set, using default bucket');
+}
+
+if (isNaN(MAX_FILE_SIZE_MB) || MAX_FILE_SIZE_MB <= 0) {
+  console.error('Invalid VITE_MAX_FILE_SIZE_MB value, using default: 10MB');
 }
 
 export function FileUpload({

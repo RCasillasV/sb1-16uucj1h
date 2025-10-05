@@ -3,15 +3,27 @@ import react from '@vitejs/plugin-react';
 
 // Validate environment variables at build time
 const requiredEnvVars = [
-  'VITE_SUPABASE_URL', 
-  'VITE_SUPABASE_ANON_KEY',
-  'VITE_MAX_FILE_SIZE_MB',
-  'VITE_BUCKET_NAME'
+  { name: 'VITE_SUPABASE_URL', required: true },
+  { name: 'VITE_SUPABASE_ANON_KEY', required: true },
+  { name: 'VITE_MAX_FILE_SIZE_MB', required: false, default: '10' },
+  { name: 'VITE_BUCKET_NAME', required: false, default: '00000000-default-bucket' }
 ];
+
+let hasErrors = false;
 for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    console.warn(`Warning: ${envVar} is not set in environment variables`);
+  if (!process.env[envVar.name]) {
+    if (envVar.required) {
+      console.error(`ERROR: ${envVar.name} is required but not set in environment variables`);
+      hasErrors = true;
+    } else {
+      console.log(`Info: ${envVar.name} not set, will use default: ${envVar.default}`);
+    }
   }
+}
+
+if (hasErrors) {
+  console.error('\nBuild cannot continue without required environment variables.');
+  console.error('Please check your .env file and ensure all required variables are set.\n');
 }
 
 export default defineConfig({
