@@ -335,8 +335,28 @@ export function GynecoObstetricReport({
         {/* Gyneco-Obstetric History Sections */}
         {gynecoObstetricRecord ? (
           <>
-            {/* Historial Obstétrico */}
-            <InfoSection title="Historial Obstétrico">
+            {/* Embarazo Actual */}
+            {gynecoObstetricRecord.embarazo_actual && (
+              <div className="mb-6 p-4 rounded-lg" style={{ background: '#FEF3C7', border: '2px solid #FCD34D' }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold" style={{ color: '#D97706' }}>
+                    ⚠️ Paciente actualmente embarazada
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Historial Obstétrico (GPAC) */}
+            <InfoSection title="Historial Obstétrico (GPAC)">
+              {(gynecoObstetricRecord.gestas || gynecoObstetricRecord.paras || gynecoObstetricRecord.abortos || gynecoObstetricRecord.cesareas) && (
+                <div className="mb-4 p-3 rounded-lg" style={{ background: currentTheme.colors.primary + '20' }}>
+                  <div className="text-center">
+                    <span className="text-2xl font-bold" style={{ color: currentTheme.colors.primary }}>
+                      G{gynecoObstetricRecord.gestas || 0}P{gynecoObstetricRecord.paras || 0}A{gynecoObstetricRecord.abortos || 0}C{gynecoObstetricRecord.cesareas || 0}
+                    </span>
+                  </div>
+                </div>
+              )}
               <InfoField
                 label="Gestas (Total de embarazos)"
                 value={gynecoObstetricRecord.gestas}
@@ -371,12 +391,21 @@ export function GynecoObstetricReport({
                 value={gynecoObstetricRecord.menarquia ? `${gynecoObstetricRecord.menarquia} años` : null}
               />
               <InfoField
+                label="Edad de Inicio de Vida Sexual Activa (IVSA)"
+                value={gynecoObstetricRecord.ivsa ? `${gynecoObstetricRecord.ivsa} años` : null}
+              />
+              <InfoField
                 label="Ritmo Menstrual"
                 value={gynecoObstetricRecord.ritmo_menstrual}
               />
               <InfoField
                 label="Método Anticonceptivo Actual"
                 value={gynecoObstetricRecord.metodo_anticonceptivo}
+              />
+              <InfoField
+                label="Fecha de Menopausia"
+                value={gynecoObstetricRecord.fecha_menopausia}
+                type="date"
               />
             </InfoSection>
 

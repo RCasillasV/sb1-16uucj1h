@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { somatometryService } from '../services/somatometryService';
 import { patients as patientService } from '../services/patientService';
-import WHOWeightForAgeChart from '../components/GrowthCharts/WHOWeightForAgeChart';
 import WHOWeightForAgeFromDB from '../components/GrowthCharts/WHOWeightForAgeFromDB';
 import WHOHeightForAgeFromDB from '../components/GrowthCharts/WHOHeightForAgeFromDB';
 import WHOBMIForAgeFromDB from '../components/GrowthCharts/WHOBMIForAgeFromDB';

@@ -17,6 +17,7 @@ import { GynecoObstetricReport } from '../components/Informes/GynecoObstetricRep
 
 // Esquema de validación con Zod
 const gynecoObstetricSchema = z.object({
+  embarazo_actual: z.boolean().nullable().optional(),
   gestas: z.preprocess(
     (val) => (val === '' ? null : Number(val)),
     z.number().int().min(0).nullable().optional()
@@ -33,16 +34,21 @@ const gynecoObstetricSchema = z.object({
     (val) => (val === '' ? null : Number(val)),
     z.number().int().min(0).nullable().optional()
   ),
-  fum: z.string().nullable().optional().transform(e => e === "" ? null : e), // Fecha de última menstruación
+  fum: z.string().nullable().optional().transform(e => e === "" ? null : e),
   menarquia: z.preprocess(
     (val) => (val === '' ? null : Number(val)),
     z.number().int().min(0).nullable().optional()
   ),
-  ritmo_menstrual: z.string().nullable().optional(), // Ej: "28x5"
+  ivsa: z.preprocess(
+    (val) => (val === '' ? null : Number(val)),
+    z.number().int().min(0).max(100).nullable().optional()
+  ),
+  ritmo_menstrual: z.string().nullable().optional(),
   metodo_anticonceptivo: z.string().nullable().optional(),
+  fecha_menopausia: z.string().nullable().optional().transform(e => e === "" ? null : e),
   fecha_ultimo_papanicolau: z.string().nullable().optional().transform(e => e === "" ? null : e),
   resultado_ultimo_papanicolau: z.string().nullable().optional(),
-  mamografia: z.string().nullable().optional().transform(e => e === "" ? null : e), // Fecha de última mamografía
+  mamografia: z.string().nullable().optional().transform(e => e === "" ? null : e),
   resultado_mamografia: z.string().nullable().optional(),
   notas_adicionales: z.string().nullable().optional(),
 });
@@ -74,14 +80,17 @@ export function GynecoObstetricHistory() {
   } = useForm<GynecoObstetricFormData>({
     resolver: zodResolver(gynecoObstetricSchema),
     defaultValues: {
+      embarazo_actual: false,
       gestas: null,
       paras: null,
       abortos: null,
       cesareas: null,
       fum: null,
       menarquia: null,
+      ivsa: null,
       ritmo_menstrual: null,
       metodo_anticonceptivo: null,
+      fecha_menopausia: null,
       fecha_ultimo_papanicolau: null,
       resultado_ultimo_papanicolau: null,
       mamografia: null,
@@ -137,14 +146,17 @@ export function GynecoObstetricHistory() {
         setGynecoObstetricRecord(data);
         // Formatear las fechas a YYYY-MM-DD y asegurar valores no nulos para el formulario
       const formattedData = {
+          embarazo_actual: data.embarazo_actual || false,
           gestas: data.gestas,
           paras: data.paras,
           abortos: data.abortos,
           cesareas: data.cesareas,
           fum: data.fum ? format(parseISO(data.fum), 'yyyy-MM-dd') : '',
           menarquia: data.menarquia,
+          ivsa: data.ivsa,
           ritmo_menstrual: data.ritmo_menstrual,
           metodo_anticonceptivo: data.metodo_anticonceptivo,
+          fecha_menopausia: data.fecha_menopausia ? format(parseISO(data.fecha_menopausia), 'yyyy-MM-dd') : '',
           fecha_ultimo_papanicolau: data.fecha_ultimo_papanicolau ? format(parseISO(data.fecha_ultimo_papanicolau), 'yyyy-MM-dd') : '',
           resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
           mamografia: data.mamografia ? format(parseISO(data.mamografia), 'yyyy-MM-dd') : '',
@@ -368,7 +380,52 @@ export function GynecoObstetricHistory() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Sección de Gestas, Paras, Abortos, Cesáreas */}
+          {/* Sección de Embarazo Actual */}
+          <div className="pb-4 border-b" style={{ borderColor: currentTheme.colors.border }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Baby className="h-5 w-5" style={{ color: currentTheme.colors.primary }} />
+              <h3 className="text-lg font-semibold" style={{ color: currentTheme.colors.text }}>
+                Embarazo Actual
+              </h3>
+            </div>
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="embarazo_actual"
+                {...register('embarazo_actual')}
+                className="mt-1 h-4 w-4 rounded"
+                style={{ accentColor: currentTheme.colors.primary }}
+              />
+              <div>
+                <label htmlFor="embarazo_actual" className="text-sm font-medium cursor-pointer" style={{ color: currentTheme.colors.text }}>
+                  Paciente actualmente embarazada
+                </label>
+                <p className="text-xs mt-1" style={{ color: currentTheme.colors.textSecondary }}>
+                  Marque la casilla si la paciente está actualmente embarazada
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sección de Historial Obstétrico (GPAC) */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold" style={{ color: currentTheme.colors.text }}>
+                Historial Obstétrico (GPAC)
+              </h3>
+              {(watchedValues.gestas || watchedValues.paras || watchedValues.abortos || watchedValues.cesareas) && (
+                <span
+                  className="px-3 py-1 rounded-full text-sm font-medium"
+                  style={{
+                    background: currentTheme.colors.primary,
+                    color: currentTheme.colors.buttonText,
+                  }}
+                >
+                  G{watchedValues.gestas || 0}P{watchedValues.paras || 0}A{watchedValues.abortos || 0}C{watchedValues.cesareas || 0}
+                </span>
+              )}
+            </div>
+          </div>
           <div className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label htmlFor="gestas" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
@@ -442,9 +499,14 @@ export function GynecoObstetricHistory() {
           </div>
 
           {/* Sección de Historial Menstrual */}
-          <div className="grid grid-cols-6 sm:grid-cols-4 gap-4"> 
+          <div>
+            <h3 className="text-lg font-semibold mb-3" style={{ color: currentTheme.colors.text }}>
+              Historial Menstrual
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="fum" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+              <label htmlFor="fum" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Fecha Última Menstruación (FUM)
                 <Tooltip text="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo.">
                   <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
@@ -454,45 +516,97 @@ export function GynecoObstetricHistory() {
                 type="date"
                 id="fum"
                 {...register('fum')}
-                className="w-full  p-2 rounded-md border"
-                style={{...inputStyle, marginBottom: '-0.5rem'}}
-              /> 
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
             </div>
             <div>
-                <label htmlFor="ritmo_menstrual" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
-                  Ritmo Menstrual
-                  <Tooltip text="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado).">
-                    <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
-                  </Tooltip>
-                </label>
-                <input
-                  type="text"
-                  id="ritmo_menstrual"
-                  {...register('ritmo_menstrual')}
-                  placeholder="Ej: 28x5 (ciclo de 28 días, 5 días de sangrado)"
-                  className="w-full p-2 rounded-md border"
-                  style={{...inputStyle, marginBottom: '-0.5rem'}}
-                />
+              <label htmlFor="menarquia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Menarquía (años)
+                <Tooltip text="Edad a la que la paciente tuvo su primera menstruación.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
+              </label>
+              <input
+                type="number"
+                id="menarquia"
+                {...register('menarquia')}
+                placeholder="Ej: 12"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
             </div>
-            <div className="col-span-2">
-                <label htmlFor="metodo_anticonceptivo" className="block text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
-                  Método Anticonceptivo Actual
-                  <Tooltip text="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. Píldoras anticonceptivas, DIU, Condón, Implante, Ninguno).">
-                    <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
-                  </Tooltip>
-                </label>
-                <input
-                  type="text"
-                  id="metodo_anticonceptivo"
-                  {...register('metodo_anticonceptivo')}
-                  placeholder="Ej: Píldoras, DIU, Condón, Ninguno"
-                  className="w-full p-2 rounded-md border"
-                  style={{...inputStyle, marginBottom: '-0.5rem'}}
-                />
+            <div>
+              <label htmlFor="ivsa" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                IVSA (años)
+                <Tooltip text="Edad de Inicio de Vida Sexual Activa. La edad a la que la paciente comenzó su actividad sexual.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
+              </label>
+              <input
+                type="number"
+                id="ivsa"
+                {...register('ivsa')}
+                placeholder="Ej: 18"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="ritmo_menstrual" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Ritmo Menstrual
+                <Tooltip text="Describe la duración del ciclo menstrual y la duración del sangrado. Se expresa como 'duración del ciclo x duración del sangrado' (ej. 28x5 = ciclo de 28 días con 5 días de sangrado).">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
+              </label>
+              <input
+                type="text"
+                id="ritmo_menstrual"
+                {...register('ritmo_menstrual')}
+                placeholder="Ej: 28x5"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="metodo_anticonceptivo" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Método Anticonceptivo
+                <Tooltip text="El método que la paciente utiliza actualmente para prevenir el embarazo (ej. DIU, Píldoras, Ninguno).">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
+              </label>
+              <input
+                type="text"
+                id="metodo_anticonceptivo"
+                {...register('metodo_anticonceptivo')}
+                placeholder="Ej: DIU, Píldoras, Ninguno"
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label htmlFor="fecha_menopausia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                Fecha Menopausia
+                <Tooltip text="Fecha en que la paciente entró en menopausia (cesación permanente de la menstruación).">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
+              </label>
+              <input
+                type="date"
+                id="fecha_menopausia"
+                {...register('fecha_menopausia')}
+                className="w-full p-2 rounded-md border"
+                style={inputStyle}
+              />
             </div>
           </div>
 
-          {/* Sección de Papanicolau y Mamografía */}
+          {/* Sección de Estudios y Prevención */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3" style={{ color: currentTheme.colors.text }}>
+              Estudios y Prevención
+            </h3>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="fecha_ultimo_papanicolau" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
@@ -599,10 +713,22 @@ export function GynecoObstetricHistory() {
             Resumen:
           </h4>
           <div className="flex flex-wrap gap-2">
+            {watchedValues.embarazo_actual && (
+              <span
+                className="px-2 py-1 rounded-full text-xs border font-medium"
+                style={{
+                  background: '#FEF3C7',
+                  color: '#D97706',
+                  borderColor: '#FCD34D',
+                }}
+              >
+                Embarazada actualmente
+              </span>
+            )}
             {watchedValues.gestas !== null && watchedValues.gestas > 0 && (
-              <span 
+              <span
                 className="px-2 py-1 rounded-full text-xs border"
-                style={{ 
+                style={{
                   background: `${currentTheme.colors.primary}20`,
                   color: currentTheme.colors.primary,
                   borderColor: currentTheme.colors.border,
@@ -612,9 +738,9 @@ export function GynecoObstetricHistory() {
               </span>
             )}
             {watchedValues.paras !== null && watchedValues.paras > 0 && (
-              <span 
+              <span
                 className="px-2 py-1 rounded-full text-xs border"
-                style={{ 
+                style={{
                   background: '#DEF7EC',
                   color: '#059669',
                   borderColor: '#A7F3D0',
@@ -624,9 +750,9 @@ export function GynecoObstetricHistory() {
               </span>
             )}
             {watchedValues.abortos !== null && watchedValues.abortos > 0 && (
-              <span 
+              <span
                 className="px-2 py-1 rounded-full text-xs border"
-                style={{ 
+                style={{
                   background: '#FEE2E2',
                   color: '#DC2626',
                   borderColor: '#FCA5A5',
@@ -636,9 +762,9 @@ export function GynecoObstetricHistory() {
               </span>
             )}
             {watchedValues.cesareas !== null && watchedValues.cesareas > 0 && (
-              <span 
+              <span
                 className="px-2 py-1 rounded-full text-xs border"
-                style={{ 
+                style={{
                   background: '#FFFBEB',
                   color: '#D97706',
                   borderColor: '#FED7AA',
@@ -648,9 +774,9 @@ export function GynecoObstetricHistory() {
               </span>
             )}
             {watchedValues.fum && (
-              <span 
+              <span
                 className="px-2 py-1 rounded-full text-xs border"
-                style={{ 
+                style={{
                   background: `${currentTheme.colors.primary}20`,
                   color: currentTheme.colors.primary,
                   borderColor: currentTheme.colors.border,
@@ -660,15 +786,27 @@ export function GynecoObstetricHistory() {
               </span>
             )}
             {watchedValues.menarquia !== null && watchedValues.menarquia > 0 && (
-              <span 
+              <span
                 className="px-2 py-1 rounded-full text-xs border"
-                style={{ 
+                style={{
                   background: `${currentTheme.colors.primary}20`,
                   color: currentTheme.colors.primary,
                   borderColor: currentTheme.colors.border,
                 }}
               >
                 Menarquia: {watchedValues.menarquia} años
+              </span>
+            )}
+            {watchedValues.ivsa !== null && watchedValues.ivsa > 0 && (
+              <span
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{
+                  background: `${currentTheme.colors.primary}20`,
+                  color: currentTheme.colors.primary,
+                  borderColor: currentTheme.colors.border,
+                }}
+              >
+                IVSA: {watchedValues.ivsa} años
               </span>
             )}
             {watchedValues.ritmo_menstrual && (
@@ -684,15 +822,27 @@ export function GynecoObstetricHistory() {
               </span>
             )}
             {watchedValues.metodo_anticonceptivo && (
-              <span 
+              <span
                 className="px-2 py-1 rounded-full text-xs border"
-                style={{ 
+                style={{
                   background: '#DBEAFE',
                   color: '#2563EB',
                   borderColor: '#93C5FD',
                 }}
               >
                 Anticonceptivo: {watchedValues.metodo_anticonceptivo}
+              </span>
+            )}
+            {watchedValues.fecha_menopausia && (
+              <span
+                className="px-2 py-1 rounded-full text-xs border"
+                style={{
+                  background: '#F3E8FF',
+                  color: '#9333EA',
+                  borderColor: '#E9D5FF',
+                }}
+              >
+                Menopausia: {format(parseISO(watchedValues.fecha_menopausia), 'dd/MM/yyyy')}
               </span>
             )}
             {watchedValues.fecha_ultimo_papanicolau && (
