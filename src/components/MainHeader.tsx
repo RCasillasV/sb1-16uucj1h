@@ -1,7 +1,6 @@
-import React from 'react';  
+import React, { useState, useRef, useEffect, memo } from 'react';  
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family, Stethoscope, Scale } from 'lucide-react';
+import { Mail, Phone, Cake, Baby, Mars, Venus, Clock, MoreVertical, Calendar, FileText, Activity, FileSpreadsheet, FolderOpen, User, Printer, ChevronDown, ChevronUp, Heart, Smile as Family, Stethoscope, Scale, TrendingUp } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useStyles } from '../hooks/useStyles';
 import { Modal } from './Modal';
@@ -43,7 +42,7 @@ interface MainHeaderProps {
   handleEditPatient: (e: React.MouseEvent) => void;
 }
 
-export function MainHeader({
+export const MainHeader = memo(function MainHeader({
   selectedPatient,
   userInfo,
   clinicalHistoryCount,
@@ -154,6 +153,23 @@ export function MainHeader({
     return `${(patient.Nombre ?? '').charAt(0)}${(patient.Paterno ?? '').charAt(0)}`.toUpperCase();
    };
 
+  // Verificar si se debe mostrar el menú de somatometrías
+  const shouldShowSomatometry = () => {
+    if (!selectedPatient) return false;
+    
+    // Si ya tiene somatometrías registradas, siempre mostrar
+    if (somatometryCount > 0) return true;
+    
+    // Si no tiene somatometrías, verificar edad (menor a 5 años 6 meses = 66 meses)
+    if (selectedPatient.FechaNacimiento) {
+      const age = calculateAge(selectedPatient.FechaNacimiento);
+      const totalMonths = (age.years * 12) + age.months;
+      return totalMonths < 66; // Menor a 5 años 6 meses
+    }
+    
+    return false;
+  };
+
   const formatPatientInfo = () => {
     if (!selectedPatient) return null;
 
@@ -253,7 +269,7 @@ export function MainHeader({
                   <Separator />
                   <InfoItem 
                     icon={Calendar} 
-                    text={`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Sin citas programadas'}`}
+                    text={`Próxima: ${nextAppointment ? format(nextAppointment, "d 'de' MMM", { locale: es }) : 'Sin cita'}`}
                   />
                 </>
               )}
@@ -344,6 +360,22 @@ export function MainHeader({
     if (!userRole || !allowedRoles.includes(userRole)) {
       return null;
     }
+    
+    // Obtener la ruta actual
+    const currentPath = window.location.pathname;
+    
+    // Función para verificar si una ruta está activa
+    const isActive = (path: string) => {
+      return currentPath.startsWith(path);
+    };
+    
+    // Estilo base para los botones de navegación
+    const navButtonClass = (path: string) => 
+      `flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors ${
+        isActive(path) 
+          ? 'font-medium bg-gray-200' 
+          : 'opacity-80 hover:opacity-100 hover:bg-gray-100'
+      }`;
   
     return (
       <div 
@@ -356,13 +388,25 @@ export function MainHeader({
           <button
             ref={clinicalHistoryButtonRef}
             onClick={() => setShowClinicalHistorySubmenu(!showClinicalHistorySubmenu)}
-            className={clsx(
-              "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors",
-              showClinicalHistorySubmenu 
-                ? "bg-black/10" 
-                : "hover:bg-black/5"
-            )}
-            style={{ position: 'relative' }}
+              className={clsx(
+                "flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors relative",
+                isActive('/heredo-familial-history') || 
+                isActive('/pathological-history') || 
+                isActive('/antecedentes-no-patologicos') || 
+                isActive('/gyneco-obstetric-history')
+                  ? 'bg-secondary/20 text-text font-medium' 
+                  : 'opacity-80 hover:opacity-100 hover:bg-black/5',
+                showClinicalHistorySubmenu && 'bg-black/10'
+              )}
+              style={{ 
+                position: 'relative',
+                color: isActive('/heredo-familial-history') || 
+                       isActive('/pathological-history') || 
+                       isActive('/antecedentes-no-patologicos') || 
+                       isActive('/gyneco-obstetric-history')
+                  ? currentTheme.colors.text
+                  : currentTheme.colors.textSecondary
+              }}
           >
             <FileText className="h-4 w-4" 
               style={{ color: currentTheme.colors.primary }} />
@@ -497,8 +541,11 @@ export function MainHeader({
         
         <Link
           to="/clinical-evolution"
-          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
-          style={{ position: 'relative' }}
+          className={navButtonClass('/clinical-evolution')}
+          style={{ 
+            position: 'relative',
+            color: currentTheme.colors.text
+          }}
         >
           <Activity className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
           Evolución Clínica
@@ -516,8 +563,11 @@ export function MainHeader({
         </Link>
         <Link
           to="/prescriptions"
-          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
-          style={{ position: 'relative' }}
+          className={navButtonClass('/prescriptions')}
+          style={{ 
+            position: 'relative',
+            color: currentTheme.colors.text
+          }}
         >
           <FileSpreadsheet className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
           Recetas
@@ -535,8 +585,11 @@ export function MainHeader({
         </Link>
         <Link
           to="/patient-files"
-          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
-          style={{ position: 'relative' }}
+          className={navButtonClass('/patient-files')}
+          style={{ 
+            position: 'relative',
+            color: currentTheme.colors.text
+          }}
         >
           <FolderOpen className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
           Archivos del Paciente
@@ -552,25 +605,30 @@ export function MainHeader({
             </span>
           )}
         </Link>
-        <Link
-          to="/somatometry"
-          className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-md hover:bg-black/5 transition-colors"
-          style={{ position: 'relative' }}
-        >
-          <Scale className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
-          Somatometrías
-          {somatometryCount > 0 && (
-            <span
-              className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
-              style={{
-                background: currentTheme.colors.primary,
-                color: currentTheme.colors.buttonText
-              }}
-            >
-              {somatometryCount}
-            </span>
-          )}
-        </Link>
+        {shouldShowSomatometry() && (
+          <Link
+            to="/somatometry"
+            className={navButtonClass('/somatometry')}
+            style={{ 
+              position: 'relative',
+              color: currentTheme.colors.text
+            }}
+          >
+            <Scale className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
+            Somatometrías
+            {somatometryCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 w-4 h-4 text-xs flex items-center justify-center rounded-full"
+                style={{
+                  background: currentTheme.colors.primary,
+                  color: currentTheme.colors.buttonText
+                }}
+              >
+                {somatometryCount}
+              </span>
+            )}
+          </Link>
+        )}
         
       </div>
     );
@@ -666,4 +724,4 @@ export function MainHeader({
       )}
     </div>
   );
-}
+});
