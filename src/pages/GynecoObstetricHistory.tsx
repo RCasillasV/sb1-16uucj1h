@@ -539,23 +539,8 @@ export function GynecoObstetricHistory() {
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="fum" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
-                Fecha Última Menstruación (FUM)
-                <Tooltip text="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo.">
-                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
-                </Tooltip>
-              </label>
-              <input
-                type="date"
-                id="fum"
-                {...register('fum')}
-                className="w-full p-2 rounded-md border"
-                style={inputStyle}
-              />
-            </div>
             {watchedValues.embarazo_actual && (
-              <div>
+              <div className="transition-all duration-300 ease-in-out">
                 <label htmlFor="fpp" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                   Fecha Probable de Parto (FPP)
                   <Tooltip text="Calculada automáticamente usando la Regla de Naegele: FUM + 7 días - 3 meses + 1 año. Representa la fecha estimada del parto basada en la última menstruación.">
@@ -574,8 +559,49 @@ export function GynecoObstetricHistory() {
                     opacity: 0.7,
                   }}
                 />
+                {!watchedValues.fum && (
+                  <p className="text-xs mt-1 transition-opacity duration-300" style={{ color: currentTheme.colors.textSecondary }}>
+                    Capture primero la FUM para calcular la FPP
+                  </p>
+                )}
               </div>
             )}
+            <div>
+              <label
+                htmlFor="fum"
+                className={clsx(
+                  "flex items-center text-sm font-medium mb-1",
+                  watchedValues.embarazo_actual && !watchedValues.fum && "animate-pulse"
+                )}
+                style={{ color: watchedValues.embarazo_actual && !watchedValues.fum ? currentTheme.colors.primary : currentTheme.colors.text }}
+              >
+                Fecha Última Menstruación (FUM)
+                <Tooltip text="La fecha del primer día de la última menstruación de la paciente. Es un dato clave para calcular la edad gestacional en caso de embarazo.">
+                  <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                </Tooltip>
+                {watchedValues.embarazo_actual && (
+                  <span className="ml-1 text-xs font-bold" style={{ color: currentTheme.colors.primary }}>
+                    *
+                  </span>
+                )}
+              </label>
+              <input
+                type="date"
+                id="fum"
+                {...register('fum')}
+                className={clsx(
+                  "w-full p-2 rounded-md border transition-all duration-200",
+                  watchedValues.embarazo_actual && !watchedValues.fum && "ring-2"
+                )}
+                style={{
+                  ...inputStyle,
+                  ...(watchedValues.embarazo_actual && !watchedValues.fum && {
+                    borderColor: currentTheme.colors.primary,
+                    ringColor: `${currentTheme.colors.primary}40`,
+                  })
+                }}
+              />
+            </div>
             <div>
               <label htmlFor="menarquia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Menarquía (años)
