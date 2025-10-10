@@ -1,0 +1,465 @@
+/* Import custom global styles after Tailwind directives */
+@import './styles/global.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Print Styles */
+@media print {
+  @page { 
+    margin: 1in;
+    size: letter;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    font-size: 12pt !important;
+    line-height: 1.4 !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Utilidades de impresión */
+  .print\:hidden,
+  body.is-printing-modal #modal-content-print-target .print\:hidden,
+  body.is-printing-modal #modal-content-print-target button {
+    display: none !important;
+  }
+
+  .print\:block { display: block !important; }
+  .print\:text-black { color: black !important; }
+  .print\:bg-gray-50 { background-color: #f9fafb !important; }
+  .print\:bg-gray-100 { background-color: #f3f4f6 !important; }
+  .print\:border-black { border-color: black !important; }
+  .print\:rounded-none { border-radius: 0 !important; }
+  .print\:shadow-none { box-shadow: none !important; }
+  .print\:p-0 { padding: 0 !important; }
+  .print\:max-w-none { max-width: none !important; }
+  .print\:mb-6 { margin-bottom: 1.5rem !important; }
+  .print\:text-white { color: white !important; }
+
+  /* Modal printing rules */
+  /* AGGRESSIVE MODAL PRINT FIXES */
+  /* Step 1: Hide everything except modal */
+  body.is-printing-modal > *:not(.print-modal-root) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Step 2: NUCLEAR OPTION - Force modal root to be completely static document */
+  body.is-printing-modal .print-modal-root {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    background: white !important;
+    color: black !important;
+    z-index: auto !important;
+    overflow: visible !important; 
+    margin: 0 !important;
+    padding: 0.5in !important;
+    border: none !important;
+    box-shadow: none !important;
+    page-break-after: always !important;
+  }
+
+  /* Step 3: Hide modal backdrop */
+  body.is-printing-modal #modal-overlay-print-target {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Step 4: ULTRA-AGGRESSIVE modal content forcing */
+  body.is-printing-modal #modal-content-print-target {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Step 5: Force ALL content containers to be blocks */
+  body.is-printing-modal #modal-content-print-target div,
+  body.is-printing-modal #modal-content-print-target section,
+  body.is-printing-modal #modal-content-print-target article {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    max-width: none !important;
+    overflow: visible !important;
+    position: static !important;
+    margin: 0.25rem 0 !important;
+    padding: 0.125rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Step 6: Force ALL text content to be visible blocks */
+  body.is-printing-modal #modal-content-print-target p,
+  body.is-printing-modal #modal-content-print-target h1,
+  body.is-printing-modal #modal-content-print-target h2,
+  body.is-printing-modal #modal-content-print-target h3,
+  body.is-printing-modal #modal-content-print-target h4,
+  body.is-printing-modal #modal-content-print-target h5,
+  body.is-printing-modal #modal-content-print-target h6,
+  body.is-printing-modal #modal-content-print-target dt,
+  body.is-printing-modal #modal-content-print-target dd,
+  body.is-printing-modal #modal-content-print-target li {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    margin: 0.25rem 0 !important;
+    padding: 0.125rem 0 !important;
+    border: none !important;
+    page-break-inside: avoid !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Step 7: Force ALL inline elements to be visible */
+  body.is-printing-modal #modal-content-print-target span,
+  body.is-printing-modal #modal-content-print-target strong,
+  body.is-printing-modal #modal-content-print-target em,
+  body.is-printing-modal #modal-content-print-target b,
+  body.is-printing-modal #modal-content-print-target i,
+  body.is-printing-modal #modal-content-print-target a {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: transparent !important;
+    position: static !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Step 8: Force ALL list elements to be visible */
+  body.is-printing-modal #modal-content-print-target ul,
+  body.is-printing-modal #modal-content-print-target ol {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    margin: 0.25rem 0 !important;
+    padding: 0 0 0 1rem !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Step 9: Force modal content wrapper to be completely visible */
+  body.is-printing-modal .modal-content-wrapper {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Step 10: ULTRA-AGGRESSIVE table structure forcing */
+  body.is-printing-modal #modal-content-print-target table {
+    display: table !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    border-collapse: collapse !important;
+    background: white !important;
+    color: black !important;
+    margin-bottom: 1rem !important;
+    position: static !important;
+    overflow: visible !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target thead {
+    display: table-header-group !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target tbody {
+    display: table-row-group !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target tr {
+    display: table-row !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target td,
+  body.is-printing-modal #modal-content-print-target th {
+  }
+
+  /* Step 18: ABSOLUTE NUCLEAR OPTION - Force everything to be visible */
+  body.is-printing-modal #modal-content-print-target,
+  body.is-printing-modal #modal-content-print-target > *,
+  body.is-printing-modal #modal-content-print-target > * > *,
+  body.is-printing-modal #modal-content-print-target > * > * > *,
+  body.is-printing-modal #modal-content-print-target > * > * > * > *,
+  body.is-printing-modal #modal-content-print-target > * > * > * > * > * {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    margin: 0.1rem 0 !important;
+    padding: 0.05rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Step 10.1: Force span elements to be inline */
+  body.is-printing-modal #modal-content-print-target span,
+  body.is-printing-modal #modal-content-print-target strong,
+  body.is-printing-modal #modal-content-print-target em,
+  body.is-printing-modal #modal-content-print-target b,
+  body.is-printing-modal #modal-content-print-target i {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: transparent !important;
+    position: static !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Step 11: Force table visibility and structure */
+  body.is-printing-modal #modal-content-print-target table {
+    display: table !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: white !important;
+    color: black !important;
+    margin-bottom: 1rem !important;
+    position: static !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target thead {
+    display: table-header-group !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target tbody {
+    display: table-row-group !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target tr {
+    display: table-row !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target td,
+  body.is-printing-modal #modal-content-print-target th {
+    display: table-cell !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0.25rem 0.5rem !important;
+    border: 1px solid #ccc !important;
+    vertical-align: top !important;
+    color: black !important;
+    background: white !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  /* Step 12: Force container divs to be blocks */
+  body.is-printing-modal #modal-content-print-target .text-center,
+  body.is-printing-modal #modal-content-print-target .text-left,
+  body.is-printing-modal #modal-content-print-target .text-right,
+  body.is-printing-modal #modal-content-print-target .justify-center,
+  body.is-printing-modal #modal-content-print-target .justify-between,
+  body.is-printing-modal #modal-content-print-target .items-center {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    text-align: left !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Step 13: Images and page breaks */
+  body.is-printing-modal #modal-content-print-target img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+    color: black !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target .space-y-6 > * {
+    page-break-inside: avoid !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Step 14: Override any Tailwind classes that might hide content */
+  body.is-printing-modal #modal-content-print-target .opacity-0 {
+    opacity: 1 !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target .hidden {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target .invisible {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Step 15: NUCLEAR OPTION - Override ALL inline styles */
+  body.is-printing-modal #modal-content-print-target [style*="color"] {
+    color: black !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target [style*="background"] {
+    background-color: white !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target [style*="display"] {
+    display: block !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target [style*="visibility"] {
+    visibility: visible !important;
+  }
+
+  body.is-printing-modal #modal-content-print-target [style*="opacity"] {
+    opacity: 1 !important;
+  }
+
+  /* Step 16: Force ALL content to be black text on white background */
+  body.is-printing-modal #modal-content-print-target * {
+    color: black !important;
+    background-color: white !important;
+    background-image: none !important;
+    background: white !important;
+    border-color: black !important;
+  }
+
+  /* Step 15: Critical - Remove ALL overflow and height constraints */
+  body.is-printing-modal *[class*="overflow"],
+  body.is-printing-modal *[class*="max-h"],
+  body.is-printing-modal *[class*="h-full"],
+  body.is-printing-modal *[class*="min-h"],
+  body.is-printing-modal .overflow-y-auto,
+  body.is-printing-modal .overflow-auto,
+  body.is-printing-modal .overflow-hidden {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  /* Step 17: DEBUG - Force everything to be visible with red borders */
+  
+  body.is-printing-modal #modal-content-print-target * {
+    border: 1px solid red !important;
+    background: yellow !important;
+    color: black !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    width: auto !important;
+    overflow: visible !important;
+  }
+  
+}
