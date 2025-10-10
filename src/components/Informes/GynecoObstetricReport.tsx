@@ -386,6 +386,13 @@ export function GynecoObstetricReport({
                 value={gynecoObstetricRecord.fum}
                 type="date"
               />
+              {gynecoObstetricRecord.embarazo_actual && gynecoObstetricRecord.fpp && (
+                <InfoField
+                  label="Fecha Probable de Parto (FPP)"
+                  value={gynecoObstetricRecord.fpp}
+                  type="date"
+                />
+              )}
               <InfoField
                 label="Edad de Menarquia"
                 value={gynecoObstetricRecord.menarquia ? `${gynecoObstetricRecord.menarquia} años` : null}

@@ -50,6 +50,7 @@ const gynecoObstetricSchema = z.object({
   resultado_ultimo_papanicolau: z.string().nullable().optional(),
   mamografia: z.string().nullable().optional().transform(e => e === "" ? null : e),
   resultado_mamografia: z.string().nullable().optional(),
+  fpp: z.string().nullable().optional().transform(e => e === "" ? null : e),
   notas_adicionales: z.string().nullable().optional(),
 });
 
@@ -95,6 +96,7 @@ export function GynecoObstetricHistory() {
       resultado_ultimo_papanicolau: null,
       mamografia: null,
       resultado_mamografia: null,
+      fpp: null,
       notas_adicionales: null,
     },
   });
@@ -106,14 +108,45 @@ export function GynecoObstetricHistory() {
     const paras = Number(watchedValues.paras) || 0;
     const abortos = Number(watchedValues.abortos) || 0;
     const cesareas = Number(watchedValues.cesareas) || 0;
-    
+
     const totalGestas = paras + abortos + cesareas;
-    
+
     // Solo actualizar si el valor calculado es diferente al actual
     if (watchedValues.gestas !== totalGestas) {
       setValue('gestas', totalGestas > 0 ? totalGestas : null);
     }
   }, [watchedValues.paras, watchedValues.abortos, watchedValues.cesareas, setValue, watchedValues.gestas]);
+
+  // Efecto para calcular automáticamente la FPP (Fecha Probable de Parto)
+  useEffect(() => {
+    // Solo calcular si está embarazada y hay FUM
+    if (watchedValues.embarazo_actual && watchedValues.fum) {
+      try {
+        const fumDate = parseISO(watchedValues.fum);
+        // Regla de Naegele: FUM + 7 días - 3 meses + 1 año
+        // Esto es equivalente a: FUM + 280 días (40 semanas)
+        const fppDate = new Date(fumDate);
+        fppDate.setDate(fppDate.getDate() + 7); // Sumar 7 días
+        fppDate.setMonth(fppDate.getMonth() - 3); // Restar 3 meses
+        fppDate.setFullYear(fppDate.getFullYear() + 1); // Sumar 1 año
+
+        const fppFormatted = format(fppDate, 'yyyy-MM-dd');
+
+        // Solo actualizar si el valor calculado es diferente al actual
+        if (watchedValues.fpp !== fppFormatted) {
+          setValue('fpp', fppFormatted);
+        }
+      } catch (error) {
+        console.error('Error calculating FPP:', error);
+        setValue('fpp', null);
+      }
+    } else {
+      // Si no está embarazada o no hay FUM, limpiar FPP
+      if (watchedValues.fpp !== null) {
+        setValue('fpp', null);
+      }
+    }
+  }, [watchedValues.embarazo_actual, watchedValues.fum, setValue, watchedValues.fpp]);
 
   useEffect(() => {
     if (!selectedPatient) {
@@ -161,6 +194,7 @@ export function GynecoObstetricHistory() {
           resultado_ultimo_papanicolau: data.resultado_ultimo_papanicolau,
           mamografia: data.mamografia ? format(parseISO(data.mamografia), 'yyyy-MM-dd') : '',
           resultado_mamografia: data.resultado_mamografia,
+          fpp: data.fpp ? format(parseISO(data.fpp), 'yyyy-MM-dd') : '',
           notas_adicionales: data.notas_adicionales,
         };
         console.log('GYNECO_HISTORY: Datos formateados antes de reset:', formattedData);
@@ -520,6 +554,28 @@ export function GynecoObstetricHistory() {
                 style={inputStyle}
               />
             </div>
+            {watchedValues.embarazo_actual && (
+              <div>
+                <label htmlFor="fpp" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
+                  Fecha Probable de Parto (FPP)
+                  <Tooltip text="Calculada automáticamente usando la Regla de Naegele: FUM + 7 días - 3 meses + 1 año. Representa la fecha estimada del parto basada en la última menstruación.">
+                    <Info className="h-4 w-4 ml-1 cursor-help" style={{ color: currentTheme.colors.textSecondary }} />
+                  </Tooltip>
+                </label>
+                <input
+                  type="date"
+                  id="fpp"
+                  {...register('fpp')}
+                  readOnly
+                  className="w-full p-2 rounded-md border cursor-not-allowed"
+                  style={{
+                    ...inputStyle,
+                    backgroundColor: currentTheme.colors.background,
+                    opacity: 0.7,
+                  }}
+                />
+              </div>
+            )}
             <div>
               <label htmlFor="menarquia" className="flex items-center text-sm font-medium mb-1" style={{ color: currentTheme.colors.text }}>
                 Menarquía (años)
@@ -783,6 +839,18 @@ export function GynecoObstetricHistory() {
                 }}
               >
                 FUM: {format(parseISO(watchedValues.fum), 'dd/MM/yyyy')}
+              </span>
+            )}
+            {watchedValues.embarazo_actual && watchedValues.fpp && (
+              <span
+                className="px-2 py-1 rounded-full text-xs border font-medium"
+                style={{
+                  background: '#FEF3C7',
+                  color: '#D97706',
+                  borderColor: '#FCD34D',
+                }}
+              >
+                FPP: {format(parseISO(watchedValues.fpp), 'dd/MM/yyyy')}
               </span>
             )}
             {watchedValues.menarquia !== null && watchedValues.menarquia > 0 && (
