@@ -834,6 +834,115 @@ export interface Database {
           edad?: number | null // integer
         }
       }
+      tcSignosVitales: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          idbu: string
+          Descripcion: string
+          Unidad: string
+          sexo: string
+          edad_minima: number
+          edad_maxima: number
+          valor_minimo_normal: number
+          valor_maximo_normal: number
+          valor_critico_bajo: number | null
+          valor_critico_alto: number | null
+          frecuencia_registro: string | null
+          metodo_medicion: string | null
+          activo: boolean
+          id_usuario: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          idbu: string
+          Descripcion: string
+          Unidad: string
+          sexo?: string
+          edad_minima?: number
+          edad_maxima?: number
+          valor_minimo_normal: number
+          valor_maximo_normal: number
+          valor_critico_bajo?: number | null
+          valor_critico_alto?: number | null
+          frecuencia_registro?: string | null
+          metodo_medicion?: string | null
+          activo?: boolean
+          id_usuario?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          idbu?: string
+          Descripcion?: string
+          Unidad?: string
+          sexo?: string
+          edad_minima?: number
+          edad_maxima?: number
+          valor_minimo_normal?: number
+          valor_maximo_normal?: number
+          valor_critico_bajo?: number | null
+          valor_critico_alto?: number | null
+          frecuencia_registro?: string | null
+          metodo_medicion?: string | null
+          activo?: boolean
+          id_usuario?: string | null
+        }
+      }
+      tpSignosVitales: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          paciente_id: string
+          user_id: string
+          idbu: string
+          id_cita: string | null
+          id_signo_vital: string
+          valor_medido: number
+          fecha_hora: string
+          metodo_usado: string | null
+          notas: string | null
+          es_critico: boolean
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          paciente_id: string
+          user_id: string
+          idbu: string
+          id_cita?: string | null
+          id_signo_vital: string
+          valor_medido: number
+          fecha_hora?: string
+          metodo_usado?: string | null
+          notas?: string | null
+          es_critico?: boolean
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          paciente_id?: string
+          user_id?: string
+          idbu?: string
+          id_cita?: string | null
+          id_signo_vital?: string
+          valor_medido?: number
+          fecha_hora?: string
+          metodo_usado?: string | null
+          notas?: string | null
+          es_critico?: boolean
+          deleted_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
