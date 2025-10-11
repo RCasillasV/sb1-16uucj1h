@@ -609,7 +609,7 @@ export const MainHeader = memo(function MainHeader({
           <Link
             to="/somatometry"
             className={navButtonClass('/somatometry')}
-            style={{ 
+            style={{
               position: 'relative',
               color: currentTheme.colors.text
             }}
@@ -629,7 +629,17 @@ export const MainHeader = memo(function MainHeader({
             )}
           </Link>
         )}
-        
+        <Link
+          to="/vital-signs"
+          className={navButtonClass('/vital-signs')}
+          style={{
+            color: currentTheme.colors.text
+          }}
+        >
+          <Heart className="h-4 w-4" style={{ color: currentTheme.colors.primary }} />
+          Signos Vitales
+        </Link>
+
       </div>
     );
   };

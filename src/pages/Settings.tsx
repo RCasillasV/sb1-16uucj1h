@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Settings as SettingsIcon, 
+import {
+  Settings as SettingsIcon,
   Search,
   Palette,
   Building2,
@@ -14,7 +14,8 @@ import {
   FolderOpen,
   Clock,
   Stethoscope,
-  Syringe
+  Syringe,
+  Heart
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import clsx from 'clsx';
@@ -123,6 +124,12 @@ function Settings() {
       title: 'Vacunas',
       description: 'Gestiona el catálogo de vacunas, esquemas de dosificación y edades de aplicación',
       onClick: () => navigate('/vaccines')
+    },
+    {
+      icon: Heart,
+      title: 'Signos Vitales',
+      description: 'Administra el catálogo de signos vitales y sus rangos normales por edad',
+      onClick: () => navigate('/vital-signs-catalog')
     },
     {
       icon: Folders,

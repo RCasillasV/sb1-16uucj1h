@@ -41,6 +41,8 @@ const PatientReportPage = lazy(() => import('./pages/PatientReportPage').then(m 
 const ScheduleConfiguration = lazy(() => import('./pages/ScheduleConfiguration').then(m => ({ default: m.ScheduleConfiguration })));
 const PatologiesManagement = lazy(() => import('./pages/PatologiesManagement').then(m => ({ default: m.PatologiesManagement })));
 const ActivityPage = lazy(() => import('./pages/ActivityPage').then(m => ({ default: m.ActivityPage })));
+const VitalSigns = lazy(() => import('./pages/VitalSigns').then(m => ({ default: m.VitalSigns })));
+const VitalSignsCatalog = lazy(() => import('./pages/VitalSignsCatalog').then(m => ({ default: m.VitalSignsCatalog })));
 
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
@@ -83,6 +85,8 @@ const AppRoutes = () => (
       <Route path="/settings/schedule" element={<PrivateRoute><AgendaWrapper><Layout><ScheduleConfiguration /></Layout></AgendaWrapper></PrivateRoute>} />
       <Route path="/settings/patologias" element={<PrivateRoute><Layout><PatologiesManagement /></Layout></PrivateRoute>} />
       <Route path="/activity" element={<PrivateRoute><Layout><ActivityPage /></Layout></PrivateRoute>} />
+      <Route path="/vital-signs" element={<PrivateRoute><Layout><VitalSigns /></Layout></PrivateRoute>} />
+      <Route path="/vital-signs-catalog" element={<PrivateRoute><Layout><VitalSignsCatalog /></Layout></PrivateRoute>} />
       <Route path="/patient-report/:id" element={<PrivateRoute><PatientReportPage /></PrivateRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
